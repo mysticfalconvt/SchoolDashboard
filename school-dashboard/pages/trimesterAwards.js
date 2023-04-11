@@ -48,7 +48,7 @@ export default function TrimesterAwards() {
   const currentTrimester =
     currentMonth === 11 || currentMonth === 12 || currentMonth === 10
       ? 1
-      : currentMonth === 2 || currentMonth === 3
+      : currentMonth === 2 || currentMonth === 3 || currentMonth === 4
       ? 2
       : currentMonth === 5 || currentMonth === 6
       ? 3
