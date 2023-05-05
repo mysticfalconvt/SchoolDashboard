@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import { useQueryClient } from "react-query";
@@ -33,7 +33,12 @@ const DELETE_LINK_MUTATION = gql`
   }
 `;
 
-export default function EditLink({ link, refetch }) {
+export default function EditLink({
+  link,
+  refetch,
+  setVisibleForm,
+  visibleForm,
+}) {
   const revalidateIndex = useRevalidatePage("/");
   const revalidateLinksPage = useRevalidatePage("/links");
   const [showForm, setShowForm] = useState(false);
@@ -57,14 +62,26 @@ export default function EditLink({ link, refetch }) {
       },
     });
   const queryClient = useQueryClient();
+
+  const isVisible = useMemo(() => {
+    if (visibleForm === link.id) {
+      return true;
+    }
+    return false;
+  }, [link, visibleForm]);
+
   return (
     <div>
-      <SmallGradientButton onClick={() => setShowForm(!showForm)}>
+      <SmallGradientButton
+        onClick={() => {
+          isVisible ? setVisibleForm(null) : setVisibleForm(link.id);
+        }}
+      >
         {showForm ? "close" : "Edit Link"}
       </SmallGradientButton>
       <FormContainerStyles>
         <Form
-          className={showForm ? "visible" : "hidden"}
+          className={visibleForm === link.id ? "visible" : "hidden"}
           style={{ width: "500px" }}
           onSubmit={async (e) => {
             e.preventDefault();
@@ -74,7 +91,7 @@ export default function EditLink({ link, refetch }) {
             revalidateIndex();
             revalidateLinksPage();
             refetch();
-            setShowForm(false);
+            setVisibleForm(null);
             // console.log(inputs);
           }}
         >
@@ -129,6 +146,7 @@ export default function EditLink({ link, refetch }) {
                   revalidateIndex();
                   revalidateLinksPage();
                   queryClient.refetchQueries("allLinks");
+                  setVisibleForm(null);
                 }}
               >
                 Delete
