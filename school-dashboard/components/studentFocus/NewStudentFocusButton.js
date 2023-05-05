@@ -1,24 +1,24 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useRouter } from 'next/dist/client/router';
-import { useQueryClient } from 'react-query';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import SearchForUserName from '../SearchForUserName';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useRouter } from "next/dist/client/router";
+import { useQueryClient } from "react-query";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import SearchForUserName from "../SearchForUserName";
+import { todaysDateForForm } from "../calendars/formatTodayForForm";
 
-import { useUser } from '../User';
-import useCreateMessage from '../Messages/useCreateMessage';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useSendEmail from '../../lib/useSendEmail';
-import useRevalidatePage from '../../lib/useRevalidatePage';
+import { useUser } from "../User";
+import useCreateMessage from "../Messages/useCreateMessage";
+import { useGQLQuery } from "../../lib/useGqlQuery";
+import useSendEmail from "../../lib/useSendEmail";
+import useRevalidatePage from "../../lib/useRevalidatePage";
 
 const GET_GUIDANCE_EMAILS = gql`
   query GET_GUIDANCE_EMAILS {
-    users(where: { isGuidance: {equals: true} }) {
+    users(where: { isGuidance: { equals: true } }) {
       id
       name
       email
@@ -60,7 +60,7 @@ export default function NewStudentFocusButton({ refetch }) {
   const [showForm, setShowForm] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    category: 'General Comments',
+    category: "General Comments",
   });
   const user = useUser();
   const [studentWhoIsFor, setStudentWhoIsFor] = useState(null);
@@ -85,20 +85,20 @@ export default function NewStudentFocusButton({ refetch }) {
   );
   // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
-  const revalidatePage = useRevalidatePage('/studentFocus');
+  const revalidatePage = useRevalidatePage("/studentFocus");
   //   console.log(inputs);
   return (
     <div>
       <GradientButton
         onClick={() => setShowForm(!showForm)}
-        style={{ marginLeft: '100px' }}
+        style={{ marginLeft: "100px" }}
       >
-        {showForm ? 'Close the form' : 'New Student Focus'}
+        {showForm ? "Close the form" : "New Student Focus"}
       </GradientButton>
 
       <FormContainerStyles>
         <Form
-          className={showForm ? 'visible' : 'hidden'}
+          className={showForm ? "visible" : "hidden"}
           // hidden={!showForm}
           onSubmit={async (e) => {
             e.preventDefault();
@@ -110,7 +110,7 @@ export default function NewStudentFocusButton({ refetch }) {
 
             // Todo: send message when callback assigned
             createMessage({
-              subject: 'New Student Focus',
+              subject: "New Student Focus",
               message: `${res?.data?.createStudentFocus?.student.name} has a new Student Focus from ${user.name}`,
               receiver: res?.data?.createStudentFocus?.student.taTeacher?.id,
               link: ``,
@@ -124,7 +124,8 @@ export default function NewStudentFocusButton({ refetch }) {
                   subject: `New Student Focus for ${res.data.createStudentFocus.student.name}`,
                   body: `
                 <p>There is a new Student Focus Entry for ${res.data.createStudentFocus.student.name} at NCUJHS.TECH created by ${user.name}. </p>
-                 `,
+                <p><a href="https://ncujhs.tech/studentFocus">Click Here to View</a></p> 
+                `,
                 };
                 // console.log(emailToSend);
                 const emailRes = await sendEmail({
@@ -135,7 +136,7 @@ export default function NewStudentFocusButton({ refetch }) {
                 console.log(emailRes);
               }
             }
-            queryClient.refetchQueries('allStudentFocus');
+            queryClient.refetchQueries("allStudentFocus");
             // recalculateCallback();
             clearForm();
             setStudentWhoIsFor(null);
