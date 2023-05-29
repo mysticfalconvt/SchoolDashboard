@@ -195,7 +195,7 @@ export default function CallbackTable({ callbacks }) {
         ],
       },
     ],
-    []
+    [me]
   );
 
   return (

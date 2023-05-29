@@ -1,22 +1,24 @@
-import { gql, GraphQLClient } from 'graphql-request';
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import DisplayError from '../components/ErrorMessage';
-import GradientButton from '../components/styles/Button';
-import Table from '../components/Table';
-import { useGQLQuery } from '../lib/useGqlQuery';
-import Loading from '../components/Loading';
-import NewUpdateUsers from '../components/users/NewUpdateUsers';
-import isAllowed from '../lib/isAllowed';
-import { useUser } from '../components/User';
-import NewStaff from '../components/users/NewStaff';
-import { endpoint, prodEndpoint } from '../config';
+import { gql, GraphQLClient } from "graphql-request";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import DisplayError from "../components/ErrorMessage";
+import GradientButton from "../components/styles/Button";
+import Table from "../components/Table";
+import { useGQLQuery } from "../lib/useGqlQuery";
+import Loading from "../components/Loading";
+import NewUpdateUsers from "../components/users/NewUpdateUsers";
+import isAllowed from "../lib/isAllowed";
+import { useUser } from "../components/User";
+import NewStaff from "../components/users/NewStaff";
+import { endpoint, prodEndpoint } from "../config";
 
 const GET_ALL_STUDENTS = gql`
- query GET_ALL_STUDENTS {
+  query GET_ALL_STUDENTS {
     students: users(
-      where: { AND: [ {NOT:{taTeacher:null}},{ isStudent: {equals:true} }] }
+      where: {
+        AND: [{ NOT: { taTeacher: null } }, { isStudent: { equals: true } }]
+      }
     ) {
       id
       name
@@ -38,8 +40,10 @@ const GET_ALL_STUDENTS = gql`
 const GET_ALL_TEACHERS = gql`
   query GET_ALL_TEACHERS {
     teachers: users(
-      where: { OR: [{ hasTA: {equals:true} }, { isTeacher: {equals:true} }] }
-      orderBy: {name: asc}
+      where: {
+        OR: [{ hasTA: { equals: true } }, { isTeacher: { equals: true } }]
+      }
+      orderBy: { name: asc }
     ) {
       id
       name
@@ -47,13 +51,13 @@ const GET_ALL_TEACHERS = gql`
       callbackCount
       PbisCardCount
       virtualCards: teacherPbisCardsCount(
-        where: { category: {not:{contains:"physical"}} }
-      ) 
+        where: { category: { not: { contains: "physical" } } }
+      )
       YearPbisCount
       averageTimeToCompleteCallback
-      callbackAssignedCount(where: { dateCompleted: null }) 
-      totalCallback: callbackAssignedCount 
-      
+      callbackAssignedCount(where: { dateCompleted: null })
+      totalCallback: callbackAssignedCount
+
       currentTaWinner {
         name
         id
@@ -62,7 +66,6 @@ const GET_ALL_TEACHERS = gql`
         name
         id
       }
-    
     }
   }
 `;
@@ -112,27 +115,31 @@ const ArrayValues = ({ values }) => (
 
 export default function Users(props) {
   const me = useUser();
-  const [userSortType, setUserSortType] = useState('student');
+  const [userSortType, setUserSortType] = useState("student");
   const cachedStudents = props?.students;
   const cachedTeachers = props?.teachers;
   // stale time of 2 minutes
   const staleTime = 2 * 60 * 1000;
-  const { data: students, isLoading: studentLoading, error } = useGQLQuery(
-    'allStudents',
+  const {
+    data: students,
+    isLoading: studentLoading,
+    error,
+  } = useGQLQuery(
+    "allStudents",
     GET_ALL_STUDENTS,
     {},
     {
-      enabled: userSortType === 'student',
+      enabled: userSortType === "student",
       initialData: cachedStudents,
       staleTime,
     }
   );
   const { data: teachers, isLoading: teacherLoading } = useGQLQuery(
-    'allTeachers',
+    "allTeachers",
     GET_ALL_TEACHERS,
     {},
     {
-      enabled: userSortType === 'staff',
+      enabled: userSortType === "staff",
       initialData: cachedTeachers,
       staleTime,
     }
@@ -140,17 +147,17 @@ export default function Users(props) {
   const studentColumns = useMemo(
     () => [
       {
-        Header: 'Students',
+        Header: "Students",
         columns: [
           {
-            Header: 'Name',
-            accessor: 'name',
+            Header: "Name",
+            accessor: "name",
             Cell: ({ row }) => {
               const { name } = row.original;
               const nameWithFirstLetterUpperCase = name
-                .split(' ')
+                .split(" ")
                 .map((name) => name.charAt(0).toUpperCase() + name.slice(1))
-                .join(' ');
+                .join(" ");
 
               const { preferredName } = row.original;
               const nameToShow = preferredName
@@ -169,8 +176,8 @@ export default function Users(props) {
           //   Cell: ({ cell: { value } }) => <ArrayValues values={value || []} />,
           // },
           {
-            Header: 'TA Teacher',
-            accessor: 'taTeacher.name',
+            Header: "TA Teacher",
+            accessor: "taTeacher.name",
             Cell: ({ row }) => {
               const showLink = !!row.original?.taTeacher?.id;
               //   console.log(showLink);
@@ -185,28 +192,28 @@ export default function Users(props) {
           },
 
           {
-            Header: 'Callback',
-            accessor: 'callbackCount',
+            Header: "Callback",
+            accessor: "callbackCount",
           },
           {
-            Header: 'Total Callback',
-            accessor: 'callbackItemsCount',
+            Header: "Total Callback",
+            accessor: "callbackItemsCount",
           },
           {
-            Header: 'Weekly PBIS',
-            accessor: 'PbisCardCount',
+            Header: "Weekly PBIS",
+            accessor: "PbisCardCount",
           },
           {
-            Header: 'Yearly PBIS',
-            accessor: 'YearPbisCount',
+            Header: "Yearly PBIS",
+            accessor: "YearPbisCount",
           },
           {
-            Header: 'Individual PBIS Level',
-            accessor: 'individualPbisLevel',
+            Header: "Individual PBIS Level",
+            accessor: "individualPbisLevel",
           },
           {
-            Header: 'Average days on callback',
-            accessor: 'averageTimeToCompleteCallback',
+            Header: "Average days on callback",
+            accessor: "averageTimeToCompleteCallback",
           },
         ],
       },
@@ -217,17 +224,17 @@ export default function Users(props) {
   const teacherColumns = useMemo(
     () => [
       {
-        Header: 'Teachers',
+        Header: "Teachers",
         columns: [
           {
-            Header: 'Name',
-            accessor: 'name',
+            Header: "Name",
+            accessor: "name",
             Cell: ({ row }) => (
               <>
                 <Link href={`/userProfile/${row.original.id}`}>
                   {row.original.name}
                 </Link>
-                {isAllowed(me, 'canManagePbis') && row.original.hasTA && (
+                {isAllowed(me, "canManagePbis") && row.original.hasTA && (
                   <Link href={`/taPage/${row.original.id}`}> - TA</Link>
                 )}
               </>
@@ -235,12 +242,12 @@ export default function Users(props) {
           },
 
           {
-            Header: 'Callback',
-            accessor: 'callbackCount',
+            Header: "Callback",
+            accessor: "callbackCount",
           },
           {
-            Header: 'Total Callback',
-            accessor: 'totalCallback',
+            Header: "Total Callback",
+            accessor: "totalCallback",
           },
           // {
           //   Header: 'Weekly PBIS',
@@ -251,68 +258,106 @@ export default function Users(props) {
           //   accessor: 'YearPbisCount',
           // },
           {
-            Header: 'Virtual PBIS Given',
-            accessor: 'virtualCards.count',
+            Header: "Virtual PBIS Given",
+            accessor: "virtualCards.count",
           },
           {
-            Header: 'Latest PBIS Winner',
-            accessor: 'currentTaWinner.name',
+            Header: "Latest PBIS Winner",
+            accessor: "currentTaWinner.name",
           },
           {
-            Header: 'Previous PBIS Winner',
-            accessor: 'previousTaWinner.name',
+            Header: "Previous PBIS Winner",
+            accessor: "previousTaWinner.name",
           },
           // {
           //   Header: 'TA Count',
           //   accessor: '_taStudentsMeta.count',
           // },
           {
-            Header: 'Assigned Callback',
-            accessor: '_callbackAssignedMeta.count',
+            Header: "Assigned Callback",
+            accessor: "_callbackAssignedMeta.count",
           },
         ],
       },
     ],
-    []
+    [me]
   );
 
   const isLoading = studentLoading || teacherLoading;
 
+  const sortedStudents = useMemo(() => {
+    if (!students) return [];
+    return students.students.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      // sort by last name
+      const aLastName = aName.split(" ")[1];
+      const bLastName = bName.split(" ")[1];
+      if (aLastName < bLastName) return -1;
+      if (aLastName > bLastName) return 1;
+      // if last names are the same, sort by first name
+      const aFirstName = aName.split(" ")[0];
+      const bFirstName = bName.split(" ")[0];
+      if (aFirstName < bFirstName) return -1;
+      if (aFirstName > bFirstName) return 1;
+      return 0;
+    });
+  }, [students]);
+
+  const sortedTeachers = useMemo(() => {
+    if (!teachers) return [];
+    return teachers.teachers.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      // sort by last name
+      const aLastName = aName.split(" ")[1];
+      const bLastName = bName.split(" ")[1];
+      if (aLastName < bLastName) return -1;
+      if (aLastName > bLastName) return 1;
+      // if last names are the same, sort by first name
+      const aFirstName = aName.split(" ")[0];
+      const bFirstName = bName.split(" ")[0];
+      if (aFirstName < bFirstName) return -1;
+      if (aFirstName > bFirstName) return 1;
+      return 0;
+    });
+  }, [teachers]);
+
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;
-  if (error) return <DisplayError>{error.mesage}</DisplayError>;
+  if (error) return <DisplayError>{error.message}</DisplayError>;
   return (
     <div>
       <ButtonStyles>
         <GradientButton
           onClick={() => {
-            setUserSortType('staff');
+            setUserSortType("staff");
           }}
-          className={userSortType === 'staff' ? 'hide' : 'show'}
+          className={userSortType === "staff" ? "hide" : "show"}
         >
           Show Teachers
         </GradientButton>
         <GradientButton
           onClick={() => {
-            setUserSortType('student');
+            setUserSortType("student");
           }}
-          className={userSortType === 'student' ? 'hide' : 'show'}
+          className={userSortType === "student" ? "hide" : "show"}
         >
           Show Students
         </GradientButton>
       </ButtonStyles>
       {/* {isAllowed(me, 'isSuperAdmin') && <NewUpdateUsers />}
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />} */}
-      {userSortType === 'staff' && (
+      {userSortType === "staff" && (
         <Table
-          data={teachers?.teachers || []}
+          data={sortedTeachers || []}
           columns={teacherColumns}
           searchColumn="name"
         />
       )}
-      {userSortType === 'student' && (
+      {userSortType === "student" && (
         <Table
-          data={students?.students || []}
+          data={sortedStudents || []}
           columns={studentColumns}
           searchColumn="name"
         />
@@ -325,15 +370,15 @@ export async function getStaticProps(context) {
   // console.log(context);
   // fetch PBIS Page data from the server
   const headers = {
-    credentials: 'include',
-    mode: 'cors',
+    credentials: "include",
+    mode: "cors",
     headers: {
       authorization: `test auth for keystone`,
     },
   };
 
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
   const fetchStudents = async () => graphQLClient.request(GET_ALL_STUDENTS);

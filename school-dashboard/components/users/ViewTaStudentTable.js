@@ -206,13 +206,33 @@ export default function ViewTaStudentTable({
         ],
       },
     ],
-    []
+    [title]
   );
+
+  const sortedStudents = useMemo(() => {
+    if (!users) return [];
+    return users.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      // sort by last name
+      const aLastName = aName.split(" ")[1];
+      const bLastName = bName.split(" ")[1];
+      if (aLastName < bLastName) return -1;
+      if (aLastName > bLastName) return 1;
+      // if last names are the same, sort by first name
+      const aFirstName = aName.split(" ")[0];
+      const bFirstName = bName.split(" ")[0];
+      if (aFirstName < bFirstName) return -1;
+      if (aFirstName > bFirstName) return 1;
+      return 0;
+    });
+  }, [users]);
+
   const hiddenColumns = discipline ? "" : "studentDisciplineCount";
   return (
     <div>
       <Table
-        data={users || []}
+        data={sortedStudents || []}
         columns={columns}
         searchColumn="name"
         showSearch={false}
