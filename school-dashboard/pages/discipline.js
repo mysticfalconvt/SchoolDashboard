@@ -1,18 +1,19 @@
-import gql from 'graphql-tag';
-import styled from 'styled-components';
-import { useRouter } from 'next/dist/client/router';
-import { GraphQLClient } from 'graphql-request';
-import { useUser } from '../components/User';
-import { useGQLQuery } from '../lib/useGqlQuery';
-import GradientButton from '../components/styles/Button';
-import DisciplineCharts from '../components/discipline/DisciplineCharts';
-import DisciplineTable from '../components/discipline/DisciplineTable';
-import NewDiscipline from '../components/discipline/DisciplineButton';
-import CellPhoneAddButton from '../components/discipline/CellPhoneAddButton';
-import ShowCellphoneViolations from '../components/discipline/ShowCellphoneViolations';
-import Loading from '../components/Loading';
-import isAllowed from '../lib/isAllowed';
-import { endpoint, prodEndpoint } from '../config';
+import gql from "graphql-tag";
+import styled from "styled-components";
+import { useRouter } from "next/dist/client/router";
+import { GraphQLClient } from "graphql-request";
+import { useUser } from "../components/User";
+import { useGQLQuery } from "../lib/useGqlQuery";
+import GradientButton from "../components/styles/Button";
+import DisciplineCharts from "../components/discipline/DisciplineCharts";
+import DisciplineTable from "../components/discipline/DisciplineTable";
+import NewDiscipline from "../components/discipline/DisciplineButton";
+import CellPhoneAddButton from "../components/discipline/CellPhoneAddButton";
+import ShowCellphoneViolations from "../components/discipline/ShowCellphoneViolations";
+import Loading from "../components/Loading";
+import isAllowed from "../lib/isAllowed";
+import { endpoint, prodEndpoint } from "../config";
+import DisciplineExtraDetails from "../components/discipline/DisciplineExtraDetails";
 
 const DisciplinePageContainer = styled.div`
   h2 {
@@ -22,7 +23,7 @@ const DisciplinePageContainer = styled.div`
   justify-content: space-around;
   flex-wrap: wrap;
   div {
-    max-width: 500px;
+    // max-width: 500px;
   }
   .big {
     flex-basis: 100%;
@@ -34,7 +35,7 @@ const DisciplinePageContainer = styled.div`
 
 export const DISCIPLINE_DATA = gql`
   query DISCIPLINE_DATA {
-    disciplines(orderBy: {date: desc}) {
+    disciplines(orderBy: { date: desc }) {
       id
       date
       teacher {
@@ -74,7 +75,7 @@ export const DISCIPLINE_DATA = gql`
       unknown
       othersInvolved
     }
-    cellPhoneViolations(orderBy: {dateGiven:desc}) {
+    cellPhoneViolations(orderBy: { dateGiven: desc }) {
       id
       description
       dateGiven
@@ -96,7 +97,7 @@ export default function Discipline(props) {
   const router = useRouter();
 
   const { data, isLoading, isError, refetch } = useGQLQuery(
-    'allDisciplines',
+    "allDisciplines",
     DISCIPLINE_DATA,
     {},
     {
@@ -106,7 +107,7 @@ export default function Discipline(props) {
   );
 
   // if (isLoading) return <Loading />;
-  const allDisciplines  = data?.disciplines || [];
+  const allDisciplines = data?.disciplines || [];
   const disciplinesWithDateIncrimented = allDisciplines?.map((d) => {
     const date = new Date(d.date);
     const dateIncrimented = new Date(date.setDate(date.getDate() + 1));
@@ -115,7 +116,7 @@ export default function Discipline(props) {
       date: dateIncrimented,
     };
   });
-  const canSeeAllDisciplines = isAllowed(me, 'canSeeAllDiscipline');
+  const canSeeAllDisciplines = isAllowed(me, "canSeeAllDiscipline");
   const disciplinesToShow = canSeeAllDisciplines
     ? disciplinesWithDateIncrimented
     : disciplinesWithDateIncrimented?.filter((d) => d?.teacher.id === me?.id);
@@ -133,14 +134,15 @@ export default function Discipline(props) {
               pathname: `Bullying`,
             })
           }
-          style={{ maxHeight: '4rem' }}
+          style={{ maxHeight: "4rem" }}
         >
           Hazing Harassment Bullying
         </GradientButton>
         <CellPhoneAddButton refetch={refetch} />
-        <ShowCellphoneViolations
-          cellViolations={data?.cellPhoneViolations}
-        />
+        <ShowCellphoneViolations cellViolations={data?.cellPhoneViolations} />
+        {isAllowed(me, "canManageDiscipline") ? (
+          <DisciplineExtraDetails disciplines={disciplinesToShow} />
+        ) : null}
       </DisciplinePageContainer>
       <DisciplinePageContainer>
         <div>
@@ -159,15 +161,15 @@ export async function getStaticProps(context) {
   // console.log(context);
   // fetch PBIS Page data from the server
   const headers = {
-    credentials: 'include',
-    mode: 'cors',
+    credentials: "include",
+    mode: "cors",
     headers: {
       authorization: `test auth for keystone`,
     },
   };
 
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
   const fetchDisciplineData = async () =>
