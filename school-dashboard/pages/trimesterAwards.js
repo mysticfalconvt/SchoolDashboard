@@ -63,7 +63,8 @@ export default function TrimesterAwards() {
   });
   // get all awards for current trimester
   const currentAwards = awards.filter(
-    (award) => award.trimester === currentTrimester.toString()
+    // todo: change this to currentTrimester
+    (award) => award.trimester === currentTrimester.toString() || true
   );
   const myAwards = awards.filter((award) => award.teacher.id === me.id);
 
@@ -80,7 +81,7 @@ export default function TrimesterAwards() {
           checked={!showAllStudents}
           onChange={() => setShowAllStudents(!showAllStudents)}
         />
-        <span> Show only current awards</span>
+        <span> Show all awards</span>
       </p>
 
       {showAllStudents && (
