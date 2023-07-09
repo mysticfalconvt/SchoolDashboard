@@ -25,7 +25,7 @@ const ContainerStyles = styled.div`
 
   .filler {
     width: 100%;
-    height: ${({ percentageLeft }) => percentageLeft}%;
+    height: ${({ percentageleft }) => percentageleft}%;
     background-color: var(--blue);
     position: relative;
     bottom: 0px;
@@ -96,10 +96,10 @@ export default function PbisFalcon({ initialCount }) {
   if (error) return <DisplayError error={error} />;
   const percentageFull =
     Math.round((data?.pbisCardsCount / cardGoal) * 10000) / 100;
-  const percentageLeft = 100 - percentageFull;
+  const percentageleft = 100 - percentageFull;
   return (
     <div>
-      <ContainerStyles percentageLeft={percentageLeft}>
+      <ContainerStyles percentageleft={percentageleft}>
         <div className="filler">
           <img src="/falcon.svg" alt="falcon" className="falcon" />
           <span className="label">{`${percentageFull}%`}</span>
