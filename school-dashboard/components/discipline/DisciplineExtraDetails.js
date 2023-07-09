@@ -56,7 +56,6 @@ export default function DisciplineExtraDetails({ disciplines }) {
       return index === self.findIndex((t) => t.id === teacher.id);
     })
     .sort((a, b) => b.totalDisciplines - a.totalDisciplines);
-  console.log(listOfTeachersWithoutDuplicates);
 
   return (
     <>
