@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 import {
   classTypeList,
   locationList,
@@ -7,11 +7,11 @@ import {
   studentConductList,
   teacherActionList,
   timeOfDayList,
-} from '../../lib/disciplineData';
-import totalsFromArray from '../../lib/totalsFromArray';
-import DoughnutChart from '../Chart/DonutChart';
-import BarChart from '../Chart/BarChart';
-import totalsTrueInArray from '../../lib/totalsTrueInArray';
+} from "../../lib/disciplineData";
+import totalsFromArray from "../../lib/totalsFromArray";
+import DoughnutChart from "../Chart/DonutChart";
+import BarChart from "../Chart/BarChart";
+import totalsTrueInArray from "../../lib/totalsTrueInArray";
 
 const ChartContainerStyles = styled.div`
   /* display: flex;
@@ -19,16 +19,16 @@ const ChartContainerStyles = styled.div`
   max-width: 400px; */
 `;
 
-const weekday = new Array(7);
-weekday[0] = 'Sunday';
-weekday[1] = 'Monday';
-weekday[2] = 'Tuesday';
-weekday[3] = 'Wednesday';
-weekday[4] = 'Thursday';
-weekday[5] = 'Friday';
-weekday[6] = 'Saturday';
+export const weekday = new Array(7);
+weekday[0] = "Sunday";
+weekday[1] = "Monday";
+weekday[2] = "Tuesday";
+weekday[3] = "Wednesday";
+weekday[4] = "Thursday";
+weekday[5] = "Friday";
+weekday[6] = "Saturday";
 
-const days = new Array(7);
+export const days = new Array(7);
 days[0] = 0;
 days[1] = 1;
 days[2] = 2;
@@ -37,7 +37,7 @@ days[4] = 4;
 days[5] = 5;
 days[6] = 6;
 
-function getDayTotals(disciplines) {
+export function getDayTotals(disciplines) {
   const arrayOfDayOfTheWeek = disciplines.map((individual) => {
     const day = new Date(individual.date).getDay();
     return day;
@@ -56,9 +56,9 @@ function getDayTotals(disciplines) {
 
 export default function DisciplineCharts({ disciplines }) {
   const classList = classTypeList;
-  const totalPerClass = totalsFromArray(classList, 'classType', disciplines);
-  const locations = totalsFromArray(locationList, 'location', disciplines);
-  const times = totalsFromArray(timeOfDayList, 'timeOfDay', disciplines);
+  const totalPerClass = totalsFromArray(classList, "classType", disciplines);
+  const locations = totalsFromArray(locationList, "location", disciplines);
+  const times = totalsFromArray(timeOfDayList, "timeOfDay", disciplines);
   const conducts = totalsTrueInArray(studentConductList, disciplines);
   const teacherActions = totalsTrueInArray(teacherActionList, disciplines);
   const others = totalsTrueInArray(othersInvolvedList, disciplines);

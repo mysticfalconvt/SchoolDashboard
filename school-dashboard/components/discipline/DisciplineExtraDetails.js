@@ -1,6 +1,17 @@
 import { useState } from "react";
 import GradientButton from "../styles/Button";
 import styled from "styled-components";
+import totalsFromArray from "../../lib/totalsFromArray";
+import {
+  classTypeList,
+  locationList,
+  othersInvolvedList,
+  studentConductList,
+  teacherActionList,
+  timeOfDayList,
+} from "../../lib/disciplineData";
+import totalsTrueInArray from "../../lib/totalsTrueInArray";
+import { getDayTotals } from "./DisciplineCharts";
 
 const DisciplineExtraDetailsModal = styled.div`
   position: fixed;
@@ -20,10 +31,22 @@ const DisciplineExtraDetailsModal = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
+
+  h3 {
+    margin: 0;
+    text-align: center;
+    border-bottom: 1px solid var(--red);
+  }
+  p {
+    margin: 0;
+    text-align: left;
+  }
+
 `;
 
 export default function DisciplineExtraDetails({ disciplines }) {
   const [showModal, setShowModal] = useState(false);
+  const [showCounts, setShowCounts] = useState(false);
   const totalDisciplines = disciplines.length;
   const listOfStudentsWithoutDuplicates = disciplines
     .map((discipline) => {
@@ -58,6 +81,40 @@ export default function DisciplineExtraDetails({ disciplines }) {
     .sort((a, b) => b.totalDisciplines - a.totalDisciplines);
   console.log(listOfTeachersWithoutDuplicates);
 
+  const classList = classTypeList;
+  const totalPerClass = totalsFromArray(
+    classList,
+    "classType",
+    disciplines
+  ).sort((a, b) => b.total - a.total);
+  const locations = totalsFromArray(locationList, "location", disciplines).sort(
+    (a, b) => b.total - a.total
+  );
+  const times = totalsFromArray(timeOfDayList, "timeOfDay", disciplines).sort(
+    (a, b) => b.total - a.total
+  );
+  const conducts = totalsTrueInArray(studentConductList, disciplines).sort(
+    (a, b) => b.totals - a.totals
+  );
+  const teacherActions = totalsTrueInArray(teacherActionList, disciplines).sort(
+    (a, b) => b.totals - a.totals
+  );
+  const others = totalsTrueInArray(othersInvolvedList, disciplines).sort(
+    (a, b) => b.totals - a.totals
+  );
+  const dates = getDayTotals(disciplines).sort((a, b) => b.total - a.total);
+
+  console.log(
+    classList,
+    totalPerClass,
+    locations,
+    times,
+    conducts,
+    teacherActions,
+    others,
+    dates
+  );
+
   return (
     <>
       <GradientButton onClick={() => setShowModal(!showModal)}>
@@ -74,6 +131,12 @@ export default function DisciplineExtraDetails({ disciplines }) {
             >
               Hide
             </GradientButton>
+            <GradientButton
+              onClick={() => setShowCounts(!showCounts)}
+              style={{ marginLeft: "20px" }}
+            >
+              {!showCounts ? "Show Details" : "Show Counts"}
+            </GradientButton>
           </h2>
           <h3 style={{ textAlign: "center" }}>Total: {totalDisciplines}</h3>
           <div
@@ -83,26 +146,75 @@ export default function DisciplineExtraDetails({ disciplines }) {
               justifyContent: "space-around",
             }}
           >
-            <div>
-              <h3>Students</h3>
-              <ul>
-                {listOfStudentsWithoutDuplicates.map((student) => (
-                  <li key={student.id}>
-                    {student.name} - {student.totalDisciplines}
-                  </li>
+            {!showCounts ? (
+              <>
+                <div>
+                  <h3>Students</h3>
+                  <ul>
+                    {listOfStudentsWithoutDuplicates.map((student) => (
+                      <li key={student.id}>
+                        {student.name} - {student.totalDisciplines}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3>Teachers</h3>
+                  <ul>
+                    {listOfTeachersWithoutDuplicates.map((teacher) => (
+                      <li key={teacher.id}>
+                        {teacher.name} - {teacher.totalDisciplines}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <div>
+                <h3>Per class</h3>
+                {totalPerClass.map((classType) => (
+                  <p key={classType.classType}>
+                    {classType.word} - {classType.total}
+                  </p>
                 ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Teachers</h3>
-              <ul>
-                {listOfTeachersWithoutDuplicates.map((teacher) => (
-                  <li key={teacher.id}>
-                    {teacher.name} - {teacher.totalDisciplines}
-                  </li>
+                <h3>Per Location</h3>
+                {locations.map((location) => (
+                  <p key={location.location}>
+                    {location.word} - {location.total}
+                  </p>
                 ))}
-              </ul>
-            </div>
+                <h3>Per Time</h3>
+                {times.map((time) => (
+                  <p key={time.timeOfDay}>
+                    {time.word} - {time.total}
+                  </p>
+                ))}
+                <h3>Per Conduct</h3>
+                {conducts.map((conduct) => (
+                  <p key={conduct.word}>
+                    {conduct.item} - {conduct.totals}
+                  </p>
+                ))}
+                <h3>Per Teacher Action</h3>
+                {teacherActions.map((teacherAction) => (
+                  <p key={teacherAction.word}>
+                    {teacherAction.item} - {teacherAction.totals}
+                  </p>
+                ))}
+                <h3>Per Others Involved</h3>
+                {others.map((other) => (
+                  <p key={other.word}>
+                    {other.item} - {other.totals}
+                  </p>
+                ))}
+                <h3>Per Day</h3>
+                {dates.map((date) => (
+                  <p key={date.date}>
+                    {date.word} - {date.total}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
         </DisciplineExtraDetailsModal>
       )}
