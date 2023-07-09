@@ -71,7 +71,8 @@ export default function StudentsOfInterestPBIS() {
     }
   );
   const studentsWithTaTeacher = data?.students.filter(
-    (student) => student.taTeacher
+    (student) =>
+      student.taTeacher && student.taTeacher.id !== "cl24ztaju149148z3qqm4c4d39"
   );
 
   if (isLoading) return <Loading />;
