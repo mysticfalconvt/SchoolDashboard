@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useEffect, useState } from 'react';
-import { useQueryClient } from 'react-query';
-import { useUser } from '../User';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
+import { useUser } from "../User";
 
 const CREATE_MESSAGE_MUTATION = gql`
   mutation CREATE_MESSAGE_MUTATION(
@@ -50,7 +50,7 @@ export default function useCreateMessage() {
         queryClient.refetchQueries("myMessages");
       }, 1000);
     }
-  }, [message]);
+  }, [message, createMessageMutation, queryClient]);
 
   return createMessage;
 }

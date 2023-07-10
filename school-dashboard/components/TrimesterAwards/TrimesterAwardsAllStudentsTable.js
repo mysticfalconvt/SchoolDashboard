@@ -1,9 +1,9 @@
-import Link from 'next/link';
-import { useMemo } from 'react';
-import styled from 'styled-components';
-import Table from '../Table';
-import { useUser } from '../User';
-import TrimesterAwardButton from './TrimesterAwardButton';
+import Link from "next/link";
+import { useMemo } from "react";
+import styled from "styled-components";
+import Table from "../Table";
+import { useUser } from "../User";
+import TrimesterAwardButton from "./TrimesterAwardButton";
 
 export const ToolTipStyles = styled.div`
   position: relative;
@@ -52,15 +52,15 @@ export default function TrimesterAwardsAllStudentsTable({
   const columns = useMemo(
     () => [
       {
-        Header: 'Trimester Awards Per Student',
+        Header: "Trimester Awards Per Student",
         columns: [
           {
-            Header: 'Student',
-            accessor: 'name',
+            Header: "Student",
+            accessor: "name",
             Cell: ({ value }) => {
               // capitalize first letter of each word
               const name = value
-                .split(' ')
+                .split(" ")
                 .map(
                   (word) => `${word.charAt(0).toUpperCase() + word.slice(1)} `
                 );
@@ -68,8 +68,8 @@ export default function TrimesterAwardsAllStudentsTable({
             },
           },
           {
-            Header: 'Give Awards',
-            accessor: 'giveAwards',
+            Header: "Give Awards",
+            accessor: "giveAwards",
             Cell: ({ cell }) => (
               // console.log(cell.row.original);
               // <p>test</p>
@@ -81,26 +81,22 @@ export default function TrimesterAwardsAllStudentsTable({
             ),
           },
           {
-            Header: 'Awards',
-            accessor: 'awards.length',
+            Header: "Awards",
+            accessor: "awards.length",
             Cell: ({ cell }) => {
               const awards = cell.row.original.awards.map(
                 (award) => `${award.teacher.name} - ${award.howl.toUpperCase()}`
               );
               const numberOfAwards = cell.row.original.awards.length;
               return (
-                <ToolTipStyles 
-                key={cell.row.original.id}
-                >
+                <ToolTipStyles key={cell.row.original.id}>
                   <span>{numberOfAwards}</span>
                   {numberOfAwards > 0 && (
                     <>
                       <span className="infoAvailable">info</span>
                       <div className="toolTipText">
                         {awards.map((award) => (
-                          <p
-                          key={award}
-                          >{award}</p>
+                          <p key={award}>{award}</p>
                         ))}
                       </div>
                     </>
@@ -112,7 +108,7 @@ export default function TrimesterAwardsAllStudentsTable({
         ],
       },
     ],
-    []
+    [refetch, trimester]
   );
 
   return (

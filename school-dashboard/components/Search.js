@@ -110,11 +110,10 @@ export default function Search() {
 
   const [itemsToDisplay, setItemsToDisplay] = useState([]);
 
-  // list of paths if staff
-  const extraPaths = me?.isStaff ? commandPallettePaths : [];
-
   // memoized list of data to display
   const formatedItems = useMemo(() => {
+    // list of paths if staff
+    const extraPaths = me?.isStaff ? commandPallettePaths : [];
     if (allUsers) {
       return [
         ...formatUsers(allUsers?.users),
@@ -124,7 +123,7 @@ export default function Search() {
       ];
     }
     return [];
-  }, [allUsers, extraPaths, allLinks, allCalendars]);
+  }, [me?.isStaff, allUsers, allLinks?.links, allCalendars?.calendars]);
 
   const items = itemsToDisplay;
 

@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useEffect, useState } from 'react';
-import { useQueryClient } from 'react-query';
-import { useUser } from '../User';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
+import { useUser } from "../User";
 
 const CREATE_PBIS_COLLECTION_MUTATION = gql`
   mutation CREATE_PBIS_COLLECTION_MUTATION(
@@ -53,7 +53,7 @@ export default function useCreateMessage() {
         queryClient.refetchQueries();
       }, 1000);
     }
-  }, [collection]);
+  }, [collection, createNewPbisCollection, queryClient]);
 
   return setPbisCollection;
 }

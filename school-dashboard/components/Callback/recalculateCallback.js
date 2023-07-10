@@ -1,6 +1,6 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useEffect, useState } from 'react';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useEffect, useState } from "react";
 
 const RECALCULATE_CALLBACK_MUTATION = gql`
   mutation RECALCULATE_CALLBACK_MUTATION($callbackId: ID!) {
@@ -23,7 +23,7 @@ export default function useRecalculateCallback() {
     if (callbackIdToUpdate) {
       recalculate();
     }
-  }, [callbackIdToUpdate]);
+  }, [callbackIdToUpdate, recalculate]);
 
   return { setCallbackID };
 }

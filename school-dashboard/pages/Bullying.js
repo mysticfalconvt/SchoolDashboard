@@ -1,12 +1,12 @@
-import gql from 'graphql-tag';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import Link from 'next/link';
-import NewBullying from '../components/discipline/BullyingButton';
-import Loading from '../components/Loading';
-import Table from '../components/Table';
-import { useUser } from '../components/User';
-import { useGQLQuery } from '../lib/useGqlQuery';
+import gql from "graphql-tag";
+import React, { useMemo } from "react";
+import styled from "styled-components";
+import Link from "next/link";
+import NewBullying from "../components/discipline/BullyingButton";
+import Loading from "../components/Loading";
+import Table from "../components/Table";
+import { useUser } from "../components/User";
+import { useGQLQuery } from "../lib/useGqlQuery";
 
 const BullyingPageContainer = styled.div`
   h2 {
@@ -29,7 +29,7 @@ const BullyingPageContainer = styled.div`
 
 const BULLYING_DATA_QUERY = gql`
   query BULLYING_DATA_QUERY {
-    bullyings(orderBy: {dateReported:desc}) {
+    bullyings(orderBy: { dateReported: desc }) {
       id
       studentOffender {
         id
@@ -47,37 +47,37 @@ const BULLYING_DATA_QUERY = gql`
 export default function Bullying() {
   const me = useUser();
   const { data, isLoading, isError, refetch } = useGQLQuery(
-    'allBullyings',
+    "allBullyings",
     BULLYING_DATA_QUERY
   );
 
   const columns = useMemo(
     () => [
       {
-        Header: 'Discipline',
+        Header: "Discipline",
         columns: [
           {
-            Header: 'Student',
-            accessor: 'studentOffender.name',
+            Header: "Student",
+            accessor: "studentOffender.name",
             Cell: ({ cell }) => (
-              <Link href={`/hhb/${cell?.row?.original?.id || ''}`}>
-                {cell.value}
+              <Link href={`/hhb/${cell?.row?.original?.id || ""}`}>
+                {cell?.value || "N/A"}
               </Link>
             ),
           },
           {
-            Header: 'Teacher',
-            accessor: 'teacherAuthor.name',
+            Header: "Teacher",
+            accessor: "teacherAuthor.name",
             Cell: ({ cell }) => (
-              <Link href={`/hhb/${cell?.row?.original?.id || ''}`}>
-                {cell.value}
+              <Link href={`/hhb/${cell?.row?.original?.id || ""}`}>
+                {cell?.value || "N/A"}
               </Link>
             ),
           },
 
           {
-            Header: 'Date ',
-            accessor: 'dateReported',
+            Header: "Date ",
+            accessor: "dateReported",
             Cell: ({ cell: { value } }) => {
               const today = new Date().toLocaleDateString();
               const displayDate = new Date(value).toLocaleDateString();
