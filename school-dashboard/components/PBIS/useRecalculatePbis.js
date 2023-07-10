@@ -1,6 +1,6 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useEffect, useState } from 'react';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useEffect, useState } from "react";
 
 const UPDATE_PBIS = gql`
   mutation UPDATE_PBIS($userId: ID!) {
@@ -22,7 +22,7 @@ export default function useRecalculatePBIS() {
       // console.log(`id: ${studentIdToRecalculatePbis}`);
       updateCardCount();
     }
-  }, [studentIdToRecalculatePbis]);
+  }, [studentIdToRecalculatePbis, updateCardCount]);
 
   return { recalculatePbisFromId };
 }

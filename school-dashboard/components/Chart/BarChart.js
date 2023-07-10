@@ -1,6 +1,15 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale , LinearScale, BarController, BarElement} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { backgroundColors, borderColors } from './chartColors';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarController,
+  BarElement,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { backgroundColors, borderColors } from "./chartColors";
 
 const options = {
   // scales: {
@@ -21,14 +30,15 @@ const options = {
   //   ],
   // },
   animation: {
-    easing: 'easeInBounce',
+    easing: "easeInBounce",
     duration: 2500,
   },
   responsive: true,
   maintainAspectRatio: true,
-  legend: {
-    display: false,
-    
+  plugins: {
+    legend: {
+      display: false,
+    },
   },
   label: {
     display: false,
@@ -43,15 +53,26 @@ export default function BarChart({ title, chartData }) {
   const labels = chartData.map((item) => item.item);
   const dataToChart = chartData.map((item) => item.totals);
   // console.log(labels);
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarController, BarElement);
-
-
+  ChartJS.register(
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    BarController,
+    BarElement
+  );
 
   const data = {
     labels,
+    options: {
+      legend: {
+        display: false,
+      },
+    },
     datasets: [
       {
-        label: '',
+        label: "",
         data: dataToChart,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
