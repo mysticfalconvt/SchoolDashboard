@@ -20,7 +20,6 @@ import FormCheckboxArray from "../../lib/FormCheckboxArray";
 import { todaysDateForForm } from "../calendars/formatTodayForForm";
 import useSendEmail from "../../lib/useSendEmail";
 import { useGQLQuery } from "../../lib/useGqlQuery";
-// import useEmailAdmin from '../../lib/useEmailAdmin';
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {

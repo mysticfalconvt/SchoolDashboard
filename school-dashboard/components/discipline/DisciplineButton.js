@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useQueryClient } from 'react-query';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import { useUser } from '../User';
-import SearchForUserName from '../SearchForUserName';
-import FormSelect from '../../lib/FormSelect';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useQueryClient } from "react-query";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import { useUser } from "../User";
+import SearchForUserName from "../SearchForUserName";
+import FormSelect from "../../lib/FormSelect";
 import {
   classTypeList,
   locationList,
@@ -16,18 +16,17 @@ import {
   studentConductList,
   teacherActionList,
   timeOfDayList,
-} from '../../lib/disciplineData';
-import FormCheckboxArray from '../../lib/FormCheckboxArray';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import useSendEmail from '../../lib/useSendEmail';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-// import useEmailAdmin from '../../lib/useEmailAdmin';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import toast from 'react-hot-toast';
+} from "../../lib/disciplineData";
+import FormCheckboxArray from "../../lib/FormCheckboxArray";
+import { todaysDateForForm } from "../calendars/formatTodayForForm";
+import useSendEmail from "../../lib/useSendEmail";
+import { useGQLQuery } from "../../lib/useGqlQuery";
+import useRevalidatePage from "../../lib/useRevalidatePage";
+import toast from "react-hot-toast";
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
-    users(where: { canManageDiscipline: {equals: true} }) {
+    users(where: { canManageDiscipline: { equals: true } }) {
       id
       name
       email
@@ -113,7 +112,7 @@ const CREATE_DISCIPLINE_MUTATION = gql`
 `;
 
 export default function NewDiscipline({ refetch }) {
-  const revalidatePage = useRevalidatePage('/discipline');
+  const revalidatePage = useRevalidatePage("/discipline");
   const me = useUser();
   const queryClient = useQueryClient();
   const { data, isLoading } = useGQLQuery(`AdminEmails`, GET_ADMIN_EMAILS);
@@ -125,9 +124,9 @@ export default function NewDiscipline({ refetch }) {
   });
   const user = useUser();
   const [studentReferralIsFor, setStudentReferralIsFor] = useState(null);
-  const [classType, setClassType] = useState('');
-  const [location, setLocation] = useState('');
-  const [timeOfDay, setTimeOfDay] = useState('');
+  const [classType, setClassType] = useState("");
+  const [location, setLocation] = useState("");
+  const [timeOfDay, setTimeOfDay] = useState("");
 
   const { sendEmail, emailLoading } = useSendEmail();
   //   console.log(`user ${user.id}`);
@@ -149,13 +148,13 @@ export default function NewDiscipline({ refetch }) {
     <div>
       <GradientButton
         onClick={() => setShowForm(!showForm)}
-        style={{ marginLeft: '100px' }}
+        style={{ marginLeft: "100px" }}
       >
-        {showForm ? 'Close the form' : 'New Discipline Referral'}
+        {showForm ? "Close the form" : "New Discipline Referral"}
       </GradientButton>
       <FormContainerStyles>
         <Form
-          className={showForm ? 'visible' : 'hidden'}
+          className={showForm ? "visible" : "hidden"}
           // hidden={!showForm}
           onSubmit={async (e) => {
             e.preventDefault();
@@ -186,10 +185,10 @@ export default function NewDiscipline({ refetch }) {
             refetch();
             setEmailSending(false);
             const revalidateResponse = revalidatePage();
-            if(res){
-              toast.success('Discipline Referral Created');
+            if (res) {
+              toast.success("Discipline Referral Created");
             }
-            queryClient.refetchQueries('allDisciplines');
+            queryClient.refetchQueries("allDisciplines");
             setShowForm(false);
           }}
         >
