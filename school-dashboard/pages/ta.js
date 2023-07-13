@@ -147,9 +147,19 @@ export default function TA() {
 
   // console.log('callbacks', allTaCallbacksFlattened);
   const students = data.taTeacher.taStudents || [];
+
+  const taTotalPbisCards = students.reduce(
+    (acc, student) => acc + student.PbisCardCount,
+    0
+  );
+  const taStudentCount = students.length;
+  const taAveragePbisCards = taTotalPbisCards / taStudentCount;
   return (
     <div>
       <h1>{me?.name}'s TA</h1>
+      <p>{taStudentCount} students</p>
+      <p>{taTotalPbisCards} total PBIS cards</p>
+      <p>{taAveragePbisCards} average PBIS cards per student</p>
       {students.length > 0 && (
         <>
           <CountPhysicalCards taStudents={students} refetch={refetch} />
