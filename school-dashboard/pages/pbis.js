@@ -213,6 +213,27 @@ export default function Pbis(props) {
     if (link.forStudents && me?.isStudent) return link;
     return null;
   });
+  let monthsWithCounts = [];
+  cardCounts?.forEach((collection) => {
+    const month = new Date(collection.collectionDate).getMonth();
+    const monthIndex = monthsWithCounts.findIndex(
+      (monthWithCount) => monthWithCount.month === month
+    );
+    if (monthIndex === -1) {
+      monthsWithCounts.push({
+        month,
+        count: collection.collectedCards,
+      });
+    } else {
+      monthsWithCounts[monthIndex].count += collection.collectedCards;
+    }
+  });
+  monthsWithCounts = monthsWithCounts.sort((a, b) => {
+    if (a.month < b.month) return -1;
+    if (a.month > b.month) return 1;
+    return 0;
+  });
+  console.log(monthsWithCounts);
 
   return (
     <div>
