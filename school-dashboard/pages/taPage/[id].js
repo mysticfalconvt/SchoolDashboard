@@ -9,7 +9,9 @@ import ViewTaStudentTable from "../../components/users/ViewTaStudentTable";
 import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
-import ChromebookCheck from "../../components/PBIS/ChromebookCheck";
+import ChromebookCheck, {
+  GET_TA_CHROMEBOOK_CHECKS_QUERY,
+} from "../../components/PBIS/ChromebookCheck";
 
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
@@ -143,6 +145,15 @@ export default function TA({ data: initialData, query }) {
       staleTime: 0,
     }
   );
+  const { data: existingChecks, isLoading: CBCheckLoading } = useGQLQuery(
+    `TAChromebookChecks-${query.id}`,
+    GET_TA_CHROMEBOOK_CHECKS_QUERY,
+    { id: me?.id },
+    {
+      enabled: !!me?.id,
+    }
+  );
+
   if (!me) return <Loading />;
   if (isLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
@@ -176,7 +187,7 @@ export default function TA({ data: initialData, query }) {
           {isAllowedPbisCardCounting && (
             <div style={{ display: "flex" }}>
               <CountPhysicalCards taStudents={students} refetch={refetch} />
-              <ChromebookCheck />
+              <ChromebookCheck taId={query.id} />
             </div>
           )}
 

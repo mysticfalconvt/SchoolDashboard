@@ -17,7 +17,7 @@ const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   }
 `;
 
-const GET_TA_CHROMEBOOK_CHECKS_QUERY = gql`
+export const GET_TA_CHROMEBOOK_CHECKS_QUERY = gql`
   query GET_TA_CHROMEBOOK_CHECKS($id: ID) {
     users(where: { taTeacher: { id: { equals: $id } } }) {
       id
@@ -112,7 +112,7 @@ function SingleChromebookCheckForm({ student, refetch }) {
   );
 }
 
-export default function ChromebookCheck() {
+export default function ChromebookCheck({ taId }) {
   const me = useUser();
   const [showForm, setShowForm] = useState(false);
   const {
@@ -120,12 +120,10 @@ export default function ChromebookCheck() {
     isLoading,
     refetch,
   } = useGQLQuery(
-    `TAChromebookChecks-${me?.id}`,
+    `TAChromebookChecks-${taId}`,
     GET_TA_CHROMEBOOK_CHECKS_QUERY,
-    { id: me?.id },
-    {
-      enabled: !!me?.id,
-    }
+    { id: taId },
+    {}
   );
 
   const studentsAbleToCheck = useMemo(() => {
@@ -154,15 +152,17 @@ export default function ChromebookCheck() {
         }) || []
     );
   }, [existingChecks]);
-
+  console.log(studentsAbleToCheck);
   return (
     <div>
-      <GradientButton
-        style={{ marginTop: "10px" }}
-        onClick={() => setShowForm(!showForm)}
-      >
-        TA Chromebook Checks
-      </GradientButton>
+      {studentsAbleToCheck.length > 0 ? (
+        <GradientButton
+          style={{ marginTop: "10px" }}
+          onClick={() => setShowForm(!showForm)}
+        >
+          {showForm ? "Hide Chromebook Checks" : "TA Chromebook Checks"}
+        </GradientButton>
+      ) : null}
       <div>
         {showForm &&
           studentsAbleToCheck.map((student) => (
