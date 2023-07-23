@@ -130,8 +130,6 @@ const TA_TEACHER_LIST_QUERY = gql`
 `;
 
 export default function TA({ data: initialData, query }) {
-  // console.log(query)
-  // console.log(initialData?.taTeacher?.name);
   const me = useUser();
   const { data, isLoading, error, refetch } = useGQLQuery(
     `taInfo-${initialData?.taTeacher?.name}`,
@@ -148,12 +146,8 @@ export default function TA({ data: initialData, query }) {
   const { data: existingChecks, isLoading: CBCheckLoading } = useGQLQuery(
     `TAChromebookChecks-${query.id}`,
     GET_TA_CHROMEBOOK_CHECKS_QUERY,
-    { id: me?.id },
-    {
-      enabled: !!me?.id,
-    }
+    { id: query.id }
   );
-
   if (!me) return <Loading />;
   if (isLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
@@ -167,8 +161,17 @@ export default function TA({ data: initialData, query }) {
   const isAllowedPbisCardCounting =
     me?.id === data?.taTeacher?.id || me?.canManagePbis;
 
-  // console.log('callbacks', allTaCallbacksFlattened);
-  const students = data?.taTeacher?.taStudents || [];
+  const studentsWithoutCBCheck = data?.taTeacher?.taStudents || [];
+  const students = studentsWithoutCBCheck.map((student) => {
+    const existingCheck = existingChecks?.users?.filter(
+      (check) => check.id === student.id
+    );
+    return {
+      ...student,
+      ChromebookChecks: existingCheck ? existingCheck[0].chromebookCheck : [],
+    };
+  });
+
   const taTotalPbisCards = students.reduce(
     (acc, student) => acc + student.YearPbisCount || 0,
     0
@@ -212,7 +215,6 @@ export async function getStaticPaths() {
     process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
-  // console.log(GraphQLClient);
   const fetchData = async () => graphQLClient.request(TA_TEACHER_LIST_QUERY);
   const data = await fetchData();
   const usersToUse = data.users;
@@ -242,13 +244,11 @@ export async function getStaticProps({ params }) {
     process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
-  // console.log(GraphQLClient);
   const fetchData = async () => {
     try {
       const dataFromFetch = await graphQLClient.request(TA_INFO_QUERY, {
         id: params.id,
       });
-      // console.log(data);
       return dataFromFetch;
     } catch (e) {
       console.log(e);
@@ -257,7 +257,6 @@ export async function getStaticProps({ params }) {
   };
   const data = (await fetchData()) || {};
 
-  // console.log(data);
   return {
     props: {
       data,

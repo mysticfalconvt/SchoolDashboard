@@ -152,7 +152,6 @@ export default function ChromebookCheck({ taId }) {
         }) || []
     );
   }, [existingChecks]);
-  console.log(studentsAbleToCheck);
   return (
     <div>
       {studentsAbleToCheck.length > 0 ? (
