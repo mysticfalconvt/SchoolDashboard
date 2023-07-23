@@ -17,6 +17,26 @@ const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   }
 `;
 
+const CREATE_QUICK_PBIS = gql`
+  mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {
+    createPbisCard(
+      data: {
+        teacher: { connect: { id: $teacher } }
+        student: { connect: { id: $student } }
+        category: "Chromebook Check"
+      }
+    ) {
+      id
+      student {
+        name
+      }
+      teacher {
+        name
+      }
+    }
+  }
+`;
+
 export const GET_TA_CHROMEBOOK_CHECKS_QUERY = gql`
   query GET_TA_CHROMEBOOK_CHECKS($id: ID) {
     users(where: { taTeacher: { id: { equals: $id } } }) {
@@ -44,9 +64,12 @@ function SingleChromebookCheckForm({ student, refetch }) {
   const [createChromebookCheck, { loading, error }] = useMutation(
     CREATE_CHROMEBOOK_CHECK_MUTATION
   );
-
+  const [createCard] = useMutation(CREATE_QUICK_PBIS, {
+    variables: { teacher: me.id, student: student.id },
+  });
   return (
     <form
+      key={student.id}
       onSubmit={async (e) => {
         e.preventDefault();
         setIsDisabled(true);
@@ -63,6 +86,12 @@ function SingleChromebookCheckForm({ student, refetch }) {
           console.log(error);
           setIsDisabled(false);
         }
+        if (res.data.createChromebookCheck.id && passed) {
+          await createCard();
+          await createCard();
+          await createCard();
+        }
+
         refetch();
       }}
     >
@@ -78,32 +107,29 @@ function SingleChromebookCheckForm({ student, refetch }) {
         }}
       >
         <h2>{student.name}</h2>
-        <label htmlFor="passed">
+        <label htmlFor={`passed${student.id}`} key={student.id}>
           <input
             type="checkbox"
-            name="passed"
-            id="passed"
+            name={`passed${student.id}`}
+            id={`passed${student.id}`}
             checked={passed}
             onChange={(e) => setPassed(e.target.checked)}
           />
           Passed
         </label>
-        {!passed ? (
-          <>
-            <label htmlFor="message">
-              Message
-              <input
-                type="text"
-                name="message"
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </label>
-          </>
-        ) : (
-          <div />
-        )}
+
+        <label htmlFor="message" key={student.id}>
+          Message
+          <input
+            type="text"
+            name="message"
+            id="message"
+            disabled={passed}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+        </label>
+
         <GradientButton type="submit" disabled={loading || isDisabled}>
           Submit
         </GradientButton>
@@ -165,11 +191,9 @@ export default function ChromebookCheck({ taId }) {
       <div>
         {showForm &&
           studentsAbleToCheck.map((student) => (
-            <SingleChromebookCheckForm
-              student={student}
-              key={student.id}
-              refetch={refetch}
-            />
+            <div key={student.id}>
+              <SingleChromebookCheckForm student={student} refetch={refetch} />
+            </div>
           ))}
       </div>
     </div>
