@@ -9,6 +9,7 @@ import ViewTaStudentTable from "../../components/users/ViewTaStudentTable";
 import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
+import ChromebookCheck from "../../components/PBIS/ChromebookCheck";
 
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
@@ -86,10 +87,9 @@ const TA_INFO_QUERY = gql`
         }
         callbackCount
         studentCellPhoneViolationCount
-        PbisCardCount
+        studentPbisCardsCount
 
         studentFocusStudentCount
-        YearPbisCount
         callbackItemsCount
         callbackItems(where: { dateCompleted: null }) {
           id
@@ -174,8 +174,12 @@ export default function TA({ data: initialData, query }) {
       {students.length > 0 && (
         <>
           {isAllowedPbisCardCounting && (
-            <CountPhysicalCards taStudents={students} refetch={refetch} />
+            <div style={{ display: "flex" }}>
+              <CountPhysicalCards taStudents={students} refetch={refetch} />
+              <ChromebookCheck />
+            </div>
           )}
+
           <ViewTaStudentTable users={students} title="TA Students" />
           <CallbackTable callbacks={allTaCallbacksFlattened || []} />
         </>

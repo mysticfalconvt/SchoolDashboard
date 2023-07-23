@@ -6,7 +6,6 @@ import Loading from "../Loading";
 import AssignmentViewCards from "../Assignments/AssignmentViewCards";
 import ViewStudentTable from "./ViewStudentTable";
 import CallbackCards from "../Callback/CallbackCards";
-import GradientButton from "../styles/Button";
 import GiveListOfStudentsACardButton from "../PBIS/GiveListOfStudentsACardButton";
 
 const ClassCardButtonStyle = styled.div`
@@ -23,7 +22,7 @@ const ClassCardButtonStyle = styled.div`
 `;
 
 const GET_SINGLE_TEACHER = gql`
-  query GET_SINGLE_TEACHER($id: ID!) {
+  query GET_SINGLE_TEACHER($id: ID!, $date: DateTime!) {
     user: user(where: { id: $id }) {
       id
       name
@@ -55,8 +54,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         studentDisciplineCount
         studentFocusStudentCount
         taTeacher {
@@ -72,8 +73,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -87,8 +90,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -102,8 +107,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -116,8 +123,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -131,8 +140,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -145,8 +156,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -160,8 +173,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -174,8 +189,10 @@ const GET_SINGLE_TEACHER = gql`
         callbackCount
         totalCallbackCount
         averageTimeToCompleteCallback
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         taTeacher {
           id
           name
@@ -216,6 +233,7 @@ export default function ViewTeacherPage({ teacher }) {
     GET_SINGLE_TEACHER,
     {
       id: teacher.id,
+      date: new Date(),
     },
     {
       enabled: teacher?.id !== "",

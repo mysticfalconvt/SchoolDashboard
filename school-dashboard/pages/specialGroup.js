@@ -79,10 +79,8 @@ export const SPECIAL_GROUP_QUERY = gql`
         }
         callbackCount
         studentCellPhoneViolationCount
-        PbisCardCount
-
+        studentPbisCardsCount
         studentFocusStudentCount
-        YearPbisCount
         callbackItemsCount
         callbackItems(where: { dateCompleted: null }) {
           id

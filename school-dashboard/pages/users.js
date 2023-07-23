@@ -28,8 +28,7 @@ const GET_ALL_STUDENTS = gql`
         id
       }
       callbackCount
-      PbisCardCount
-      YearPbisCount
+      YearPbisCount: studentPbisCardsCount
       averageTimeToCompleteCallback
       individualPbisLevel
       callbackItemsCount
@@ -49,11 +48,10 @@ const GET_ALL_TEACHERS = gql`
       name
       hasTA
       callbackCount
-      PbisCardCount
+
       virtualCards: teacherPbisCardsCount(
         where: { category: { not: { contains: "physical" } } }
       )
-      YearPbisCount
       averageTimeToCompleteCallback
       callbackAssignedCount(where: { dateCompleted: null })
       totalCallback: callbackAssignedCount
@@ -127,7 +125,9 @@ export default function Users(props) {
   } = useGQLQuery(
     "allStudents",
     GET_ALL_STUDENTS,
-    {},
+    {
+      date: new Date(),
+    },
     {
       enabled: userSortType === "student",
       initialData: cachedStudents,
@@ -200,10 +200,6 @@ export default function Users(props) {
             accessor: "callbackItemsCount",
           },
           {
-            Header: "Weekly PBIS",
-            accessor: "PbisCardCount",
-          },
-          {
             Header: "Yearly PBIS",
             accessor: "YearPbisCount",
           },
@@ -259,24 +255,20 @@ export default function Users(props) {
           // },
           {
             Header: "Virtual PBIS Given",
-            accessor: "virtualCards.count",
+            accessor: "virtualCards",
           },
-          {
-            Header: "Latest PBIS Winner",
-            accessor: "currentTaWinner.name",
-          },
-          {
-            Header: "Previous PBIS Winner",
-            accessor: "previousTaWinner.name",
-          },
+          // {
+          //   Header: "Latest PBIS Winner",
+          //   accessor: "currentTaWinner.name",
+          // },
+          // {
+          //   Header: "Previous PBIS Winner",
+          //   accessor: "previousTaWinner.name",
+          // },
           // {
           //   Header: 'TA Count',
           //   accessor: '_taStudentsMeta.count',
           // },
-          {
-            Header: "Assigned Callback",
-            accessor: "_callbackAssignedMeta.count",
-          },
         ],
       },
     ],

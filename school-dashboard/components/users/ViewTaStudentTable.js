@@ -35,12 +35,8 @@ export default function ViewTaStudentTable({
           },
 
           {
-            Header: "Weekly PBIS",
-            accessor: "PbisCardCount",
-          },
-          {
-            Header: "Yearly PBIS",
-            accessor: "YearPbisCount",
+            Header: "PBIS Cards",
+            accessor: "studentPbisCardsCount",
           },
           {
             Header: "Callback",

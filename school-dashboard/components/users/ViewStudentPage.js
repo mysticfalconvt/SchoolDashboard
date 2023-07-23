@@ -19,14 +19,14 @@ const ParentInfoStyles = styled.div`
   border: 1px solid var(--blue);
 `;
 const GET_SINGLE_TEACHER = gql`
-  query GET_SINGLE_TEACHER($id: ID!) {
+  query GET_SINGLE_TEACHER($id: ID!, $date: DateTime!) {
     user: user(where: { id: $id }) {
       id
       name
       preferredName
       email
-      PbisCardCount
-      YearPbisCount
+      PbisCardCount: studentPbisCardsCount(where: { dateGiven: { gte: $date } })
+      YearPbisCount: studentPbisCardsCount
       callbackItems(where: { dateCompleted: null }) {
         id
         title
@@ -141,7 +141,7 @@ export default function ViewStudentPage({ student }) {
   const { data, isLoading, error } = useGQLQuery(
     `SingleStudent-${student.id}`,
     GET_SINGLE_TEACHER,
-    { id: student.id },
+    { id: student.id, date: new Date() },
     {
       enabled: !!student?.id,
     }

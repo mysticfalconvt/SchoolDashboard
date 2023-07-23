@@ -4,7 +4,7 @@ import { request, gql, GraphQLClient } from "graphql-request";
 import { endpoint, prodEndpoint } from "../config";
 
 const CURRENT_USER_QUERY = gql`
-  query {
+  query ($date: DateTime!) {
     authenticatedItem {
       __typename
       ... on User {
@@ -32,8 +32,10 @@ const CURRENT_USER_QUERY = gql`
         isStaff
         isTeacher
         isSuperAdmin
-        PbisCardCount
-        YearPbisCount
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
         sortingHat
         children {
           id
@@ -75,7 +77,9 @@ const CURRENT_USER_QUERY = gql`
 `;
 
 export function useUser() {
-  const { data } = useGQLQuery("me", CURRENT_USER_QUERY);
+  const { data } = useGQLQuery("me", CURRENT_USER_QUERY, {
+    date: new Date(),
+  });
   // console.log("user",data);
   // const newData = await getUser();
   // console.log("newData",newData);
@@ -84,29 +88,34 @@ export function useUser() {
 
 export { CURRENT_USER_QUERY };
 
-async function getUser() {
-  //check if on client
-  if (typeof window !== "undefined") {
-    // const token = localStorage.getItem('token');
-    // console.log("token",token);
-    const headers = {
-      credentials: "include",
-      mode: "cors",
-      headers: {
-        // authorization: `Bearer ${token}`,
-      },
-    };
+// async function getUser() {
+//   //check if on client
+//   if (typeof window !== "undefined") {
+//     // const token = localStorage.getItem('token');
+//     // console.log("token",token);
+//     const headers = {
+//       credentials: "include",
+//       mode: "cors",
+//       headers: {
+//         // authorization: `Bearer ${token}`,
+//       },
+//     };
 
-    const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
-      headers
-    );
-    const fetchAllLinks = async () => graphQLClient.request(CURRENT_USER_QUERY);
+//     const graphQLClient = new GraphQLClient(
+//       process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
+//       headers
+//     );
+//     const variables = {
+//       date: new Date(),
+//     };
+//     console.log("variables", variables);
+//     const fetchUser = async () =>
+//       graphQLClient.request(CURRENT_USER_QUERY, variables);
 
-    const res = await fetchAllLinks();
+//     const res = await fetchUser();
 
-    console.log("userfetch", res);
-    return res.authenticatedItem;
-  }
-  return null;
-}
+//     console.log("userfetch", res);
+//     return res.authenticatedItem;
+//   }
+//   return null;
+// }
