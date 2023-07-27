@@ -185,6 +185,7 @@ export default function Home(props) {
           )}
           {me && isAllowed(me, "isStudent") && (
             <div>
+              <StudentPbisData student={me} />
               {me?.birthday && !me?.birthday?.cakeType && (
                 <StudentCakeChooser birthday={me.birthday} />
               )}
@@ -192,7 +193,6 @@ export default function Home(props) {
               {data?.user && (
                 <AssignmentViewCardsStudent student={data?.user} />
               )}
-              <StudentPbisData student={me} />
               <DisplayPbisCardWidget cards={me.studentPbisCards} />
             </div>
           )}

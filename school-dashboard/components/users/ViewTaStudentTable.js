@@ -213,7 +213,6 @@ export default function ViewTaStudentTable({
               const failedCount = cell.value?.filter(
                 (item) => item.message !== "Passed"
               )?.length;
-              console.log(count, passedCount, failedCount);
               if (count === passedCount) icon = "✅";
               if (count === failedCount) icon = "❌";
               if (!count) icon = "🅾️";

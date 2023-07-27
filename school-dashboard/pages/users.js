@@ -234,7 +234,6 @@ export default function Users(props) {
               const failedCount = cell.value?.filter(
                 (item) => item.message !== "Passed"
               )?.length;
-              console.log(count, passedCount, failedCount);
               if (count === passedCount) icon = "✅";
               if (count === failedCount) icon = "❌";
               if (!count) icon = "🅾️";
@@ -378,7 +377,6 @@ export default function Users(props) {
       return 0;
     });
   }, [teachers]);
-  console.log(sortedStudents);
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
