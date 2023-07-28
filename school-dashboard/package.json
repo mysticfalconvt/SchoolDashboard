@@ -16,6 +16,7 @@
     "babel-plugin-styled-components": "^2.1.4",
     "chart.js": "^4.3.0",
     "downshift": "^6",
+    "googleapis": "^123.0.0",
     "graphql": "^16.7.1",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
