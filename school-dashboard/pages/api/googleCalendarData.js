@@ -9,7 +9,7 @@ const getCalendarData = async (req, res) => {
   ];
   const now = new Date(); // now
   const timeMin = new Date(now.getFullYear(), now.getMonth(), 1); // 1 week before current month
-  const timeMax = new Date(now.getFullYear(), now.getMonth() + 3, 0); // 1 week after current month
+  const timeMax = new Date(now.getFullYear(), now.getMonth() + 4, 0); // 1 week after current month
 
   const credentials = JSON.parse(process.env.CREDENTIALS || "");
 
