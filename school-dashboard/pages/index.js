@@ -32,6 +32,7 @@ import GradientButton from "../components/styles/Button";
 import { endpoint, prodEndpoint } from "../config";
 import { SEARCH_ALL_USERS_QUERY } from "../components/Search";
 import getDisplayName from "../lib/displayName";
+import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
 
 const DashboardContainerStyles = styled.div`
   display: flex;
@@ -178,6 +179,7 @@ export default function Home(props) {
               <WeeklyCalendar
                 me={me || {}}
                 initialData={props?.weeklyCalendar}
+                initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
               />
               {isAllowed(me, "hasClasses") && <TeacherAssignments />}
               {isAllowed(me, "hasTA") && <TaCallbacks />}
@@ -256,14 +258,15 @@ export async function getStaticProps(context) {
   const homePageLinks = await fetchHomePageLinks();
   const weeklyCalendar = await fetchWeeklyCalendar();
   const allUsersForSearch = await fetchAllUsersForSearch();
-
+  const initialGoogleCalendarEvents = await getGoogleCalendarEvents();
   return {
     props: {
       totalCards: totalCards.pbisCardsCount,
       homePageLinks,
       weeklyCalendar,
       allUsersForSearch,
+      initialGoogleCalendarEvents,
     }, // will be passed to the page component as props
-    revalidate: 1200, // In seconds
+    revalidate: 60 * 60,
   };
 }

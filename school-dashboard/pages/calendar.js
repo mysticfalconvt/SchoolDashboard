@@ -5,6 +5,7 @@ import { LeftEdgeButton } from "../components/styles/Button";
 import { endpoint, prodEndpoint } from "../config";
 import { useQuery } from "react-query";
 import GoogleCalendarList from "../components/calendars/GoogleCalendarList";
+import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
 
 export default function Calendar(props) {
   const weekAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
@@ -19,14 +20,6 @@ export default function Calendar(props) {
       setCalendarDates({ label: "all", date: "2011-02-28T20:48:00.000Z" });
     }
   }
-  const { data } = useQuery(
-    ["Calendars"],
-    async () => {
-      return fetch("/api/googleCalendarData").then((res) => res.json());
-    },
-    {}
-  );
-  console.log(data);
 
   return (
     <div>
@@ -39,17 +32,17 @@ export default function Calendar(props) {
           </div>
         </LeftEdgeButton>
       </div>
-      <GoogleCalendarList events={data?.events || []} />
+      {/* <GoogleCalendarList events={data?.events || []} /> */}
       <Calendars
         dates={calendarDates}
         initialData={props.initialCalendarDates}
+        googleCalendarEvents={props.initialGoogleCalendarEvents}
       />
     </div>
   );
 }
 
 export async function getStaticProps(context) {
-  // console.log(context);
   // fetch PBIS Page data from the server
   const headers = {
     credentials: "include",
@@ -67,9 +60,12 @@ export async function getStaticProps(context) {
 
   const initialCalendarDates = await fetchAllCalendars();
 
+  const initialGoogleCalendarEvents = await getGoogleCalendarEvents();
+
   return {
     props: {
       initialCalendarDates,
+      initialGoogleCalendarEvents: initialGoogleCalendarEvents.events || [],
     }, // will be passed to the page component as props
     revalidate: 1200, // In seconds
   };

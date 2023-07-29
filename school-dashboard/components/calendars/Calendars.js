@@ -26,8 +26,11 @@ export const GET_CALENDARS = gql`
   }
 `;
 
-export default function Calendars({ dates, initialData }) {
-  // console.log('Calendars.js: initialData', initialData);
+export default function Calendars({
+  dates,
+  initialData,
+  googleCalendarEvents,
+}) {
   const me = useUser();
   const teacherWithStudentEvents = me?.isStaff && me?.canSeeStudentEvents;
   const status = me?.isStaff ? "Teachers" : "Students";
@@ -45,21 +48,27 @@ export default function Calendars({ dates, initialData }) {
     }
   );
 
-  const calendarsFilteredByUserType =
-    data?.calendars.filter((calendar) => {
-      if (calendar.status === "Both") return true;
-      if (me?.isStaff && calendar.status === "Teachers") return true;
-      if (me?.isStudent && calendar.status === "Students") return true;
-      if (me?.isParent && calendar.status === "Students") return true;
-      if (teacherWithStudentEvents && calendar.status === "Students")
-        return true;
-      return false;
-    }) || [];
+  const calendarsFilteredByUserType = useMemo(
+    () =>
+      data?.calendars.filter((calendar) => {
+        if (calendar.status === "Both") return true;
+        if (me?.isStaff && calendar.status === "Teachers") return true;
+        if (me?.isStudent && calendar.status === "Students") return true;
+        if (me?.isParent && calendar.status === "Students") return true;
+        if (teacherWithStudentEvents && calendar.status === "Students")
+          return true;
+        return false;
+      }) || [],
+    [data, me, teacherWithStudentEvents]
+  );
 
-  //   console.log(data);
-  const filteredCalendars = calendarsFilteredByUserType.filter(
+  const calendarsWithGoogleEvents = useMemo(() => {
+    if (!googleCalendarEvents) return calendarsFilteredByUserType;
+    return [...calendarsFilteredByUserType, ...googleCalendarEvents];
+  }, [calendarsFilteredByUserType, googleCalendarEvents]);
+
+  const filteredCalendars = calendarsWithGoogleEvents.filter(
     (singleCalendarToFilter) => {
-      // console.log(singleCalendarToFilter);
       const date = new Date(singleCalendarToFilter.date);
       const filterDate = new Date(dates.date);
       return date >= filterDate;
@@ -78,7 +87,11 @@ export default function Calendars({ dates, initialData }) {
               return (
                 <Link
                   legacyBehavior
-                  href={`/calendarEvent/${cell.row.original.id}`}
+                  href={
+                    !cell.row.original.isGoogleCalendarEvent
+                      ? `/calendarEvent/${cell.row.original.id}`
+                      : cell.row.original.link
+                  }
                 >
                   <a>{value}</a>
                 </Link>
@@ -92,7 +105,11 @@ export default function Calendars({ dates, initialData }) {
               return (
                 <Link
                   legacyBehavior
-                  href={`/calendarEvent/${cell.row.original.id}`}
+                  href={
+                    !cell.row.original.isGoogleCalendarEvent
+                      ? `/calendarEvent/${cell.row.original.id}`
+                      : cell.row.original.link
+                  }
                 >
                   <a>{value}</a>
                 </Link>

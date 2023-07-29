@@ -38,8 +38,27 @@ const getCalendarData = async (req, res) => {
     orderBy: "startTime",
   });
 
-  const events = Calendar.data.items || [];
+  const rawEvents = Calendar.data.items || [];
 
+  const events = rawEvents.map((event) => {
+    const status = "Both";
+    const date = new Date(event.start.dateTime || event.start.date);
+    const endDate = new Date(event.end.dateTime || event.end.date);
+    const name = event.summary;
+    const description = event.description;
+    const link = event.htmlLink;
+    const id = event.id;
+    return {
+      status,
+      date,
+      endDate,
+      name,
+      description,
+      link,
+      id,
+      isGoogleCalendarEvent: true,
+    };
+  });
   res.status(200).json({ events: events });
 };
 
