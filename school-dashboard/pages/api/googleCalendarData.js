@@ -40,16 +40,28 @@ const getCalendarData = async (req, res) => {
 
   const rawEvents = Calendar.data.items || [];
 
-  const events = rawEvents.map((event) => {
+  let events = rawEvents.map((event) => {
     const status = "Both";
-    const date = new Date(event.start.dateTime || event.start.date);
-    const endDate = new Date(event.end.dateTime || event.end.date);
+    const isGCDate = event.start.date ? true : false;
+    const isGCDateTime = event.start.dateTime ? true : false;
+    const startDate = new Date(event.start.date || event.start.dateTime);
+    const endDate = new Date(event.end.date || event.end.dateTime);
+    const isMultiDayEvent = endDate - startDate > 1000 * 60 * 60 * 24;
+    if (isMultiDayEvent) {
+      console.log("isMultiDayEvent", event);
+    }
+    const date = new Date(
+      isGCDate ? startDate.setDate(startDate.getDate() + 1) : startDate
+    );
     const name = event.summary;
     const description = event.description;
     const link = event.htmlLink;
     const id = event.id;
     return {
       status,
+      isMultiDayEvent,
+      isGCDate,
+      isGCDateTime,
       date,
       endDate,
       name,
@@ -59,6 +71,28 @@ const getCalendarData = async (req, res) => {
       isGoogleCalendarEvent: true,
     };
   });
+  const multiDayEvents = events.filter((event) => {
+    return event.isMultiDayEvent;
+  });
+  multiDayEvents.forEach((event) => {
+    const start = new Date(event.date);
+    const end = new Date(event.endDate);
+    const days = (end - start) / (1000 * 60 * 60 * 24);
+    for (let i = 1; i < days; i++) {
+      const newDate = new Date(start);
+      newDate.setDate(newDate.getDate() + i);
+      const newEvent = {
+        ...event,
+        date: newDate.toISOString(),
+        isMultiDayEvent: false,
+      };
+      events.push(newEvent);
+    }
+  });
+  events = events.sort((a, b) => {
+    return new Date(a.date) - new Date(b.date);
+  });
+
   res.status(200).json({ events: events });
 };
 
