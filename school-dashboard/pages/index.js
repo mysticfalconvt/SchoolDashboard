@@ -33,6 +33,7 @@ import { endpoint, prodEndpoint } from "../config";
 import { SEARCH_ALL_USERS_QUERY } from "../components/Search";
 import getDisplayName from "../lib/displayName";
 import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
+import PbisWidget from "../components/PBIS/PbisWidget";
 
 const DashboardContainerStyles = styled.div`
   display: flex;
@@ -139,6 +140,19 @@ export default function Home(props) {
           Welcome to the NCUJHS Dashboard {getDisplayName(me)}
         </h1>
         <DashboardContainerStyles>
+          {!!me && (
+            <>
+              <PbisWidget initialCardCount={props?.totalCards} />
+              <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
+              <WeeklyCalendar
+                me={me || {}}
+                initialData={props?.weeklyCalendar}
+                initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
+              />
+              {isAllowed(me, "hasClasses") && <TeacherAssignments />}
+              {isAllowed(me, "hasTA") && <TaCallbacks />}
+            </>
+          )}
           {me && isAllowed(me || {}, "isStaff") && (
             <PbisCardFormButton teacher={me} />
           )}
@@ -160,31 +174,6 @@ export default function Home(props) {
           <GradientButton title="Videos about NCUJHS">
             <Link href="/movies">Videos</Link>
           </GradientButton>
-          {!!me && (
-            <>
-              <PbisFalcon initialCount={props?.totalCards} />
-              {/* {me && (
-                <iframe
-                  title="video"
-                  allowFullScreen
-                  width="600"
-                  height="400"
-                  scrolling="no"
-                  frameBorder="0"
-                  // style="border: none;"
-                  src="https://www.wevideo.com/view/2513335772"
-                />
-              )} */}
-              <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
-              <WeeklyCalendar
-                me={me || {}}
-                initialData={props?.weeklyCalendar}
-                initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
-              />
-              {isAllowed(me, "hasClasses") && <TeacherAssignments />}
-              {isAllowed(me, "hasTA") && <TaCallbacks />}
-            </>
-          )}
           {me && isAllowed(me, "isStudent") && (
             <div>
               <StudentPbisData student={me} />
