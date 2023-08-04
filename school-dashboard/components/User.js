@@ -3,6 +3,16 @@ import { useGQLQuery } from "../lib/useGqlQuery";
 import { request, gql, GraphQLClient } from "graphql-request";
 import { endpoint, prodEndpoint } from "../config";
 
+const GET_ALL_PBIS_DATES_QUERY = gql`
+  # sort by date descending
+  query GET_ALL_PBIS_DATES {
+    pbisCollectionDates(orderBy: { collectionDate: desc }) {
+      id
+      collectionDate
+    }
+  }
+`;
+
 const CURRENT_USER_QUERY = gql`
   query ($date: DateTime!) {
     authenticatedItem {
@@ -36,6 +46,10 @@ const CURRENT_USER_QUERY = gql`
           where: { dateGiven: { gte: $date } }
         )
         YearPbisCount: studentPbisCardsCount
+        teacherPbisCardCount: teacherPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        teacherYearPbisCount: teacherPbisCardsCount
         sortingHat
         children {
           id
@@ -77,45 +91,23 @@ const CURRENT_USER_QUERY = gql`
 `;
 
 export function useUser() {
+  const { data: pbisDates } = useGQLQuery(
+    "pbisDates",
+    GET_ALL_PBIS_DATES_QUERY
+  );
+  const latestCollectionDateOr2YearsAgo =
+    pbisDates?.pbisCollectionDates[0]?.collectionDate ||
+    new Date(new Date().setFullYear(new Date().getFullYear() - 2));
   const { data } = useGQLQuery("me", CURRENT_USER_QUERY, {
-    date: new Date(),
+    date: new Date(latestCollectionDateOr2YearsAgo),
   });
-  // console.log("user",data);
-  // const newData = await getUser();
-  // console.log("newData",newData);
-  return data?.authenticatedItem;
+  const userData = data?.authenticatedItem;
+  if (userData?.isStaff) {
+    userData.PbisCardCount = userData.teacherPbisCardCount;
+    userData.YearPbisCount = userData.teacherYearPbisCount;
+  }
+
+  return userData;
 }
 
 export { CURRENT_USER_QUERY };
-
-// async function getUser() {
-//   //check if on client
-//   if (typeof window !== "undefined") {
-//     // const token = localStorage.getItem('token');
-//     // console.log("token",token);
-//     const headers = {
-//       credentials: "include",
-//       mode: "cors",
-//       headers: {
-//         // authorization: `Bearer ${token}`,
-//       },
-//     };
-
-//     const graphQLClient = new GraphQLClient(
-//       process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
-//       headers
-//     );
-//     const variables = {
-//       date: new Date(),
-//     };
-//     console.log("variables", variables);
-//     const fetchUser = async () =>
-//       graphQLClient.request(CURRENT_USER_QUERY, variables);
-
-//     const res = await fetchUser();
-
-//     console.log("userfetch", res);
-//     return res.authenticatedItem;
-//   }
-//   return null;
-// }
