@@ -12,6 +12,7 @@ import { endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
   GET_TA_CHROMEBOOK_CHECKS_QUERY,
 } from "../../components/PBIS/ChromebookCheck";
+import { useMemo } from "react";
 
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
@@ -148,9 +149,6 @@ export default function TA({ data: initialData, query }) {
     GET_TA_CHROMEBOOK_CHECKS_QUERY,
     { id: query.id }
   );
-  if (!me) return <Loading />;
-  if (isLoading) return <Loading />;
-  if (error) return <DisplayError>{error.message}</DisplayError>;
   // get the callbacks from each student in the ta
   const allTaCallbacks =
     data?.taTeacher?.taStudents?.map(
@@ -161,17 +159,27 @@ export default function TA({ data: initialData, query }) {
   const isAllowedPbisCardCounting =
     me?.id === data?.taTeacher?.id || me?.canManagePbis;
 
-  const studentsWithoutCBCheck = data?.taTeacher?.taStudents || [];
-  const students = studentsWithoutCBCheck.map((student) => {
-    const existingCheck = existingChecks?.users?.filter(
-      (check) => check.id === student.id
-    );
-    return {
-      ...student,
-      ChromebookChecks: existingCheck ? existingCheck[0].chromebookCheck : [],
-    };
-  });
+  const students = useMemo(
+    () =>
+      data?.taTeacher?.taStudents
+        .map((student) => {
+          const existingCheck = existingChecks?.users?.filter(
+            (check) => check.id === student.id
+          );
+          return {
+            ...student,
+            ChromebookChecks: existingCheck
+              ? existingCheck[0].chromebookCheck
+              : [],
+          };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [data, existingChecks]
+  );
 
+  if (!me) return <Loading />;
+  if (isLoading) return <Loading />;
+  if (error) return <DisplayError>{error.message}</DisplayError>;
   const taTotalPbisCards = students.reduce(
     (acc, student) => acc + student.YearPbisCount || 0,
     0

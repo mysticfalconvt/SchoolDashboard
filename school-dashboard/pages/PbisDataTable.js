@@ -27,7 +27,8 @@ const PBIS_DATA_QUERY = gql`
     students: users(where: { isStudent: { equals: true } }) {
       id
       name
-      YearPbisCount
+      YearPbisCount: studentPbisCardsCount
+
       block1Teacher {
         id
         name

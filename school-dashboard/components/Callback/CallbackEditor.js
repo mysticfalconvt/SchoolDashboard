@@ -1,16 +1,13 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
 
-import SearchForUserName from '../SearchForUserName';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import useRecalculateCallback from './recalculateCallback';
-import { useUser } from '../User';
-import useCreateMessage from '../Messages/useCreateMessage';
+import { useUser } from "../User";
+import useCreateMessage from "../Messages/useCreateMessage";
 
 const UPDATE_CALLBACK_MUTATION = gql`
   mutation UPDATE_CALLBACK_MUTATION(
@@ -21,7 +18,7 @@ const UPDATE_CALLBACK_MUTATION = gql`
     $link: String
   ) {
     updateCallback(
-      where: {id: $id}
+      where: { id: $id }
       data: {
         title: $title
         dateAssigned: $dateAssigned
@@ -37,7 +34,7 @@ const UPDATE_CALLBACK_MUTATION = gql`
 export default function CallbackEditor({ callback, refetch, setEditing }) {
   const date = new Date(callback.dateAssigned);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    dateAssigned: date.toISOString().split('T')[0],
+    dateAssigned: date.toISOString().split("T")[0],
     title: callback.title,
     description: callback.description,
     link: callback.link,
@@ -58,8 +55,6 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
   // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
 
-  const { setCallbackID } = useRecalculateCallback();
-  //   console.log(inputs);
   return (
     <div>
       {/* <FormContainerStyles> */}
@@ -73,13 +68,12 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
           const res = await updateCallback();
 
           createMessage({
-            subject: 'Updated Callback Assignment',
+            subject: "Updated Callback Assignment",
             message: `${user.name} updated a callback item`,
             receiver: callback.student.id,
             link: `/callback/${res?.data?.updateCallback.id}`,
           });
           refetch();
-          // recalculateCallback();
           setEditing(false);
 
           // console.log(inputs);
@@ -102,7 +96,7 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
                 id="title"
                 name="title"
                 placeholder="Title of Assignment"
-                value={inputs.title || ''}
+                value={inputs.title || ""}
                 onChange={handleChange}
               />
             </label>

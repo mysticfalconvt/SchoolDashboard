@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useRouter } from 'next/dist/client/router';
-import { useQueryClient } from 'react-query';
-import useForm from '../lib/useForm';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useRouter } from "next/dist/client/router";
+import { useQueryClient } from "react-query";
+import useForm from "../lib/useForm";
 
-import useSendEmail from '../lib/useSendEmail';
-import { useUser } from './User';
-import GradientButton from './styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from './styles/Form';
-import DisplayError from './ErrorMessage';
+import useSendEmail from "../lib/useSendEmail";
+import { useUser } from "./User";
+import GradientButton from "./styles/Button";
+import Form, { FormContainerStyles, FormGroupStyles } from "./styles/Form";
+import DisplayError from "./ErrorMessage";
 
 const CREATE_SORTING_QUESTION = gql`
   mutation CREATE_SORTING_QUESTION(
@@ -40,11 +40,11 @@ export default function NewSortingHatQuestion() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    question: '',
-    gryffindorChoice: '',
-    ravenclawChoice: '',
-    hufflepuffChoice: '',
-    slytherinChoice: '',
+    question: "",
+    gryffindorChoice: "",
+    ravenclawChoice: "",
+    hufflepuffChoice: "",
+    slytherinChoice: "",
   });
   const me = useUser();
 
@@ -68,13 +68,13 @@ export default function NewSortingHatQuestion() {
     <div>
       <GradientButton
         onClick={() => setShowForm(!showForm)}
-        style={{ marginLeft: '100px' }}
+        style={{ marginLeft: "100px" }}
       >
-        {showForm ? 'Close the form' : 'New Sorting Hat Question'}
+        {showForm ? "Close the form" : "New Sorting Hat Question"}
       </GradientButton>
       <FormContainerStyles>
         <Form
-          className={showForm ? 'visible' : 'hidden'}
+          className={showForm ? "visible" : "hidden"}
           // hidden={!showForm}
           onSubmit={async (e) => {
             e.preventDefault();
@@ -85,8 +85,7 @@ export default function NewSortingHatQuestion() {
 
             // Todo: send message when callback assigned
 
-            queryClient.refetchQueries('SortingHatQuestions');
-            // recalculateCallback();
+            queryClient.refetchQueries("SortingHatQuestions");
             clearForm();
             setShowForm(false);
           }}

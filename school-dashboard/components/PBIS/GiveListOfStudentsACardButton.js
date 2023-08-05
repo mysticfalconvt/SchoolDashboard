@@ -5,7 +5,6 @@ import { useQueryClient } from "react-query";
 import { UPDATE_PBIS } from "../../lib/pbisUtils";
 import GradientButton, { SmallGradientButton } from "../styles/Button";
 import { useUser } from "../User";
-import useRecalculatePBIS from "./useRecalculatePbis";
 
 const CREATE_CLASS_PBIS_CARD = gql`
   mutation CREATE_CLASS_PBIS_CARD(
@@ -42,11 +41,6 @@ export default function GiveListOfStudentsACardButton({ students, title }) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
   const listOfStudentIds = students.map((student) => student.id);
-  const { recalculatePbisFromId } = useRecalculatePBIS();
-  const [updateCardCount, { loading: cardLoading }] = useMutation(
-    UPDATE_PBIS,
-    {}
-  );
 
   const [createCard, { loading, error, data }] = useMutation(
     CREATE_CLASS_PBIS_CARD,
@@ -70,9 +64,6 @@ export default function GiveListOfStudentsACardButton({ students, title }) {
             cardsToCreate.map(async (card) => {
               //   console.log('card', card);
               const res = await createCard({ variables: card });
-              const update = await updateCardCount({
-                variables: { userId: card.student },
-              });
             })
           );
           await queryClient.refetchQueries(`SingleTeacher-${me.id}`);

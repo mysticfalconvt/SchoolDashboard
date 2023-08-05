@@ -140,19 +140,7 @@ export default function Home(props) {
           Welcome to the NCUJHS Dashboard {getDisplayName(me)}
         </h1>
         <DashboardContainerStyles>
-          {!!me && (
-            <>
-              <PbisWidget initialCardCount={props?.totalCards} />
-              <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
-              <WeeklyCalendar
-                me={me || {}}
-                initialData={props?.weeklyCalendar}
-                initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
-              />
-              {isAllowed(me, "hasClasses") && <TeacherAssignments />}
-              {isAllowed(me, "hasTA") && <TaCallbacks />}
-            </>
-          )}
+          <PbisWidget initialCardCount={props?.totalCards} />
           {me && isAllowed(me || {}, "isStaff") && (
             <PbisCardFormButton teacher={me} />
           )}
@@ -166,14 +154,20 @@ export default function Home(props) {
               <Link href="/trimesterAwards">Trimester Awards</Link>
             </GradientButton>
           )}
+
           {me && isAllowed(me || {}, "isStaff") && (
             <GradientButton>
               <Link href="/allTeacherCurrentWork">Current Work</Link>
             </GradientButton>
           )}
-          <GradientButton title="Videos about NCUJHS">
-            <Link href="/movies">Videos</Link>
-          </GradientButton>
+          <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
+          {isAllowed(me, "hasClasses") && <TeacherAssignments />}
+          {isAllowed(me, "hasTA") && <TaCallbacks />}
+          <WeeklyCalendar
+            me={me || {}}
+            initialData={props?.weeklyCalendar}
+            initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
+          />
           {me && isAllowed(me, "isStudent") && (
             <div>
               <StudentPbisData student={me} />

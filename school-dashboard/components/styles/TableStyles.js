@@ -1,10 +1,11 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const UserTableStyles = styled.div`
   table {
     width: 100%;
     border-spacing: 0;
     border: 1px solid #ededed;
+    font-size: 1rem;
   }
   table tr:last-child td {
     border-bottom: 0;
@@ -31,7 +32,7 @@ export const UserTableStyles = styled.div`
     position: absolute;
     right: 15px;
     top: 16px;
-    content: '';
+    content: "";
     width: 0;
     height: 0;
     border-left: 5px solid transparent;
@@ -77,11 +78,11 @@ export const UserTableStyles = styled.div`
     background-color: var(--tableAccentColor);
   }
   @media (max-width: 700px) {
-    font-size: 1rem;
+    font-size: 0.8rem;
     /* overflow-x: scroll; */
   }
   @media (max-width: 500px) {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     table th,
     table td {
       padding: 0.2rem;

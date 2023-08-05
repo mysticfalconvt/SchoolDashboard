@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { toast } from 'react-hot-toast';
-import GradientButton from '../styles/Button';
-import SearchForUserName from '../SearchForUserName';
-import Form from '../styles/Form';
-import useForm from '../../lib/useForm';
-import { useUser } from '../User';
-import useCreateMessage from '../Messages/useCreateMessage';
-import useRecalculatePBIS from './useRecalculatePbis';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { toast } from "react-hot-toast";
+import GradientButton from "../styles/Button";
+import SearchForUserName from "../SearchForUserName";
+import Form from "../styles/Form";
+import useForm from "../../lib/useForm";
+import { useUser } from "../User";
+import useCreateMessage from "../Messages/useCreateMessage";
 
 const CardButtonContainer = styled.div`
   padding: 20px;
@@ -78,7 +77,7 @@ const CREATE_PBIS_CARD = gql`
 
 function CardForm({ visible, hide }) {
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    message: '',
+    message: "",
   });
   const me = useUser();
   const teacher = me?.id;
@@ -93,7 +92,6 @@ function CardForm({ visible, hide }) {
       category: inputs.category,
     },
   });
-  const { recalculatePbisFromId } = useRecalculatePBIS();
   const createMessage = useCreateMessage();
   if (error) {
     console.log(error);
@@ -164,16 +162,12 @@ function CardForm({ visible, hide }) {
               console.log(`res res `);
               console.log(res?.data);
               await createMessage({
-                subject: 'New PBIS Card',
+                subject: "New PBIS Card",
                 message: `you received a new PBIS Card from ${me.name} for ${inputs.category}`,
                 receiver: studentCardIsFor.userId,
                 link: `/pbis/${res?.data?.createPbisCard.id}`,
               });
               console.log(studentCardIsFor);
-              recalculatePbisFromId(studentCardIsFor.userId);
-              // clearForm();
-              // resetForm();
-              // setStudentCardIsFor(null);
               if (res) {
                 toast.success(`Added Card For ${studentCardIsFor.userName}`);
               }
@@ -194,7 +188,7 @@ export default function PbisCardFormButton({ teacher }) {
   return (
     <CardButtonContainer>
       <GradientButton
-        style={{ height: '4rem' }}
+        style={{ height: "4rem" }}
         onClick={() => {
           setDisplayCardForm(!displayCardForm);
         }}
@@ -203,7 +197,7 @@ export default function PbisCardFormButton({ teacher }) {
       </GradientButton>
 
       <CardForm
-        visible={displayCardForm ? 'visible' : 'invisible'}
+        visible={displayCardForm ? "visible" : "invisible"}
         hide={setDisplayCardForm}
       />
     </CardButtonContainer>

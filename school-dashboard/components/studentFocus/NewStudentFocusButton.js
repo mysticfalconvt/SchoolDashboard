@@ -137,7 +137,6 @@ export default function NewStudentFocusButton({ refetch }) {
               }
             }
             queryClient.refetchQueries("allStudentFocus");
-            // recalculateCallback();
             clearForm();
             setStudentWhoIsFor(null);
             setEmailSending(false);

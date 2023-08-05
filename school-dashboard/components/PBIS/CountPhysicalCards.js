@@ -1,13 +1,12 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { object } from 'prop-types';
-import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import { useUser } from '../User';
-import useRecalculatePBIS from './useRecalculatePbis';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { object } from "prop-types";
+import { useState } from "react";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles } from "../styles/Form";
+import { useUser } from "../User";
 
 const CREATE_CARD_MUTATION = gql`
   mutation CREATE_CARD_MUTATION($cards: [PbisCardCreateInput!]!) {
@@ -25,13 +24,11 @@ function createCards(users, teacherId) {
     if (users[user] > 0) {
       const numberOfCards = users[user];
       for (let i = 0; i < numberOfCards; i++) {
-        cards.push(
-          {
-            student: { connect: { id: user } },
-            teacher: { connect: { id: teacherId } },
-            category: 'physical',
-          },
-        );
+        cards.push({
+          student: { connect: { id: user } },
+          teacher: { connect: { id: teacherId } },
+          category: "physical",
+        });
       }
     }
   });
@@ -40,7 +37,6 @@ function createCards(users, teacherId) {
 export default function CountPhysicalCards({ taStudents, refetch }) {
   const me = useUser();
   const [showForm, setShowForm] = useState(false);
-  const { recalculatePbisFromId } = useRecalculatePBIS();
   // creat an array of objects with keys taStudent.id and value of 0
   const taStudentCounts = {};
   taStudents.forEach((student) => {
@@ -49,17 +45,15 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
   // create an object with key of taStudent.id and value of 0
 
   //   const studentIds = taStudents.map((student) => student.id);
-  const { inputs, handleChange, clearForm, resetForm } = useForm(
-    taStudentCounts
-  );
-  const [countCardsMutation, { loading, error, data }] = useMutation(
-    CREATE_CARD_MUTATION
-  );
+  const { inputs, handleChange, clearForm, resetForm } =
+    useForm(taStudentCounts);
+  const [countCardsMutation, { loading, error, data }] =
+    useMutation(CREATE_CARD_MUTATION);
 
   return (
     <div>
       <GradientButton
-        style={{ marginTop: '10px' }}
+        style={{ marginTop: "10px" }}
         onClick={() => setShowForm(!showForm)}
       >
         Log TA Cards
@@ -67,8 +61,8 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
       <div>
         <FormContainerStyles>
           <Form
-            className={showForm ? 'visible' : 'hidden'}
-            style={{ width: 'max-content' }}
+            className={showForm ? "visible" : "hidden"}
+            style={{ width: "max-content" }}
             onSubmit={async (e) => {
               e.preventDefault();
               // Submit the inputfields to the backend:
@@ -78,19 +72,9 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
                 variables: { cards: cardsToCreate },
               });
               // get all the unique students from the cards
-              const studentIds = cardsToCreate.map(
-                (card) => card.student.connect.id
-              );
               // get the unique student ids
-              const uniqueStudentIds = [...new Set(studentIds)];
-              // recalculate pbis for each student
 
-              uniqueStudentIds.forEach((studentId) => {
-                recalculatePbisFromId(studentId);
-              });
-              setTimeout(() => {
-                refetch();
-              }, 2000);
+              refetch();
               resetForm();
               setShowForm(false);
             }}
@@ -104,12 +88,12 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
                   style={{
                     // display: 'inline',
                     // width: '5rem',
-                    marginLeft: '10px',
-                    display: 'grid',
-                    gridTemplateColumns: '50% 5rem',
+                    marginLeft: "10px",
+                    display: "grid",
+                    gridTemplateColumns: "50% 5rem",
                   }}
                 >
-                  <label htmlFor={student.id} style={{ display: 'inline' }}>
+                  <label htmlFor={student.id} style={{ display: "inline" }}>
                     {student.name}
                   </label>
                   <input
