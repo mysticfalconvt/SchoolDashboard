@@ -228,18 +228,18 @@ const GET_SINGLE_TEACHER = gql`
 `;
 
 export default function ViewTeacherPage({ teacher }) {
+  const me = useUser();
   const { data, isLoading, error } = useGQLQuery(
     `SingleTeacher-${teacher.id}`,
     GET_SINGLE_TEACHER,
     {
       id: teacher.id,
-      date: new Date(),
+      date: new Date(me?.lastCollection || new Date()),
     },
     {
       enabled: teacher?.id !== "",
     }
   );
-  const me = useUser();
   if (isLoading) return <Loading />;
   //   console.log(data.user);
   const { user } = data;

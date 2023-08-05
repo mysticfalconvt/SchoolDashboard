@@ -102,6 +102,9 @@ export function useUser() {
     date: new Date(latestCollectionDateOr2YearsAgo),
   });
   const userData = data?.authenticatedItem;
+  if (userData) {
+    userData.lastCollection = latestCollectionDateOr2YearsAgo;
+  }
   if (userData?.isStaff) {
     userData.PbisCardCount = userData.teacherPbisCardCount;
     userData.YearPbisCount = userData.teacherYearPbisCount;
