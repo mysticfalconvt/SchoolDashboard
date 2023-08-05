@@ -1,26 +1,21 @@
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/dist/client/router';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import usePbisCollection from './useNewPbisCollection';
-import useRevalidatePage from '../../lib/useRevalidatePage';
+import React, { useEffect } from "react";
+import { useRouter } from "next/dist/client/router";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import useRevalidatePage from "../../lib/useRevalidatePage";
+import useV3PbisCollection from "./useV3PbisCollection";
 
 export default function NewWeeklyPbisCollection() {
-  const sendRevalidationRequest = useRevalidatePage('/pbis');
+  const sendRevalidationRequest = useRevalidatePage("/pbis");
   const [showForm, setShowForm] = React.useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm();
   const [running, setRunning] = React.useState(false);
   const router = useRouter();
-  const {
-    runCardCollection,
-    data,
-    setGetData,
-    getData,
-    loading,
-  } = usePbisCollection();
+  const { runCardCollection, data, setGetData, getData, loading } =
+    useV3PbisCollection();
   useEffect(() => {
-    console.log('running', running);
+    console.log("running", running);
     if (!running) {
       setShowForm(false);
     }
@@ -29,7 +24,7 @@ export default function NewWeeklyPbisCollection() {
   return (
     <div>
       <GradientButton
-        style={{ marginTop: '10px' }}
+        style={{ marginTop: "10px" }}
         onClick={() => {
           setShowForm(!showForm);
           setGetData(!getData);
@@ -40,11 +35,11 @@ export default function NewWeeklyPbisCollection() {
       <div>
         <FormContainerStyles>
           <Form
-            className={showForm ? 'visible' : 'hidden'}
+            className={showForm ? "visible" : "hidden"}
             onSubmit={async (e) => {
               e.preventDefault();
               // Submit the inputfields to the backend:
-              if (inputs.confirmation === 'yes') {
+              if (inputs.confirmation === "yes") {
                 setRunning(true);
                 const res = await runCardCollection();
                 // setShowForm(false);
@@ -52,6 +47,9 @@ export default function NewWeeklyPbisCollection() {
                 if (res) {
                   console.log(res);
                   const revalidateRes = await sendRevalidationRequest();
+                  // wait for the revalidation to finish for a couple seconds
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
+
                   console.log(revalidateRes);
                   setRunning(false);
                   router.push({
