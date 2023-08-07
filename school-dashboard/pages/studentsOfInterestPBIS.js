@@ -13,7 +13,7 @@ const PBIS_STUDENTS_OF_INTEREST_QUERY = gql`
     students: users(where: { isStudent: { equals: true } }) {
       id
       name
-      YearPbisCount
+      YearPbisCount: studentPbisCardsCount
       studentPbisCards(orderBy: { dateGiven: desc }, take: 1) {
         id
         dateGiven

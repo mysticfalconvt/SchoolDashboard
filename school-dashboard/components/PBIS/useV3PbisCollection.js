@@ -11,7 +11,7 @@ const shuffle = (array) => {
   return array;
 };
 
-const PBISCardsPerTaLevel = 4;
+const PBISCardsPerTaLevel = 24;
 const PbisCardsPerPersonalLevel = [
   0, 25, 50, 85, 120, 165, 210, 265, 320, 385, 450, 525, 600, 675, 750,
 ];
