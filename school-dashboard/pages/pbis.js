@@ -103,40 +103,58 @@ const PBIS_PAGE_QUERY = gql`
 
 const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY {
-    cards: pbisCards(take: 1000, orderBy: { dateGiven: desc }) {
-      id
-      dateGiven
-      category
-
-      counted
-    }
     totalSchoolCards: pbisCardsCount
 
-    teams: pbisTeams {
+    classCards: pbisCardsCount(where: { category: { equals: "class" } })
+    chromebookCards: pbisCardsCount(
+      where: { category: { equals: "Chromebook Check" } }
+    )
+    perseveranceCards: pbisCardsCount(
+      where: { category: { equals: "perseverance" } }
+    )
+    respectCards: pbisCardsCount(where: { category: { equals: "respect" } })
+    responsibilityCards: pbisCardsCount(
+      where: { category: { equals: "responsibility" } }
+    )
+    quickCards: pbisCardsCount(where: { category: { equals: "quick" } })
+    physicalCards: pbisCardsCount(where: { category: { equals: "physical" } })
+
+    TAs: users(where: { hasTA: { equals: true } }) {
       id
-      teamName
-      taTeacher {
-        id
-        name
+      name
+      taTeamPbisLevel
+      taTeamAveragePbisCardsPerStudent
+      taStudents {
+        studentPbisCardsCount
       }
-      averageCardsPerStudent
-      uncountedCards
-      countedCards
-      currentLevel
-      numberOfStudents
     }
-    lastCollection: pbisCollections(
+
+    lastCollection: pbisCollectionDates(
       orderBy: { collectionDate: desc }
       take: 2
     ) {
       id
-      name
       collectionDate
-      personalLevelWinners
-      randomDrawingWinners
-      taTeamsLevels
-      taTeamNewLevelWinners
-      currentPbisTeamGoal
+      taNewLevelWinners {
+        id
+        name
+        taTeamPbisLevel
+      }
+      personalLevelWinners {
+        id
+        name
+        individualPbisLevel
+      }
+      randomDrawingWinners {
+        id
+        student {
+          id
+          name
+          taTeacher {
+            name
+          }
+        }
+      }
     }
 
     pbisLinks: links(where: { forPbis: { equals: true } }) {
@@ -148,9 +166,9 @@ const PBIS_PAGE_STATIC_QUERY = gql`
       forTeachers
       forStudents
     }
-    cardCounts: pbisCollections(orderBy: { collectionDate: asc }) {
+    cardCounts: pbisCollectionDates(orderBy: { collectionDate: asc }) {
       id
-      name
+      collectionDate
       collectedCards
     }
   }
@@ -213,27 +231,6 @@ export default function Pbis(props) {
     if (link.forStudents && me?.isStudent) return link;
     return null;
   });
-  let monthsWithCounts = [];
-  cardCounts?.forEach((collection) => {
-    const month = new Date(collection.collectionDate).getMonth();
-    const monthIndex = monthsWithCounts.findIndex(
-      (monthWithCount) => monthWithCount.month === month
-    );
-    if (monthIndex === -1) {
-      monthsWithCounts.push({
-        month,
-        count: collection.collectedCards,
-      });
-    } else {
-      monthsWithCounts[monthIndex].count += collection.collectedCards;
-    }
-  });
-  monthsWithCounts = monthsWithCounts.sort((a, b) => {
-    if (a.month < b.month) return -1;
-    if (a.month > b.month) return 1;
-    return 0;
-  });
-  console.log(monthsWithCounts);
 
   return (
     <div>
@@ -368,16 +365,36 @@ export async function getStaticProps(context) {
   // alpha sort the categories
   categoriesArray.sort();
   // get the number of cards in each category for whole school
-  const schoolWideCardsInCategories =
-    categoriesArray?.map((category) => {
-      const cardsInCategory = cards.filter(
-        (card) => card.category === category
-      );
-      return {
-        word: category,
-        total: cardsInCategory.length,
-      };
-    }) || [];
+  const schoolWideCardsInCategories = [
+    {
+      word: "Chromebook Check",
+      total: data.chromebookCards,
+    },
+    {
+      word: "class",
+      total: data.classCards,
+    },
+    {
+      word: "quick",
+      total: data.quickCards,
+    },
+    {
+      word: "respect",
+      total: data.respectCards,
+    },
+    {
+      word: "responsibility",
+      total: data.responsibilityCards,
+    },
+    {
+      word: "perseverance",
+      total: data.perseveranceCards,
+    },
+    {
+      word: "physical",
+      total: data.physicalCards,
+    },
+  ];
 
   const teams = data?.teams || [];
 
