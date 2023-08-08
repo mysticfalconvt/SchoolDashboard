@@ -23,10 +23,7 @@ export default function DisplayPbisCollectionData({ collectionData }) {
             <h3>TA Level-Up</h3>
             <h4>{teacher.name}</h4>
             <h4>Level {teacher.taTeamPbisLevel}</h4>
-            <p>
-              {Math.round(teacher.taTeamAveragePbisCardsPerStudent)} cards per
-              student
-            </p>
+            <p>{teacher.taTeamAveragePbisCardsPerStudent} cards per student</p>
           </div>
         ))}
         {studentsWhoWentUpLevel.map((student) => (

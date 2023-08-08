@@ -138,6 +138,7 @@ const PBIS_PAGE_STATIC_QUERY = gql`
         id
         name
         taTeamPbisLevel
+        taTeamAveragePbisCardsPerStudent
       }
       personalLevelWinners {
         id
