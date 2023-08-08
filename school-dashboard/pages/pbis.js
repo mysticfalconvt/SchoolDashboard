@@ -310,16 +310,21 @@ export default function Pbis(props) {
           <DisplayPbisCollectionData collectionData={lastPbisCollection} />
         )}
       </div>
+      <h3>Current Team Data</h3>
       <TeamCardStyles>
-        {TAs?.map((ta) => (
-          <div key={ta.id} className="gridCard">
-            <h3>{ta.name}</h3>
+        {TAs?.filter(
+          (ta) => ta.taStudents.length && ta.id !== "cl24ztaju149148z3qqm4c4d39"
+        )
+          .sort((a, b) => a.taTeamPbisLevel - b.taTeamPbisLevel)
+          .map((ta) => (
+            <div key={ta.id} className="gridCard">
+              <h3>{ta.name}</h3>
 
-            <h4>Level -{ta.taTeamPbisLevel}-</h4>
-            <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
-            <p>Total of {ta.taStudents?.length} students</p>
-          </div>
-        ))}
+              <h4>Level -{ta.taTeamPbisLevel}-</h4>
+              <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
+              <p>Total of {ta.taStudents?.length} students</p>
+            </div>
+          ))}
       </TeamCardStyles>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
     </div>
