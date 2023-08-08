@@ -105,7 +105,6 @@ const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY {
     totalSchoolCards: pbisCardsCount
 
-    classCards: pbisCardsCount(where: { category: { equals: "class" } })
     chromebookCards: pbisCardsCount(
       where: { category: { equals: "Chromebook Check" } }
     )
@@ -178,6 +177,7 @@ export default function Pbis(props) {
   // console.log(props.data);
   const me = useUser();
   const teamId = me?.taTeam?.id || me?.taTeacher?.taTeam?.id || null;
+  const TAs = props?.TAs || [];
   const teamName =
     me?.taTeam?.teamName || me?.taTeacher?.taTeam?.teamName || null;
   const { data, isLoading, error, refetch } = useGQLQuery(
@@ -305,32 +305,22 @@ export default function Pbis(props) {
         )}
       </ChartContainerStyles>
       <PbisCardChart className="hidePrint" cardCounts={cardCounts} />
-      <TeamCardStyles>
-        {teams?.map((team) => (
-          <div key={team.id} className="gridCard">
-            <h3>{team.teamName}</h3>
-
-            {team.taTeacher?.map((teacher) => (
-              <p key={teacher.id}>{` ${teacher.name} `} </p>
-            ))}
-
-            <h4>Level -{team.currentLevel}-</h4>
-            <p>{team.averageCardsPerStudent} cards per student</p>
-            <p>Total of {team.numberOfStudents} students</p>
-          </div>
-        ))}
-      </TeamCardStyles>
       <div>
-        {didWeGetNewSchoolWideLevel && (
-          <AnnouncementStyle>
-            We Reached A New School-Wide Goal!!: {newSchoolwideGoal}
-          </AnnouncementStyle>
-        )}
-
         {lastPbisCollection && (
           <DisplayPbisCollectionData collectionData={lastPbisCollection} />
         )}
       </div>
+      <TeamCardStyles>
+        {TAs?.map((ta) => (
+          <div key={ta.id} className="gridCard">
+            <h3>{ta.name}</h3>
+
+            <h4>Level -{ta.taTeamPbisLevel}-</h4>
+            <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
+            <p>Total of {ta.taStudents?.length} students</p>
+          </div>
+        ))}
+      </TeamCardStyles>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
     </div>
   );
@@ -355,65 +345,52 @@ export async function getStaticProps(context) {
   const fetchData = async () => graphQLClient.request(PBIS_PAGE_STATIC_QUERY);
   const data = await fetchData();
   // console.log(data);
-  const cards = data?.cards || [];
   const totalSchoolCards = data?.totalSchoolCards || 0;
 
-  // gat card data by category
-  const categories = cards?.map((card) => card.category) || [];
-  const categoriesSet = new Set(categories);
-  const categoriesArray = Array.from(categoriesSet);
-  // alpha sort the categories
-  categoriesArray.sort();
   // get the number of cards in each category for whole school
   const schoolWideCardsInCategories = [
     {
       word: "Chromebook Check",
-      total: data.chromebookCards,
+      total: data.chromebookCards || 0,
     },
     {
       word: "class",
-      total: data.classCards,
+      total: data.classCards || 0,
     },
     {
       word: "quick",
-      total: data.quickCards,
+      total: data.quickCards || 0,
     },
     {
       word: "respect",
-      total: data.respectCards,
+      total: data.respectCards || 0,
     },
     {
       word: "responsibility",
-      total: data.responsibilityCards,
+      total: data.responsibilityCards || 0,
     },
     {
       word: "perseverance",
-      total: data.perseveranceCards,
+      total: data.perseveranceCards || 0,
     },
     {
       word: "physical",
-      total: data.physicalCards,
+      total: data.physicalCards || 0,
     },
   ];
 
-  const teams = data?.teams || [];
-
   const lastPbisCollection = data?.lastCollection[0] || null;
-  const previousPbisCollection = data?.lastCollection[1] || null;
   const pbisLinks = data?.pbisLinks || [];
-  const cardCounts = data?.cardCounts || [];
+  const TAs = data?.TAs || [];
 
   return {
     props: {
       totalSchoolCards,
       schoolWideCardsInCategories,
-      categoriesArray,
-      teams,
       lastPbisCollection,
-      previousPbisCollection,
       pbisLinks,
-      cardCounts,
-    }, // will be passed to the page component as props
+      TAs,
+    },
     revalidate: false,
   };
 }
