@@ -1,8 +1,8 @@
-import gql from 'graphql-tag';
-import styled from 'styled-components';
-import Loading from '../components/Loading';
-import { capitalizeFirstLetter } from '../lib/nameUtils';
-import { useGQLQuery } from '../lib/useGqlQuery';
+import gql from "graphql-tag";
+import styled from "styled-components";
+import Loading from "../components/Loading";
+import { capitalizeFirstLetter } from "../lib/nameUtils";
+import { useGQLQuery } from "../lib/useGqlQuery";
 
 const PbisReadingStyles = styled.div`
   h3 {
@@ -23,45 +23,58 @@ const PbisReadingStyles = styled.div`
 
 const PBIS_READING_QUERY = gql`
   query PBIS_READING_QUERY {
-    lastCollection: pbisCollections(orderBy: {collectionDate: desc}, take: 1) {
+    lastCollection: pbisCollectionDates(
+      orderBy: { collectionDate: desc }
+      take: 2
+    ) {
       id
-      name
       collectionDate
-      personalLevelWinners
-      randomDrawingWinners
-      taTeamsLevels
-      taTeamNewLevelWinners
-      currentPbisTeamGoal
+      taNewLevelWinners {
+        id
+        name
+        taTeamPbisLevel
+        taTeamAveragePbisCardsPerStudent
+      }
+      personalLevelWinners {
+        id
+        name
+        individualPbisLevel
+      }
+      randomDrawingWinners {
+        id
+        student {
+          id
+          name
+          taTeacher {
+            name
+          }
+        }
+      }
     }
     totalCards: pbisCardsCount
   }
-
 `;
 
 export default function PbisWeeklyReading() {
   // console.log('PbisWeeklyReading');
 
   const { data, isLoading } = useGQLQuery(
-    'PBIS Reading Page',
+    "PBIS Reading Page",
     PBIS_READING_QUERY,
     {},
     {}
   );
   if (isLoading) return <Loading />;
   const lastCollection = data.lastCollection[0];
-  if(!lastCollection) return <p>No data</p>;
-  const taTeamsAtNewLevels =
-    JSON.parse(lastCollection?.taTeamNewLevelWinners) || [];
+  if (!lastCollection) return <p>No data</p>;
+  const tasAtNewLevels = lastCollection?.taNewLevelWinners || [];
   // console.log(taTeamsAtNewLevels);
-  const personalLevelWinners =
-    JSON.parse(lastCollection?.personalLevelWinners) || [];
-  const randomDrawingWinners =
-    JSON.parse(lastCollection?.randomDrawingWinners) || [];
-  const hasTaTeamsAtNewLevels = taTeamsAtNewLevels.length > 0;
+  const personalLevelWinners = lastCollection.personalLevelWinners || [];
+  const randomDrawingWinners = lastCollection.randomDrawingWinners || [];
+  const hasTaTeamsAtNewLevels = tasAtNewLevels.length > 0;
   const hasPersonalLevelWinners = personalLevelWinners.length > 0;
-  const hasRandomDrawingWinners = randomDrawingWinners.length > 0;
 
-  const totalCards = data.totalCards.count;
+  const totalCards = data.totalCards;
   return (
     <PbisReadingStyles>
       <h3>In PBIS News,</h3>
@@ -74,8 +87,10 @@ export default function PbisWeeklyReading() {
         <h3>The following TA Teams have reached a new level:</h3>
       )}
       <ul>
-        {taTeamsAtNewLevels.map((winner) => (
-          <li key={winner.id}>{winner.name}</li>
+        {tasAtNewLevels.map((winner) => (
+          <li key={winner.id}>
+            {winner.name} - {winner.taTeamPbisLevel}
+          </li>
         ))}
       </ul>
       <h3>
@@ -84,9 +99,7 @@ export default function PbisWeeklyReading() {
       </h3>
       <ul>
         {randomDrawingWinners.map((winner) => (
-          <li key={winner.id}>
-            {capitalizeFirstLetter(winner?.randomWinner?.name)}
-          </li>
+          <li key={winner.id}>{capitalizeFirstLetter(winner?.student.name)}</li>
         ))}
       </ul>
       {hasPersonalLevelWinners && (
@@ -97,7 +110,9 @@ export default function PbisWeeklyReading() {
       )}
       <ul>
         {personalLevelWinners.map((winner) => (
-          <li key={winner.id}>{capitalizeFirstLetter(winner.name)}</li>
+          <li key={winner.id}>
+            {capitalizeFirstLetter(winner.name)} - {winner.individualPbisLevel}
+          </li>
         ))}
       </ul>
     </PbisReadingStyles>

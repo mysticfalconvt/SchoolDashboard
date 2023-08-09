@@ -396,6 +396,7 @@ export async function getStaticProps(context) {
       lastPbisCollection,
       pbisLinks,
       TAs,
+      cardCounts: data?.cardCounts || [],
     },
     revalidate: false,
   };

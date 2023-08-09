@@ -19,7 +19,7 @@ export default function DisplayPbisCollectionData({ collectionData }) {
       </h3>
       <TeamCardStyles>
         {teamsThatWentUpLevel.map((teacher) => (
-          <div key={teacher.id}>
+          <div key={`ta-${teacher.id}`}>
             <h3>TA Level-Up</h3>
             <h4>{teacher.name}</h4>
             <h4>Level {teacher.taTeamPbisLevel}</h4>

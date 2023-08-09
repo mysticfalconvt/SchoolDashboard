@@ -1,8 +1,8 @@
 // show whether user us parent, student, or teacher
 export function UserTypeDisplay(user) {
-  let userDisplay = '';
+  let userDisplay = "";
   if (user.isStaff) {
-    userDisplay = '👨‍🏫 ';
+    userDisplay = "👨‍🏫 ";
   }
   if (user.isParent) {
     userDisplay = `${userDisplay} 👨‍👧‍👦 `;
@@ -10,16 +10,18 @@ export function UserTypeDisplay(user) {
   if (user.isStudent) {
     userDisplay = `${userDisplay} 🧑‍🎓 `;
   }
-  if (userDisplay === '') {
-    userDisplay = 'User';
+  if (userDisplay === "") {
+    userDisplay = "User";
   }
   return userDisplay;
 }
 
 // capitalize first letter of each word in string
 export function capitalizeFirstLetter(string) {
-  return string.replace(
-    /\w\S*/g,
-    (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  return (
+    string?.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    ) ?? ""
   );
 }
