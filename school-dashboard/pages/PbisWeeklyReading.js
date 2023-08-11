@@ -73,7 +73,12 @@ export default function PbisWeeklyReading() {
   const randomDrawingWinners = lastCollection.randomDrawingWinners || [];
   const hasTaTeamsAtNewLevels = tasAtNewLevels.length > 0;
   const hasPersonalLevelWinners = personalLevelWinners.length > 0;
-
+  const todaysDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const totalCards = data.totalCards;
   return (
     <PbisReadingStyles>
@@ -83,19 +88,9 @@ export default function PbisWeeklyReading() {
         work. Continue to demonstrate our Habits of Work: Respect,
         Responsibility, and Perseverance.
       </p>
-      {hasTaTeamsAtNewLevels && (
-        <h3>The following TA Teams have reached a new level:</h3>
-      )}
-      <ul>
-        {tasAtNewLevels.map((winner) => (
-          <li key={winner.id}>
-            {winner.name} - {winner.taTeamPbisLevel}
-          </li>
-        ))}
-      </ul>
       <h3>
         <span className="strong">Congratulations</span> to the following Random
-        Drawing Winners! Please report to the gym to claim your reward.
+        Drawing Winners! Please report to the Bus Lobby to claim your reward.
       </h3>
       <ul>
         {randomDrawingWinners.map((winner) => (
@@ -112,6 +107,20 @@ export default function PbisWeeklyReading() {
         {personalLevelWinners.map((winner) => (
           <li key={winner.id}>
             {capitalizeFirstLetter(winner.name)} - {winner.individualPbisLevel}
+          </li>
+        ))}
+      </ul>
+      {hasTaTeamsAtNewLevels && (
+        <h3>
+          The following TA Teams have completed their Quest Box. You will be
+          notified when you should receive your celebration. Your TA will claim
+          your earnings TODAY {todaysDate}
+        </h3>
+      )}
+      <ul>
+        {tasAtNewLevels.map((winner) => (
+          <li key={winner.id}>
+            {winner.name} - {winner.taTeamPbisLevel}
           </li>
         ))}
       </ul>

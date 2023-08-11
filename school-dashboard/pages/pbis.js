@@ -200,16 +200,10 @@ export default function Pbis(props) {
   const totalSchoolCards = props?.totalSchoolCards || data?.totalSchoolCards;
   const schoolWideCardsInCategories =
     props?.schoolWideCardsInCategories || data?.schoolWideCardsInCategories;
-  const teams = props?.teams || [];
   const hasTeam = !!teamId;
   const categoriesArray = props?.categoriesArray || [];
   const lastPbisCollection = props?.lastPbisCollection || null;
-  const previousPbisCollection = props?.previousPbisCollection || null;
   const rawListOfLinks = props?.pbisLinks || [];
-  const newSchoolwideGoal = lastPbisCollection?.currentPbisTeamGoal || 2;
-  const previousSchoolwideGoal =
-    previousPbisCollection?.currentPbisTeamGoal || 2;
-  const didWeGetNewSchoolWideLevel = newSchoolwideGoal > previousSchoolwideGoal;
   const cardCounts = props?.cardCounts;
   const totalTeamCards = data?.totalTeamCards;
 
