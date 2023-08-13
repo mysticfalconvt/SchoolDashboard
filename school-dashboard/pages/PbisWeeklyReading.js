@@ -85,8 +85,8 @@ export default function PbisWeeklyReading() {
       <h3>In PBIS News,</h3>
       <p>
         As a school, we have earned {totalCards} PBIS cards. Keep up the good
-        work. Continue to demonstrate our Habits of Work: Respect,
-        Responsibility, and Perseverance.
+        work. Continue to demonstrate our Habits: Respect, Responsibility, and
+        Perseverance.
       </p>
       <h3>
         <span className="strong">Congratulations</span> to the following Random
@@ -99,8 +99,8 @@ export default function PbisWeeklyReading() {
       </ul>
       {hasPersonalLevelWinners && (
         <h3>
-          The following students have Leveled-Up and should report to the gym to
-          claim their reward.
+          The following students have Leveled-Up. Please report to the BUS LOBBY
+          to claim your earnings.
         </h3>
       )}
       <ul>
