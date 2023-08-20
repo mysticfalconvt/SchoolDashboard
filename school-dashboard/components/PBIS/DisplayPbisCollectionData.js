@@ -4,7 +4,6 @@ import { TeamCardStyles } from "../../pages/pbis";
 import { useUser } from "../User";
 
 export default function DisplayPbisCollectionData({ collectionData }) {
-  console.log("collectionData", collectionData);
   const studentsWhoWentUpLevel = collectionData.personalLevelWinners;
   const teamsThatWentUpLevel = collectionData.taNewLevelWinners;
   const randomDrawingWinners =
@@ -27,14 +26,14 @@ export default function DisplayPbisCollectionData({ collectionData }) {
           </div>
         ))}
         {studentsWhoWentUpLevel.map((student) => (
-          <div key={student.student}>
+          <div key={`level-${student.id}`}>
             <h3>Student Level-Up</h3>
             <h4>{student.name}</h4>
             <h4>Level {student.individualPbisLevel}</h4>
           </div>
         ))}
         {randomDrawingWinners.map((student) => (
-          <div key={student.id}>
+          <div key={`random-${student.id}`}>
             <h3>Random Drawing Winner</h3>
             <h4>{capitalizeFirstLetter(student.name)}</h4>
           </div>

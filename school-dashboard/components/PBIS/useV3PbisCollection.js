@@ -13,7 +13,7 @@ const shuffle = (array) => {
 
 const PBISCardsPerTaLevel = 24;
 const PbisCardsPerPersonalLevel = [
-  0, 25, 50, 85, 120, 165, 210, 265, 320, 385, 450, 525, 600, 675, 750,
+  25, 50, 85, 120, 165, 210, 265, 320, 385, 450, 525, 600, 675, 750,
 ];
 const weeklyWinnerCount = 10;
 const collectionsWithoutRepeatWinners = 3;
@@ -114,7 +114,7 @@ const STUDENT_LEVELED_UP_MUTATION = gql`
   mutation STUDENT_LEVELED_UP_MUTATION($collectionId: ID!, $studentId: ID!) {
     updatePbisCollectionDate(
       where: { id: $collectionId }
-      data: { studentNewLevelWinners: { connect: { id: $studentId } } }
+      data: { personalLevelWinners: { connect: { id: $studentId } } }
     ) {
       id
     }
@@ -216,7 +216,7 @@ export default function useV3PbisCollection() {
 
     // for each teacher get the number of students in the class and the average number of cards this collection
     // then do TA team average cards and team levels
-    taTeachers.forEach((teacher) => {
+    for (const teacher of taTeachers) {
       const taStudents = teacher.taStudents;
       const taTeamPreviousPbisLevel = teacher.taTeamPbisLevel;
       const taPbisPreviousCardCount = teacher.taPbisCardCount;
@@ -248,7 +248,7 @@ export default function useV3PbisCollection() {
         taTeamPbisLevelChange,
         averageCardsRounded,
       });
-      updateTA({
+      await updateTA({
         variables: {
           id: teacher.id,
           averagePbisCardsPerStudent: averageCardsRounded,
@@ -256,14 +256,14 @@ export default function useV3PbisCollection() {
         },
       });
       if (taTeamPbisLevelChange > 0) {
-        updateTAlevel({
+        await updateTAlevel({
           variables: {
             collectionId: thisCollectionId,
             taId: teacher.id,
           },
         });
       }
-    });
+    }
 
     // for each student get the number of cards they have this collection
     // then do student individual level
@@ -275,30 +275,33 @@ export default function useV3PbisCollection() {
       (student) => student.studentPbisCardsCount > 0
     );
 
-    arrayOfStudentsWithNewCards.forEach((student) => {
+    for (const student of arrayOfStudentsWithNewCards) {
       const studentPreviousPbisLevel = student.individualPbisLevel;
       const studentTotalCards = student.studentPbisCardsCount;
-      // get student level by what element they got to in the PbisCardsPerPersonalLevel array
+
       const studentCurrentPbisLevel = PbisCardsPerPersonalLevel.findIndex(
         (level) => level > studentTotalCards
       );
+
       const studentPbisLevelChange =
         studentCurrentPbisLevel - studentPreviousPbisLevel || 0;
+
       if (studentPbisLevelChange > 0) {
-        updateStudentLevelInCollection({
+        await updateStudentLevelInCollection({
           variables: {
             collectionId: thisCollectionId,
             studentId: student.id,
           },
         });
-        updateStudentIndividualLevel({
+
+        await updateStudentIndividualLevel({
           variables: {
             id: student.id,
             individualPbisLevel: studentCurrentPbisLevel,
           },
         });
       }
-    });
+    }
 
     // for each student except the previous winners get the number of cards they have this collection
     // then do random drawing winners
@@ -334,14 +337,14 @@ export default function useV3PbisCollection() {
     }
 
     console.log("randomDrawingWinnerIds", randomDrawingWinnerIds);
-    randomDrawingWinnerIds.forEach((winnerId) => {
-      updateStudentRandomDrawingWinner({
+    for (const winnerId of randomDrawingWinnerIds) {
+      await updateStudentRandomDrawingWinner({
         variables: {
           collectionId: thisCollectionId,
           studentId: winnerId,
         },
       });
-    });
+    }
 
     setLoading(false);
     return "it Worked";

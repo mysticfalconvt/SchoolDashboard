@@ -159,15 +159,15 @@ function CardForm({ visible, hide }) {
               // console.log(inputs);
               // alert('card created');
               const res = await createCard();
-              console.log(`res res `);
-              console.log(res?.data);
+              // console.log(`res res `);
+              // console.log(res?.data);
               await createMessage({
                 subject: "New PBIS Card",
                 message: `you received a new PBIS Card from ${me.name} for ${inputs.category}`,
                 receiver: studentCardIsFor.userId,
                 link: `/pbis/${res?.data?.createPbisCard.id}`,
               });
-              console.log(studentCardIsFor);
+              // console.log(studentCardIsFor);
               if (res) {
                 toast.success(`Added Card For ${studentCardIsFor.userName}`);
               }

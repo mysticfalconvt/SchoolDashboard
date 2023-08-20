@@ -80,7 +80,6 @@ export default function WeeklyCalendar({
   const dailyEvents = useMemo(() => {
     const gcEvents = initialGoogleCalendarEvents?.events.filter((event) => {
       const date = new Date(event.date);
-      if (event.description) console.log("WeeklyCalendar.js: event", event);
       return date >= new Date(lastSunday) && date <= new Date(nextSaturday);
     });
 

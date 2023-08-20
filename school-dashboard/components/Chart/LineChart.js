@@ -48,14 +48,14 @@ const options = {
 };
 
 export default function LineChart({ title, chartData, label }) {
-  const labels = chartData?.map((item) => item?.item?.slice(16)) ?? [];
-  const dataToChart = chartData?.map((item) => item.data) ?? [];
-  // take array of numbers and create array oc cumulative values
-  const cumulativeSum = (
-    (sum) => (value) =>
-      (sum += value)
-  )(0);
-  const cumulativeData = dataToChart.map(cumulativeSum);
+  const labels = chartData?.map((item) => item?.item?.slice(0, 10)) ?? [];
+  const dataToChart = chartData?.map((item) => Number(item.data)) ?? [];
+  // cumulateive data is an array of the sum of all the previous values
+  const cumulativeData = dataToChart.reduce((acc, curr) => {
+    acc.push(((acc.length && acc[acc.length - 1]) || 0) + curr);
+    return acc;
+  }, []);
+  console.log(cumulativeData);
   const marbleData = dataToChart.map((item) => Math.round(item / 5));
 
   // console.log(cumulativeData);

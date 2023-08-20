@@ -21,7 +21,6 @@ const LineChartStyles = styled.div`
 export default function PbisCardChart(initialData) {
   // if (isLoading) return <Loading />;
   const chartDataRaw = initialData?.cardCounts;
-  console.log("id", initialData);
   //   console.log(chartDataRaw);
   // parse the data array into Json object
   const chartData = chartDataRaw?.map((singleCollection) => ({

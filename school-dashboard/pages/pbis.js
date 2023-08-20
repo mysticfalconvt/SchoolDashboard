@@ -175,7 +175,6 @@ const PBIS_PAGE_STATIC_QUERY = gql`
 `;
 
 export default function Pbis(props) {
-  // console.log(props.data);
   const me = useUser();
   const teamId = me?.taTeam?.id || me?.taTeacher?.taTeam?.id || null;
   const TAs = props?.TAs || [];
@@ -327,7 +326,6 @@ export default function Pbis(props) {
 }
 
 export async function getStaticProps(context) {
-  console.log("PBIS PAGE GET STATIC PROPS");
   // fetch PBIS Page data from the server
   const headers = {
     credentials: "include",
@@ -341,10 +339,8 @@ export async function getStaticProps(context) {
     process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
-  // console.log(GraphQLClient);
   const fetchData = async () => graphQLClient.request(PBIS_PAGE_STATIC_QUERY);
   const data = await fetchData();
-  // console.log(data);
   const totalSchoolCards = data?.totalSchoolCards || 0;
 
   // get the number of cards in each category for whole school
