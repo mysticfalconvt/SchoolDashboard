@@ -55,10 +55,8 @@ export default function LineChart({ title, chartData, label }) {
     acc.push(((acc.length && acc[acc.length - 1]) || 0) + curr);
     return acc;
   }, []);
-  console.log(cumulativeData);
   const marbleData = dataToChart.map((item) => Math.round(item / 5));
 
-  // console.log(cumulativeData);
   const data = {
     labels,
     datasets: [
