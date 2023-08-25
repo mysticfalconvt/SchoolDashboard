@@ -88,6 +88,16 @@ const TA_INFO_QUERY = gql`
           id
           block8Assignment
         }
+        block9Teacher {
+          name
+          id
+          block9Assignment
+        }
+        block10Teacher {
+          name
+          id
+          block10Assignment
+        }
         callbackCount
         studentCellPhoneViolationCount
         studentPbisCardsCount

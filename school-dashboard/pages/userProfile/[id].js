@@ -64,6 +64,15 @@ const GET_SINGLE_USER = gql`
         name
         id
       }
+      block9Teacher {
+        name
+        id
+      }
+      block10Teacher {
+        name
+        id
+      }
+
       taTeacher {
         name
         id

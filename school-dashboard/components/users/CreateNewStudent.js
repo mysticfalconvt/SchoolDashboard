@@ -26,6 +26,8 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
     $block6: ID!
     $block7: ID!
     $block8: ID!
+    $block9: ID!
+    $block10: ID!
   ) {
     createUser(
       data: {
@@ -40,6 +42,8 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
         block6Teacher: { connect: { id: $block6 } }
         block7Teacher: { connect: { id: $block7 } }
         block8Teacher: { connect: { id: $block8 } }
+        block9Teacher: { connect: { id: $block9 } }
+        block10Teacher: { connect: { id: $block10 } }
         isStudent: true
         password: "password"
       }
@@ -89,6 +93,8 @@ export default function NewStudent({ student }) {
     block6: "",
     block7: "",
     block8: "",
+    block9: "",
+    block10: "",
   });
 
   const [createNewStudent, { loading, error }] = useMutation(
@@ -343,6 +349,46 @@ export default function NewStudent({ student }) {
                 </option>
                 {teacherList.map((item) => (
                   <option key={`item${item.name}`} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="block9">
+              Block 9
+              <select
+                id="block9"
+                name="block9"
+                placeholder="Block 9 Teacher"
+                value={inputs.block9}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>
+                  None
+                </option>
+                {teacherList.map((item) => (
+                  <option key={`item${item.id}`} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="block10">
+              Block 10
+              <select
+                id="block10"
+                name="block10"
+                placeholder="Block 10 Teacher"
+                value={inputs.block10}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>
+                  None
+                </option>
+                {teacherList.map((item) => (
+                  <option key={item.id} value={item.id}>
                     {item.name}
                   </option>
                 ))}

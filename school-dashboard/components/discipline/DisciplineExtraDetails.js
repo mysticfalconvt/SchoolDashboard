@@ -79,7 +79,6 @@ export default function DisciplineExtraDetails({ disciplines }) {
       return index === self.findIndex((t) => t.id === teacher.id);
     })
     .sort((a, b) => b.totalDisciplines - a.totalDisciplines);
-  console.log(listOfTeachersWithoutDuplicates);
 
   const classList = classTypeList;
   const totalPerClass = totalsFromArray(
@@ -103,17 +102,6 @@ export default function DisciplineExtraDetails({ disciplines }) {
     (a, b) => b.totals - a.totals
   );
   const dates = getDayTotals(disciplines).sort((a, b) => b.total - a.total);
-
-  console.log(
-    classList,
-    totalPerClass,
-    locations,
-    times,
-    conducts,
-    teacherActions,
-    others,
-    dates
-  );
 
   return (
     <>

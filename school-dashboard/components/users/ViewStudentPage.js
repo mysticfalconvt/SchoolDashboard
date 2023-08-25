@@ -102,6 +102,20 @@ const GET_SINGLE_TEACHER = gql`
         block8Assignment
         block8AssignmentLastUpdated
       }
+      block9Teacher {
+        name
+        id
+        block9ClassName
+        block9Assignment
+        block9AssignmentLastUpdated
+      }
+      block10Teacher {
+        name
+        id
+        block10ClassName
+        block10Assignment
+        block10AssignmentLastUpdated
+      }
       taTeacher {
         id
         name

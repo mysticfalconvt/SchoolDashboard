@@ -198,6 +198,31 @@ const GET_SINGLE_TEACHER = gql`
           name
         }
       }
+      block9Students {
+        id
+        name
+        individualPbisLevel
+        preferredName
+        callbackCount
+        totalCallbackCount
+        averageTimeToCompleteCallback
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
+      }
+      block10Students {
+        id
+        name
+        individualPbisLevel
+        callbackCount
+        totalCallbackCount
+        averageTimeToCompleteCallback
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
+      }
 
       block1Assignment
       block1ClassName
@@ -223,6 +248,12 @@ const GET_SINGLE_TEACHER = gql`
       block8Assignment
       block8ClassName
       block8AssignmentLastUpdated
+      block9Assignment
+      block9ClassName
+      block9AssignmentLastUpdated
+      block10Assignment
+      block10ClassName
+      block10AssignmentLastUpdated
     }
   }
 `;
@@ -252,6 +283,8 @@ export default function ViewTeacherPage({ teacher }) {
   const { block6Students } = user;
   const { block7Students } = user;
   const { block8Students } = user;
+  const { block9Students } = user;
+  const { block10Students } = user;
   return (
     <div>
       {me.id === teacher.id && (
@@ -290,6 +323,14 @@ export default function ViewTeacherPage({ teacher }) {
             title="Block 8"
             students={block8Students}
           />
+          <GiveListOfStudentsACardButton
+            title="Block 9"
+            students={block9Students}
+          />
+          <GiveListOfStudentsACardButton
+            title="Block 10"
+            students={block10Students}
+          />
         </ClassCardButtonStyle>
       )}
       <h3>Teacher info</h3>
@@ -320,6 +361,12 @@ export default function ViewTeacherPage({ teacher }) {
       )}
       {user.block8Students[0] && (
         <ViewStudentTable users={user.block8Students} title="Block 8" />
+      )}
+      {user.block9Students[0] && (
+        <ViewStudentTable users={user.block9Students} title="Block 9" />
+      )}
+      {user.block10Students[0] && (
+        <ViewStudentTable users={user.block10Students} title="Block 10" />
       )}
       <CallbackCards callbacks={user.callbackAssigned} />
     </div>

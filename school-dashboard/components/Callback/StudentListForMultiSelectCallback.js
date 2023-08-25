@@ -62,6 +62,8 @@ export default function StudentList({
     block6Students,
     block7Students,
     block8Students,
+    block9Students,
+    block10Students,
   } = studentList || [];
   const [showSingleClass, setShowSingleClass] = useState(false);
   const allStudents = [
@@ -73,6 +75,8 @@ export default function StudentList({
     ...(block6Students || []),
     ...(block7Students || []),
     ...(block8Students || []),
+    ...(block9Students || []),
+    ...(block10Students || []),
   ];
   const allStudentsAlphabetical = allStudents.sort((a, b) =>
     a.name > b.name ? 1 : -1
@@ -169,6 +173,18 @@ export default function StudentList({
               <div>
                 <h4>block 8 Students</h4>
                 <DisplaySingleClass classList={block8Students} />
+              </div>
+            )}
+            {block9Students?.length > 0 && (
+              <div>
+                <h4>block 9 Students</h4>
+                <DisplaySingleClass classList={block9Students} />
+              </div>
+            )}
+            {block10Students?.length > 0 && (
+              <div>
+                <h4>block 10 Students</h4>
+                <DisplaySingleClass classList={block10Students} />
               </div>
             )}
           </>

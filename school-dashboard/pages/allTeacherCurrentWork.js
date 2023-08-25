@@ -62,6 +62,12 @@ const ALL_TEACHERS_QUERY = gql`
       block8ClassName
       block8Assignment
       block8AssignmentLastUpdated
+      block9ClassName
+      block9Assignment
+      block9AssignmentLastUpdated
+      block10ClassName
+      block10Assignment
+      block10AssignmentLastUpdated
     }
   }
 `;
@@ -181,6 +187,20 @@ export default function AllTeacherCurrentWork(props) {
             accessor: "block8Assignment",
             Cell: ({ row }) => (
               <DisplayClasswork data={row.original} block="8" />
+            ),
+          },
+          {
+            Header: "Block 9",
+            accessor: "block9Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="9" />
+            ),
+          },
+          {
+            Header: "Block 10",
+            accessor: "block10Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="10" />
             ),
           },
         ],

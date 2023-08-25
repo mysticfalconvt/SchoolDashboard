@@ -61,6 +61,14 @@ const PBIS_DATA_QUERY = gql`
         id
         name
       }
+      block9Teacher {
+        id
+        name
+      }
+      block10Teacher {
+        id
+        name
+      }
     }
     teachers: users(where: { hasClasses: { equals: true } }) {
       id
@@ -153,6 +161,12 @@ const getStudentsWhoHaveTeacher = (teacherId, students) => {
       studentsWithTeacher.push(student);
     }
     if (student.block8Teacher && student.block8Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block9Teacher && student.block9Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block10Teacher && student.block10Teacher.id === teacherId) {
       studentsWithTeacher.push(student);
     }
   });

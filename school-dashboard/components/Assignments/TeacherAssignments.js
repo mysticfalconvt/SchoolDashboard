@@ -21,7 +21,7 @@ export const TeacherMessagesStyles = styled.div`
 
   .messageContainer {
     display: grid;
-    grid-template-columns: repeat(8, auto);
+    grid-template-columns: repeat(10, auto);
 
     @media (max-width: 600px) {
       grid-template-columns: 1fr;
@@ -118,6 +118,12 @@ const GET_MESSAGES = gql`
         block8Assignment
         block8ClassName
         block8AssignmentLastUpdated
+        block9Assignment
+        block9ClassName
+        block9AssignmentLastUpdated
+        block10Assignment
+        block10ClassName
+        block10AssignmentLastUpdated
       }
     }
   }
@@ -150,7 +156,7 @@ export default function TeacherAssignments() {
         <h3>Current Class Assignments</h3>
 
         <div className="messageContainer">
-          {[...Array(8)].map((e, i) => {
+          {[...Array(10)].map((e, i) => {
             const num = i + 1;
             const today = new Date();
             const messageDate = new Date(

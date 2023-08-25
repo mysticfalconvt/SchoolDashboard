@@ -187,6 +187,40 @@ export default function ViewTaStudentTable({
             },
           },
           {
+            Header: "Block 9",
+            accessor: "block9Teacher.name",
+            Cell: ({ row }) => {
+              const showLink = !!row.original?.block9Teacher?.id;
+              // console.log(row);
+              if (showLink)
+                return (
+                  <Link
+                    href={`/userProfile/${row.original?.block9Teacher?.id}`}
+                  >
+                    {row.original?.block9Teacher?.name}
+                  </Link>
+                );
+              return null;
+            },
+          },
+          {
+            Header: "Block 10",
+            accessor: "block10Teacher.name",
+            Cell: ({ row }) => {
+              const showLink = !!row.original?.block10Teacher?.id;
+              // console.log(row);
+              if (showLink)
+                return (
+                  <Link
+                    href={`/userProfile/${row.original?.block10Teacher?.id}`}
+                  >
+                    {row.original?.block10Teacher?.name}
+                  </Link>
+                );
+              return null;
+            },
+          },
+          {
             Header: "Parent Account",
             accessor: "parent",
             Cell: ({ cell }) => {

@@ -21,6 +21,8 @@ const UPDATE_STUDENT_MUTATION = gql`
     $block6: ID
     $block7: ID
     $block8: ID
+    $block9: ID
+    $block10: ID
   ) {
     updateUser(
       where: { id: $id }
@@ -35,6 +37,8 @@ const UPDATE_STUDENT_MUTATION = gql`
         block6Teacher: { connect: { id: $block6 } }
         block7Teacher: { connect: { id: $block7 } }
         block8Teacher: { connect: { id: $block8 } }
+        block9Teacher: { connect: { id: $block9 } }
+        block10Teacher: { connect: { id: $block10 } }
       }
     ) {
       id
@@ -79,6 +83,8 @@ export default function EditStudent({ student }) {
     block6: student.block6Teacher?.id,
     block7: student.block7Teacher?.id,
     block8: student.block8Teacher?.id,
+    block9: student.block9Teacher?.id,
+    block10: student.block10Teacher?.id,
   });
 
   const [updateStudent, { loading }] = useMutation(UPDATE_STUDENT_MUTATION, {
@@ -265,6 +271,38 @@ export default function EditStudent({ student }) {
                 name="block8"
                 placeholder="Block 8 Teacher"
                 value={inputs.block8}
+                onChange={handleChange}
+              >
+                {teacherList.map((item) => (
+                  <option key={`item${item.name}`} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="block9">
+              Block 8
+              <select
+                id="block9"
+                name="block9"
+                placeholder="Block 9 Teacher"
+                value={inputs.block9}
+                onChange={handleChange}
+              >
+                {teacherList.map((item) => (
+                  <option key={`item${item.name}`} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="block10">
+              Block 8
+              <select
+                id="block10"
+                name="block10"
+                placeholder="Block 10 Teacher"
+                value={inputs.block10}
                 onChange={handleChange}
               >
                 {teacherList.map((item) => (

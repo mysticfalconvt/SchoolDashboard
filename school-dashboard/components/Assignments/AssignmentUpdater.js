@@ -89,6 +89,12 @@ const UPDATE_ASSIGNMENTS = gql`
     $block8Assignment: String
     $block8ClassName: String
     $block8AssignmentLastUpdated: DateTime
+    $block9Assignment: String
+    $block9ClassName: String
+    $block9AssignmentLastUpdated: DateTime
+    $block10Assignment: String
+    $block10ClassName: String
+    $block10AssignmentLastUpdated: DateTime
   ) {
     updateUser(
       where: { id: $id }
@@ -117,6 +123,12 @@ const UPDATE_ASSIGNMENTS = gql`
         block8Assignment: $block8Assignment
         block8ClassName: $block8ClassName
         block8AssignmentLastUpdated: $block8AssignmentLastUpdated
+        block9Assignment: $block9Assignment
+        block9ClassName: $block9ClassName
+        block9AssignmentLastUpdated: $block9AssignmentLastUpdated
+        block10Assignment: $block10Assignment
+        block10ClassName: $block10ClassName
+        block10AssignmentLastUpdated: $block10AssignmentLastUpdated
       }
     ) {
       id
@@ -203,6 +215,8 @@ export default function AssignmentUpdater({
               updateData[`block6AssignmentLastUpdated`] = todaysDate;
               updateData[`block7AssignmentLastUpdated`] = todaysDate;
               updateData[`block8AssignmentLastUpdated`] = todaysDate;
+              updateData[`block9AssignmentLastUpdated`] = todaysDate;
+              updateData[`block10AssignmentLastUpdated`] = todaysDate;
               updateData[`block1Assignment`] = inputs.assignment;
               // updateData[`block1ClassName`] = inputs.classTitle;
               updateData[`block2Assignment`] = inputs.assignment;
@@ -219,6 +233,10 @@ export default function AssignmentUpdater({
               // updateData[`block7ClassName`] = inputs.classTitle;
               updateData[`block8Assignment`] = inputs.assignment;
               // updateData[`block8ClassName`] = inputs.classTitle;
+              updateData[`block9Assignment`] = inputs.assignment;
+              // updateData[`block9ClassName`] = inputs.classTitle;
+              updateData[`block10Assignment`] = inputs.assignment;
+              // updateData[`block10ClassName`] = inputs.classTitle;
               updateData.id = me.id;
               // console.log(updateData);
               await updateAssignment({ variables: updateData });

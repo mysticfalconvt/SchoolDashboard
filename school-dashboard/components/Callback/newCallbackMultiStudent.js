@@ -79,6 +79,14 @@ const USERS_CLASS_STUDENTS_QUERY = gql`
           id
           name
         }
+        block9Students(orderBy: { name: asc }) {
+          id
+          name
+        }
+        block10Students(orderBy: { name: asc }) {
+          id
+          name
+        }
       }
     }
   }

@@ -27,6 +27,8 @@ const MY_CALLBACK_ASSIGNMENTS = gql`
             { block6Teacher: { id: { equals: $teacher } } }
             { block7Teacher: { id: { equals: $teacher } } }
             { block8Teacher: { id: { equals: $teacher } } }
+            { block9Teacher: { id: { equals: $teacher } } }
+            { block10Teacher: { id: { equals: $teacher } } }
           ]
         }
       }
