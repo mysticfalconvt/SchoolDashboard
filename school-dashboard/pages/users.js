@@ -342,40 +342,44 @@ export default function Users(props) {
 
   const sortedStudents = useMemo(() => {
     if (!students) return [];
-    return students.students.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      // sort by last name
-      const aLastName = aName.split(" ")[1];
-      const bLastName = bName.split(" ")[1];
-      if (aLastName < bLastName) return -1;
-      if (aLastName > bLastName) return 1;
-      // if last names are the same, sort by first name
-      const aFirstName = aName.split(" ")[0];
-      const bFirstName = bName.split(" ")[0];
-      if (aFirstName < bFirstName) return -1;
-      if (aFirstName > bFirstName) return 1;
-      return 0;
-    });
+    return (
+      students?.students?.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        // sort by last name
+        const aLastName = aName.split(" ")[1];
+        const bLastName = bName.split(" ")[1];
+        if (aLastName < bLastName) return -1;
+        if (aLastName > bLastName) return 1;
+        // if last names are the same, sort by first name
+        const aFirstName = aName.split(" ")[0];
+        const bFirstName = bName.split(" ")[0];
+        if (aFirstName < bFirstName) return -1;
+        if (aFirstName > bFirstName) return 1;
+        return 0;
+      }) || []
+    );
   }, [students]);
 
   const sortedTeachers = useMemo(() => {
     if (!teachers) return [];
-    return teachers.teachers.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      // sort by last name
-      const aLastName = aName.split(" ")[1];
-      const bLastName = bName.split(" ")[1];
-      if (aLastName < bLastName) return -1;
-      if (aLastName > bLastName) return 1;
-      // if last names are the same, sort by first name
-      const aFirstName = aName.split(" ")[0];
-      const bFirstName = bName.split(" ")[0];
-      if (aFirstName < bFirstName) return -1;
-      if (aFirstName > bFirstName) return 1;
-      return 0;
-    });
+    return (
+      teachers?.teachers?.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        // sort by last name
+        const aLastName = aName.split(" ")[1];
+        const bLastName = bName.split(" ")[1];
+        if (aLastName < bLastName) return -1;
+        if (aLastName > bLastName) return 1;
+        // if last names are the same, sort by first name
+        const aFirstName = aName.split(" ")[0];
+        const bFirstName = bName.split(" ")[0];
+        if (aFirstName < bFirstName) return -1;
+        if (aFirstName > bFirstName) return 1;
+        return 0;
+      }) || []
+    );
   }, [teachers]);
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;

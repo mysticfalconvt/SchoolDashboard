@@ -66,7 +66,7 @@ function SingleChromebookCheckForm({ student, refetch }) {
   });
   return (
     <form
-      key={student.id}
+      key={`chromebook-form${student.id}`}
       onSubmit={async (e) => {
         e.preventDefault();
         setIsDisabled(true);
@@ -104,7 +104,10 @@ function SingleChromebookCheckForm({ student, refetch }) {
         }}
       >
         <h2>{student.name}</h2>
-        <label htmlFor={`passed${student.id}`} key={student.id}>
+        <label
+          htmlFor={`passed${student.id}`}
+          key={`checkbox-chromebook-${student.id}`}
+        >
           <input
             type="checkbox"
             name={`passed${student.id}`}
@@ -115,7 +118,7 @@ function SingleChromebookCheckForm({ student, refetch }) {
           Passed
         </label>
 
-        <label htmlFor="message" key={student.id}>
+        <label htmlFor="message" key={`message-chromebook-${student.id}`}>
           Message
           <input
             type="text"
@@ -188,7 +191,7 @@ export default function ChromebookCheck({ taId }) {
       <div>
         {showForm &&
           studentsAbleToCheck.map((student) => (
-            <div key={student.id}>
+            <div key={`chromebook-check-${student.id}`}>
               <SingleChromebookCheckForm student={student} refetch={refetch} />
             </div>
           ))}
