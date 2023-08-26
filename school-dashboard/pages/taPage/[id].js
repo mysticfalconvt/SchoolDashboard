@@ -11,7 +11,7 @@ import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
   GET_TA_CHROMEBOOK_CHECKS_QUERY,
-} from "../../components/PBIS/ChromebookCheck";
+} from "../../components/Chromebooks/ChromebookCheck";
 import { useMemo } from "react";
 
 const TA_INFO_QUERY = gql`

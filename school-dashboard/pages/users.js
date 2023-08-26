@@ -32,15 +32,6 @@ const GET_ALL_STUDENTS = gql`
       averageTimeToCompleteCallback
       individualPbisLevel
       callbackItemsCount
-      chromebookCheck {
-        id
-        time
-        message
-        student {
-          id
-          name
-        }
-      }
     }
   }
 `;
@@ -220,60 +211,60 @@ export default function Users(props) {
             Header: "Average days on callback",
             accessor: "averageTimeToCompleteCallback",
           },
-          {
-            Header: "Chromebook",
-            accessor: "chromebookCheck",
-            Cell: ({ cell }) => {
-              const [showTooltip, setShowTooltip] = useState(false);
-              const chromebookCheckExist = cell.value?.length > 0;
-              const icon = "";
-              const count = cell.value?.length;
-              const passedCount = cell.value?.filter(
-                (item) => item.message === "Passed"
-              )?.length;
-              const failedCount = cell.value?.filter(
-                (item) => item.message !== "Passed"
-              )?.length;
-              if (count === passedCount) icon = "✅";
-              if (count === failedCount) icon = "❌";
-              if (!count) icon = "🅾️";
-              if (count > passedCount && count > failedCount) icon = "⚠️";
-              return (
-                <div
-                  onMouseEnter={() => setShowTooltip(true)}
-                  onMouseLeave={() => setShowTooltip(false)}
-                >
-                  {showTooltip && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        backgroundColor: "white",
-                        border: "1px solid black",
-                        padding: "1rem",
-                        borderRadius: "5px",
-                        boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
-                        zIndex: 1,
-                        width: "max-content",
-                        transform: "translateX(-50%)",
-                      }}
-                    >
-                      <div>Passed: {passedCount}</div>
-                      <div>Failed: {failedCount}</div>
-                      {cell.value
-                        ?.filter((item) => item.message !== "Passed")
-                        ?.map((item) => (
-                          <div key={item.id}>
-                            {item.message} -{" "}
-                            {new Date(item.time).toLocaleDateString()}
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                  <span>{icon}</span> {count}
-                </div>
-              );
-            },
-          },
+          // {
+          //   Header: "Chromebook",
+          //   accessor: "chromebookCheck",
+          //   Cell: ({ cell }) => {
+          //     const [showTooltip, setShowTooltip] = useState(false);
+          //     const chromebookCheckExist = cell.value?.length > 0;
+          //     const icon = "";
+          //     const count = cell.value?.length;
+          //     const passedCount = cell.value?.filter(
+          //       (item) => item.message === "Passed"
+          //     )?.length;
+          //     const failedCount = cell.value?.filter(
+          //       (item) => item.message !== "Passed"
+          //     )?.length;
+          //     if (count === passedCount) icon = "✅";
+          //     if (count === failedCount) icon = "❌";
+          //     if (!count) icon = "🅾️";
+          //     if (count > passedCount && count > failedCount) icon = "⚠️";
+          //     return (
+          //       <div
+          //         onMouseEnter={() => setShowTooltip(true)}
+          //         onMouseLeave={() => setShowTooltip(false)}
+          //       >
+          //         {showTooltip && (
+          //           <div
+          //             style={{
+          //               position: "absolute",
+          //               backgroundColor: "white",
+          //               border: "1px solid black",
+          //               padding: "1rem",
+          //               borderRadius: "5px",
+          //               boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
+          //               zIndex: 1,
+          //               width: "max-content",
+          //               transform: "translateX(-50%)",
+          //             }}
+          //           >
+          //             <div>Passed: {passedCount}</div>
+          //             <div>Failed: {failedCount}</div>
+          //             {cell.value
+          //               ?.filter((item) => item.message !== "Passed")
+          //               ?.map((item) => (
+          //                 <div key={item.id}>
+          //                   {item.message} -{" "}
+          //                   {new Date(item.time).toLocaleDateString()}
+          //                 </div>
+          //               ))}
+          //           </div>
+          //         )}
+          //         <span>{icon}</span> {count}
+          //       </div>
+          //     );
+          //   },
+          // },
         ],
       },
     ],

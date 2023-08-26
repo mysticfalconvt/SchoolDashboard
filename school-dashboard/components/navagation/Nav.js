@@ -42,9 +42,9 @@ export default function Nav() {
           {isAllowed(me, "isStaff") && (
             <Link href="/discipline">Discipline</Link>
           )}
-          {/* {isAllowed(me, "isStaff") && (
-            <Link href="/studentFocus">Student Focus</Link>
-          )} */}
+          {isAllowed(me, "isStaff") && (
+            <Link href="/chromebooks">Chromebook</Link>
+          )}
           {isAllowed(me, "canHaveSpecialGroups") && (
             <Link href="/specialGroup">SpGroup</Link>
           )}
