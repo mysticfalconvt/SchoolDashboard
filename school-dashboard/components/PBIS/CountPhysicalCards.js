@@ -105,6 +105,7 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
                     placeholder="Enter number of cards"
                     value={inputs[student.id]}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
                   />
                 </div>
               ))}
