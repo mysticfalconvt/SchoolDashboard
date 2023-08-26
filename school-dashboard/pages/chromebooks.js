@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import { GraphQLClient } from "graphql-request";
 import { endpoint, prodEndpoint } from "../config";
@@ -38,7 +38,8 @@ export default function Chromebooks({
   initialChromebookChecks,
   initialChromebookAssignments,
 }) {
-  const { data: chromebookChecks } = useGQLQuery(
+  const [display, setDisplay] = useState("assignments");
+  const { data: chromebookChecksData } = useGQLQuery(
     "Chromebooks",
     GET_ALL_CHROMEBOOK_CHECKS_QUERY,
     {},
@@ -47,7 +48,7 @@ export default function Chromebooks({
       initialData: initialChromebookChecks,
     }
   );
-  const { data: chromebookAssignments } = useGQLQuery(
+  const { data: chromebookAssignmentsData } = useGQLQuery(
     "Chromebook Assignments",
     GET_CHROMEBOOK_ASSIGNMENTS_QUERY,
     {},
@@ -57,8 +58,16 @@ export default function Chromebooks({
     }
   );
 
-  console.log("chromebookChecks", chromebookChecks);
-  console.log("chromebooksAssignments", chromebookAssignments);
+  const chromebookAssignments = useMemo(() => {
+    if (!chromebookAssignmentsData) return [];
+    return chromebookAssignmentsData.chromebookAssignments;
+  }, [chromebookAssignmentsData]);
+
+  const chromebookChecks = useMemo(() => {
+    if (!chromebookChecksData) return [];
+    return chromebookChecksData.chromebookChecks;
+  }, [chromebookChecksData]);
+
   return <div>chromebooks</div>;
 }
 
