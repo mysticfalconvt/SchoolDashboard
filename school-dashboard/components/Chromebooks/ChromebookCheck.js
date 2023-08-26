@@ -172,9 +172,9 @@ export default function ChromebookCheck({ taId }) {
   const [showForm, setShowForm] = useState(false);
 
   const { data: taAssignments } = useGQLQuery(
-    "TA Chromebook Assignments",
+    `TAChromebookAssignments-${taId}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
-    { id: me.id }
+    { id: taId }
   );
   const assignments = taAssignments?.chromebookAssignments || [];
   return (
