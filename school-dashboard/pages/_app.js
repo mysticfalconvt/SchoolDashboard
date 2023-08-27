@@ -1,16 +1,18 @@
+import "../pages/global.css";
+
 import {
   useQuery,
   useMutation,
   useQueryClient,
   QueryClient,
   QueryClientProvider,
-} from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
-import { ApolloProvider } from '@apollo/client';
-import Router from 'next/router';
+} from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
+import { ApolloProvider } from "@apollo/client";
+import Router from "next/router";
 
-import Page from '../components/Page';
-import withData from '../lib/withData';
+import Page from "../components/Page";
+import withData from "../lib/withData";
 
 const queryClient = new QueryClient();
 queryClient.setDefaultOptions({ queries: { staleTime: 10000 } });
