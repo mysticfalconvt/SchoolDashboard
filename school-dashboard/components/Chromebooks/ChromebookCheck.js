@@ -49,7 +49,7 @@ const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   }
 `;
 
-const ChromeBookCheckMessageOptions = [
+export const ChromeBookCheckMessageOptions = [
   "",
   "As Issued",
   "Same as previous week",

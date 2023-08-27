@@ -3,19 +3,9 @@ import React, { useMemo, useState } from "react";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import { GraphQLClient } from "graphql-request";
 import { endpoint, prodEndpoint } from "../config";
-
-const GET_ALL_CHROMEBOOK_CHECKS_QUERY = gql`
-  query GET_CHROMEBOOKS_QUERY {
-    chromebookChecks {
-      id
-      time
-      message
-      assignment {
-        id
-      }
-    }
-  }
-`;
+import GradientButton from "../components/styles/Button";
+import ChromebookAssignmentsData from "../components/Chromebooks/ChromebookAssignmentsData";
+import ChromebookChecksData from "../components/Chromebooks/ChromebookChecksData";
 
 const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_CHROMEBOOK_ASSIGNMENTS_QUERY {
@@ -30,24 +20,19 @@ const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
         name
       }
       number
+      checkLogCount
+      checkLog(orderBy: { time: asc }) {
+        id
+        time
+        message
+      }
     }
   }
 `;
 
-export default function Chromebooks({
-  initialChromebookChecks,
-  initialChromebookAssignments,
-}) {
-  const [display, setDisplay] = useState("assignments");
-  const { data: chromebookChecksData } = useGQLQuery(
-    "Chromebooks",
-    GET_ALL_CHROMEBOOK_CHECKS_QUERY,
-    {},
-    {
-      staleTime: 1000,
-      initialData: initialChromebookChecks,
-    }
-  );
+export default function Chromebooks({ initialChromebookAssignments }) {
+  const [display, setDisplay] = useState("Chromebook Checks");
+
   const { data: chromebookAssignmentsData } = useGQLQuery(
     "Chromebook Assignments",
     GET_CHROMEBOOK_ASSIGNMENTS_QUERY,
@@ -63,16 +48,34 @@ export default function Chromebooks({
     return chromebookAssignmentsData.chromebookAssignments;
   }, [chromebookAssignmentsData]);
 
-  const chromebookChecks = useMemo(() => {
-    if (!chromebookChecksData) return [];
-    return chromebookChecksData.chromebookChecks;
-  }, [chromebookChecksData]);
+  const handleDisplayButtonClick = () => {
+    if (display === "Chromebook Assignments") {
+      setDisplay("Chromebook Checks");
+    }
+    if (display === "Chromebook Checks") {
+      setDisplay("Chromebook Assignments");
+    }
+  };
 
-  return <div>chromebooks</div>;
+  return (
+    <div>
+      <div className="flex justify-center gap-4 items-center">
+        <h1 className="text-2xl">Chromebooks</h1>
+        <GradientButton onClick={handleDisplayButtonClick}>
+          {display}
+        </GradientButton>
+      </div>
+      {display === "Chromebook Assignments" ? (
+        <ChromebookAssignmentsData assignments={chromebookAssignments} />
+      ) : null}
+      {display === "Chromebook Checks" ? (
+        <ChromebookChecksData assignments={chromebookAssignments} />
+      ) : null}
+    </div>
+  );
 }
 
 export async function getStaticProps(context) {
-  // console.log(context);
   // fetch PBIS Page data from the server
   const headers = {
     credentials: "include",
@@ -86,17 +89,13 @@ export async function getStaticProps(context) {
     process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
     headers
   );
-  const fetchChromebookChecks = async () =>
-    graphQLClient.request(GET_ALL_CHROMEBOOK_CHECKS_QUERY);
   const fetchChromebookAssignments = async () =>
     graphQLClient.request(GET_CHROMEBOOK_ASSIGNMENTS_QUERY);
 
-  const initialChromebookChecks = await fetchChromebookChecks();
   const initialChromebookAssignments = await fetchChromebookAssignments();
 
   return {
     props: {
-      initialChromebookChecks,
       initialChromebookAssignments,
     }, // will be passed to the page component as props
     revalidate: 1200, // In seconds
