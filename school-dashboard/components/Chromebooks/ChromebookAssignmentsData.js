@@ -76,7 +76,7 @@ const EditStudentRow = ({
       <SmallGradientButton onClick={() => setEditable(!editable)}>
         Edit
       </SmallGradientButton>
-      <div className="text-red-400 text-3xl">{assignment.number}</div>
+      <div className=" text-3xl">{assignment.number}</div>
       {editable ? (
         <select
           className="border-2 border-gray-400 rounded-md"
@@ -176,8 +176,11 @@ export default function ChromebookAssignmentsData({ assignments }) {
           );
 
           return (
-            <div key={teacher.id}>
-              <h3 className="text-xl font-bold">{teacher.name}</h3>
+            <div
+              key={teacher.id}
+              className="border-2 border-solid border-slate-400"
+            >
+              <h3 className="text-3xl font-bold">{teacher.name}</h3>
               <div className="flex flex-col">
                 {teacherAssignments
                   .sort((a, b) => a.number - b.number)

@@ -188,7 +188,6 @@ export default function PbisCardFormButton({ teacher }) {
   return (
     <CardButtonContainer>
       <GradientButton
-        style={{ height: "4rem" }}
         onClick={() => {
           setDisplayCardForm(!displayCardForm);
         }}
