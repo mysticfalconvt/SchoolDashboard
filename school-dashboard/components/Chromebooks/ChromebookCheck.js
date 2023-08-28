@@ -5,6 +5,7 @@ import DisplayError from "../ErrorMessage";
 import GradientButton from "../styles/Button";
 import { useUser } from "../User";
 import { useGQLQuery } from "../../lib/useGqlQuery";
+import useSendEmail from "../../lib/useSendEmail";
 
 const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   mutation CREATE_CHROMEBOOK_CHECK_MUTATION(
@@ -12,6 +13,12 @@ const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   ) {
     createChromebookCheck(data: $chromebookCheck) {
       id
+      message
+      assignment {
+        student {
+          name
+        }
+      }
     }
   }
 `;
@@ -59,6 +66,11 @@ export const ChromeBookCheckMessageOptions = [
   "Broken Camera",
   "Other",
 ];
+const goodCheckMessages = ChromeBookCheckMessageOptions.slice(1, 3);
+const chromebookEmails = [
+  "robert.boskind@ncsuvt.org",
+  "Joyce.Lantagne@ncsuvt.org",
+];
 
 function SingleChromebookCheckForm({ assignment, refetch }) {
   const me = useUser();
@@ -70,11 +82,10 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
     CREATE_CHROMEBOOK_CHECK_MUTATION
   );
   const student = assignment?.student;
-  console.log(student);
   const [createCard] = useMutation(CREATE_QUICK_PBIS, {
     variables: { teacher: me?.id, student: student?.id },
   });
-
+  const { sendEmail, emailLoading } = useSendEmail();
   return (
     <form
       key={`chromebook-form${assignment?.id}`}
@@ -95,12 +106,36 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
         }
         if (
           res.data.createChromebookCheck.id &&
-          (message === "As Issued" || message === "Same as previous week") &&
+          goodCheckMessages.includes(message) &&
           student?.id
         ) {
           await createCard();
           await createCard();
           await createCard();
+        }
+
+        if (
+          res.data?.createChromebookCheck?.id &&
+          me?.id &&
+          !goodCheckMessages.includes(message)
+        ) {
+          chromebookEmails.forEach(async (email) => {
+            const emailToSend = {
+              toAddress: email,
+              fromAddress: me.email,
+              subject: `New Chromebook Check for ${res.data.createChromebookCheck.assignment?.student?.name}`,
+              body: `
+          <p>There is a new Chromebook check for ${res.data.createChromebookCheck.assignment?.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
+          <p>${res.data.createChromebookCheck.message}</p>
+           `,
+            };
+            // console.log(emailToSend);
+            const emailRes = await sendEmail({
+              variables: {
+                emailData: JSON.stringify(emailToSend),
+              },
+            });
+          });
         }
       }}
     >
