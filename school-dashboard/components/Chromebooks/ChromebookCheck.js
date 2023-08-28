@@ -70,6 +70,9 @@ const goodCheckMessages = ChromeBookCheckMessageOptions.slice(1, 3);
 const chromebookEmails = [
   "robert.boskind@ncsuvt.org",
   "Joyce.Lantagne@ncsuvt.org",
+  "colleen.storrings@ncsuvt.org",
+  "edna.flores@ncsuvt.org",
+  "katlynn.cochran@ncsuvt.org",
 ];
 
 function SingleChromebookCheckForm({ assignment, refetch }) {
