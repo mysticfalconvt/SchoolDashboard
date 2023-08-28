@@ -176,12 +176,12 @@ export default function Home(props) {
           )}
           <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
           {isAllowed(me, "hasClasses") && <TeacherAssignments />}
-          {isAllowed(me, "hasTA") && <TaCallbacks />}
           <WeeklyCalendar
             me={me || {}}
             initialData={props?.weeklyCalendar}
             initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
           />
+          {isAllowed(me, "hasTA") && <TaCallbacks />}
           {me && isAllowed(me, "isStudent") && (
             <div>
               <StudentPbisData student={me} />

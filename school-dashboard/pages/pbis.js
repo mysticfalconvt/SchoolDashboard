@@ -259,9 +259,9 @@ export default function Pbis(props) {
             )}
             {isAllowed(me, "isStaff") && (
               <Link to="/studentsOfInterestPBIS" href="/studentsOfInterestPBIS">
-                <GradientButton title="Students of Interest">
+                <SmallGradientButton title="Students of Interest">
                   Students of Interest
-                </GradientButton>
+                </SmallGradientButton>
               </Link>
             )}
             {links?.map((link) => (

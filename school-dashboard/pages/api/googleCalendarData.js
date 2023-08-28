@@ -21,7 +21,6 @@ const getCalendarData = async (req, res) => {
   );
 
   const loginAuth = google.auth.fromJSON(credentials);
-  // console.log("jwt", jwt);
   const calendar = await google.calendar({
     version: "v3",
     auth: loginAuth,
@@ -47,9 +46,6 @@ const getCalendarData = async (req, res) => {
     const startDate = new Date(event.start.date || event.start.dateTime);
     const endDate = new Date(event.end.date || event.end.dateTime);
     const isMultiDayEvent = endDate - startDate > 1000 * 60 * 60 * 24;
-    if (isMultiDayEvent) {
-      console.log("isMultiDayEvent", event);
-    }
     const date = new Date(
       isGCDate ? startDate.setDate(startDate.getDate() + 1) : startDate
     );

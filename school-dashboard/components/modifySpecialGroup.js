@@ -7,6 +7,7 @@ import { useUser } from "./User";
 import gql from "graphql-tag";
 import Loading from "./Loading";
 import styled from "styled-components";
+import { SmallGradientButton } from "./styles/Button";
 
 const SpecialGroupStyles = styled.div`
   display: flex;
@@ -90,8 +91,9 @@ export default function ModifySpecialGroup() {
         // value={inputs.studentName}
         updateUser={setSearchValue}
       />
-      <button
+      <SmallGradientButton
         type="button"
+        className="p-4 m-2 bg-stone-500 border-1 border-slate-400 border-solid rounded-md"
         onClick={async () => {
           setThinking(true);
           await addStudent();
@@ -102,7 +104,7 @@ export default function ModifySpecialGroup() {
         disabled={searchValue === ""}
       >
         add {searchValue.userName}
-      </button>
+      </SmallGradientButton>
       <div className="studentList">
         {studentList.map((student) => (
           <div key={student.id}>

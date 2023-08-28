@@ -13,9 +13,7 @@ const AssignmentUpdateStyles = styled.div`
   top: 40%;
   min-width: 50%;
   height: auto;
-  overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.9);
+  // overflow: auto;
   border-radius: 2rem;
   h4 {
     color: white;
@@ -27,7 +25,7 @@ const AssignmentUpdateStyles = styled.div`
     background: var(--blueTrans);
     border: none;
     border-radius: 100px;
-    font-size: 2rem;
+    // font-size: 2rem;
     margin: 0rem 0.5rem;
   }
   form {
@@ -43,10 +41,11 @@ const AssignmentUpdateStyles = styled.div`
     textarea {
       margin: auto 2rem;
       min-width: 90%;
+      color: black;
     }
     button {
       margin-bottom: 1rem;
-      max-width: 10rem;
+      // max-width: 10rem;
       /* margin-left: auto; */
       /* margin-right: auto; */
       padding-left: 2rem;
@@ -156,10 +155,10 @@ export default function AssignmentUpdater({
   );
 
   return (
-    <AssignmentUpdateStyles>
-      <h4>
+    <AssignmentUpdateStyles className="bg-slate-900 overflow-hidden border-slate-400 border-solid border-2">
+      <h4 className="flex items-center w-full justify-center">
         Update Class Assignment for Block {block}
-        <button type="button" onClick={() => hide(false)}>
+        <button type="button" onClick={() => hide(false)} className="w-10 h-10">
           &times;
         </button>
       </h4>
@@ -205,6 +204,7 @@ export default function AssignmentUpdater({
           </button>
           <button
             type="button"
+            className="w-80"
             onClick={async () => {
               const todaysDate = new Date();
               updateData[`block1AssignmentLastUpdated`] = todaysDate;
