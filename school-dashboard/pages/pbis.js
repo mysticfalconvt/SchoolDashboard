@@ -117,6 +117,7 @@ const PBIS_PAGE_STATIC_QUERY = gql`
     )
     quickCards: pbisCardsCount(where: { category: { equals: "quick" } })
     physicalCards: pbisCardsCount(where: { category: { equals: "physical" } })
+    classCards: pbisCardsCount(where: { category: { equals: "class" } })
 
     TAs: users(where: { hasTA: { equals: true } }) {
       id
