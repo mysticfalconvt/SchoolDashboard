@@ -126,6 +126,9 @@ export default function StudentCakeChooser({ birthday }) {
                 <option value="Chocolate Cake - Strawberry Frosting">
                   Chocolate Cake - Strawberry Frosting
                 </option>
+                <option value="Chocolate Cake - No Frosting">
+                  Chocolate Cake - No Frosting
+                </option>
                 <option value="Vanilla Cake - Chocolate Frosting">
                   Vanilla Cake - Chocolate Frosting
                 </option>
@@ -134,6 +137,9 @@ export default function StudentCakeChooser({ birthday }) {
                 </option>
                 <option value="Vanilla Cake - Strawberry Frosting">
                   Vanilla Cake - Strawberry Frosting
+                </option>
+                <option value="Vanilla Cake - No Frosting">
+                  Vanilla Cake - No Frosting
                 </option>
               </select>
             </label>
