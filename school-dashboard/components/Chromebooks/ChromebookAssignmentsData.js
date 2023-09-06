@@ -144,7 +144,9 @@ export default function ChromebookAssignmentsData({ assignments }) {
 
   const teacherList = useMemo(() => {
     if (!teachersData) return [];
-    return teachersData.users.sort((a, b) => a.name.localeCompare(b.name));
+    return (
+      teachersData?.users?.sort((a, b) => a.name.localeCompare(b.name)) || []
+    );
   }, [teachersData]);
 
   const { data: studentsData, isLoading: studentsLoading } = useGQLQuery(
@@ -157,9 +159,11 @@ export default function ChromebookAssignmentsData({ assignments }) {
 
   const studentList = useMemo(() => {
     if (!studentsData) return [];
-    return studentsData.users
-      .filter((student) => !studentsWithAssignments.includes(student.id))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return (
+      studentsData?.users
+        .filter((student) => !studentsWithAssignments.includes(student.id))
+        .sort((a, b) => a.name.localeCompare(b.name)) || []
+    );
   }, [studentsData, studentsWithAssignments]);
 
   const [updateChromebookAssignment, { loading: updateLoading }] = useMutation(

@@ -6,6 +6,9 @@ import { endpoint, prodEndpoint } from "../config";
 import GradientButton from "../components/styles/Button";
 import ChromebookAssignmentsData from "../components/Chromebooks/ChromebookAssignmentsData";
 import ChromebookChecksData from "../components/Chromebooks/ChromebookChecksData";
+import isAllowed from "../lib/isAllowed";
+import ChromebookCheck from "../components/Chromebooks/ChromebookCheck";
+import { useUser } from "../components/User";
 
 const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_CHROMEBOOK_ASSIGNMENTS_QUERY {
@@ -32,7 +35,7 @@ const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
 
 export default function Chromebooks({ initialChromebookAssignments }) {
   const [display, setDisplay] = useState("Chromebook Checks");
-
+  const me = useUser();
   const { data: chromebookAssignmentsData } = useGQLQuery(
     "Chromebook Assignments",
     GET_CHROMEBOOK_ASSIGNMENTS_QUERY,
@@ -65,6 +68,7 @@ export default function Chromebooks({ initialChromebookAssignments }) {
           {display}
         </GradientButton>
       </div>
+      {isAllowed(me, "hasTA") && <ChromebookCheck taId={me.id} />}
       {display === "Chromebook Assignments" ? (
         <ChromebookAssignmentsData assignments={chromebookAssignments} />
       ) : null}
