@@ -7,7 +7,7 @@ import { useUser } from "../User";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import useSendEmail from "../../lib/useSendEmail";
 
-const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
+export const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   mutation CREATE_CHROMEBOOK_CHECK_MUTATION(
     $chromebookCheck: ChromebookCheckCreateInput!
   ) {
@@ -23,7 +23,7 @@ const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   }
 `;
 
-const CREATE_QUICK_PBIS = gql`
+export const CREATE_QUICK_PBIS = gql`
   mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {
     createPbisCard(
       data: {
@@ -66,8 +66,8 @@ export const ChromeBookCheckMessageOptions = [
   "Broken Camera",
   "Other",
 ];
-const goodCheckMessages = ChromeBookCheckMessageOptions.slice(1, 3);
-const chromebookEmails = [
+export const goodCheckMessages = ChromeBookCheckMessageOptions.slice(1, 3);
+export const chromebookEmails = [
   "robert.boskind@ncsuvt.org",
   "Joyce.Lantagne@ncsuvt.org",
   "katlynn.cochran@ncsuvt.org",

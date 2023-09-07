@@ -34,6 +34,7 @@ import { SEARCH_ALL_USERS_QUERY } from "../components/Search";
 import getDisplayName from "../lib/displayName";
 import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
 import PbisWidget from "../components/PBIS/PbisWidget";
+import CreateSingleChromebookCheck from "../components/Chromebooks/CreateSingleChromebookCheck";
 
 const DashboardContainerStyles = styled.div`
   display: flex;
@@ -173,6 +174,9 @@ export default function Home(props) {
             <GradientButton>
               <Link href="/allTeacherCurrentWork">Current Work</Link>
             </GradientButton>
+          )}
+          {me && isAllowed(me || {}, "isStaff") && (
+            <CreateSingleChromebookCheck />
           )}
           <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
           {isAllowed(me, "hasClasses") && <TeacherAssignments />}
