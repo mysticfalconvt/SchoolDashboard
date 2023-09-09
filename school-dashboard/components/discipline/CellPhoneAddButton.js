@@ -100,6 +100,9 @@ export default function CellPhoneAddButton() {
     }
   );
   console.log("cell", description);
+  const isThirdViolation =
+    studentCellPhoneViolations?.cellPhoneViolationsCount === 2;
+
   if (error) {
     console.log(error);
     return <p>{error.message}</p>;
@@ -130,9 +133,14 @@ export default function CellPhoneAddButton() {
                   fromAddress: me.email,
                   subject: `New Cell Phone Violation for ${res.data.createCellPhoneViolation.student.name}`,
                   body: `
-                  <p>There is a new Cell Phone Violation for ${res.data.createCellPhoneViolation.student.name} at NCUJHS.TECH created by ${me.name}. </p>
+                  <p>There is a new Cell Phone Violation for ${
+                    res.data.createCellPhoneViolation.student.name
+                  } at NCUJHS.TECH created by ${me.name}. </p>
                   <p><a href="https://ncujhs.tech/discipline">Click Here to View</a></p>
-                  <p>Violation Description: ${res.data.createCellPhoneViolation.description}</p>
+                  ${isThirdViolation ? "<p>Third Violation!!</p>" : ""}
+                  <p>Violation Description: ${
+                    res.data.createCellPhoneViolation.description
+                  }</p>
                   `,
                 };
                 // console.log(emailToSend);
