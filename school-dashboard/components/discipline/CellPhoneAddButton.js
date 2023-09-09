@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import { useQueryClient } from 'react-query';
-import GradientButton, { SmallGradientButton } from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import { useUser } from '../User';
-import SearchForUserName from '../SearchForUserName';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useSendEmail from '../../lib/useSendEmail';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import { useQueryClient } from "react-query";
+import GradientButton, { SmallGradientButton } from "../styles/Button";
+import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import { useUser } from "../User";
+import SearchForUserName from "../SearchForUserName";
+import { useGQLQuery } from "../../lib/useGqlQuery";
+import useSendEmail from "../../lib/useSendEmail";
+import useRevalidatePage from "../../lib/useRevalidatePage";
+import toast from "react-hot-toast";
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
-    users(where: { canManageDiscipline: {equals: true} }) {
+    users(where: { canManageDiscipline: { equals: true } }) {
       id
       name
       email
@@ -45,8 +45,14 @@ const ADD_CELLPHONE_MUTATION = gql`
   }
 `;
 
+const GET_STUDENT_CELLPHONE_VIOLATIONS = gql`
+  query GET_STUDENT_CELLPHONE_VIOLATIONS($id: ID!) {
+    cellPhoneViolationsCount(where: { student: { id: { equals: $id } } })
+  }
+`;
+
 export default function CellPhoneAddButton() {
-  const revalidatePage = useRevalidatePage('/discipline');
+  const revalidatePage = useRevalidatePage("/discipline");
   const { data: adminEmails, isLoading } = useGQLQuery(
     `AdminEmails`,
     GET_ADMIN_EMAILS
@@ -57,7 +63,7 @@ export default function CellPhoneAddButton() {
   const [showForm, setShowForm] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    description: '',
+    description: "",
   });
   const me = useUser();
 
@@ -65,16 +71,35 @@ export default function CellPhoneAddButton() {
   const [studentCardIsFor, setStudentCardIsFor] = useState();
   // console.log(studentCardIsFor);
   const { sendEmail, emailLoading } = useSendEmail();
+  const { data: studentCellPhoneViolations } = useGQLQuery(
+    `StudentCellPhoneViolations-${studentCardIsFor?.userId}`,
+    GET_STUDENT_CELLPHONE_VIOLATIONS,
+    {
+      id: studentCardIsFor?.userId,
+    },
+
+    {
+      enabled: !!studentCardIsFor?.userId,
+    }
+  );
+  const description = `${inputs.description}${
+    studentCellPhoneViolations?.cellPhoneViolationsCount
+      ? ` - Violation #${
+          studentCellPhoneViolations?.cellPhoneViolationsCount + 1
+        }`
+      : ""
+  }`;
   const [createCellViolation, { loading, error, data }] = useMutation(
     ADD_CELLPHONE_MUTATION,
     {
       variables: {
         teacher,
         student: studentCardIsFor?.userId,
-        description: inputs.description,
+        description: description,
       },
     }
   );
+  console.log("cell", description);
   if (error) {
     console.log(error);
     return <p>{error.message}</p>;
@@ -82,15 +107,15 @@ export default function CellPhoneAddButton() {
   return (
     <div>
       <GradientButton
-        style={{ margin: '5px' }}
+        style={{ margin: "5px" }}
         onClick={() => setShowForm(!showForm)}
       >
-        {showForm ? 'close' : 'New Cell Phone Violation'}
+        {showForm ? "close" : "New Cell Phone Violation"}
       </GradientButton>
       <FormContainerStyles>
         <Form
-          className={showForm ? 'visible' : 'hidden'}
-          style={{ width: '500px' }}
+          className={showForm ? "visible" : "hidden"}
+          style={{ width: "500px" }}
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the input fields to the backend:
@@ -107,6 +132,7 @@ export default function CellPhoneAddButton() {
                   body: `
                   <p>There is a new Cell Phone Violation for ${res.data.createCellPhoneViolation.student.name} at NCUJHS.TECH created by ${me.name}. </p>
                   <p><a href="https://ncujhs.tech/discipline">Click Here to View</a></p>
+                  <p>Violation Description: ${res.data.createCellPhoneViolation.description}</p>
                   `,
                 };
                 // console.log(emailToSend);
@@ -117,14 +143,14 @@ export default function CellPhoneAddButton() {
                 });
               }
             }
-            
+
             if (res) {
-              toast.success('Cell Phone Violation Created');
+              toast.success("Cell Phone Violation Created");
             }
             setEmailSending(false);
             const revalidationResponse = revalidatePage();
             // console.log(revalidationResponse);
-            queryClient.refetchQueries('allDisciplines');
+            queryClient.refetchQueries("allDisciplines");
             resetForm();
             setShowForm(false);
           }}
@@ -145,13 +171,13 @@ export default function CellPhoneAddButton() {
             <label htmlFor="description">
               Description
               <input
-                style={{ marginLeft: '0' }}
+                style={{ marginLeft: "0" }}
                 required
                 type="text"
                 id="description"
                 name="description"
                 placeholder="Title of Assignment"
-                value={inputs.description || ''}
+                value={inputs.description || ""}
                 onChange={handleChange}
               />
             </label>
