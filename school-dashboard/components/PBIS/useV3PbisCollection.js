@@ -247,9 +247,7 @@ export default function useV3PbisCollection() {
       const taTeamPbisLevelChange =
         taTeamCurrentPbisLevel - taTeamPreviousPbisLevel || 0;
       teacher.taTeamPbisLevelChange = taTeamPbisLevelChange;
-      teacher.newCardsPerStudent =
-        taTeamCurrentAveragePbisCardsPerStudent +
-        taTeamPreviousAveragePbisCardsPerStudent;
+      teacher.newCardsPerStudent = taTeamCurrentAveragePbisCardsPerStudent;
       const averageCardsRounded = Math.round(teacher.newCardsPerStudent);
 
       console.log(
