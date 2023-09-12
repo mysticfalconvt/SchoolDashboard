@@ -175,7 +175,10 @@ export default function useV3PbisCollection() {
 
   const [getData, setGetData] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  console.log(
+    "latestCollectionDateOr2YearsAgo",
+    latestCollectionDateOr2YearsAgo
+  );
   const { data } = useGQLQuery(
     "pbisCollection",
     PBIS_COLLECTION_QUERY,
@@ -184,6 +187,10 @@ export default function useV3PbisCollection() {
   );
 
   console.log("PBIS Collection Data", data);
+  const currentCardsPerTaLevel = data?.taTeachers?.map((teacher) =>
+    teacher.taStudents.reduce((acc, cur) => acc + cur.studentPbisCardsCount, 0)
+  );
+  console.log("currentCardsPerTaLevel", currentCardsPerTaLevel);
 
   async function runCardCollection() {
     setLoading(true);
@@ -213,7 +220,6 @@ export default function useV3PbisCollection() {
       .map((winner) => winner.student.id);
 
     const taTeachers = data.taTeachers;
-
     // for each teacher get the number of students in the class and the average number of cards this collection
     // then do TA team average cards and team levels
     for (const teacher of taTeachers) {
@@ -222,6 +228,7 @@ export default function useV3PbisCollection() {
       const taPbisPreviousCardCount = teacher.taPbisCardCount;
       const taTeamPreviousAveragePbisCardsPerStudent =
         teacher.taTeamAveragePbisCardsPerStudent;
+      console.log(taStudents);
       const taTeamCurrentCardsFromAllStudents = taStudents.reduce(
         (acc, cur) => acc + cur.studentPbisCardsCount,
         0
@@ -231,7 +238,9 @@ export default function useV3PbisCollection() {
         taTeamCurrentCardsFromAllStudents
       );
       const taTeamCurrentAveragePbisCardsPerStudent =
-        taTeamCurrentCardsFromAllStudents / taStudents.length || 0;
+        taTeamCurrentCardsFromAllStudents / (taStudents?.length || 1) +
+        taTeamPreviousAveragePbisCardsPerStudent;
+
       const taTeamCurrentPbisLevel = Math.floor(
         taTeamCurrentAveragePbisCardsPerStudent / PBISCardsPerTaLevel
       );
@@ -242,6 +251,14 @@ export default function useV3PbisCollection() {
         taTeamCurrentAveragePbisCardsPerStudent +
         taTeamPreviousAveragePbisCardsPerStudent;
       const averageCardsRounded = Math.round(teacher.newCardsPerStudent);
+
+      console.log(
+        "!!! TA TEAM",
+        averageCardsRounded,
+        taTeamCurrentPbisLevel,
+        taTeamCurrentAveragePbisCardsPerStudent,
+        taTeamCurrentAveragePbisCardsPerStudent / 24
+      );
       console.log("TA Data", {
         name: teacher.name,
         taTeamCurrentPbisLevel,
