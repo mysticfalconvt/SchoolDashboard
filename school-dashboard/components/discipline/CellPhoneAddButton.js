@@ -41,6 +41,7 @@ const ADD_CELLPHONE_MUTATION = gql`
         id
         name
       }
+      description
     }
   }
 `;
