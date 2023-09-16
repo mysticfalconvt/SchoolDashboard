@@ -225,7 +225,6 @@ export default function useV3PbisCollection() {
     for (const teacher of taTeachers) {
       const taStudents = teacher.taStudents;
       const taTeamPreviousPbisLevel = teacher.taTeamPbisLevel;
-      const taPbisPreviousCardCount = teacher.taPbisCardCount;
       const taTeamPreviousAveragePbisCardsPerStudent =
         teacher.taTeamAveragePbisCardsPerStudent;
       console.log(taStudents);
@@ -287,15 +286,15 @@ export default function useV3PbisCollection() {
       []
     );
     const arrayOfStudentsWithNewCards = arrayOfStudents.filter(
-      (student) => student.studentPbisCardsCount > 0
+      (student) => student.totalPBISCards > 0
     );
 
     for (const student of arrayOfStudentsWithNewCards) {
       const studentPreviousPbisLevel = student.individualPbisLevel;
-      const studentTotalCards = student.studentPbisCardsCount;
+      const studentTotalCards = student.totalPBISCards;
 
       const studentCurrentPbisLevel = PbisCardsPerPersonalLevel.findIndex(
-        (level) => level > studentTotalCards
+        (level) => level >= studentTotalCards
       );
 
       const studentPbisLevelChange =
