@@ -294,7 +294,7 @@ export default function useV3PbisCollection() {
       const studentTotalCards = student.totalPBISCards;
 
       const studentCurrentPbisLevel = PbisCardsPerPersonalLevel.findIndex(
-        (level) => level >= studentTotalCards
+        (level) => level - 1 >= studentTotalCards
       );
 
       const studentPbisLevelChange =
