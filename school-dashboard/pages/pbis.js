@@ -146,6 +146,11 @@ const PBIS_PAGE_STATIC_QUERY = gql`
         name
         individualPbisLevel
       }
+      staffRandomWinners {
+        id
+        name
+        email
+      }
       randomDrawingWinners {
         id
         student {

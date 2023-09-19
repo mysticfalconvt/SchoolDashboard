@@ -40,6 +40,11 @@ const PBIS_READING_QUERY = gql`
         name
         individualPbisLevel
       }
+      staffRandomWinners {
+        id
+        name
+        email
+      }
       randomDrawingWinners {
         id
         student {
@@ -121,6 +126,16 @@ export default function PbisWeeklyReading() {
           </li>
         ))}
       </ul>
+      {lastCollection?.staffRandomWinners.length ? (
+        <>
+          <h3>Congratulations to the following Staff Members</h3>
+          <ul>
+            {lastCollection.staffRandomWinners.map((winner) => (
+              <li key={winner.id}>{winner.name}</li>
+            ))}
+          </ul>{" "}
+        </>
+      ) : null}
     </PbisReadingStyles>
   );
 }

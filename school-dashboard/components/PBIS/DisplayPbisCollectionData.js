@@ -8,6 +8,7 @@ export default function DisplayPbisCollectionData({ collectionData }) {
   const teamsThatWentUpLevel = collectionData.taNewLevelWinners;
   const randomDrawingWinners =
     collectionData.randomDrawingWinners?.map((winner) => winner.student) || [];
+  const staffRandomWinners = collectionData.staffRandomWinners || [];
   return (
     <div>
       <h2>Stats at last collection: {collectionData.name}</h2>
@@ -36,6 +37,12 @@ export default function DisplayPbisCollectionData({ collectionData }) {
           <div key={`random-${student.id}`}>
             <h3>Random Drawing Winner</h3>
             <h4>{capitalizeFirstLetter(student.name)}</h4>
+          </div>
+        ))}
+        {staffRandomWinners.map((staff) => (
+          <div key={`staff-${staff.id}`}>
+            <h3>Staff Random Drawing Winner</h3>
+            <h4>{staff.name}</h4>
           </div>
         ))}
       </TeamCardStyles>
