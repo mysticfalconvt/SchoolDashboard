@@ -22,7 +22,7 @@ const TA_INFO_QUERY = gql`
       name
       id
       email
-
+      taTeamAveragePbisCardsPerStudent
       taTeam {
         teamName
         countedCards
@@ -190,8 +190,9 @@ export default function TA({ data: initialData, query }) {
   if (!me) return <Loading />;
   if (isLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
+  console.log(students);
   const taTotalPbisCards = students.reduce(
-    (acc, student) => acc + student.YearPbisCount || 0,
+    (acc, student) => acc + student.studentPbisCardsCount || 0,
     0
   );
   const taStudentCount = students.length;
@@ -202,7 +203,10 @@ export default function TA({ data: initialData, query }) {
       <h1>{data?.taTeacher?.name}'s TA</h1>
       <p>{taStudentCount} students</p>
       <p>{taTotalPbisCards} total PBIS cards</p>
-      <p>{taAveragePbisCards} average PBIS cards per student</p>
+      <p>
+        {data?.taTeacher?.taTeamAveragePbisCardsPerStudent || 0} average PBIS
+        cards per student
+      </p>
       {students.length > 0 && (
         <>
           {isAllowedPbisCardCounting && (
