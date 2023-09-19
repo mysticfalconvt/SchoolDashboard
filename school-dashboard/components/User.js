@@ -98,9 +98,16 @@ export function useUser() {
   const latestCollectionDateOr2YearsAgo =
     pbisDates?.pbisCollectionDates[0]?.collectionDate ||
     new Date(new Date().setFullYear(new Date().getFullYear() - 2));
-  const { data } = useGQLQuery("me", CURRENT_USER_QUERY, {
-    date: new Date(latestCollectionDateOr2YearsAgo),
-  });
+  const { data } = useGQLQuery(
+    "me",
+    CURRENT_USER_QUERY,
+    {
+      date: new Date(latestCollectionDateOr2YearsAgo),
+    },
+    {
+      enabled: !!pbisDates,
+    }
+  );
   const userData = data?.authenticatedItem;
   if (userData) {
     userData.lastCollection = latestCollectionDateOr2YearsAgo;

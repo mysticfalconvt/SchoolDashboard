@@ -32,6 +32,17 @@ export default function PbisWidget({ initialCardCount = 0 }) {
     return () => clearInterval(interval);
   }, [PBISCards]);
 
+  let weekCards = 0;
+  let yearCards = 0;
+  if (me?.isStudent) {
+    weekCards = me?.PbisCardCount;
+    yearCards = me?.YearPbisCount;
+  }
+  if (me?.isStaff) {
+    weekCards = me?.teacherPbisCardCount;
+    yearCards = me?.teacherYearPbisCount;
+  }
+
   return (
     <div
       style={{
@@ -48,31 +59,33 @@ export default function PbisWidget({ initialCardCount = 0 }) {
         margin: "5px",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <p
+      {me?.isStaff || me?.isStudent ? (
+        <div
           style={{
-            margin: "2px",
-            whiteSpace: "nowrap",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          Week - {me.PbisCardCount}
-        </p>
-        <p
-          style={{
-            margin: "2px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Year - {me.YearPbisCount}
-        </p>
-      </div>
+          <p
+            style={{
+              margin: "2px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Week - {weekCards}
+          </p>
+          <p
+            style={{
+              margin: "2px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Year - {yearCards}
+          </p>
+        </div>
+      ) : null}
       <PbisFalcon initialCount={initialCardCount} />
       {isStudent && !!card && (
         <div
