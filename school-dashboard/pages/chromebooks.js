@@ -59,7 +59,7 @@ export default function Chromebooks({ initialChromebookAssignments }) {
       setDisplay("Chromebook Assignments");
     }
   };
-
+  if (!me) return <p>loading...</p>;
   return (
     <div>
       <div className="flex justify-center gap-4 items-center">

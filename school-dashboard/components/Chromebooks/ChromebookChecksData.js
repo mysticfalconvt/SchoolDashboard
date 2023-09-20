@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { ChromeBookCheckMessageOptions } from "./ChromebookCheck";
+import ChromebookCheckRow from "./ChromebookCheckRow";
 
 const getColorFromMessage = (message) => {
   if (message === ChromeBookCheckMessageOptions[1]) return "green";
@@ -110,6 +111,7 @@ const ChromebookMessageLegend = () => {
 };
 
 export default function ChromebookChecksData({ assignments }) {
+  const [displayGreen, setDisplayGreen] = useState(false);
   const assignmentsSortedByTeacher = useMemo(() => {
     if (!assignments) return [];
     return assignments
@@ -125,54 +127,51 @@ export default function ChromebookChecksData({ assignments }) {
       .filter((assignment) => assignment.checkLog.length > 0);
   }, [assignments]);
 
+  const checksToShow = useMemo(() => {
+    let checksToShow = assignmentsSortedByTeacher
+      .map((assignment) => {
+        const { teacher, student, number, checkLog } = assignment;
+        if (!teacher || !student || !number || !checkLog) return null;
+        return {
+          ...assignment,
+          checkLog: checkLog.filter((check) => {
+            if (displayGreen) return true;
+            if (check.message === ChromeBookCheckMessageOptions[1])
+              return false;
+            if (check.message === ChromeBookCheckMessageOptions[2])
+              return false;
+            return true;
+          }),
+        };
+      })
+      .filter((assignment) => !!assignment);
+
+    return checksToShow;
+  }, [assignmentsSortedByTeacher, displayGreen]);
+
   return (
     <div>
       <h2>Chromebook Checks</h2>
-      <ChromebookMessageLegend />
-      <div>
-        {assignmentsSortedByTeacher.map((assignment) => {
-          const { teacher, student, number, checkLog } = assignment;
-          return (
-            <div
-              key={`assignment-${assignment.id}`}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "1rem",
-                alignItems: "center",
-                justifyContent: "flex-start",
-              }}
-            >
-              <h3>{teacher?.name}</h3>
-
-              <h4>
-                {assignment.number} - {student?.name}
-              </h4>
-
-              {checkLog.map((check) => {
-                const { message, time } = check;
-                const date = new Date(time).toLocaleDateString();
-                return (
-                  <div
-                    key={`check-${check.id}`}
-                    style={{
-                      backgroundColor: getColorFromMessage(message),
-                      width: "50px",
-                      height: "50px",
-                      textAlign: "center",
-                      borderRadius: "5px",
-                    }}
-                  >
-                    <div style={{ fontSize: "0.8rem", lineHeight: "1rem" }}>
-                      {message} - {date}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+      <div className="flex justify-start gap-4 items-center my-4">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            value={displayGreen}
+            class="sr-only peer"
+            onChange={() => setDisplayGreen(!displayGreen)}
+          />
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          <span class="ml-3 text-lg font-medium text-gray-900 dark:text-gray-300">
+            Show Green Checks
+          </span>
+        </label>
       </div>
+      <ChromebookMessageLegend />
+      <table className="table-auto border-collapse border border-slate-500 border-spacing-2 border-spacing-x-2 border-spacing-y-2 mt-2">
+        {checksToShow.map((assignment) => (
+          <ChromebookCheckRow key={assignment.id} assignment={assignment} />
+        ))}
+      </table>
     </div>
   );
 }
