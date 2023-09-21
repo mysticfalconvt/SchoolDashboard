@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ChromeBookCheckMessageOptions } from "./ChromebookCheck";
 import ChromebookCheckRow from "./ChromebookCheckRow";
+import TeacherChromebookData from "./TeacherChromebookData";
 
 const getColorFromMessage = (message) => {
   if (message === ChromeBookCheckMessageOptions[1]) return "green";
@@ -113,6 +114,7 @@ const ChromebookMessageLegend = () => {
 export default function ChromebookChecksData({ assignments }) {
   const [displayGreen, setDisplayGreen] = useState(false);
   const [filterText, setFilterText] = useState("");
+  const [showRecent, setShowRecent] = useState(false);
   const assignmentsSortedByTeacher = useMemo(() => {
     if (!assignments) return [];
     return assignments
@@ -130,6 +132,7 @@ export default function ChromebookChecksData({ assignments }) {
 
   const checksToShow = useMemo(() => {
     let checksToShow = assignmentsSortedByTeacher
+      // filter out checks that are green status
       .map((assignment) => {
         const { teacher, student, number, checkLog } = assignment;
         if (!teacher || !student || !number || !checkLog) return null;
@@ -145,6 +148,24 @@ export default function ChromebookChecksData({ assignments }) {
           }),
         };
       })
+      // filter checks that are more than 7 days old
+      .map((assignment) => {
+        if (!assignment) return null;
+        const { teacher, student, number, checkLog } = assignment;
+        if (!teacher || !student || !number || !checkLog) return null;
+        return {
+          ...assignment,
+          checkLog: checkLog.filter((check) => {
+            if (showRecent) {
+              const tenDaysAgo = new Date();
+              tenDaysAgo.setDate(tenDaysAgo.getDate() - 7);
+              const checkDate = new Date(check.time);
+              return checkDate > tenDaysAgo;
+            }
+            return true;
+          }),
+        };
+      })
       .filter((assignment) =>
         assignment?.student?.name
           .toLowerCase()
@@ -153,7 +174,7 @@ export default function ChromebookChecksData({ assignments }) {
       .filter((assignment) => !!assignment);
 
     return checksToShow;
-  }, [assignmentsSortedByTeacher, displayGreen, filterText]);
+  }, [assignmentsSortedByTeacher, displayGreen, filterText, showRecent]);
 
   return (
     <div>
@@ -171,6 +192,18 @@ export default function ChromebookChecksData({ assignments }) {
             Show Green Checks
           </span>
         </label>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            value={showRecent}
+            class="sr-only peer"
+            onChange={() => setShowRecent(!showRecent)}
+          />
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          <span class="ml-3 text-lg font-medium text-gray-900 dark:text-gray-300">
+            Show only last 7 days
+          </span>
+        </label>
         <label>
           <input
             type="text"
@@ -180,6 +213,9 @@ export default function ChromebookChecksData({ assignments }) {
             className="border-2 border-gray-400 rounded-md text-gray-800"
           />
         </label>
+        <TeacherChromebookData
+          chromebookAssignments={assignmentsSortedByTeacher}
+        />
       </div>
       <ChromebookMessageLegend />
       <table className="table-auto border-collapse border border-slate-500 border-spacing-2 border-spacing-x-2 border-spacing-y-2 mt-2">
