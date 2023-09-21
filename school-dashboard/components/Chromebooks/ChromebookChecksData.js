@@ -112,6 +112,7 @@ const ChromebookMessageLegend = () => {
 
 export default function ChromebookChecksData({ assignments }) {
   const [displayGreen, setDisplayGreen] = useState(false);
+  const [filterText, setFilterText] = useState("");
   const assignmentsSortedByTeacher = useMemo(() => {
     if (!assignments) return [];
     return assignments
@@ -144,15 +145,20 @@ export default function ChromebookChecksData({ assignments }) {
           }),
         };
       })
+      .filter((assignment) =>
+        assignment?.student?.name
+          .toLowerCase()
+          .includes(filterText.toLowerCase())
+      )
       .filter((assignment) => !!assignment);
 
     return checksToShow;
-  }, [assignmentsSortedByTeacher, displayGreen]);
+  }, [assignmentsSortedByTeacher, displayGreen, filterText]);
 
   return (
     <div>
       <h2>Chromebook Checks</h2>
-      <div className="flex justify-start gap-4 items-center my-4">
+      <div className="flex justify-start gap-8 items-center my-4">
         <label class="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
@@ -164,6 +170,15 @@ export default function ChromebookChecksData({ assignments }) {
           <span class="ml-3 text-lg font-medium text-gray-900 dark:text-gray-300">
             Show Green Checks
           </span>
+        </label>
+        <label>
+          <input
+            type="text"
+            onChange={(e) => setFilterText(e.target.value)}
+            value={filterText}
+            placeholder="Filter by student name"
+            className="border-2 border-gray-400 rounded-md text-gray-800"
+          />
         </label>
       </div>
       <ChromebookMessageLegend />
