@@ -94,9 +94,9 @@ export default function CreateSingleChromebookCheck() {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  if (e.target.value !== "Other") {
-                    setMessage("");
-                  }
+                  // if (e.target.value !== "Other") {
+                  //   setMessage("");
+                  // }
                 }}
               >
                 {ChromeBookCheckMessageOptions.map((option) => (
@@ -110,7 +110,7 @@ export default function CreateSingleChromebookCheck() {
             <input
               id="message"
               name="message"
-              disabled={status !== "Other"}
+              // disabled={status !== "Other"}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="border-2 border-gray-400 rounded-md text-gray-800"
@@ -127,7 +127,7 @@ export default function CreateSingleChromebookCheck() {
 
               let messageToSend = message;
               if (status !== "Other") {
-                messageToSend = status;
+                messageToSend = `${status} - ${message}`;
               }
               if (
                 me?.id !==

@@ -97,7 +97,10 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
           variables: {
             chromebookCheck: {
               assignment: { connect: { id: assignment.id } },
-              message: message === "Other" ? customMessage : message,
+              message:
+                message === "Other"
+                  ? customMessage
+                  : `${message} - ${customMessage}`,
             },
           },
         });
@@ -183,12 +186,12 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
         <label htmlFor="message" key={`message-chromebook-${assignment.id}`}>
           Message
           <input
-            className="bg-gray-50 border border-gray-500 disabled:bg-gray-50 disabled:border-none "
+            className="bg-gray-50 border border-gray-500 text-stone-900 disabled:bg-gray-50 disabled:border-none "
             type="text"
             name="message"
             id="message"
             value={customMessage}
-            disabled={message !== "Other"}
+            // disabled={message !== "Other"}
             onChange={(e) => setCustomMessage(e.target.value)}
           />
         </label>

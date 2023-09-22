@@ -2,12 +2,12 @@ import React from "react";
 import { ChromeBookCheckMessageOptions } from "./ChromebookCheck";
 
 const getColorFromMessage = (message) => {
-  if (message === ChromeBookCheckMessageOptions[1]) return "green";
-  if (message === ChromeBookCheckMessageOptions[2]) return "green";
-  if (message === ChromeBookCheckMessageOptions[3]) return "yellow";
-  if (message === ChromeBookCheckMessageOptions[4]) return "red";
-  if (message === ChromeBookCheckMessageOptions[5]) return "red";
-  if (message === ChromeBookCheckMessageOptions[6]) return "red";
+  if (message.startsWith(ChromeBookCheckMessageOptions[1])) return "green";
+  if (message.startsWith(ChromeBookCheckMessageOptions[2])) return "green";
+  if (message.startsWith(ChromeBookCheckMessageOptions[3])) return "yellow";
+  if (message.startsWith(ChromeBookCheckMessageOptions[4])) return "red";
+  if (message.startsWith(ChromeBookCheckMessageOptions[5])) return "red";
+  if (message.startsWith(ChromeBookCheckMessageOptions[6])) return "red";
   return "blue";
 };
 
@@ -34,9 +34,9 @@ export default function ChromebookCheckRow({ assignment }) {
           >
             <div
               style={{
-                backgroundColor: getColorFromMessage(message),
+                borderColor: getColorFromMessage(message),
               }}
-              className="text-md m-1 h-full p-1 rounded-md"
+              className="text-md m-1 h-full p-1 rounded-md border-2"
             >
               {message} - {date}
             </div>
