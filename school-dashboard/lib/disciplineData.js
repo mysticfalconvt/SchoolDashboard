@@ -31,6 +31,8 @@ export const timeOfDayList = [
   "Block 6",
   "Block 7",
   "Block 8",
+  "Block 9",
+  "Block 10",
   "Lunch",
   "Break",
   "Afternoon TA",

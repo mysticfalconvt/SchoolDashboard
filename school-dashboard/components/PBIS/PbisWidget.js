@@ -27,7 +27,7 @@ export default function PbisWidget({ initialCardCount = 0 }) {
         setCard(randomCard);
       },
       // 1 second
-      1000
+      5000
     );
     return () => clearInterval(interval);
   }, [PBISCards]);
