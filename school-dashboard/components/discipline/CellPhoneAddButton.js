@@ -119,7 +119,12 @@ export default function CellPhoneAddButton() {
       <FormContainerStyles>
         <Form
           className={showForm ? "visible" : "hidden"}
-          style={{ width: "500px" }}
+          style={{
+            width: "500px",
+            display: "flex",
+            flexDirection: "column",
+            transform: showForm ? "translateX(-50%)" : null,
+          }}
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the input fields to the backend:
