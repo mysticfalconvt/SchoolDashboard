@@ -83,7 +83,13 @@ export default function StudentList({
   );
 
   function DisplaySingleClass({ classList }) {
-    // console.log(classList);
+    // sort classList alphabetically by last name
+    classList.sort((a, b) => {
+      const aLastName = a.name.split(" ")[1];
+      const bLastName = b.name.split(" ")[1];
+      return aLastName > bLastName ? 1 : -1;
+    });
+
     return classList.map((student) => (
       <li className="list" key={student.id}>
         <label htmlFor={student.id}>
