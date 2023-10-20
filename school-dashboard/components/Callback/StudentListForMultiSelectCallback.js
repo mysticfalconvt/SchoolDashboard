@@ -78,9 +78,11 @@ export default function StudentList({
     ...(block9Students || []),
     ...(block10Students || []),
   ];
-  const allStudentsAlphabetical = allStudents.sort((a, b) =>
-    a.name > b.name ? 1 : -1
-  );
+  const allStudentsAlphabetical = allStudents.sort((a, b) => {
+    const aLastName = a.name.split(" ")[1];
+    const bLastName = b.name.split(" ")[1];
+    return aLastName > bLastName ? 1 : -1;
+  });
 
   function DisplaySingleClass({ classList }) {
     // sort classList alphabetically by last name

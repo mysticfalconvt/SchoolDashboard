@@ -128,6 +128,43 @@ export default function NewCallbackMultiStudent({ refetch }) {
   const createMessage = useCreateMessage();
 
   const { setCallbackID } = useRecalculateCallback();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Submit the input fields to the backend:
+    // console.log(studentsCallbackIsFor);
+    if (studentsCallbackIsFor?.length > 0) {
+      for (const student of studentsCallbackIsFor) {
+        const res = await createCallback({
+          variables: {
+            ...inputs,
+            dateAssigned: new Date(
+              inputs.dateAssigned.concat("T24:00:00.000Z")
+            ),
+            teacher: user?.id,
+            student,
+          },
+        });
+        setCallbackID(res.data.createCallback.id);
+        // console.log(res);
+        createMessage({
+          subject: "New Callback Assignment",
+          message: `you received a new callback item from ${res.data.createCallback.student.name}`,
+          receiver: student,
+          link: `/callback/${res?.data?.createCallback.id}`,
+        });
+        toast.success(
+          `Created Callback for ${res.data.createCallback.student.name}`
+        );
+      }
+      refetch();
+      resetForm();
+      setStudentsCallbackIsFor([]);
+      setShowForm(false);
+    } else {
+      toast.error("Please select at least one student");
+    }
+  };
   //   console.log(inputs);
   return (
     <div>
@@ -144,41 +181,8 @@ export default function NewCallbackMultiStudent({ refetch }) {
         <Form
           className={showForm ? "visible" : "hidden"}
           // hidden={!showForm}
-          onSubmit={async (e) => {
+          onSubmit={(e) => {
             e.preventDefault();
-            // Submit the input fields to the backend:
-            // console.log(studentsCallbackIsFor);
-            if (studentsCallbackIsFor?.length > 0) {
-              for (const student of studentsCallbackIsFor) {
-                const res = await createCallback({
-                  variables: {
-                    ...inputs,
-                    dateAssigned: new Date(
-                      inputs.dateAssigned.concat("T24:00:00.000Z")
-                    ),
-                    teacher: user?.id,
-                    student,
-                  },
-                });
-                setCallbackID(res.data.createCallback.id);
-                // console.log(res);
-                createMessage({
-                  subject: "New Callback Assignment",
-                  message: `you received a new callback item from ${res.data.createCallback.student.name}`,
-                  receiver: student,
-                  link: `/callback/${res?.data?.createCallback.id}`,
-                });
-                toast.success(
-                  `Created Callback for ${res.data.createCallback.student.name}`
-                );
-              }
-              refetch();
-              resetForm();
-              setStudentsCallbackIsFor([]);
-              setShowForm(false);
-            } else {
-              toast.error("Please select at least one student");
-            }
           }}
         >
           <h2>Add a New Callback Assignment</h2>
@@ -236,7 +240,9 @@ export default function NewCallbackMultiStudent({ refetch }) {
                 onChange={handleChange}
               />
             </label>
-            <button type="submit">+ Publish</button>
+            <button type="button" onClick={handleSubmit}>
+              + Publish
+            </button>
           </fieldset>
         </Form>
       </FormContainerStyles>
