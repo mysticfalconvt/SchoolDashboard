@@ -45,6 +45,7 @@ const CREATE_LINK_MUTATION = gql`
 export default function NewLink({ refetchLinks, hidden }) {
   const revalidateIndexPage = useRevalidatePage("/");
   const revalidateLinkPage = useRevalidatePage("/links");
+  const revalidateEPortfolioPage = useRevalidatePage("/ePortfolio");
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     name: "",
@@ -88,6 +89,7 @@ export default function NewLink({ refetchLinks, hidden }) {
             resetForm();
             refetchLinks();
             revalidateLinkPage();
+            revalidateEPortfolioPage();
             setShowForm(false);
           }}
         >
