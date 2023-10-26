@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import Toggle from 'react-toggle';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import { useUser } from '../User';
-import 'react-toggle/style.css';
-import useRevalidatePage from '../../lib/useRevalidatePage';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import Toggle from "react-toggle";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles } from "../styles/Form";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import { useUser } from "../User";
+import "react-toggle/style.css";
+import useRevalidatePage from "../../lib/useRevalidatePage";
 
 const CREATE_LINK_MUTATION = gql`
   mutation CREATE_LINK_MUTATION(
@@ -19,6 +19,7 @@ const CREATE_LINK_MUTATION = gql`
     $forParents: Boolean!
     $onHomePage: Boolean!
     $forPbis: Boolean!
+    $forEPortfolio: Boolean!
     $link: String
     $modifiedBy: ID!
   ) {
@@ -32,6 +33,7 @@ const CREATE_LINK_MUTATION = gql`
         onHomePage: $onHomePage
         link: $link
         forPbis: $forPbis
+        forEPortfolio: $forEPortfolio
         modifiedBy: { connect: { id: $modifiedBy } }
       }
     ) {
@@ -45,15 +47,14 @@ export default function NewLink({ refetchLinks, hidden }) {
   const revalidateLinkPage = useRevalidatePage("/links");
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
-    name: '',
-    link: '',
-    description: '',
+    name: "",
+    link: "",
+    description: "",
     forTeachers: false,
     forStudents: false,
     forParents: false,
     onHomePage: false,
     forPbis: false,
-
   });
   const user = useUser();
   //   console.log(`user ${user.id}`);
@@ -69,13 +70,13 @@ export default function NewLink({ refetchLinks, hidden }) {
     <div>
       <GradientButton
         onClick={() => setShowForm(!showForm)}
-        style={{ marginLeft: '100px' }}
+        style={{ marginLeft: "100px" }}
       >
-        {showForm ? 'Close the form' : 'Add A New Link'}
+        {showForm ? "Close the form" : "Add A New Link"}
       </GradientButton>
       <FormContainerStyles>
         <Form
-          className={showForm ? 'visible' : 'hidden'}
+          className={showForm ? "visible" : "hidden"}
           // hidden={!showForm}
           onSubmit={async (e) => {
             e.preventDefault();
@@ -170,6 +171,15 @@ export default function NewLink({ refetchLinks, hidden }) {
                 id="forPbis"
                 name="forPbis"
                 checked={inputs.forPbis}
+                onChange={handleChange}
+              />
+            </label>
+            <label htmlFor="forEPortfolio">
+              <span>Show on The E-Portfolio Page </span>
+              <Toggle
+                id="forEPortfolio"
+                name="forEPortfolio"
+                checked={inputs.forEPortfolio}
                 onChange={handleChange}
               />
             </label>

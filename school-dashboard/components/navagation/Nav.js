@@ -48,6 +48,7 @@ export default function Nav() {
           {isAllowed(me, "canHaveSpecialGroups") && (
             <Link href="/specialGroup">SpGroup</Link>
           )}
+          <Link href="/ePortfolio">E-Portfolio</Link>
           {isAllowed(me, "isSuperAdmin") && (
             <Link href="/superUserSettings">⚙️</Link>
           )}
