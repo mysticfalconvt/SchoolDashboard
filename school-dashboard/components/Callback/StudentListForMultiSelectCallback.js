@@ -66,6 +66,7 @@ export default function StudentList({
     block10Students,
   } = studentList || [];
   const [showSingleClass, setShowSingleClass] = useState(false);
+  const [firstNameSort, setFirstNameSort] = useState(false);
   const allStudents = [
     ...(block1Students || []),
     ...(block2Students || []),
@@ -79,17 +80,29 @@ export default function StudentList({
     ...(block10Students || []),
   ];
   const allStudentsAlphabetical = allStudents.sort((a, b) => {
-    const aLastName = a.name.split(" ")[1];
-    const bLastName = b.name.split(" ")[1];
-    return aLastName > bLastName ? 1 : -1;
+    if (firstNameSort) {
+      const aLastName = a.name.split(" ")[1].toLowerCase();
+      const bLastName = b.name.split(" ")[1].toLowerCase();
+      return aLastName > bLastName ? 1 : -1;
+    } else {
+      const aFirstName = a.name.split(" ")[0].toLowerCase();
+      const bFirstName = b.name.split(" ")[0].toLowerCase();
+      return aFirstName > bFirstName ? 1 : -1;
+    }
   });
 
   function DisplaySingleClass({ classList }) {
     // sort classList alphabetically by last name
     classList.sort((a, b) => {
-      const aLastName = a.name.split(" ")[1];
-      const bLastName = b.name.split(" ")[1];
-      return aLastName > bLastName ? 1 : -1;
+      if (firstNameSort) {
+        const aFirstName = a.name.split(" ")[0].toLowerCase();
+        const bFirstName = b.name.split(" ")[0].toLowerCase();
+        return aFirstName > bFirstName ? 1 : -1;
+      } else {
+        const aLastName = a.name.split(" ")[1].toLowerCase();
+        const bLastName = b.name.split(" ")[1].toLowerCase();
+        return aLastName > bLastName ? 1 : -1;
+      }
     });
 
     return classList.map((student) => (
@@ -118,10 +131,23 @@ export default function StudentList({
 
   return (
     <>
-      <SmallGradientButton onClick={() => setShowSingleClass(!showSingleClass)}>
+      <SmallGradientButton
+        onClick={(e) => {
+          e.preventDefault();
+          setShowSingleClass(!showSingleClass);
+        }}
+      >
         {showSingleClass
           ? "Show all classes"
           : "Sort all students alphabetically"}
+      </SmallGradientButton>
+      <SmallGradientButton
+        onClick={(e) => {
+          e.preventDefault();
+          setFirstNameSort(!firstNameSort);
+        }}
+      >
+        {firstNameSort ? "Sort by last name" : "Sort by first name"}
       </SmallGradientButton>
       <StudentPickerStyle>
         {showSingleClass ? (
