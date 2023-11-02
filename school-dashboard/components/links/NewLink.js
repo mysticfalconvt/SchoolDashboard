@@ -56,6 +56,7 @@ export default function NewLink({ refetchLinks, hidden }) {
     forParents: false,
     onHomePage: false,
     forPbis: false,
+    forEPortfolio: false,
   });
   const user = useUser();
   //   console.log(`user ${user.id}`);
