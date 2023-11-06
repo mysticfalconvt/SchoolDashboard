@@ -100,7 +100,6 @@ export default function CellPhoneAddButton() {
       },
     }
   );
-  console.log("cell", description);
   const isThirdViolation =
     studentCellPhoneViolations?.cellPhoneViolationsCount === 2;
 

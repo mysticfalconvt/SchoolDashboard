@@ -121,6 +121,7 @@ export default function NewDiscipline({ refetch }) {
   const [emailSending, setEmailSending] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     date: todaysDateForForm(),
+    teacherComments: "",
   });
   const user = useUser();
   const [studentReferralIsFor, setStudentReferralIsFor] = useState(null);
@@ -144,6 +145,7 @@ export default function NewDiscipline({ refetch }) {
       },
     }
   );
+  const isDevelopment = process.env.NODE_ENV === "development";
   return (
     <div>
       <GradientButton
@@ -161,9 +163,14 @@ export default function NewDiscipline({ refetch }) {
             // Submit the input fields to the backend:
             const res = await createDiscipline();
             setEmailSending(true);
-            if (res.data.createDiscipline.id) {
+            if (
+              res.data.createDiscipline.id &&
+              adminEmailArray &&
+              !isDevelopment
+            ) {
               // loop over each email in adminEmailArray and send an email to each one async and await
               for (const email of adminEmailArray) {
+                console.log(`email ${email}`);
                 const emailToSend = {
                   toAddress: email,
                   fromAddress: me.email,
@@ -174,6 +181,7 @@ export default function NewDiscipline({ refetch }) {
                `,
                 };
                 // console.log(emailToSend);
+
                 const emailRes = await sendEmail({
                   variables: {
                     emailData: JSON.stringify(emailToSend),
@@ -189,6 +197,7 @@ export default function NewDiscipline({ refetch }) {
               toast.success("Discipline Referral Created");
             }
             queryClient.refetchQueries("allDisciplines");
+            setStudentReferralIsFor(null);
             setShowForm(false);
           }}
         >
