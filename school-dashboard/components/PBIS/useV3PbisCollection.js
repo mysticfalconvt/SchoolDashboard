@@ -15,7 +15,7 @@ const PBISCardsPerTaLevel = 24;
 const PbisCardsPerPersonalLevel = [
   25, 50, 85, 120, 165, 210, 265, 320, 385, 450, 525, 600, 675, 750,
 ];
-const weeklyWinnerCount = 20;
+const weeklyWinnerCount = 10;
 const collectionsWithoutRepeatWinners = 3;
 
 const GET_ALL_PBIS_DATES_QUERY = gql`
