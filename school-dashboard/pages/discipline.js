@@ -141,9 +141,7 @@ export default function Discipline(props) {
         <CellPhoneAddButton refetch={refetch} />
         <ShowCellphoneViolations cellViolations={data?.cellPhoneViolations} />
         <a href="https://docs.google.com/forms/u/2/d/e/1FAIpQLSddBPipLhsUlH11wTb0oO85uKI4GZdBhtbmien7vrmw0fug7g/viewform?usp=sf_link">
-          <GradientButton>
-            Student Concerns Form/EST & 504 Referrals/ Behavior Team
-          </GradientButton>
+          <GradientButton>Student Concerns Form Behavior Team</GradientButton>
         </a>
         {isAllowed(me, "canManageDiscipline") ? (
           <DisciplineExtraDetails disciplines={disciplinesToShow} />
