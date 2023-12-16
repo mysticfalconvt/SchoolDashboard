@@ -28,6 +28,11 @@ export const UPDATE_CALLBACK_MESSAGES_MUTATION = gql`
     }
   }
 `;
+const studentDeleteMessage = "Remove Message";
+const studentMessageOptions = [
+  "I am finished. Please check my work.",
+  "I am stuck. Please help me.",
+];
 
 const AnimatedInput = styled.p`
   position: relative;
@@ -90,9 +95,8 @@ export default function CallbackCardMessages({ me, callback }) {
   const [teacherMessageDate, setTeacherMessageDate] = useState(
     callback.messageFromTeacherDate || ""
   );
-  const [studentMessage, setStudentMessage] = useState(
-    callback.messageFromStudent || ""
-  );
+  const studentMessage = callback.messageFromStudent;
+
   const [studentMessageDate, setStudentMessageDate] = useState(
     callback.messageFromStudentDate || ""
   );
@@ -124,6 +128,51 @@ export default function CallbackCardMessages({ me, callback }) {
       handleSubmit(e);
     }
   };
+  const handleSelectStudentMessage = async (e) => {
+    console.log(e.target.value);
+    const studentMessage =
+      e.target.value === studentDeleteMessage ? "" : e.target.value;
+    const todaysDate = new Date().toLocaleDateString();
+    const res = await updateCallback({
+      variables: {
+        id: callback.id,
+        messageFromTeacher: teacherMessage,
+        messageFromStudent: studentMessage,
+        messageFromStudentDate: todaysDate,
+      },
+    });
+    await queryClient.refetchQueries("myStudentCallbacks");
+    if (res) {
+      toast.success(`Updated Callback Message for ${callback.student.name}`);
+    }
+  };
+  console.log(studentMessage);
+  const getStudentMessageOptionsArray = () => {
+    const options = studentMessageOptions.map((option) => ({
+      key: option,
+      value: option,
+    }));
+    if (!studentMessage) {
+      options.unshift({
+        key: "default",
+        value: "No Current Message to Teacher",
+      });
+    } else {
+      options.unshift({
+        key: "delete",
+        value: studentDeleteMessage,
+      });
+    }
+    if (studentMessage && !studentMessageOptions.includes(studentMessage)) {
+      options.push({
+        key: studentMessage,
+        value: studentMessage,
+        selected: true,
+      });
+    }
+    return options;
+  };
+  const studentMessageOptionsArray = getStudentMessageOptionsArray();
 
   return (
     <Form
@@ -155,7 +204,7 @@ export default function CallbackCardMessages({ me, callback }) {
             <>
               <AnimatedInput>
                 Student Message:
-                <textarea
+                {/* <textarea
                   id={`student - ${callback.id}`}
                   placeholder="Message from Student"
                   value={studentMessage}
@@ -167,7 +216,25 @@ export default function CallbackCardMessages({ me, callback }) {
                     const todaysDate = new Date().toLocaleDateString();
                     setStudentMessageDate(todaysDate);
                   }}
-                />
+                /> */}
+                {/* a select box for student messages */}
+                <select
+                  id={`student - ${callback.id}`}
+                  value={studentMessage}
+                  selected={studentMessage}
+                  className={loading ? "inputUpdating" : ""}
+                  onChange={handleSelectStudentMessage}
+                >
+                  {studentMessageOptionsArray.map((option) => (
+                    <option
+                      key={option.key}
+                      value={option.value}
+                      selected={option.selected}
+                    >
+                      {option.value}
+                    </option>
+                  ))}
+                </select>
                 <span>{studentMessageDate || "-"}</span>
               </AnimatedInput>
             </>

@@ -75,11 +75,11 @@ export default function StudentCallbacks() {
           />
         </label>
         <label>
-          <span> Show As Table</span>
-          <Toggle
+          {/* <span> Show As Table</span> */}
+          {/* <Toggle
             checked={showTable}
             onChange={() => setShowTable(!showTable)}
-          />
+          /> */}
         </label>
       </FormContainerStyles>
       {showTable && <CallbackTable callbacks={callbacks} />}
