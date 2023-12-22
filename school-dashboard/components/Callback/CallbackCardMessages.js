@@ -31,7 +31,7 @@ export const UPDATE_CALLBACK_MESSAGES_MUTATION = gql`
 const studentDeleteMessage = "Remove Message";
 const studentMessageOptions = [
   "I am finished. Please check my work.",
-  "I am stuck. Please help me.",
+  "I am stuck. I will come see you.",
 ];
 
 const AnimatedInput = styled.p`
