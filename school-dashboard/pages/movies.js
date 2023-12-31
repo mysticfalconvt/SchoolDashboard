@@ -70,7 +70,6 @@ export default function MoviesPage({ movieList }) {
         {movieList.videos.map((video) => {
           // check if video is in search results
           const isVisible = searchResults.includes(video);
-          console.log(isVisible);
           return (
             <SingleVideo key={video.id} video={video} hidden={!isVisible} />
           );

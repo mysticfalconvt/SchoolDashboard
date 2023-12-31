@@ -227,7 +227,6 @@ export default function PbisDataTable() {
     }
   );
 
-  console.log(teachersToDisplay);
   const changeSortMethod = (sortMethod) => {
     if (sortMethod === "average") {
       setTeachersToDisplay(teachersSortedAlphabetically);

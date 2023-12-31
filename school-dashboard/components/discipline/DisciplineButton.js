@@ -170,7 +170,6 @@ export default function NewDiscipline({ refetch }) {
             ) {
               // loop over each email in adminEmailArray and send an email to each one async and await
               for (const email of adminEmailArray) {
-                console.log(`email ${email}`);
                 const emailToSend = {
                   toAddress: email,
                   fromAddress: me.email,

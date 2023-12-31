@@ -124,7 +124,6 @@ export default function CallbackTable({ callbacks, showClassBlock = false }) {
       return { ...callback, student, block };
     });
     return callbackWithName.sort((a, b) => {
-      console.log(a, b);
       if (a.student.name < b.student.name) {
         return -1;
       }

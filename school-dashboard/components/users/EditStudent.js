@@ -98,7 +98,6 @@ export default function EditStudent({ student }) {
     a.name.localeCompare(b.name)
   );
 
-  console.log(student.id);
   return (
     <div>
       <GradientButton onClick={() => setShowForm(!showForm)}>

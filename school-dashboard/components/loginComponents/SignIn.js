@@ -47,9 +47,7 @@ export default function SignIn() {
     e.preventDefault(); // stop the form from submitting
     // console.log(inputs);
     const newRes = await signinNew(inputs);
-    console.log("newSignin", newRes);
     const res = await signin();
-    console.log("oldres", res);
     queryClient.refetchQueries();
     // refetch();
     resetForm();

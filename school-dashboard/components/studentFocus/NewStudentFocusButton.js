@@ -133,7 +133,6 @@ export default function NewStudentFocusButton({ refetch }) {
                     emailData: JSON.stringify(emailToSend),
                   },
                 });
-                console.log(emailRes);
               }
             }
             queryClient.refetchQueries("allStudentFocus");
@@ -141,7 +140,6 @@ export default function NewStudentFocusButton({ refetch }) {
             setStudentWhoIsFor(null);
             setEmailSending(false);
             const revalidation = revalidatePage();
-            console.log(revalidation);
             setShowForm(false);
           }}
         >

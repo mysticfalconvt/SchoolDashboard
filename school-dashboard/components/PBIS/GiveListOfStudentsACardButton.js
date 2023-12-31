@@ -90,9 +90,7 @@ export default function GiveListOfStudentsACardButton({ students, title }) {
   const [createCard, { loading, error }] = useMutation(CREATE_CLASS_PBIS_CARD);
 
   const handleCreateCards = React.useCallback(async () => {
-    console.log("handleCreateCards");
     const listOfStudentIds = students.map((student) => student.id);
-    console.log("listOfStudentIds", listOfStudentIds);
 
     setIsLoading(true);
     const cardsToCreate = await createCardsFromListOfStudents({

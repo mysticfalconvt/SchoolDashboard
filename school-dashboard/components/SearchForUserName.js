@@ -1,12 +1,12 @@
-import { useLazyQuery } from '@apollo/client';
-import { resetIdCounter, useCombobox } from 'downshift';
-import gql from 'graphql-tag';
-import debounce from 'lodash.debounce';
-import { useRouter } from 'next/dist/client/router';
-import { useState } from 'react';
-import { DropDown, DropDownItem, SearchStyles } from './styles/DropDown';
-import { useGQLQuery } from '../lib/useGqlQuery';
-import { useUser } from './User';
+import { useLazyQuery } from "@apollo/client";
+import { resetIdCounter, useCombobox } from "downshift";
+import gql from "graphql-tag";
+import debounce from "lodash.debounce";
+import { useRouter } from "next/dist/client/router";
+import { useState } from "react";
+import { DropDown, DropDownItem, SearchStyles } from "./styles/DropDown";
+import { useGQLQuery } from "../lib/useGqlQuery";
+import { useUser } from "./User";
 
 export const SEARCH_ALL_USERS_QUERY = gql`
   query SEARCH_ALL_USERS_QUERY {
@@ -30,7 +30,7 @@ export default function SearchForUserName({
   const [usersToDisplay, setUsersToDisplay] = useState([]);
 
   const { data: allUsers, isLoading } = useGQLQuery(
-    'allUsers',
+    "allUsers",
     SEARCH_ALL_USERS_QUERY,
     {},
     {
@@ -48,7 +48,7 @@ export default function SearchForUserName({
 
   const items = usersToDisplay;
   const filterUsers = (valueToFilter) => {
-    if (valueToFilter === '') {
+    if (valueToFilter === "") {
       setUsersToDisplay([]);
 
       return;
@@ -76,11 +76,9 @@ export default function SearchForUserName({
       filterUsers(inputValue);
     },
     onSelectedItemChange({ selectedItem }) {
-      console.log('clicked');
-      console.log(selectedItem);
       updateUser({ userId: selectedItem.id, userName: selectedItem.name });
     },
-    itemToString: (item) => item?.name || '',
+    itemToString: (item) => item?.name || "",
   });
 
   return (
@@ -88,11 +86,11 @@ export default function SearchForUserName({
       <div {...getComboboxProps()}>
         <input
           {...getInputProps({
-            type: 'search',
-            placeholder: 'Search for a User',
+            type: "search",
+            placeholder: "Search for a User",
             id: name,
             name,
-            className: isLoading ? 'loading' : '',
+            className: isLoading ? "loading" : "",
             // value,
           })}
         />

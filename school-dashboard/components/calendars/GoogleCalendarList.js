@@ -1,5 +1,4 @@
 export default function GoogleCalendarList({ events }) {
-  console.log("cal", events);
   return (
     <div>
       <h1>Google Calendar List</h1>

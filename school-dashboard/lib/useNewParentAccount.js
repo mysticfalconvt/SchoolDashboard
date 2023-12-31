@@ -1,8 +1,8 @@
-import gql from 'graphql-tag';
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { useAsyncGQLQuery } from './useGqlQuery';
-import useSendEmail from './useSendEmail';
+import gql from "graphql-tag";
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { useAsyncGQLQuery } from "./useGqlQuery";
+import useSendEmail from "./useSendEmail";
 
 const STUDENT_INFO_QUERY = gql`
   query STUDENT_INFO_QUERY($id: ID!) {
@@ -25,7 +25,7 @@ const UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION = gql`
     $id: ID!
     $parent: UserRelateToManyForUpdateInput!
   ) {
-    updateUser(where: {id: $id}, data: { parent: $parent }) {
+    updateUser(where: { id: $id }, data: { parent: $parent }) {
       id
     }
   }
@@ -33,7 +33,7 @@ const UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION = gql`
 
 const PARENT_INFO_QUERY = gql`
   query PARENT_INFO_QUERY($email: String!) {
-    users(where: { email: {equals: $email }}) {
+    users(where: { email: { equals: $email } }) {
       id
       name
       email
@@ -114,22 +114,18 @@ export function useNewParentAccount() {
   async function createParentAccount(props) {
     const { parentEmail, parentName, student, teacher } = props;
     setCreatingParentAccount(true);
-    console.log('props', props);
     // get student's current parent info
     setStudentId(student.id);
-    console.log("studentID", student.id)
     const studentWithParents = await getStudentData({ id: student.id });
-    console.log('studentWithParents', studentWithParents);
     const { parent } = studentWithParents.user;
 
     const allParentEmails = parent.map((p) => p.email);
-    console.log('allParentEmails', allParentEmails);
     // check if the parent email already exists with that student
     const parentEmailAlreadyExists = allParentEmails.includes(parentEmail);
     // If the parent email exists return because we don't want to create a new parent account
     if (parentEmailAlreadyExists) {
       setCreatingParentAccount(false);
-      return { result: 'This Parent already exists!! No Account Created' };
+      return { result: "This Parent already exists!! No Account Created" };
     }
 
     // check if a parent account with the email address exists
@@ -149,7 +145,7 @@ export function useNewParentAccount() {
       });
       setCreatingParentAccount(false);
       return {
-        result: 'parent already existed.  Connected to this student account',
+        result: "parent already existed.  Connected to this student account",
       };
     }
 
@@ -195,7 +191,7 @@ export function useNewParentAccount() {
     }
 
     setCreatingParentAccount(false);
-    return { result: 'There was an error.  Please try again.' };
+    return { result: "There was an error.  Please try again." };
   }
 
   return [createParentAccount, creatingParentAccount];

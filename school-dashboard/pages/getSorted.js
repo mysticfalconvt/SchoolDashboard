@@ -1,15 +1,15 @@
-import gql from 'graphql-tag';
-import { useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { useMutation } from '@apollo/client';
-import { useQueryClient } from 'react-query';
-import Loading from '../components/Loading';
-import SortingHatQuestions from '../components/SortingHatQuestions';
-import { useGQLQuery } from '../lib/useGqlQuery';
-import { useUser } from '../components/User';
-import SortedHouse from '../components/SortedHouse';
-import isAllowed from '../lib/isAllowed';
-import NewSortingHatQuestion from '../components/NewSortingHatQuestionButton';
+import gql from "graphql-tag";
+import { useMemo, useState } from "react";
+import styled from "styled-components";
+import { useMutation } from "@apollo/client";
+import { useQueryClient } from "react-query";
+import Loading from "../components/Loading";
+import SortingHatQuestions from "../components/SortingHatQuestions";
+import { useGQLQuery } from "../lib/useGqlQuery";
+import { useUser } from "../components/User";
+import SortedHouse from "../components/SortedHouse";
+import isAllowed from "../lib/isAllowed";
+import NewSortingHatQuestion from "../components/NewSortingHatQuestionButton";
 
 function arrayOfNumbersOneToFourInRandomOrder() {
   return [1, 2, 3, 4].sort(() => Math.random() - 0.5);
@@ -41,9 +41,9 @@ const UPDATE_HOUSE = gql`
 `;
 
 export const SortingHatStyles = styled.div`
-  @import url('http://fonts.cdnfonts.com/css/parry-hotter');
+  @import url("http://fonts.cdnfonts.com/css/parry-hotter");
 
-  font-family: 'HarryPotter7';
+  font-family: "HarryPotter7";
 
   display: flex;
   flex-direction: column;
@@ -85,7 +85,7 @@ export const SortingHatStyles = styled.div`
     padding: 10px;
     font-size: 3rem;
     cursor: pointer;
-    font-family: 'HarryPotter7';
+    font-family: "HarryPotter7";
   }
 
   .questionContainer {
@@ -180,7 +180,7 @@ export default function GetSorted() {
   const [updateHouse] = useMutation(UPDATE_HOUSE);
 
   const { data, isLoading, refetch } = useGQLQuery(
-    'SortingHatQuestions',
+    "SortingHatQuestions",
     SORTING_HAT_QUESTION_QUERY,
     {}
   );
@@ -190,12 +190,9 @@ export default function GetSorted() {
   const maxQuestionNumber = data.allSortingHatQuestions.length - 1;
 
   const currentQuestion = data?.allSortingHatQuestions[questionNumber];
-  console.log(housePoints);
-  console.log(questionNumber);
   const winningHouse = Object.keys(housePoints).reduce((a, b) =>
     housePoints[a] > housePoints[b] ? a : b
   );
-  console.log('house', winningHouse);
 
   function onAnswer(answer) {
     if (answer === currentQuestion.gryffindorChoice) {
@@ -237,7 +234,7 @@ export default function GetSorted() {
         href="http://fonts.cdnfonts.com/css/harrypotter7"
         rel="stylesheet"
       />
-      {isAllowed(me, 'isStaff') && <NewSortingHatQuestion />}
+      {isAllowed(me, "isStaff") && <NewSortingHatQuestion />}
       <SortingHatStyles
         gryffindorOrder={randomOrder[0]}
         hufflepuffOrder={randomOrder[1]}
@@ -262,7 +259,7 @@ export default function GetSorted() {
                     house: winningHouse,
                   },
                 });
-                await queryClient.refetchQueries('me');
+                await queryClient.refetchQueries("me");
                 setQuestionNumber(0);
               }}
             >
@@ -280,7 +277,7 @@ export default function GetSorted() {
                 setQuestionNumber(0);
               }}
             >
-              {' '}
+              {" "}
               Start Over
             </button>
           </>

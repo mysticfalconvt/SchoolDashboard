@@ -104,7 +104,6 @@ export default function NewBugReportButton() {
                 emailData: JSON.stringify(email),
               },
             });
-            console.log(emailRes);
             resetForm();
             setShowForm(false);
           }}
