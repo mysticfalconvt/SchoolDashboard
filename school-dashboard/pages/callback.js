@@ -93,7 +93,7 @@ export default function Callback() {
           <Link href="/mystudentscallback">My class students callback</Link>
         </SmallGradientButton>
       </FormContainerStyles>
-      {showTable && <CallbackTable callbacks={callbacks} />}
+      {showTable && <CallbackTable showClassBlock callbacks={callbacks} />}
 
       {!showTable && <CallbackCards callbacks={callbacks} />}
     </div>

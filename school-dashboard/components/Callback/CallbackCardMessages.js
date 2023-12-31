@@ -129,7 +129,6 @@ export default function CallbackCardMessages({ me, callback }) {
     }
   };
   const handleSelectStudentMessage = async (e) => {
-    console.log(e.target.value);
     const studentMessage =
       e.target.value === studentDeleteMessage ? "" : e.target.value;
     const todaysDate = new Date().toLocaleDateString();
@@ -146,7 +145,6 @@ export default function CallbackCardMessages({ me, callback }) {
       toast.success(`Updated Callback Message for ${callback.student.name}`);
     }
   };
-  console.log(studentMessage);
   const getStudentMessageOptionsArray = () => {
     const options = studentMessageOptions.map((option) => ({
       key: option,

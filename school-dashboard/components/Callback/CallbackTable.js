@@ -6,6 +6,8 @@ import Table from "../Table";
 import { useUser } from "../User";
 import CallbackMessagesForTable from "./CallbackMessagesForTable";
 import MarkCallbackCompleted from "./MarkCallbackCompleted";
+import gql from "graphql-tag";
+import { useGQLQuery } from "../../lib/useGqlQuery";
 
 export const ToolTipStyles = styled.div`
   position: relative;
@@ -29,16 +31,100 @@ export const ToolTipStyles = styled.div`
   }
 `;
 
-export default function CallbackTable({ callbacks }) {
+const GET_STUDENTS_BY_BLOCK_QUERY = gql`
+  query GET_STUDENTS_BY_BLOCK($id: ID) {
+    user(where: { id: $id }) {
+      id
+      name
+      block1Students {
+        id
+      }
+      block2Students {
+        id
+      }
+      block3Students {
+        id
+      }
+      block4Students {
+        id
+      }
+      block5Students {
+        id
+      }
+      block6Students {
+        id
+      }
+      block7Students {
+        id
+      }
+      block8Students {
+        id
+      }
+      block9Students {
+        id
+      }
+      block10Students {
+        id
+      }
+    }
+  }
+`;
+
+export default function CallbackTable({ callbacks, showClassBlock = false }) {
   const me = useUser();
+
+  const { data } = useGQLQuery(
+    "studentsByBlock",
+    GET_STUDENTS_BY_BLOCK_QUERY,
+    {
+      id: me?.id,
+    },
+    {
+      enabled: !!me && !!showClassBlock,
+    }
+  );
+  const studentsByBlock = useMemo(() => {
+    const students = data?.user;
+    const B1 = students?.block1Students?.map((student) => student.id);
+    const B2 = students?.block2Students?.map((student) => student.id);
+    const B3 = students?.block3Students?.map((student) => student.id);
+    const B4 = students?.block4Students?.map((student) => student.id);
+    const B5 = students?.block5Students?.map((student) => student.id);
+    const B6 = students?.block6Students?.map((student) => student.id);
+    const B7 = students?.block7Students?.map((student) => student.id);
+    const B8 = students?.block8Students?.map((student) => student.id);
+    const B9 = students?.block9Students?.map((student) => student.id);
+    const B10 = students?.block10Students?.map((student) => student.id);
+    const studentsByBlock = {
+      B1,
+      B2,
+      B3,
+      B4,
+      B5,
+      B6,
+      B7,
+      B8,
+      B9,
+      B10,
+    };
+    return studentsByBlock;
+  }, [data]);
+
   const callbacksMemo = useMemo(() => {
     const callbackWithName = callbacks?.map((callback) => {
       const name = getDisplayName(callback.student);
       const student = { ...callback.student, name };
-      return { ...callback, student };
+      // check which block student is in from studentsByBlock
+      const block =
+        Object.keys(studentsByBlock).find((block) => {
+          const students = studentsByBlock[block];
+          return students?.includes(student.id);
+        }) || "n/a";
+
+      return { ...callback, student, block };
     });
     return callbackWithName;
-  }, [callbacks]);
+  }, [callbacks, studentsByBlock]);
   const columns = useMemo(
     () => [
       {
@@ -137,6 +223,10 @@ export default function CallbackTable({ callbacks }) {
               </Link>
             ),
           },
+          {
+            Header: "Block",
+            accessor: "block",
+          },
         ],
       },
       {
@@ -208,6 +298,7 @@ export default function CallbackTable({ callbacks }) {
         data={callbacksMemo || []}
         searchColumn="student.name"
         columns={columns}
+        hiddenColumns={!showClassBlock ? ["block"] : []}
       />
     </div>
   );
