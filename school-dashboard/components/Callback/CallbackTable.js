@@ -123,7 +123,16 @@ export default function CallbackTable({ callbacks, showClassBlock = false }) {
 
       return { ...callback, student, block };
     });
-    return callbackWithName;
+    return callbackWithName.sort((a, b) => {
+      console.log(a, b);
+      if (a.student.name < b.student.name) {
+        return -1;
+      }
+      if (a.student.name > b.student.name) {
+        return 1;
+      }
+      return 0;
+    });
   }, [callbacks, studentsByBlock]);
   const columns = useMemo(
     () => [
