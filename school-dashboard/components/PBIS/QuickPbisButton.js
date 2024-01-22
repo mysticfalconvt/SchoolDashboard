@@ -42,7 +42,7 @@ export default function QuickPbisButton({ id, displayName = false }) {
   return (
     <SmallGradientButton
       style={{ marginLeft: "1rem" }}
-      disabled={loading || cardLoading}
+      disabled={loading}
       onClick={async (e) => {
         e.preventDefault();
         // console.log(teacher);
@@ -53,7 +53,7 @@ export default function QuickPbisButton({ id, displayName = false }) {
         queryClient.refetchQueries();
       }}
     >
-      {loading || cardLoading ? "Please Wait" : ""}
+      {loading ? "Please Wait" : ""}
       {displayName ? `Quick Card for ${displayName}` : "Quick Card"}
     </SmallGradientButton>
   );
