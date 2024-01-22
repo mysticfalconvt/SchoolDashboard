@@ -1,4 +1,5 @@
 import "../pages/global.css";
+import * as Sentry from "@sentry/react";
 
 import {
   useQuery,
@@ -19,6 +20,20 @@ queryClient.setDefaultOptions({ queries: { staleTime: 10000 } });
 // console.log('MyApp.js');
 // console.log(queryClient.getDefaultOptions());
 function MyApp({ Component, pageProps, apollo }) {
+  Sentry.init({
+    dsn: "https://fd136ab708a7f9d31644905e226b92e5@o4506610880741376.ingest.sentry.io/4506614637002752",
+    integrations: [
+      new Sentry.BrowserTracing({
+        // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+        tracePropagationTargets: [
+          "localhost",
+          /^https:\/\/yourserver\.io\/api/,
+        ],
+      }),
+    ],
+    // Performance Monitoring
+    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  });
   return (
     <>
       <ApolloProvider client={apollo}>
