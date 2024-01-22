@@ -1,11 +1,11 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import Link from 'next/link';
-import React from 'react';
-import { useQueryClient } from 'react-query';
-import { UPDATE_PBIS } from '../../lib/pbisUtils';
-import { SmallGradientButton } from '../styles/Button';
-import { useUser } from '../User';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import Link from "next/link";
+import React from "react";
+import { useQueryClient } from "react-query";
+import { UPDATE_PBIS } from "../../lib/pbisUtils";
+import { SmallGradientButton } from "../styles/Button";
+import { useUser } from "../User";
 
 const CREATE_QUICK_PBIS = gql`
   mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {
@@ -35,13 +35,13 @@ export default function QuickPbisButton({ id, displayName = false }) {
     { variables: { teacher, student: id } }
   );
   // console.log(id);
-  const [updateCardCount, { loading: cardLoading }] = useMutation(UPDATE_PBIS, {
-    variables: { userId: id },
-  });
+  // const [updateCardCount, { loading: cardLoading }] = useMutation(UPDATE_PBIS, {
+  //   variables: { userId: id },
+  // });
   const queryClient = useQueryClient();
   return (
     <SmallGradientButton
-      style={{ marginLeft: '1rem' }}
+      style={{ marginLeft: "1rem" }}
       disabled={loading || cardLoading}
       onClick={async (e) => {
         e.preventDefault();
@@ -49,12 +49,12 @@ export default function QuickPbisButton({ id, displayName = false }) {
         // console.log('creating card');
         const res = await createCard();
         // console.log(res);
-        await updateCardCount();
+        // await updateCardCount();
         queryClient.refetchQueries();
       }}
     >
-      {loading || cardLoading ? 'Please Wait' : ''}
-      {displayName ? `Quick Card for ${displayName}` : 'Quick Card'}
+      {loading || cardLoading ? "Please Wait" : ""}
+      {displayName ? `Quick Card for ${displayName}` : "Quick Card"}
     </SmallGradientButton>
   );
 }
