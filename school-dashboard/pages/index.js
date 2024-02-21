@@ -172,11 +172,11 @@ export default function Home(props) {
               <Link href={`/userProfile/${me?.id}`}>My Students</Link>
             </GradientButton>
           )}
-          {me && isAllowed(me || {}, "isStaff") && (
+          {/* {me && isAllowed(me || {}, "isStaff") && (
             <GradientButton>
               <Link href="/trimesterAwards">Trimester Awards</Link>
             </GradientButton>
-          )}
+          )} */}
 
           {me && isAllowed(me || {}, "isStaff") && (
             <GradientButton>
