@@ -20,7 +20,7 @@ export default class MyDocument extends Document {
             <script
               async
               src="https://umami.rboskind.com/script.js"
-              data-website-id="8b53e6ab-eeb4-4954-aa7d-d3fb46b22914"
+              data-website-id={process.env.UMAMI_ID || ""}
             ></script>
           )}
         </Head>
