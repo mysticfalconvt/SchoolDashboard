@@ -101,7 +101,7 @@ export default function NewBugReportButton() {
             //send email to Admin
             const emailRes = await sendEmail({
               variables: {
-                emailData: JSON.stringify(email),
+                emailData: email,
               },
             });
             resetForm();

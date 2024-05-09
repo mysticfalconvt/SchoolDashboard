@@ -136,7 +136,7 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
             // console.log(emailToSend);
             const emailRes = await sendEmail({
               variables: {
-                emailData: JSON.stringify(emailToSend),
+                emailData: emailToSend,
               },
             });
           });

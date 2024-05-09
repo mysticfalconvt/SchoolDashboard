@@ -180,7 +180,7 @@ export function useNewParentAccount() {
       };
       const emailRes = await sendEmail({
         variables: {
-          emailData: JSON.stringify(emailToSend),
+          emailData: emailToSend,
         },
       });
       setCreatingParentAccount(false);

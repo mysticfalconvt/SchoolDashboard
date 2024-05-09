@@ -163,11 +163,7 @@ export default function NewDiscipline({ refetch }) {
             // Submit the input fields to the backend:
             const res = await createDiscipline();
             setEmailSending(true);
-            if (
-              res.data.createDiscipline.id &&
-              adminEmailArray &&
-              !isDevelopment
-            ) {
+            if (res.data.createDiscipline.id && adminEmailArray) {
               // loop over each email in adminEmailArray and send an email to each one async and await
               for (const email of adminEmailArray) {
                 const emailToSend = {
@@ -183,9 +179,10 @@ export default function NewDiscipline({ refetch }) {
 
                 const emailRes = await sendEmail({
                   variables: {
-                    emailData: JSON.stringify(emailToSend),
+                    emailData: emailToSend,
                   },
                 });
+                console.log(emailRes);
               }
             }
             resetForm();

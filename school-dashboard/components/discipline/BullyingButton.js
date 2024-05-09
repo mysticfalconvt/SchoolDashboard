@@ -125,7 +125,7 @@ export default function NewBullying({ refetch }) {
                 };
                 const emailRes = await sendEmail({
                   variables: {
-                    emailData: JSON.stringify(emailToSend),
+                    emailData: emailToSend,
                   },
                 });
               }
