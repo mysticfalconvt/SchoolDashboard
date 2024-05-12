@@ -6,10 +6,8 @@ import Form, { FormContainerStyles } from '../styles/Form';
 import DisplayError from '../ErrorMessage';
 
 const UPDATE_USER_MUTATION = gql`
-  mutation UPDATE_USER_MUTATION($studentScheduleData: String!) {
-    updateStudentSchedules(studentScheduleData: $studentScheduleData) {
-      name
-    }
+  mutation UPDATE_USER_MUTATION($studentScheduleData: JSON!) {
+    updateStudentSchedules(studentScheduleData: $studentScheduleData) 
   }
 `;
 
@@ -41,7 +39,7 @@ export default function NewUpdateUsers() {
               // Submit the inputfields to the backend:
               const res = await upateUsersFromJson();
               setResultOfUpdate(
-                JSON.parse(res.data.updateStudentSchedules.name)
+                JSON.parse(res.data.updateStudentSchedules)
               );
               // clearForm();
               setShowForm(false);

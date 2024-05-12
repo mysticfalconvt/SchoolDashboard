@@ -14,10 +14,13 @@ const UPDATE_USER_MUTATION = gql`
 export default function NewUpdateUsers() {
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm } = useForm();
+  console.log(inputs);
+  const inputJson = JSON.parse(inputs?.userData || "{}");
+
   const [updateUsersFromJson, { loading, error, data }] = useMutation(
     UPDATE_USER_MUTATION,
     {
-      variables: { staffData: JSON.parse(inputs.userData) },
+      variables: { staffData: inputJson },
     }
   );
   const [resultOfUpdate, setResultOfUpdate] = useState(null);
@@ -37,10 +40,10 @@ export default function NewUpdateUsers() {
             onSubmit={async (e) => {
               e.preventDefault();
               // Submit the inputfields to the backend:
-              const inputJson = JSON.parse(inputs.data);
+              const inputJson = JSON.parse(inputs?.data || "{}");
               if (!inputJson) return;
               const res = await updateUsersFromJson();
-              setResultOfUpdate(JSON.parse(res.data.addStaff.name));
+              setResultOfUpdate(JSON.parse(res.data.addStaff));
               clearForm();
               setShowForm(false);
             }}
