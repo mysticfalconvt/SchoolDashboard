@@ -41,6 +41,8 @@
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
     "@next/eslint-plugin-next": "^14.2.3",
+    "@types/node": "20.12.11",
+    "@types/react": "18.3.2",
     "autoprefixer": "^10.4.19",
     "babel-eslint": "^10.1.0",
     "eslint": "^8.2.0",
