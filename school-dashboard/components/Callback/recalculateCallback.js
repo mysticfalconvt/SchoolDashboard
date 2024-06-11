@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const RECALCULATE_CALLBACK_MUTATION = gql`
   mutation RECALCULATE_CALLBACK_MUTATION($callbackId: ID!) {
-    recalculateCallback(callbackID: $callbackId) {
+    recalculateCallback(callbackId: $callbackId) {
       id
     }
   }
