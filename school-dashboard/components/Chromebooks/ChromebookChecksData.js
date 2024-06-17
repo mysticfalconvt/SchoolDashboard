@@ -140,10 +140,8 @@ export default function ChromebookChecksData({ assignments }) {
           ...assignment,
           checkLog: checkLog.filter((check) => {
             if (displayGreen) return true;
-            if (check.message === ChromeBookCheckMessageOptions[1])
-              return false;
-            if (check.message === ChromeBookCheckMessageOptions[2])
-              return false;
+            if (getColorFromMessage(check.message) === "green") return false;
+
             return true;
           }),
         };
@@ -220,7 +218,11 @@ export default function ChromebookChecksData({ assignments }) {
       <ChromebookMessageLegend />
       <table className="table-auto border-collapse border border-slate-500 border-spacing-2 border-spacing-x-2 border-spacing-y-2 mt-2">
         {checksToShow.map((assignment) => (
-          <ChromebookCheckRow key={assignment.id} assignment={assignment} />
+          <ChromebookCheckRow
+            key={assignment.id}
+            assignment={assignment}
+            showGreens={displayGreen}
+          />
         ))}
       </table>
     </div>

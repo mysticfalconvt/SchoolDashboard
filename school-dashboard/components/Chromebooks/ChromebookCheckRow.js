@@ -11,7 +11,7 @@ const getColorFromMessage = (message) => {
   return "blue";
 };
 
-export default function ChromebookCheckRow({ assignment }) {
+export default function ChromebookCheckRow({ assignment, showGreens }) {
   const { teacher, student, number, checkLog } = assignment;
   if (!teacher || !student || !number || !checkLog.length) return null;
   return (
@@ -27,6 +27,8 @@ export default function ChromebookCheckRow({ assignment }) {
       {checkLog.map((check) => {
         const { message, time } = check;
         const date = new Date(time).toLocaleDateString();
+        if (getColorFromMessage(message) === "green" && !showGreens)
+          return null;
         return (
           <td
             key={`check-${check.id}`}
