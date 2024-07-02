@@ -14,7 +14,7 @@ import { useUser } from "../User";
 import useCreateMessage from "../Messages/useCreateMessage";
 import useSendEmail from "../../lib/useSendEmail";
 
-const CREATE_BUG_REPORT_MUTATION = gql`
+export const CREATE_BUG_REPORT_MUTATION = gql`
   mutation CREATE_BUG_REPORT_MUTATION(
     $name: String!
     $submittedBy: ID!
@@ -55,10 +55,8 @@ export default function NewBugReportButton() {
       },
     }
   );
-  // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
 
-  //   console.log(inputs);
   return (
     <div>
       <GradientButton
@@ -101,7 +99,7 @@ export default function NewBugReportButton() {
             //send email to Admin
             const emailRes = await sendEmail({
               variables: {
-                emailData: JSON.stringify(email),
+                emailData: email,
               },
             });
             resetForm();

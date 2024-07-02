@@ -151,7 +151,7 @@ export default function CellPhoneAddButton() {
                 // console.log(emailToSend);
                 const emailRes = await sendEmail({
                   variables: {
-                    emailData: JSON.stringify(emailToSend),
+                    emailData: emailToSend,
                   },
                 });
               }

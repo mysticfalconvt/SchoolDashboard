@@ -178,7 +178,7 @@ export default function CreateSingleChromebookCheck() {
                   };
                   const emailRes = await sendEmail({
                     variables: {
-                      emailData: JSON.stringify(emailToSend),
+                      emailData: JemailToSend,
                     },
                   });
                 });

@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import React from 'react';
-import useSendEmail from '../../lib/useSendEmail';
-import GradientButton from '../styles/Button';
-import { useUser } from '../User';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import React from "react";
+import useSendEmail from "../../lib/useSendEmail";
+import GradientButton from "../styles/Button";
+import { useUser } from "../User";
 
 const CREATE_STUDENT_FOCUS = gql`
   mutation CREATE_STUDENT_FOCUS(
@@ -75,7 +75,7 @@ export default function EmailParentsAboutCallback({ student, disabled }) {
           // console.log('sending email to', emailToSend);
           await sendEmail({
             variables: {
-              emailData: JSON.stringify(emailToSend),
+              emailData: emailToSend,
             },
           });
           return emailToSend;
@@ -84,7 +84,7 @@ export default function EmailParentsAboutCallback({ student, disabled }) {
         const studentFocusRes = await createStudentFocus({
           variables: {
             comments: `Emailed parents ${parentEmails} about ${callbackCount} items on Callback`,
-            category: 'Parent Contact',
+            category: "Parent Contact",
             teacher: me?.id,
             student: student.id,
           },
@@ -94,8 +94,8 @@ export default function EmailParentsAboutCallback({ student, disabled }) {
         setLoading(false);
       }}
     >
-      {loading ? 'Sending...' : null}
-      {!emailSent ? 'Email Parents about Callback' : 'Email Sent'}
+      {loading ? "Sending..." : null}
+      {!emailSent ? "Email Parents about Callback" : "Email Sent"}
     </GradientButton>
   );
 }
