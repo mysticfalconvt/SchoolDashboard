@@ -10,8 +10,7 @@ import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
-  GET_TA_CHROMEBOOK_CHECKS_QUERY,
-} from "../../components/Chromebooks/ChromebookCheck";
+GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY} from "../../components/Chromebooks/ChromebookCheck";
 import { useMemo } from "react";
 
 const TA_INFO_QUERY = gql`
@@ -156,7 +155,7 @@ export default function TA({ data: initialData, query }) {
   );
   const { data: existingChecks, isLoading: CBCheckLoading } = useGQLQuery(
     `TAChromebookChecks-${query.id}`,
-    GET_TA_CHROMEBOOK_CHECKS_QUERY,
+    GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
     { id: query.id }
   );
   // get the callbacks from each student in the ta
