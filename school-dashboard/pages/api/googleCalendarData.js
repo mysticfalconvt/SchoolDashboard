@@ -1,7 +1,7 @@
 // get google calendar events from google api
 import { google } from "googleapis";
 
-const getCalendarData = async (req, res) => {
+export const getCalendarData = async (req, res) => {
   const calendarId = process.env.CALENDAR_ID;
   const scopes = [
     "https://www.googleapis.com/auth/calendar.readonly",
@@ -88,7 +88,7 @@ const getCalendarData = async (req, res) => {
   events = events.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
   });
-
+console.log("test", events);
   res.status(200).json({ events: events });
 };
 
