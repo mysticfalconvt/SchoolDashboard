@@ -79,6 +79,8 @@ const getCalendarData = async (req, res) => {
     orderBy: "startTime",
   });
 
+  console.log(Calendar);
+
   const rawEvents = Calendar.data.items || [];
 
   let events = rawEvents.map((event) => {
