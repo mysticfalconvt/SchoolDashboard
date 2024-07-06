@@ -232,7 +232,7 @@ export default function Home(props) {
     </div>
   );
 }
-const getCalendarData = async (req, res) => {
+const getCalendarData = async () => {
   const calendarId = process.env.CALENDAR_ID;
   const scopes = [
     "https://www.googleapis.com/auth/calendar.readonly",
@@ -323,8 +323,8 @@ const getCalendarData = async (req, res) => {
     (event) => {
       return {
         ...event,
-        date: new Date(event.date).toISOString(),
-        endDate: new Date(event.endDate).toISOString(),
+        date: event?.date ? new Date(event.date).toISOString() : "",
+        endDate: event?.endDate ? new Date(event.endDate).toISOString() : "",
         description: event.description || "",
       };
     }
