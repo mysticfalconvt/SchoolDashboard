@@ -43,7 +43,7 @@ export const CREATE_QUICK_PBIS = gql`
   }
 `;
 
-const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
+export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY($id: ID) {
     chromebookAssignments(where: { teacher: { id: { equals: $id } } }) {
       id
