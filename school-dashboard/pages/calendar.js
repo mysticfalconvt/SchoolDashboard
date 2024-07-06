@@ -85,16 +85,16 @@ const getCalendarData = async (req, res) => {
     const status = "Both";
     const isGCDate = event.start.date ? true : false;
     const isGCDateTime = event.start.dateTime ? true : false;
-    const startDate = new Date(event.start.date || event.start.dateTime);
-    const endDate = new Date(event.end.date || event.end.dateTime);
+    const startDate = new Date(event.start.date || event.start.dateTime || "");
+    const endDate = new Date(event.end.date || event.end.dateTime || "");
     const isMultiDayEvent = endDate - startDate > 1000 * 60 * 60 * 24;
     const date = new Date(
       isGCDate ? startDate.setDate(startDate.getDate() + 1) : startDate
     );
-    const name = event.summary;
-    const description = event.description;
-    const link = event.htmlLink;
-    const id = event.id;
+    const name = event?.summary || "";
+    const description = event?.description || "";
+    const link = event?.htmlLink || "";
+    const id = event.id || "";
     return {
       status,
       isMultiDayEvent,
