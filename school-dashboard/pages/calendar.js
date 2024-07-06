@@ -130,7 +130,17 @@ const getCalendarData = async (req, res) => {
   events = events.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
   });
-  return  events ;
+  const initialGoogleCalendarEvents = events.map(
+    (event) => {
+      return {
+        ...event,
+        date: new Date(event.date).toISOString(),
+        endDate: new Date(event.endDate).toISOString(),
+        description: event.description || "",
+      };
+    }
+  )
+  return  initialGoogleCalendarEvents ;
 };
 
 export async function getStaticProps(context) {
@@ -149,17 +159,7 @@ export async function getStaticProps(context) {
   );
   const fetchAllCalendars = async () => graphQLClient.request(GET_CALENDARS);
   const initialCalendarDates = await fetchAllCalendars();
-  const initialGoogleCalendarEventsWithDates = await getCalendarData();
-  const initialGoogleCalendarEvents = initialGoogleCalendarEventsWithDates.map(
-    (event) => {
-      return {
-        ...event,
-        date: new Date(event.date).toISOString(),
-        endDate: new Date(event.endDate).toISOString(),
-        description: event.description || "",
-      };
-    }
-  )
+  const initialGoogleCalendarEvents = await getCalendarData();
   return {
     props: {
       initialCalendarDates,

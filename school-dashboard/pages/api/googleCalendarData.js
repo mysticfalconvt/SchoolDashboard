@@ -88,8 +88,18 @@ export const getCalendarData = async (req, res) => {
   events = events.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
   });
+  const initialGoogleCalendarEvents = events?.map(
+    (event) => {
+      return {
+        ...event,
+        date: new Date(event.date).toISOString(),
+        endDate: new Date(event.endDate).toISOString(),
+        description: event.description || "",
+      };
+    }
+  ) || [];
 console.log("test", events);
-  res.status(200).json({ events: events });
+  res.status(200).json({ events: initialGoogleCalendarEvents });
 };
 
 export default getCalendarData;
