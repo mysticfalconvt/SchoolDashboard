@@ -1,26 +1,30 @@
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import NewBugReportButton from "../components/bugreports/NewBugReportButton";
 import { useUser } from "../components/User";
 import useSendEmail from "../lib/useSendEmail";
 
 export default function Page404(): JSX.Element {
-  const pathname = window?.location?.pathname || "";
+  const [pathname, setPathname] = useState("");
   const me = useUser();
   const { sendEmail } = useSendEmail();
-  console.log(pathname);
 
   useEffect(() => {
+    // Set pathname only on the client side
+    if (typeof window !== "undefined") {
+      setPathname(window.location.pathname);
+    }
+
     // send an email only on initial load to prevent spam
-    if (me) {
+    if (me && pathname) {
       const email = {
         toAddress: "rboskind@gmail.com",
         fromAddress: me.email,
         subject: `NCUJHS.Tech 404 Bug Report from ${me.name}`,
         body: `
             <p>This is a bug report from ${me.name}. </p>
-            <p>there was a 404 error on ${pathname}</p>
+            <p>There was a 404 error on ${pathname}</p>
             `,
       };
       sendEmail({
@@ -29,7 +33,7 @@ export default function Page404(): JSX.Element {
         },
       });
     }
-  }, []);
+  }, [me, pathname, sendEmail]);
 
   return (
     <div>
