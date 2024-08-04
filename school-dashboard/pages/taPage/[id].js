@@ -10,7 +10,8 @@ import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
-GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY} from "../../components/Chromebooks/ChromebookCheck";
+  GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
+} from "../../components/Chromebooks/ChromebookCheck";
 import { useMemo } from "react";
 
 const TA_INFO_QUERY = gql`
@@ -171,7 +172,7 @@ export default function TA({ data: initialData, query }) {
   const students = useMemo(
     () =>
       data?.taTeacher?.taStudents
-        .map((student) => {
+        ?.map((student) => {
           const existingCheck = existingChecks?.users?.filter(
             (check) => check.id === student.id
           );
@@ -182,7 +183,7 @@ export default function TA({ data: initialData, query }) {
               : [],
           };
         })
-        .sort((a, b) => a.name.localeCompare(b.name)),
+        .sort((a, b) => a.name.localeCompare(b.name)) || [],
     [data, existingChecks]
   );
 
@@ -238,7 +239,7 @@ export async function getStaticPaths() {
   );
   const fetchData = async () => graphQLClient.request(TA_TEACHER_LIST_QUERY);
   const data = await fetchData();
-  const usersToUse = data.users;
+  const usersToUse = data?.users || [];
 
   const paths =
     usersToUse?.map((user) => ({
