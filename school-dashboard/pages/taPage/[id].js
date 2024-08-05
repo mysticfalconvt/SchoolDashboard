@@ -190,7 +190,6 @@ export default function TA({ data: initialData, query }) {
   if (!me) return <Loading />;
   if (isLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
-  console.log(students);
   const taTotalPbisCards = students.reduce(
     (acc, student) => acc + student.studentPbisCardsCount || 0,
     0

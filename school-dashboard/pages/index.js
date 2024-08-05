@@ -362,15 +362,10 @@ export async function getStaticProps(context) {
     graphQLClient.request(SEARCH_ALL_USERS_QUERY);
 
   const totalCards = await fetchTotalCards();
-  console.log("totalCards", totalCards);
   const homePageLinks = await fetchHomePageLinks();
-  console.log("homePageLinks", homePageLinks);
   const weeklyCalendar = await fetchWeeklyCalendar();
-  console.log("weeklyCalendar", weeklyCalendar);
   const allUsersForSearch = await fetchAllUsersForSearch();
-  console.log("allUsersForSearch", allUsersForSearch);
   const initialGoogleCalendarEvents = await getCalendarData();
-  console.log("initialGoogleCalendarEvents", initialGoogleCalendarEvents);
   return {
     props: {
       totalCards: totalCards.pbisCardsCount,
