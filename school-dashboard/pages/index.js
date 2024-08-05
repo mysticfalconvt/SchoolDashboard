@@ -303,7 +303,7 @@ const getCalendarData = async () => {
   });
   multiDayEvents.forEach((event) => {
     const start = new Date(event?.date);
-    const end = new Date(event?.endDate || event?.date);
+    const end = new Date(event?.endDate || event?.date || new Date());
     const days = (end - start) / (1000 * 60 * 60 * 24);
     for (let i = 1; i < days; i++) {
       const newDate = new Date(start);
