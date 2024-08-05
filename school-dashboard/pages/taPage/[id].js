@@ -233,6 +233,10 @@ export async function getStaticPaths() {
         authorization: `test auth for keystone`,
       },
     };
+    console.log(
+      "Request URL: path",
+      process.env.NODE_ENV === "development" ? endpoint : prodEndpoint
+    );
 
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
@@ -272,6 +276,10 @@ export async function getStaticProps({ params }) {
         authorization: `test auth for keystone`,
       },
     };
+    console.log(
+      "Request URL props",
+      process.env.NODE_ENV === "development" ? endpoint : prodEndpoint
+    );
 
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
