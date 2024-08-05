@@ -264,35 +264,46 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const headers = {
-    credentials: "include",
-    mode: "cors",
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
+  try {
+    const headers = {
+      credentials: "include",
+      mode: "cors",
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    };
 
-  const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
-    headers
-  );
-  const fetchData = async () => {
-    try {
-      const dataFromFetch = await graphQLClient.request(TA_INFO_QUERY, {
-        id: params.id,
-      });
-      return dataFromFetch;
-    } catch (e) {
-      console.log(e);
-      console.log("error", params.id);
-    }
-  };
-  const data = (await fetchData()) || {};
+    const graphQLClient = new GraphQLClient(
+      process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
+      headers
+    );
 
-  return {
-    props: {
-      data,
-      revalidate: 60 * 60 * 1, // 1 hours (in seconds)
-    },
-  };
+    const fetchData = async () => {
+      try {
+        const dataFromFetch = await graphQLClient.request(TA_INFO_QUERY, {
+          id: params.id,
+        });
+        return dataFromFetch;
+      } catch (e) {
+        console.log(e);
+        console.log("error", params.id);
+        throw new Error("Failed to fetch data"); // Throw an error to indicate that the fetch failed
+      }
+    };
+
+    const data = await fetchData();
+    console.log("data", data);
+
+    return {
+      props: {
+        data,
+        revalidate: 60 * 60 * 1, // 1 hours (in seconds)
+      },
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps:", error);
+    return {
+      notFound: true, // If there's an error, return a 404 page
+    };
+  }
 }

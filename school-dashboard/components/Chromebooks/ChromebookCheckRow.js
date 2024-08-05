@@ -11,11 +11,11 @@ const getColorFromMessage = (message) => {
   return "blue";
 };
 
-export default function ChromebookCheckRow({ assignment, showGreens }) {
+export default function ChromebookCheckRow({ assignment, showGreens, key }) {
   const { teacher, student, number, checkLog } = assignment;
   if (!teacher || !student || !number || !checkLog.length) return null;
   return (
-    <tr key={`assignment-${assignment.id}`} className="border-spacing-2">
+    <tr key={`key-${key}`} className="border-spacing-2">
       <td className="border border-slate-500 border-spacing-2 ">
         {teacher?.name}
       </td>
