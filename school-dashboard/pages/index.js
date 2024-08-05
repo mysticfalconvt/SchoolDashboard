@@ -319,17 +319,15 @@ const getCalendarData = async () => {
   events = events.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
   });
-  const initialGoogleCalendarEvents = events.map(
-    (event) => {
-      return {
-        ...event,
-        date: event?.date ? new Date(event.date).toISOString() : "",
-        endDate: event?.endDate ? new Date(event.endDate).toISOString() : "",
-        description: event.description || "",
-      };
-    }
-  )
-  return  initialGoogleCalendarEvents ;
+  const initialGoogleCalendarEvents = events.map((event) => {
+    return {
+      ...event,
+      date: event?.date ? new Date(event.date).toISOString() : "",
+      endDate: event?.endDate ? new Date(event.endDate).toISOString() : "",
+      description: event.description || "",
+    };
+  });
+  return initialGoogleCalendarEvents;
 };
 
 export async function getStaticProps(context) {
@@ -364,17 +362,22 @@ export async function getStaticProps(context) {
     graphQLClient.request(SEARCH_ALL_USERS_QUERY);
 
   const totalCards = await fetchTotalCards();
+  console.log("totalCards", totalCards);
   const homePageLinks = await fetchHomePageLinks();
+  console.log("homePageLinks", homePageLinks);
   const weeklyCalendar = await fetchWeeklyCalendar();
+  console.log("weeklyCalendar", weeklyCalendar);
   const allUsersForSearch = await fetchAllUsersForSearch();
+  console.log("allUsersForSearch", allUsersForSearch);
   const initialGoogleCalendarEvents = await getCalendarData();
+  console.log("initialGoogleCalendarEvents", initialGoogleCalendarEvents);
   return {
     props: {
       totalCards: totalCards.pbisCardsCount,
       homePageLinks,
       weeklyCalendar,
       allUsersForSearch,
-      initialGoogleCalendarEvents: {events: initialGoogleCalendarEvents},
+      initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
     }, // will be passed to the page component as props
     revalidate: 60 * 60,
   };

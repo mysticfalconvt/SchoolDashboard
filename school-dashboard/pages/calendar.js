@@ -132,17 +132,15 @@ const getCalendarData = async (req, res) => {
   events = events.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
   });
-  const initialGoogleCalendarEvents = events.map(
-    (event) => {
-      return {
-        ...event,
-        date: new Date(event.date).toISOString(),
-        endDate: new Date(event.endDate).toISOString(),
-        description: event.description || "",
-      };
-    }
-  )
-  return  initialGoogleCalendarEvents ;
+  const initialGoogleCalendarEvents = events.map((event) => {
+    return {
+      ...event,
+      date: new Date(event.date).toISOString(),
+      endDate: new Date(event.endDate).toISOString(),
+      description: event.description || "",
+    };
+  });
+  return initialGoogleCalendarEvents;
 };
 
 export async function getStaticProps(context) {
@@ -164,7 +162,7 @@ export async function getStaticProps(context) {
   const initialGoogleCalendarEvents = await getCalendarData();
   return {
     props: {
-      initialCalendarDates,
+      initialCalendarDates: initialCalendarDates || [],
       initialGoogleCalendarEvents: initialGoogleCalendarEvents || [],
     }, // will be passed to the page component as props
     revalidate: 1200, // In seconds
