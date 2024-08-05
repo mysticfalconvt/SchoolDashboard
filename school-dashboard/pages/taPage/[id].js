@@ -10,7 +10,8 @@ import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
 import { endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
-GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY} from "../../components/Chromebooks/ChromebookCheck";
+  GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
+} from "../../components/Chromebooks/ChromebookCheck";
 import { useMemo } from "react";
 
 const TA_INFO_QUERY = gql`
@@ -224,32 +225,42 @@ export default function TA({ data: initialData, query }) {
 }
 
 export async function getStaticPaths() {
-  const headers = {
-    credentials: "include",
-    mode: "cors",
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
-  const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
-    headers
-  );
-  const fetchData = async () => graphQLClient.request(TA_TEACHER_LIST_QUERY);
-  const data = await fetchData();
-  const usersToUse = data.users;
-
-  const paths =
-    usersToUse?.map((user) => ({
-      params: {
-        id: user.id,
+  try {
+    const headers = {
+      credentials: "include",
+      mode: "cors",
+      headers: {
+        authorization: `test auth for keystone`,
       },
-    })) || [];
-  return {
-    paths,
-    fallback: "blocking",
-  };
+    };
+
+    const graphQLClient = new GraphQLClient(
+      process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
+      headers
+    );
+
+    const fetchData = async () => graphQLClient.request(TA_TEACHER_LIST_QUERY);
+    const data = await fetchData();
+    const usersToUse = data.users;
+
+    const paths =
+      usersToUse?.map((user) => ({
+        params: {
+          id: user.id,
+        },
+      })) || [];
+
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      paths: [],
+      fallback: "blocking",
+    };
+  }
 }
 
 export async function getStaticProps({ params }) {
