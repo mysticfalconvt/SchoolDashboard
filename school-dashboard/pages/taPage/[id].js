@@ -8,7 +8,7 @@ import Loading from "../../components/Loading";
 import ViewTaStudentTable from "../../components/users/ViewTaStudentTable";
 import CallbackTable from "../../components/Callback/CallbackTable";
 import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
-import { endpoint, prodEndpoint } from "../../config";
+import { callbackDisabled, endpoint, prodEndpoint } from "../../config";
 import ChromebookCheck, {
   GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
 } from "../../components/Chromebooks/ChromebookCheck";
@@ -216,7 +216,9 @@ export default function TA({ data: initialData, query }) {
           )}
 
           <ViewTaStudentTable users={students} title="TA Students" />
-          <CallbackTable callbacks={allTaCallbacksFlattened || []} />
+          {!callbackDisabled && (
+            <CallbackTable callbacks={allTaCallbacksFlattened || []} />
+          )}
         </>
       )}
     </div>

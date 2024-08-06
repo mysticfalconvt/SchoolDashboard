@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Table from "../Table";
+import { callbackDisabled } from "../../config";
 
 export default function ViewTaStudentTable({
   users,
@@ -313,8 +314,15 @@ export default function ViewTaStudentTable({
   }, [users]);
 
   const hiddenColumns = discipline
-    ? "ChromebookChecks"
-    : "studentDisciplineCount";
+    ? ["ChromebookChecks"]
+    : ["studentDisciplineCount"];
+  if (callbackDisabled) {
+    hiddenColumns.push(
+      "callbackCount",
+      "callbackItemsCount",
+      "averageTimeToCompleteCallback"
+    );
+  }
   return (
     <div>
       <Table

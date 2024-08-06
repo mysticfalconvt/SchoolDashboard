@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import Table from "../Table";
 import QuickPbisButton from "../PBIS/QuickPbisButton";
+import { callbackDisabled } from "../../config";
 
 export default function ViewStudentTable({ users, title }) {
   const columns = useMemo(
@@ -94,7 +95,10 @@ export default function ViewStudentTable({ users, title }) {
       return 0;
     });
   }, [users]);
-
+  hiddenColumns = callbackDisabled
+    ? ["callbackCount", "averageTimeToCompleteCallback"]
+    : [];
+  console.log(hiddenColumns);
   return (
     <div>
       <Table
@@ -102,6 +106,7 @@ export default function ViewStudentTable({ users, title }) {
         columns={columns}
         searchColumn="name"
         showSearch={false}
+        hiddenColumns={hiddenColumns}
       />
     </div>
   );

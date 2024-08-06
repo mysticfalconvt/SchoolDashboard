@@ -29,7 +29,7 @@ import NewBugReportButton from "../components/bugreports/NewBugReportButton";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import AssignmentViewCardsStudent from "../components/Assignments/AssignmentViewCardsStudent";
 import GradientButton from "../components/styles/Button";
-import { endpoint, prodEndpoint } from "../config";
+import { callbackDisabled, endpoint, prodEndpoint } from "../config";
 import { SEARCH_ALL_USERS_QUERY } from "../components/Search";
 import getDisplayName from "../lib/displayName";
 import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
@@ -147,6 +147,7 @@ export default function Home(props) {
       initialData: props?.allUsersForSearch,
     }
   );
+  console.log("callbackEnabled", callbackDisabled);
 
   if (!me) return <RequestReset />;
   return (
@@ -194,14 +195,14 @@ export default function Home(props) {
             initialData={props?.weeklyCalendar}
             initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
           />
-          {isAllowed(me, "hasTA") && <TaCallbacks />}
+          {isAllowed(me, "hasTA") && !callbackDisabled && <TaCallbacks />}
           {me && isAllowed(me, "isStudent") && (
             <div>
               <StudentPbisData student={me} />
               {me?.birthday && !me?.birthday?.cakeType && (
                 <StudentCakeChooser birthday={me.birthday} />
               )}
-              <StudentCallbacks />
+              {!callbackDisabled && <StudentCallbacks />}
               {data?.user && (
                 <AssignmentViewCardsStudent student={data?.user} />
               )}

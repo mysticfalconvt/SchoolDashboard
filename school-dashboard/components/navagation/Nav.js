@@ -6,6 +6,7 @@ import SignIn from "../loginComponents/SignIn";
 import isAllowed from "../../lib/isAllowed";
 import MessagesCount from "../Messages/MessagesCount";
 import { useRouter } from "next/router";
+import { callbackDisabled, disciplineDisabled } from "../../config";
 
 export default function Nav() {
   const me = useUser();
@@ -35,11 +36,11 @@ export default function Nav() {
           <Link href="/links">Links</Link>
           <Link href="/pbis">PBIS</Link>
           {isAllowed(me, "hasTA") && <Link href={`/taPage/${me?.id}`}>TA</Link>}
-          {isAllowed(me, "hasClasses") && (
+          {isAllowed(me, "hasClasses") && !callbackDisabled && (
             <Link href="/callback">Callback</Link>
           )}
           {isAllowed(me, "isStaff") && <Link href="/users">Users</Link>}
-          {isAllowed(me, "isStaff") && (
+          {isAllowed(me, "isStaff") && !disciplineDisabled && (
             <Link href="/discipline">Discipline</Link>
           )}
           {isAllowed(me, "isStaff") && (

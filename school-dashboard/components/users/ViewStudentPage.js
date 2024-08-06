@@ -12,6 +12,7 @@ import EmailParentsAboutCallback from "../Callback/EmailParentsAboutCallback";
 import QuickPbisButton from "../PBIS/QuickPbisButton";
 import { capitalizeFirstLetter } from "../../lib/nameUtils";
 import getDisplayName from "../../lib/displayName";
+import { callbackDisabled } from "../../config";
 
 const ParentInfoStyles = styled.div`
   border-radius: 1rem;
@@ -196,7 +197,9 @@ export default function ViewStudentPage({ student }) {
         </ParentInfoStyles>
       )}
 
-      <CallbackCards callbacks={user.callbackItems || []} />
+      {!callbackDisabled && (
+        <CallbackCards callbacks={user.callbackItems || []} />
+      )}
       <DisplayPbisCardsWidget cards={user.studentPbisCards || []} />
     </div>
   );

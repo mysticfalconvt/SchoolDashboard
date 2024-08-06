@@ -11,7 +11,7 @@ import NewUpdateUsers from "../components/users/NewUpdateUsers";
 import isAllowed from "../lib/isAllowed";
 import { useUser } from "../components/User";
 import NewStaff from "../components/users/NewStaff";
-import { endpoint, prodEndpoint } from "../config";
+import { callbackDisabled, endpoint, prodEndpoint } from "../config";
 
 const GET_ALL_STUDENTS = gql`
   query GET_ALL_STUDENTS {
@@ -372,6 +372,16 @@ export default function Users(props) {
       }) || []
     );
   }, [teachers]);
+
+  const hiddenColumns = callbackDisabled
+    ? [
+        "callbackCount",
+        "totalCallback",
+        "callbackItemsCount",
+        "averageTimeToCompleteCallback",
+      ]
+    : [];
+
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
@@ -402,6 +412,7 @@ export default function Users(props) {
           data={sortedTeachers || []}
           columns={teacherColumns}
           searchColumn="name"
+          hiddenColumns={hiddenColumns}
         />
       )}
       {userSortType === "student" && (
@@ -409,6 +420,7 @@ export default function Users(props) {
           data={sortedStudents || []}
           columns={studentColumns}
           searchColumn="name"
+          hiddenColumns={hiddenColumns}
         />
       )}
     </div>
