@@ -53,7 +53,7 @@ export default function Nav() {
           {isAllowed(me, "isSuperAdmin") && (
             <Link href="/superUserSettings">⚙️</Link>
           )}
-          {isAllowed(me, "canManagePbis") && <Link href="/birthdays">🧁</Link>}
+          {/* {isAllowed(me, "canManagePbis") && <Link href="/birthdays">🧁</Link>} */}
         </>
       )}
     </NavStyles>
