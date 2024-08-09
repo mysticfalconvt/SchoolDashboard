@@ -149,7 +149,7 @@ export default function Home(props) {
   );
   console.log("callbackEnabled", callbackDisabled);
 
-  if (!me) return <RequestReset />;
+  if (!me) return null;
   return (
     <div>
       <main>
