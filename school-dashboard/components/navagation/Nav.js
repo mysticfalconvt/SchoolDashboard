@@ -7,6 +7,7 @@ import isAllowed from "../../lib/isAllowed";
 import MessagesCount from "../Messages/MessagesCount";
 import { useRouter } from "next/router";
 import { callbackDisabled, disciplineDisabled } from "../../config";
+import MagicLinkSignIn from "../loginComponents/MagicLinkSignIn";
 
 export default function Nav() {
   const me = useUser();
@@ -21,7 +22,7 @@ export default function Nav() {
   }
 
   if (!me) {
-    return <SignIn />;
+    return <MagicLinkSignIn />;
   }
   return (
     <NavStyles>
