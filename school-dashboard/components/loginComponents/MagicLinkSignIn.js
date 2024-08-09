@@ -8,6 +8,7 @@ import Error from "../ErrorMessage";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import { GraphQLClient, request } from "graphql-request";
 import { endpoint, prodEndpoint } from "../../config";
+import * as React from "react";
 
 const SIGNIN_MUTATION = gql`
   mutation SIGNIN_MUTATION($email: String!, $password: String!) {
@@ -52,7 +53,7 @@ export default function MagicLinkSignIn() {
     email: "",
     password: "",
   });
-  const queryClient = useQueryClient();
+  const [magicLinkSent, setMagicLinkSent] = React.useState(false);
   const [
     sendMagicLink,
     { data: sendMagicLinkData, loading: sendMagicLinkLoading },
@@ -73,19 +74,12 @@ export default function MagicLinkSignIn() {
     const newRes = await sendMagicLink({
       variables: { email: inputs?.email?.toLowerCase() },
     });
+    if (newRes?.data?.sendUserMagicAuthLink) {
+      setMagicLinkSent(true);
+    }
     console.log(newRes);
   };
-  async function handleSignIn(e) {
-    e.preventDefault(); // stop the form from submitting
-    // console.log(inputs);
-    const newRes = await signinNew(inputs);
-    const res = await signin();
-    queryClient.refetchQueries();
-    // refetch();
-    resetForm();
-    // Send the email and password to the graphqlAPI
-  }
-  // console.log(data)
+
   const error =
     data?.authenticateUserWithPassword.__typename ===
     "UserAuthenticationWithPasswordFailure"
@@ -95,21 +89,23 @@ export default function MagicLinkSignIn() {
   console.log("linkInfo", sendMagicLinkData, sendMagicLinkLoading);
   return (
     <Form method="POST" onSubmit={handleSendMagicLink}>
-      <h2>Sign Into Your Account</h2>
+      {!magicLinkSent && <h2>Sign Into Your Account</h2>}
       <Error error={error} />
-      <fieldset>
-        <label htmlFor="email">
-          Email
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email Address"
-            autoComplete="email"
-            value={inputs.email}
-            onChange={handleChange}
-          />
-        </label>
-        {/* <label htmlFor="password">
+      {!magicLinkSent && (
+        <fieldset>
+          <label htmlFor="email">
+            Email
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email Address"
+              autoComplete="email"
+              value={inputs.email}
+              onChange={handleChange}
+              disabled={sendMagicLinkLoading || magicLinkSent}
+            />
+          </label>
+          {/* <label htmlFor="password">
           Password
           <input
             type="password"
@@ -120,8 +116,15 @@ export default function MagicLinkSignIn() {
             onChange={handleChange}
           />
         </label> */}
-        <button type="submit">Send a Sign In Link</button>
-      </fieldset>
+          <button type="submit">Send a Sign In Link</button>
+        </fieldset>
+      )}
+      {magicLinkSent && (
+        <p className="text-4xl">
+          Check your email for the sign in link. If no email is received, check
+          your email address and spam folder
+        </p>
+      )}
     </Form>
   );
 }
