@@ -52,7 +52,7 @@ export default function Chromebooks({ initialChromebookAssignments }) {
       <div className="flex justify-center gap-4 items-center">
         <h1 className="text-2xl">Chromebooks</h1>
       </div>
-      {isAllowed(me, "hasTA") && <ChromebookCheck taId={me.id} />}
+      {isAllowed(me, "hasTA") && <ChromebookCheck />}
       {/* {display === "Chromebook Assignments" ? (
         <ChromebookAssignmentsData assignments={chromebookAssignments} />
       ) : null} */}

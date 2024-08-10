@@ -6,6 +6,7 @@ import GradientButton from "../styles/Button";
 import { useUser } from "../User";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import useSendEmail from "../../lib/useSendEmail";
+import { useQueryClient } from "react-query";
 
 export const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   mutation CREATE_CHROMEBOOK_CHECK_MUTATION(
@@ -44,13 +45,13 @@ export const CREATE_QUICK_PBIS = gql`
 
 export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY($id: ID) {
-    chromebookAssignments(where: { teacher: { id: { equals: $id } } }) {
+    user(where: { id: $id }) {
       id
-      student {
+      name
+      taStudents {
         id
         name
       }
-      number
     }
   }
 `;
@@ -72,30 +73,29 @@ export const chromebookEmails = [
   "katlynn.cochran@ncsuvt.org",
 ];
 
-function SingleChromebookCheckForm({ assignment, refetch }) {
+function SingleChromebookCheckForm({ student }) {
   const me = useUser();
   const [customMessage, setCustomMessage] = useState("");
   const [message, setMessage] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
-
+  const queryClient = useQueryClient();
   const [createChromebookCheck, { loading, error }] = useMutation(
     CREATE_CHROMEBOOK_CHECK_MUTATION
   );
-  const student = assignment?.student;
   const [createCard] = useMutation(CREATE_QUICK_PBIS, {
     variables: { teacher: me?.id, student: student?.id },
   });
   const { sendEmail, emailLoading } = useSendEmail();
   return (
     <form
-      key={`chromebook-form${assignment?.id}`}
+      key={`chromebook-form${student?.id}`}
       onSubmit={async (e) => {
         e.preventDefault();
         setIsDisabled(true);
         const res = await createChromebookCheck({
           variables: {
             chromebookCheck: {
-              assignment: { connect: { id: assignment.id } },
+              student: { connect: { id: student.id } },
               message:
                 message === "Other"
                   ? customMessage
@@ -116,7 +116,7 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
           await createCard();
           await createCard();
         }
-
+        queryClient.refetchQueries();
         if (
           res.data?.createChromebookCheck?.id &&
           me?.id &&
@@ -126,9 +126,9 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
             const emailToSend = {
               toAddress: email,
               fromAddress: me.email,
-              subject: `New Chromebook Check for ${res.data.createChromebookCheck.assignment?.student?.name}`,
+              subject: `New Chromebook Check for ${res.data.createChromebookCheck?.student?.name}`,
               body: `
-          <p>There is a new Chromebook check for ${res.data.createChromebookCheck.assignment?.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
+          <p>There is a new Chromebook check for ${res.data.createChromebookCheck?.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
           <p>${res.data.createChromebookCheck.message}</p>
            `,
             };
@@ -153,14 +153,11 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
           justifyContent: "space-between",
         }}
       >
-        <h2>
-          {assignment?.number}{" "}
-          {assignment.student ? `- ${assignment.student.name}` : null}
-        </h2>
+        <h2>{student?.name}</h2>
         <label
           htmlFor="status"
           className="flex"
-          key={`status-chromebook-${assignment.id}`}
+          key={`status-chromebook-${student.id}`}
         >
           Status:{" "}
           <select
@@ -182,7 +179,7 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
           </select>
         </label>
 
-        <label htmlFor="message" key={`message-chromebook-${assignment.id}`}>
+        <label htmlFor="message" key={`message-chromebook-${student.id}`}>
           Message
           <input
             className="bg-gray-50 border border-gray-500 text-stone-900 disabled:bg-gray-50 disabled:border-none "
@@ -211,19 +208,20 @@ function SingleChromebookCheckForm({ assignment, refetch }) {
   );
 }
 
-export default function ChromebookCheck({ taId }) {
+export default function ChromebookCheck() {
   const me = useUser();
   const [showForm, setShowForm] = useState(false);
-
-  const { data: taAssignments } = useGQLQuery(
-    `TAChromebookAssignments-${taId}`,
+  const { data: taTeacher } = useGQLQuery(
+    `TAChromebookAssignments-${me?.id}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
-    { id: taId }
+    { id: me?.id },
+    { enabled: !!me?.id }
   );
-  const assignments = taAssignments?.chromebookAssignments || [];
+
+  const students = taTeacher?.user?.taStudents || [];
   return (
     <div>
-      {assignments?.length > 0 ? (
+      {students?.length > 0 ? (
         <GradientButton
           style={{ marginTop: "10px" }}
           onClick={() => setShowForm(!showForm)}
@@ -233,13 +231,11 @@ export default function ChromebookCheck({ taId }) {
       ) : null}
       <div>
         {showForm &&
-          assignments
-            ?.sort((a, b) => a.number - b.number)
-            .map((assignment) => (
-              <div key={`chromebook-check-${assignment.id}`}>
-                <SingleChromebookCheckForm assignment={assignment} />
-              </div>
-            ))}
+          students.map((student) => (
+            <div key={`chromebook-check-${student.id}`}>
+              <SingleChromebookCheckForm student={student} />
+            </div>
+          ))}
       </div>
     </div>
   );

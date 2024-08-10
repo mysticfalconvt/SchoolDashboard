@@ -211,7 +211,7 @@ export default function TA({ data: initialData, query }) {
           {isAllowedPbisCardCounting && (
             <div style={{ display: "flex" }}>
               <CountPhysicalCards taStudents={students} refetch={refetch} />
-              <ChromebookCheck taId={query.id} />
+              <ChromebookCheck />
             </div>
           )}
 
