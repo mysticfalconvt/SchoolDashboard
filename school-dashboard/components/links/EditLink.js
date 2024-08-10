@@ -137,7 +137,7 @@ export default function EditLink({
               />
             </label>
             <button type="submit">+ Publish</button>
-            {user.isSuperAdmin ? (
+            {user?.isSuperAdmin ? (
               <button
                 type="button"
                 onClick={async () => {

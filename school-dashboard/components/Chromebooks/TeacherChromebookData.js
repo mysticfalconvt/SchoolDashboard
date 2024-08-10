@@ -1,27 +1,24 @@
 import React, { useMemo, useState } from "react";
 import { SmallGradientButton } from "../styles/Button";
+import ChromebookCheck from "./ChromebookCheck";
 
-export default function TeacherChromebookData({ chromebookAssignments }) {
+export default function TeacherChromebookData({ teachers }) {
   const [showModal, setShowModal] = useState(false);
   const [dateRange, setDateRange] = useState(7);
   const teacherData = useMemo(() => {
     // get all the teachers and an array of all checks for each teacher
-    if (!chromebookAssignments) return [];
-    const teachers = {};
-    chromebookAssignments.forEach((assignment) => {
-      if (!teachers[assignment.teacher.name]) {
-        teachers[assignment.teacher.name] = [];
-      }
-      teachers[assignment.teacher.name].push(assignment);
-    });
+    if (!teachers) return [];
+
     const teachersWithChecks = [];
-    Object.keys(teachers).forEach((teacher) => {
+    teachers.forEach((teacher) => {
       const teacherWithChecks = {
-        name: teacher,
+        name: teacher.name,
         checks: [],
       };
-      teachers[teacher].forEach((assignment) => {
-        teacherWithChecks.checks.push(...assignment.checkLog);
+      teacher.taStudents.forEach((student) => {
+        student.chromebookCheck.forEach((check) => {
+          teacherWithChecks.checks.push(check);
+        });
       });
 
       teachersWithChecks.push(teacherWithChecks);
@@ -44,7 +41,7 @@ export default function TeacherChromebookData({ chromebookAssignments }) {
     });
 
     return teachersWithFilteredChecks;
-  }, [chromebookAssignments, dateRange]);
+  }, [teachers, dateRange]);
 
   return (
     <>

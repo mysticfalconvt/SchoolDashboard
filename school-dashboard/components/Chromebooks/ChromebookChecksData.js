@@ -4,12 +4,36 @@ import ChromebookCheckRow from "./ChromebookCheckRow";
 import TeacherChromebookData from "./TeacherChromebookData";
 
 const getColorFromMessage = (message) => {
-  if (message === ChromeBookCheckMessageOptions[1]) return "green";
-  if (message === ChromeBookCheckMessageOptions[2]) return "green";
-  if (message === ChromeBookCheckMessageOptions[3]) return "yellow";
-  if (message === ChromeBookCheckMessageOptions[4]) return "red";
-  if (message === ChromeBookCheckMessageOptions[5]) return "red";
-  if (message === ChromeBookCheckMessageOptions[6]) return "red";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[1]) ||
+    message === ChromeBookCheckMessageOptions[1]
+  )
+    return "green";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[2]) ||
+    message === ChromeBookCheckMessageOptions[2]
+  )
+    return "green";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[3]) ||
+    message === ChromeBookCheckMessageOptions[3]
+  )
+    return "yellow";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[4]) ||
+    message === ChromeBookCheckMessageOptions[4]
+  )
+    return "red";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[5]) ||
+    message === ChromeBookCheckMessageOptions[5]
+  )
+    return "red";
+  if (
+    message.startsWith(ChromeBookCheckMessageOptions[6]) ||
+    message === ChromeBookCheckMessageOptions[6]
+  )
+    return "red";
   return "blue";
 };
 
@@ -111,68 +135,52 @@ const ChromebookMessageLegend = () => {
   );
 };
 
-export default function ChromebookChecksData({ assignments }) {
+export default function ChromebookChecksData({ taTeachers }) {
   const [displayGreen, setDisplayGreen] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [showRecent, setShowRecent] = useState(false);
-  const assignmentsSortedByTeacher = useMemo(() => {
-    if (!assignments) return [];
-    return assignments
-      .sort((a, b) => {
-        // sort by teacher name and then by number
-        if (a.teacher.name < b.teacher.name) return -1;
-        if (a.teacher.name > b.teacher.name) return 1;
-        if (a.number < b.number) return -1;
-        if (a.number > b.number) return 1;
-
-        return 0;
-      })
-      .filter((assignment) => assignment.checkLog.length > 0);
-  }, [assignments]);
 
   const checksToShow = useMemo(() => {
-    let checksToShow = assignmentsSortedByTeacher
+    let checksToShow = [];
+    taTeachers
       // filter out checks that are green status
-      .map((assignment) => {
-        const { teacher, student, number, checkLog } = assignment;
-        if (!teacher || !student || !number || !checkLog) return null;
-        return {
-          ...assignment,
-          checkLog: checkLog.filter((check) => {
-            if (displayGreen) return true;
-            if (getColorFromMessage(check.message) === "green") return false;
-
-            return true;
-          }),
-        };
-      })
-      // filter checks that are more than 7 days old
-      .map((assignment) => {
-        if (!assignment) return null;
-        const { teacher, student, number, checkLog } = assignment;
-        if (!teacher || !student || !number || !checkLog) return null;
-        return {
-          ...assignment,
-          checkLog: checkLog.filter((check) => {
-            if (showRecent) {
-              const tenDaysAgo = new Date();
-              tenDaysAgo.setDate(tenDaysAgo.getDate() - 7);
+      .forEach((teacher) => {
+        teacher.taStudents.forEach((student) => {
+          const checkLog = student.chromebookCheck
+            .filter((check) => {
+              if (displayGreen) return true;
+              if (getColorFromMessage(check.message) !== "green") return true;
+            })
+            // filter out checks that are more than 7 days old
+            .filter((check) => {
+              if (!showRecent) return true;
               const checkDate = new Date(check.time);
-              return checkDate > tenDaysAgo;
-            }
-            return true;
-          }),
-        };
-      })
-      .filter((assignment) =>
-        assignment?.student?.name
-          .toLowerCase()
-          .includes(filterText.toLowerCase())
-      )
-      .filter((assignment) => !!assignment);
+              const now = new Date();
+              const diffTime = Math.abs(now - checkDate);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              if (diffDays < 7) return true;
+            });
+          const check = {
+            student: student,
+            teacher: teacher,
+            checkLog: checkLog,
+            number: checkLog.length,
+          };
+          checksToShow.push(check);
+        });
+      });
+
+    if (filterText) {
+      checksToShow = checksToShow.filter((check) => {
+        return (
+          check.student.name.toLowerCase().includes(filterText.toLowerCase()) ||
+          check.teacher.name.toLowerCase().includes(filterText.toLowerCase())
+        );
+      });
+    }
 
     return checksToShow;
-  }, [assignmentsSortedByTeacher, displayGreen, filterText, showRecent]);
+  }, [taTeachers, displayGreen, showRecent, filterText]);
 
   return (
     <div>
@@ -211,15 +219,13 @@ export default function ChromebookChecksData({ assignments }) {
             className="border-2 border-gray-400 rounded-md text-gray-800"
           />
         </label>
-        <TeacherChromebookData
-          chromebookAssignments={assignmentsSortedByTeacher}
-        />
+        <TeacherChromebookData teachers={taTeachers} />
       </div>
       <ChromebookMessageLegend />
       <table className="table-auto border-collapse border border-slate-500 border-spacing-2 border-spacing-x-2 border-spacing-y-2 mt-2">
         {checksToShow.map((assignment) => (
           <ChromebookCheckRow
-            key={assignment.id}
+            key={assignment.student.id}
             assignment={assignment}
             showGreens={displayGreen}
           />

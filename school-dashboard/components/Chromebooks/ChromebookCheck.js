@@ -14,10 +14,9 @@ export const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
     createChromebookCheck(data: $chromebookCheck) {
       id
       message
-      assignment {
-        student {
-          name
-        }
+      student {
+        id
+        name
       }
     }
   }

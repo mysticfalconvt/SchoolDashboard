@@ -12,29 +12,23 @@ import { useUser } from "../components/User";
 
 const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_CHROMEBOOK_ASSIGNMENTS_QUERY {
-    chromebookAssignments {
+    users(where: { hasTA: { equals: true } }) {
       id
-      student {
+      name
+      taStudents {
         id
         name
-      }
-      teacher {
-        id
-        name
-      }
-      number
-      checkLogCount
-      checkLog(orderBy: { time: asc }) {
-        id
-        time
-        message
+        chromebookCheck {
+          id
+          message
+          time
+        }
       }
     }
   }
 `;
 
 export default function Chromebooks({ initialChromebookAssignments }) {
-  const [display, setDisplay] = useState("Chromebook Checks");
   const me = useUser();
   const { data: chromebookAssignmentsData } = useGQLQuery(
     "Chromebook Assignments",
@@ -48,33 +42,22 @@ export default function Chromebooks({ initialChromebookAssignments }) {
 
   const chromebookAssignments = useMemo(() => {
     if (!chromebookAssignmentsData) return [];
-    return chromebookAssignmentsData.chromebookAssignments;
+    return chromebookAssignmentsData.users;
   }, [chromebookAssignmentsData]);
 
-  const handleDisplayButtonClick = () => {
-    if (display === "Chromebook Assignments") {
-      setDisplay("Chromebook Checks");
-    }
-    if (display === "Chromebook Checks") {
-      setDisplay("Chromebook Assignments");
-    }
-  };
+  console.log("data", chromebookAssignments);
   if (!me) return <p>loading...</p>;
   return (
     <div>
       <div className="flex justify-center gap-4 items-center">
         <h1 className="text-2xl">Chromebooks</h1>
-        <GradientButton onClick={handleDisplayButtonClick}>
-          {display}
-        </GradientButton>
       </div>
       {isAllowed(me, "hasTA") && <ChromebookCheck taId={me.id} />}
-      {display === "Chromebook Assignments" ? (
+      {/* {display === "Chromebook Assignments" ? (
         <ChromebookAssignmentsData assignments={chromebookAssignments} />
-      ) : null}
-      {display === "Chromebook Checks" ? (
-        <ChromebookChecksData assignments={chromebookAssignments} />
-      ) : null}
+      ) : null} */}
+
+      <ChromebookChecksData taTeachers={chromebookAssignments} />
     </div>
   );
 }

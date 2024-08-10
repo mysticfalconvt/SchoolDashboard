@@ -12,49 +12,24 @@ import { useGQLQuery } from "../../lib/useGqlQuery";
 import { useMutation } from "@apollo/client";
 import { useUser } from "../User";
 import useSendEmail from "../../lib/useSendEmail";
-
-const GET_ALL_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
-  query GET_ALL_CHROMEBOOK_ASSIGNMENTS_QUERY {
-    chromebookAssignments(
-      where: {
-        student: { id: { not: { equals: "cl24ztaju149148z3qqm4c4d39" } } }
-      }
-    ) {
-      id
-      student {
-        id
-        name
-      }
-      teacher {
-        id
-        name
-      }
-      number
-    }
-  }
-`;
+import SearchForUserName from "../SearchForUserName";
 
 export default function CreateSingleChromebookCheck() {
-  const { data } = useGQLQuery(
-    "All Chromebook Assignments",
-    GET_ALL_CHROMEBOOK_ASSIGNMENTS_QUERY
-  );
   const me = useUser();
   const [createChromebookCheck] = useMutation(CREATE_CHROMEBOOK_CHECK_MUTATION);
   const [message, setMessage] = useState("");
-  const [assignmentId, setAssignmentId] = useState("");
+  const [studentFor, setStudentCheckIsFor] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [status, setStatus] = useState("idle");
   const { sendEmail, emailLoading } = useSendEmail();
-  const studentId = data?.chromebookAssignments?.find(
-    (assignment) => assignment?.id === assignmentId
-  )?.student?.id;
+
   const [createCard] = useMutation(CREATE_QUICK_PBIS, {
     variables: {
       teacher: me?.id,
-      student: studentId,
+      student: studentFor.userId,
     },
   });
+  console.log(studentFor);
   return (
     <>
       <GradientButton onClick={() => setShowForm(!showForm)}>
@@ -71,21 +46,12 @@ export default function CreateSingleChromebookCheck() {
           <h2 className="text-center text-2xl">Create Chromebook Check</h2>
           <div className="flex flex-col gap-2 w-3/4 items-stretch m-auto">
             <label htmlFor="assignmentId">Chromebook</label>
-            <select
-              id="assignmentId"
-              name="assignmentId"
-              value={assignmentId}
-              onChange={(e) => setAssignmentId(e.target.value)}
-              className="border-2 border-gray-400 rounded-md text-gray-800"
-            >
-              <option value={null}></option>
-              {data?.chromebookAssignments?.map((assignment) => (
-                <option key={assignment.id} value={assignment.id}>
-                  {assignment.student?.name} - {assignment?.teacher?.name} -{" "}
-                  {assignment.number}
-                </option>
-              ))}
-            </select>
+            <SearchForUserName
+              name="studentName"
+              value={studentFor}
+              updateUser={setStudentCheckIsFor}
+              userType="isStudent"
+            />
             <label htmlFor="status" key={`status-chromebook-single`}>
               Status:{" "}
               <select
@@ -118,7 +84,7 @@ export default function CreateSingleChromebookCheck() {
           </div>
           <GradientButton
             disabled={
-              !assignmentId || !status || (status === "Other" && !message)
+              !studentFor?.userId || !status || (status === "Other" && !message)
             }
             onClick={async () => {
               // message gets status if status is not other.  Otherwise, message is message
@@ -127,21 +93,13 @@ export default function CreateSingleChromebookCheck() {
 
               let messageToSend = message;
               if (status !== "Other") {
-                messageToSend = `${status} - ${message}`;
-              }
-              if (
-                me?.id !==
-                data?.chromebookAssignments?.find(
-                  (assignment) => assignment?.id === assignmentId
-                )?.teacher?.id
-              ) {
-                messageToSend = `${messageToSend} - ${me.name}`;
+                messageToSend = `${status} - ${message} - ${me.name}`;
               }
 
               const res = await createChromebookCheck({
                 variables: {
                   chromebookCheck: {
-                    assignment: { connect: { id: assignmentId } },
+                    student: { connect: { id: studentFor.userId } },
                     message: messageToSend,
                   },
                 },
@@ -170,22 +128,21 @@ export default function CreateSingleChromebookCheck() {
                   const emailToSend = {
                     toAddress: email,
                     fromAddress: me?.email,
-                    subject: `New Chromebook Check for ${res.data.createChromebookCheck.assignment?.student?.name}`,
+                    subject: `New Chromebook Check for ${res.data.createChromebookCheck?.student?.name}`,
                     body: `
-                <p>There is a new Chromebook check for ${res.data.createChromebookCheck.assignment?.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
+                <p>There is a new Chromebook check for ${res.data.createChromebookCheck.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
                 <p>${res.data.createChromebookCheck.message}</p>
                  `,
                   };
                   const emailRes = await sendEmail({
                     variables: {
-                      emailData: JemailToSend,
+                      emailData: emailToSend,
                     },
                   });
                 });
               }
               if (res?.data?.createChromebookCheck) {
                 setMessage("");
-                setAssignmentId("");
                 setShowForm(false);
               }
             }}

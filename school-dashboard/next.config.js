@@ -3,9 +3,7 @@ module.exports = {
     // ssr and displayName are configured by default
     styledComponents: true,
   },
-  
 };
-
 
 // Injected content via Sentry wizard below
 
