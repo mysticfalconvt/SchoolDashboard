@@ -1,11 +1,10 @@
 import gql from "graphql-tag";
 import Image from "next/image";
-import React from "react";
 import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import DisplayError from "../ErrorMessage";
 import Loading from "../Loading";
-
+import * as React from "react";
 // gql query to get number of cards
 export const TOTAL_PBIS_CARDS = gql`
   query {
@@ -51,7 +50,7 @@ const ContainerStyles = styled.div`
     /* left: 20px; */
     /* right: 20px; */
     /* bottom: 00px; */
-    transform: translate(30px, +30px);
+    transform: translate(${({ cardOffset }) => cardOffset});
     /* text-align: center; */
   }
   img {
@@ -97,9 +96,24 @@ export default function PbisFalcon({ initialCount }) {
   const percentageFull =
     Math.round((data?.pbisCardsCount / cardGoal) * 10000) / 100;
   const percentageLeft = 100 - percentageFull;
+  console.log("percentage left", percentageLeft);
+  const getTotalCardsOffset = () => {
+    if (percentageLeft > 60) {
+      return "30px, -30px";
+    }
+    if (percentageLeft > 40) {
+      return "30px, -10px";
+    }
+    if (percentageLeft > 30) {
+      return "30px, 20px";
+    }
+
+    return "30px, 30px";
+  };
+  const cardOffset = getTotalCardsOffset();
   return (
     <div>
-      <ContainerStyles percentageLeft={percentageLeft}>
+      <ContainerStyles percentageLeft={percentageLeft} cardOffset={cardOffset}>
         <div className="filler">
           <img src="/falcon.svg" alt="falcon" className="falcon" />
           <span className="label">{`${percentageFull}%`}</span>
