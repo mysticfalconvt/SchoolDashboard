@@ -87,7 +87,6 @@ export default function PbisFalcon({ initialCount }) {
     {},
     queryOptions
   );
-  // console.log(data);
   // last years card total
   const cardGoal = 60000;
   // console.log('data', data);
@@ -96,7 +95,6 @@ export default function PbisFalcon({ initialCount }) {
   const percentageFull =
     Math.round((data?.pbisCardsCount / cardGoal) * 10000) / 100;
   const percentageLeft = 100 - percentageFull;
-  console.log("percentage left", percentageLeft);
   const getTotalCardsOffset = () => {
     if (percentageLeft > 60) {
       return "30px, -30px";

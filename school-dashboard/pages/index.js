@@ -147,7 +147,6 @@ export default function Home(props) {
       initialData: props?.allUsersForSearch,
     }
   );
-  console.log("callbackEnabled", callbackDisabled);
 
   if (!me) return null;
   return (

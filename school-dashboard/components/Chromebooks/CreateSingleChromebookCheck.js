@@ -29,7 +29,6 @@ export default function CreateSingleChromebookCheck() {
       student: studentFor.userId,
     },
   });
-  console.log(studentFor);
   return (
     <>
       <GradientButton onClick={() => setShowForm(!showForm)}>
