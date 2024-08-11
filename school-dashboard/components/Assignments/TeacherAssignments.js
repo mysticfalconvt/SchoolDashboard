@@ -5,6 +5,7 @@ import { useUser } from "../User";
 import Loading from "../Loading";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import MessageUpdater from "./AssignmentUpdater";
+import { NUMBER_OF_BLOCKS } from "../../config";
 
 export const TeacherMessagesStyles = styled.div`
   display: flex;
@@ -156,7 +157,7 @@ export default function TeacherAssignments() {
         <h3>Current Class Assignments</h3>
 
         <div className="messageContainer">
-          {[...Array(10)].map((e, i) => {
+          {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
             const num = i + 1;
             const today = new Date();
             const messageDate = new Date(

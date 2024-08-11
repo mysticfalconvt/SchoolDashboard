@@ -311,7 +311,7 @@ export default function ViewTeacherPage({ teacher }) {
             title="Block 5"
             students={block5Students}
           />
-          <GiveListOfStudentsACardButton
+          {/* <GiveListOfStudentsACardButton
             title="Block 6"
             students={block6Students}
           />
@@ -330,7 +330,7 @@ export default function ViewTeacherPage({ teacher }) {
           <GiveListOfStudentsACardButton
             title="Block 10"
             students={block10Students}
-          />
+          /> */}
         </ClassCardButtonStyle>
       )}
       <h3>Teacher info</h3>

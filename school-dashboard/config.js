@@ -8,3 +8,5 @@ export const callbackDisabled =
   process.env.NEXT_PUBLIC_CALLBACK_DISABLED || false;
 export const disciplineDisabled =
   process.env.NEXT_PUBLIC_DISCIPLINE_DISABLED || false;
+
+export const NUMBER_OF_BLOCKS = 5;

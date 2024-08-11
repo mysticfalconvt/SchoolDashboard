@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { TeacherMessagesStyles } from "./TeacherAssignments";
+import { NUMBER_OF_BLOCKS } from "../../config";
 
 export default function AssignmentViewCards({ assignments }) {
   return (
@@ -7,7 +8,7 @@ export default function AssignmentViewCards({ assignments }) {
       <h3>Current Class Assignments</h3>
 
       <div className="messageContainer">
-        {[...Array(10)].map((e, i) => {
+        {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
           const num = i + 1;
           const today = new Date();
           const messageDate = new Date(

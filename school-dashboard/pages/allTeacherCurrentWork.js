@@ -168,41 +168,41 @@ export default function AllTeacherCurrentWork(props) {
               <DisplayClasswork data={row.original} block="5" />
             ),
           },
-          {
-            Header: "Block 6",
-            accessor: "block6Assignment",
-            Cell: ({ row }) => (
-              <DisplayClasswork data={row.original} block="6" />
-            ),
-          },
-          {
-            Header: "Block 7",
-            accessor: "block7Assignment",
-            Cell: ({ row }) => (
-              <DisplayClasswork data={row.original} block="7" />
-            ),
-          },
-          {
-            Header: "Block 8",
-            accessor: "block8Assignment",
-            Cell: ({ row }) => (
-              <DisplayClasswork data={row.original} block="8" />
-            ),
-          },
-          {
-            Header: "Block 9",
-            accessor: "block9Assignment",
-            Cell: ({ row }) => (
-              <DisplayClasswork data={row.original} block="9" />
-            ),
-          },
-          {
-            Header: "Block 10",
-            accessor: "block10Assignment",
-            Cell: ({ row }) => (
-              <DisplayClasswork data={row.original} block="10" />
-            ),
-          },
+          // {
+          //   Header: "Block 6",
+          //   accessor: "block6Assignment",
+          //   Cell: ({ row }) => (
+          //     <DisplayClasswork data={row.original} block="6" />
+          //   ),
+          // },
+          // {
+          //   Header: "Block 7",
+          //   accessor: "block7Assignment",
+          //   Cell: ({ row }) => (
+          //     <DisplayClasswork data={row.original} block="7" />
+          //   ),
+          // },
+          // {
+          //   Header: "Block 8",
+          //   accessor: "block8Assignment",
+          //   Cell: ({ row }) => (
+          //     <DisplayClasswork data={row.original} block="8" />
+          //   ),
+          // },
+          // {
+          //   Header: "Block 9",
+          //   accessor: "block9Assignment",
+          //   Cell: ({ row }) => (
+          //     <DisplayClasswork data={row.original} block="9" />
+          //   ),
+          // },
+          // {
+          //   Header: "Block 10",
+          //   accessor: "block10Assignment",
+          //   Cell: ({ row }) => (
+          //     <DisplayClasswork data={row.original} block="10" />
+          //   ),
+          // },
         ],
       },
     ],
