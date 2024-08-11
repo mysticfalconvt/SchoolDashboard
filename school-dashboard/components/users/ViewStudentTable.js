@@ -95,7 +95,7 @@ export default function ViewStudentTable({ users, title }) {
       return 0;
     });
   }, [users]);
-  hiddenColumns = callbackDisabled
+  const hiddenColumns = callbackDisabled
     ? ["callbackCount", "averageTimeToCompleteCallback"]
     : [];
   console.log(hiddenColumns);
