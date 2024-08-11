@@ -27,10 +27,10 @@ export default function SuperUserSettings() {
       {isAllowed(me, "isSuperAdmin") && <NewUpdateUsers />}
       {isAllowed(me, "isSuperAdmin") && <NewStaff />}
       {isAllowed(me, "isSuperAdmin") && <NewEvents />}
-      {isAllowed(me, "isSuperAdmin") && <AddBirthdays />}
+      {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, "canManagePbis") && <NewWeeklyPbisCollection />}
-      {isAllowed(me, "isSuperAdmin") && <CreateChromebookAssignments />}
-      {isAllowed(me, "isSuperAdmin") && <TransferData />}
+      {/* {isAllowed(me, "isSuperAdmin") && <CreateChromebookAssignments />} */}
+      {/* {isAllowed(me, "isSuperAdmin") && <TransferData />} */}
     </div>
   );
 }
