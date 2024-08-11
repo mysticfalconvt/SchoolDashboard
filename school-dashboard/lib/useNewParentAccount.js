@@ -155,7 +155,7 @@ export function useNewParentAccount() {
       const newParent = await createNewUser({
         variables: {
           email: parentEmail,
-          name: parentName,
+          name: parentEmail,
           password,
           children: { connect: { id: student.id } },
           isParent: true,
@@ -167,7 +167,7 @@ export function useNewParentAccount() {
         fromAddress: teacher.email,
         subject: `NCUJHS.Tech account - ${student.name}`,
         body: `
-    <p>NCUJHS.Tech is a schoolwide dashboard. A parent account has been created for you.  To login use this email address (${parentEmail}).  Your password is: ${password}</p>
+    <p>NCUJHS.Tech is a schoolwide dashboard. A parent account has been created for you.  To login use this email address (${parentEmail}).</p>
     <p><a href="https://ncujhs.tech">Click Here to View The NCUJHS School Dashboard</a></p>
     <p></p>
     <p>Ths account can be used to vew any overdue assignments (Callback) for ${student.name}</p>
@@ -185,7 +185,7 @@ export function useNewParentAccount() {
       });
       setCreatingParentAccount(false);
       return {
-        result: `New Parent Account Created for ${parentName}. Email with login sent to ${parentEmail}`,
+        result: `New Parent Account Created for ${parentEmail}. Email with login sent to ${parentEmail}`,
         email: emailRes,
       };
     }

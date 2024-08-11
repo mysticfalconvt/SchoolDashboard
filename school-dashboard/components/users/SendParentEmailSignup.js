@@ -1,41 +1,41 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import React from 'react';
-import { toast } from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import { useUser } from '../User';
-import useSendEmail from '../../lib/useSendEmail';
-import { useNewParentAccount } from '../../lib/useNewParentAccount';
-import { useQueryClient } from 'react-query';
+import { useMutation } from "@apollo/client";
+import gql from "graphql-tag";
+import React from "react";
+import { toast } from "react-hot-toast";
+import useForm from "../../lib/useForm";
+import DisplayError from "../ErrorMessage";
+import GradientButton from "../styles/Button";
+import Form, { FormContainerStyles } from "../styles/Form";
+import { useUser } from "../User";
+import useSendEmail from "../../lib/useSendEmail";
+import { useNewParentAccount } from "../../lib/useNewParentAccount";
+import { useQueryClient } from "react-query";
 
 export default function SendParentEmailSignupButton({ student }) {
   const me = useUser();
   const [showForm, setShowForm] = React.useState(false);
   const { inputs, handleChange, clearForm } = useForm({
-    parentEmail: '',
-    parentName: '',
+    parentEmail: "",
+    parentName: "",
   });
   const { setEmail, emailLoading } = useSendEmail();
   const [createParentAccount, creatingParentAccount] = useNewParentAccount();
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   if (!student) return null;
   return (
     <div>
       <GradientButton
-        style={{ marginTop: '10px', marginBottom: '10px' }}
+        style={{ marginTop: "10px", marginBottom: "10px" }}
         onClick={() => setShowForm(!showForm)}
       >
         {showForm
-          ? 'Hide  Parent Signup  '
-          : 'Send A Parent Account Signup Email'}
+          ? "Hide  Parent Signup  "
+          : "Send A Parent Account Signup Email"}
       </GradientButton>
-      <div style={{ position: 'relative', marginLeft: '-300px' }}>
+      <div style={{ position: "relative", marginLeft: "-300px" }}>
         <FormContainerStyles>
           <Form
-            className={showForm ? 'visible' : 'hidden'}
+            className={showForm ? "visible" : "hidden"}
             onSubmit={async (e) => {
               e.preventDefault();
               // check if email is a valid email address
@@ -57,10 +57,9 @@ const queryClient = useQueryClient();
               if (data) {
                 toast(data.result, {
                   duration: 4000,
-                  icon: '👨‍👧‍👦',
+                  icon: "👨‍👧‍👦",
                 });
                 queryClient.refetchQueries();
-
               }
 
               clearForm();
@@ -83,7 +82,7 @@ const queryClient = useQueryClient();
                   onChange={handleChange}
                 />
               </label>
-              <label htmlFor="parentName">
+              {/* <label htmlFor="parentName">
                 Parent / Guardian Name
                 <input
                   required
@@ -94,7 +93,7 @@ const queryClient = useQueryClient();
                   value={inputs.parentName}
                   onChange={handleChange}
                 />
-              </label>
+              </label> */}
 
               <button type="submit">Send Email</button>
             </fieldset>
