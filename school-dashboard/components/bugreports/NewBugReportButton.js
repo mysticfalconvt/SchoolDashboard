@@ -13,6 +13,7 @@ import { todaysDateForForm } from "../calendars/formatTodayForForm";
 import { useUser } from "../User";
 import useCreateMessage from "../Messages/useCreateMessage";
 import useSendEmail from "../../lib/useSendEmail";
+import { ADMIN_ID } from "../../config";
 
 export const CREATE_BUG_REPORT_MUTATION = gql`
   mutation CREATE_BUG_REPORT_MUTATION(
@@ -80,7 +81,7 @@ export default function NewBugReportButton() {
             createMessage({
               subject: "New Bug Report",
               message: `${res?.data?.createBugReport?.submittedBy.name} reported a bug or asked for a feature`,
-              receiver: "cl24ztaju149148z3qqm4c4d39",
+              receiver: ADMIN_ID,
               link: ``,
             });
 

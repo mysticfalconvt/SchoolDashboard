@@ -7,6 +7,7 @@ import styled from "styled-components";
 import GradientButton from "../components/styles/Button";
 import gql from "graphql-tag";
 import { getAverageYearlyPbis } from "../pages/PbisDataTable";
+import { ADMIN_ID } from "../config";
 
 const PBIS_STUDENTS_OF_INTEREST_QUERY = gql`
   query PBIS_STUDENTS_OF_INTEREST_QUERY {
@@ -71,8 +72,7 @@ export default function StudentsOfInterestPBIS() {
     }
   );
   const studentsWithTaTeacher = data?.students.filter(
-    (student) =>
-      student.taTeacher && student.taTeacher.id !== "cl24ztaju149148z3qqm4c4d39"
+    (student) => student.taTeacher && student.taTeacher.id !== ADMIN_ID
   );
 
   if (isLoading) return <Loading />;

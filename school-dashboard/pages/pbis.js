@@ -12,7 +12,7 @@ import GradientButton, {
   SmallGradientButton,
 } from "../components/styles/Button";
 import isAllowed from "../lib/isAllowed";
-import { endpoint, prodEndpoint } from "../config";
+import { ADMIN_ID, endpoint, prodEndpoint } from "../config";
 
 const ChartContainerStyles = styled.div`
   display: grid;
@@ -312,9 +312,7 @@ export default function Pbis(props) {
       </div>
       <h3>Current Team Data</h3>
       <TeamCardStyles>
-        {TAs?.filter(
-          (ta) => ta.taStudents.length && ta.id !== "cl24ztaju149148z3qqm4c4d39"
-        )
+        {TAs?.filter((ta) => ta.taStudents.length && ta.id !== ADMIN_ID)
           .sort((a, b) => a.taTeamPbisLevel - b.taTeamPbisLevel)
           .map((ta) => (
             <div key={ta.id} className="gridCard">
