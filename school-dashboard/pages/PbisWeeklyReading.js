@@ -114,9 +114,8 @@ export default function PbisWeeklyReading() {
       </ul>
       {hasTaTeamsAtNewLevels && (
         <h3>
-          The following TA Teams have completed their Quest Box. You will be
-          notified when you should receive your celebration. Your TA will claim
-          your earnings TODAY {todaysDate}
+          The following TA Teams have completed their Bingo Box. You will be
+          notified when you should receive your celebration.
         </h3>
       )}
       <ul>
