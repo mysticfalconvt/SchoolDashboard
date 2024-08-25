@@ -9,5 +9,7 @@ export const callbackDisabled =
 export const disciplineDisabled =
   process.env.NEXT_PUBLIC_DISCIPLINE_DISABLED || false;
 
-export const NUMBER_OF_BLOCKS = 5;
+export const NUMBER_OF_BLOCKS = Number(
+  process.env.NEXT_PUBLIC_NUMBER_OF_BLOCKS || 5
+);
 export const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID;

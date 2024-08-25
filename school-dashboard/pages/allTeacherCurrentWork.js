@@ -8,7 +8,7 @@ import Loading from "../components/Loading";
 import Table from "../components/Table";
 import { useUser } from "../components/User";
 import { useGQLQuery } from "../lib/useGqlQuery";
-import { endpoint, prodEndpoint } from "../config";
+import { endpoint, NUMBER_OF_BLOCKS, prodEndpoint } from "../config";
 
 const TeacherWorkPageContainer = styled.div`
   h2 {
@@ -119,8 +119,8 @@ export default function AllTeacherCurrentWork(props) {
   );
   // console.log(data?.users)
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const columns = [
       {
         Header: "Teacher",
         columns: [
@@ -168,46 +168,56 @@ export default function AllTeacherCurrentWork(props) {
               <DisplayClasswork data={row.original} block="5" />
             ),
           },
-          // {
-          //   Header: "Block 6",
-          //   accessor: "block6Assignment",
-          //   Cell: ({ row }) => (
-          //     <DisplayClasswork data={row.original} block="6" />
-          //   ),
-          // },
-          // {
-          //   Header: "Block 7",
-          //   accessor: "block7Assignment",
-          //   Cell: ({ row }) => (
-          //     <DisplayClasswork data={row.original} block="7" />
-          //   ),
-          // },
-          // {
-          //   Header: "Block 8",
-          //   accessor: "block8Assignment",
-          //   Cell: ({ row }) => (
-          //     <DisplayClasswork data={row.original} block="8" />
-          //   ),
-          // },
-          // {
-          //   Header: "Block 9",
-          //   accessor: "block9Assignment",
-          //   Cell: ({ row }) => (
-          //     <DisplayClasswork data={row.original} block="9" />
-          //   ),
-          // },
-          // {
-          //   Header: "Block 10",
-          //   accessor: "block10Assignment",
-          //   Cell: ({ row }) => (
-          //     <DisplayClasswork data={row.original} block="10" />
-          //   ),
-          // },
+          {
+            Header: "Block 6",
+            accessor: "block6Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="6" />
+            ),
+          },
+          {
+            Header: "Block 7",
+            accessor: "block7Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="7" />
+            ),
+          },
+          {
+            Header: "Block 8",
+            accessor: "block8Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="8" />
+            ),
+          },
+          {
+            Header: "Block 9",
+            accessor: "block9Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="9" />
+            ),
+          },
+          {
+            Header: "Block 10",
+            accessor: "block10Assignment",
+            Cell: ({ row }) => (
+              <DisplayClasswork data={row.original} block="10" />
+            ),
+          },
         ],
       },
-    ],
-    []
-  );
+    ];
+    const numberOfBlocksToRemove = 10 - NUMBER_OF_BLOCKS;
+    // remove number of columns based on number of blocks
+    return [
+      {
+        ...columns[0],
+        columns: columns[0].columns.slice(
+          0,
+          columns[0].columns.length - numberOfBlocksToRemove
+        ),
+      },
+    ];
+  }, []);
   // if (isLoading) return <Loading />;
   return (
     <TeacherWorkPageContainer>
