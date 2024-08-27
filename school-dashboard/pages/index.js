@@ -223,7 +223,7 @@ export default function Home(props) {
           <div style={{ display: "flex", justifyContent: "start" }}>
             <SignOut />
             <NewBugReportButton />
-            <UpdateMyPassword />
+            {/* <UpdateMyPassword /> */}
           </div>
         ) : (
           <RequestReset />
