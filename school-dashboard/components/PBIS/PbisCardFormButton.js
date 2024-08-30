@@ -165,7 +165,7 @@ function CardForm({ visible, hide }) {
                 subject: "New PBIS Card",
                 message: `you received a new PBIS Card from ${me.name} for ${inputs.category}`,
                 receiver: studentCardIsFor.userId,
-                link: `/pbis/${res?.data?.createPbisCard.id}`,
+                link: ``,
               });
               // console.log(studentCardIsFor);
               if (res) {
