@@ -90,6 +90,15 @@ export const SPECIAL_GROUP_QUERY = gql`
         callbackCount
         studentCellPhoneViolationCount
         studentPbisCardsCount
+        studentCardCountInLastWeek : studentPbisCardsCount(
+          where: {
+            dateGiven: {
+              gte: "${new Date(
+                new Date().getTime() - 7 * 24 * 60 * 60 * 1000
+              ).toISOString()}"
+            }
+          }
+        )
         studentFocusStudentCount
         callbackItemsCount
         callbackItems(where: { dateCompleted: null }) {

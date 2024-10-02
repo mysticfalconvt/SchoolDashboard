@@ -98,6 +98,15 @@ const TA_INFO_QUERY = gql`
 
         studentFocusStudentCount
         YearPbisCount
+        studentCardCountInLastWeek : studentPbisCardsCount(
+          where: {
+            dateGiven: {
+              gte: "${new Date(
+                new Date().getTime() - 7 * 24 * 60 * 60 * 1000
+              ).toISOString()}"
+            }
+          }
+        )
 
         # studentPbisCards(take:10) {
         #   id

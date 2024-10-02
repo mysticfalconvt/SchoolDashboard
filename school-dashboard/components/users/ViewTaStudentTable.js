@@ -40,6 +40,10 @@ export default function ViewTaStudentTable({
             accessor: "studentPbisCardsCount",
           },
           {
+            Header: "This Week PBIS Cards",
+            accessor: "studentCardCountInLastWeek",
+          },
+          {
             Header: "Callback",
             accessor: "callbackCount",
           },
