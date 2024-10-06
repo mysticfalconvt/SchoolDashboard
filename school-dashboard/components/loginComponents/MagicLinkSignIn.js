@@ -86,7 +86,6 @@ export default function MagicLinkSignIn() {
       ? data?.authenticateUserWithPassword
       : undefined;
 
-  console.log("linkInfo", sendMagicLinkData, sendMagicLinkLoading);
   return (
     <Form method="POST" onSubmit={handleSendMagicLink}>
       {!magicLinkSent && <h2>Sign Into Your Account</h2>}

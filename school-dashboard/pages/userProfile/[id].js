@@ -105,8 +105,8 @@ export default function UserProfile({ query }) {
         {isAllowed(me, "isStaff") && me.id !== user.id && (
           <>
             {isStudent && <EditStudent student={user} />}
-            <SendParentEmailSignupButton student={user} />
-            <ResetPasswordToPassword userID={query.id} />
+            {/* <SendParentEmailSignupButton student={user} /> */}
+            {/* <ResetPasswordToPassword userID={query.id} /> */}
           </>
         )}
       </ButtonStyles>

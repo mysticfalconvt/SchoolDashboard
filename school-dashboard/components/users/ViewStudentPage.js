@@ -13,6 +13,7 @@ import QuickPbisButton from "../PBIS/QuickPbisButton";
 import { capitalizeFirstLetter } from "../../lib/nameUtils";
 import getDisplayName from "../../lib/displayName";
 import { callbackDisabled } from "../../config";
+import StudentPbisCardsPerCollection from "../PBIS/studentPbisCardsPerColelction";
 
 const ParentInfoStyles = styled.div`
   border-radius: 1rem;
@@ -144,6 +145,9 @@ const GET_SINGLE_TEACHER = gql`
         }
         dateGiven
       }
+      allCards: studentPbisCards(orderBy: { dateGiven: desc }) {
+        dateGiven
+      }
       studentFocusStudent(take: 2) {
         id
         comments
@@ -171,12 +175,12 @@ export default function ViewStudentPage({ student }) {
     <div>
       <h3>
         Student info for {getDisplayName(user)} TA: {user?.taTeacher?.name}
-        {me.isStaff && (
+        {/* {me.isStaff && (
           <EmailParentsAboutCallback
             student={user}
             disabled={canSendCallbackEmail}
           />
-        )}
+        )} */}
         {me.isStaff && (
           <QuickPbisButton
             id={user.id}
@@ -200,6 +204,7 @@ export default function ViewStudentPage({ student }) {
       {!callbackDisabled && (
         <CallbackCards callbacks={user.callbackItems || []} />
       )}
+      <StudentPbisCardsPerCollection cards={user.allCards || []} />
       <DisplayPbisCardsWidget cards={user.studentPbisCards || []} />
     </div>
   );

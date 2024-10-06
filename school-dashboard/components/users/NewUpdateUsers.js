@@ -100,9 +100,9 @@ export default function NewUpdateUsers() {
               );
             })}
             <p>
-              {resultOfUpdate.length} users updated. {unUpdatedUsers.length}{" "}
+              {resultOfUpdate.length} users updated. {unUpdatedUsers?.length}{" "}
               users not updated
-              {unUpdatedUsers.map((user) => {
+              {unUpdatedUsers?.map((user) => {
                 return <p key={user.name}>{user.name}</p>;
               })}
             </p>
