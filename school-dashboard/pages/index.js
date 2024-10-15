@@ -160,14 +160,14 @@ export default function Home(props) {
           {me && isAllowed(me || {}, "isStaff") && (
             <PbisCardFormButton teacher={me} />
           )}
-          {me && isAllowed(me || {}, "isStaff") && (
+          {/* {me && isAllowed(me || {}, "isStaff") && (
             <a
               href="https://ncujhs.ncsuvt.org/emergency"
               className="bg-gradient-to-r text-white from-red-950 from-10% via-yellow-900 via-50% to-red-950 to-90% p-4 rounded-xl"
             >
               <button type="button">Emergency</button>
             </a>
-          )}
+          )} */}
           {me && isAllowed(me || {}, "hasClasses") && (
             <GradientButton>
               <Link href={`/userProfile/${me?.id}`}>My Students</Link>
@@ -179,11 +179,11 @@ export default function Home(props) {
             </GradientButton>
           )} */}
 
-          {me && isAllowed(me || {}, "isStaff") && (
+          {/* {me && isAllowed(me || {}, "isStaff") && (
             <GradientButton>
               <Link href="/allTeacherCurrentWork">Current Work</Link>
             </GradientButton>
-          )}
+          )} */}
           {me && isAllowed(me || {}, "isStaff") && (
             <CreateSingleChromebookCheck />
           )}
