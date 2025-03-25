@@ -61,7 +61,6 @@ export default function SingleCallbackPage({ query }) {
   // if (isLoading) return <Loading />;
   // if (error) return <p>{error.message}</p>;
   // const student = data.User;
-  console.log(error);
   return (
     <div>
       <FormContainerStyles>

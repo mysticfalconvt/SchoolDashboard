@@ -14,7 +14,6 @@ const UPDATE_USER_MUTATION = gql`
 export default function NewUpdateUsers() {
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm } = useForm();
-  console.log(inputs);
   const inputJson = JSON.parse(inputs?.userData || "{}");
 
   const [updateUsersFromJson, { loading, error, data }] = useMutation(
@@ -72,7 +71,6 @@ export default function NewUpdateUsers() {
         {resultOfUpdate && (
           <div>
             {resultOfUpdate.map((user) => {
-              console.log(user);
               return (
                 <p key={user.email}>
                   {user.email} - {user.existed ? "Existing User" : "New User"}

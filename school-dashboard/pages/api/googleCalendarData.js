@@ -98,7 +98,6 @@ export const getCalendarData = async (req, res) => {
       };
     }
   ) || [];
-console.log("test", events);
   res.status(200).json({ events: initialGoogleCalendarEvents });
 };
 

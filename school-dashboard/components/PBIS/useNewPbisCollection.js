@@ -185,25 +185,16 @@ export default function usePbisCollection() {
     setLoading(true);
     // get all the level data for each PBIS team
     const taTeamData = getTaTeamData(data.taTeamCards);
-    console.log("Team Data", taTeamData);
     // get all the teams that went up a level for rewards
     const taTeamsAtNewLevel = taTeamData.filter((taTeam) => taTeam.isNewLevel);
-    console.log("Teams at new level", taTeamsAtNewLevel);
     // get all the studets who went up a level for rewards
     const studentsWithNewPersonalLevel = getPersonalLevel(data.taTeamCards);
-    console.log(
-      "Students with new personal level",
-      studentsWithNewPersonalLevel
-    );
     // get all the random drawing winners
     const randomDrawingWinners = getRandomWinners(data.taTeamCards);
-    console.log("Random drawing winners", randomDrawingWinners);
     // get the lowest PBIS team level
     const lowestTaTeamLevel = getLowestTaTeamLevel(taTeamData);
-    console.log("Lowest ta team level", lowestTaTeamLevel);
     // get the team PBIS  level goal
     const newTaTeamLevelGoal = getNewTaTeamLevelGoal(lowestTaTeamLevel);
-    console.log("New ta team level goal", newTaTeamLevelGoal);
 
     const pbisCollectionData = {
       name: `PBIS Collection ${new Date().toLocaleDateString()}`,
@@ -219,7 +210,6 @@ export default function usePbisCollection() {
     const latestCollection = await createNewPbisCollection({
       variables: pbisCollectionData,
     });
-    console.log("Latest collection", latestCollection);
 
     // update the students who went up a level
     const studentsToUpdateLevel = studentsWithNewPersonalLevel.map(
@@ -233,32 +223,25 @@ export default function usePbisCollection() {
     const updatedStudents = await bulkUpdateUsers({
       variables: { data: studentsToUpdateLevel },
     });
-    console.log("Updated students", updatedStudents);
     // update each ta teacher with their new pbis winner
     const teachersToUpdate = getTeachersToUpdate(randomDrawingWinners);
-    console.log("Teachers to update", teachersToUpdate);
     const updatedTeachers = await bulkUpdateUsers({
       variables: {
         data: teachersToUpdate,
       },
     });
-    console.log("Updated teachers", updatedTeachers);
 
     // update each ta team with their new data
     const taTeamsToUpdate = getTaTeamsToUpdate(taTeamData);
-    console.log("Ta teams to update", taTeamsToUpdate);
     const updatedPbisTeams = await updatePbisTeamData({
       variables: {
         data: taTeamsToUpdate,
       },
     });
-    console.log("Updated pbis teams", updatedPbisTeams);
     // mark all new cards as collected
     const cardsToUpdate = getPbisCardsToMarkCollected(data.individualPbisCards);
     // divide the cards into chunks of 50
     const chunks = chunk(cardsToUpdate, 50);
-    console.log("Chunks", chunks);
-    // console.log('Cards to update', cardsToUpdate);
     // update each chunk of cards
     for (let i = 0; i < chunks.length; i++) {
       const updatedCards = await countCardsMutation({
@@ -266,7 +249,6 @@ export default function usePbisCollection() {
           data: chunks[i],
         },
       });
-      console.log("Updated cards", updatedCards);
     }
 
     // const updatedCards = await countCardsMutation({
@@ -286,7 +268,6 @@ export default function usePbisCollection() {
         })
       )
     );
-    console.log("Recalculated PBIS", recalculatedPBIS);
 
     setLoading(false);
     return "it Worked";

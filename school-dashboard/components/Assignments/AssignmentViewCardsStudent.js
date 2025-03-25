@@ -21,10 +21,9 @@ export default function AssignmentViewCardsStudent({ student }) {
           const today = new Date();
           const messageDate = new Date(
             student[`block${num}Teacher`][`block${num}AssignmentLastUpdated`] ||
-              ""
+            ""
           );
           const newUpdate = today - messageDate < 164000000;
-          // console.log(newUpdate);
           return (
             <div
               className={
@@ -40,7 +39,7 @@ export default function AssignmentViewCardsStudent({ student }) {
                 {
                   new Date(
                     student[`block${num}Teacher`][
-                      `block${num}AssignmentLastUpdated`
+                    `block${num}AssignmentLastUpdated`
                     ]
                   )
                     .toLocaleString()

@@ -38,7 +38,6 @@ export default function MissingBirthdays() {
   const needsToChooseCake = data?.users?.filter(
     (user) => !user?.birthday?.cakeType
   );
-  // console.log(needsToChooseCake);
   const needsBirthdayDate = data?.users?.filter((user) => !user.birthday);
 
   if (isLoading) return <Loading />;

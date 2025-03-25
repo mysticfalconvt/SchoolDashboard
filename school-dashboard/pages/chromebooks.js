@@ -45,7 +45,6 @@ export default function Chromebooks({ initialChromebookAssignments }) {
     return chromebookAssignmentsData.users;
   }, [chromebookAssignmentsData]);
 
-  console.log("data", chromebookAssignments);
   if (!me) return <p>loading...</p>;
   return (
     <div>

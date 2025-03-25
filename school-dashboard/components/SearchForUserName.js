@@ -38,13 +38,10 @@ export default function SearchForUserName({
       staleTime: 1000 * 60 * 60, // 1 hour
     }
   );
-  // console.log(userType);
-  // console.log(usersToDisplay);
   const usersFilteredByType =
     allUsers?.users?.filter((item) =>
       userType ? item[userType] === true : true
     ) || [];
-  // console.log(usersFilteredByType);
 
   const items = usersToDisplay;
   const filterUsers = (valueToFilter) => {

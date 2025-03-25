@@ -12,7 +12,6 @@ export default function useRebuildWebsite() {
       }
     );
     const body = await response.text();
-    console.log('body', body);
   };
   return sendPost;
 }

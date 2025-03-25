@@ -48,7 +48,6 @@ export function getTaTeamData(data) {
 // get the personal level of each student and
 // return students at a new level with their level
 export function getPersonalLevel(data) {
-  console.log("getting personal levels");
   const allStudents = [];
   const students = data.map((team) => {
     // for each team get all the ta teachers
@@ -69,13 +68,6 @@ export function getPersonalLevel(data) {
     );
     const isNewLevel =
       Number(newPersonalLevel) > (Number(student.individualPbisLevel) || 0);
-    console.log(
-      "isNewLevel",
-      student.name,
-      isNewLevel,
-      newPersonalLevel,
-      student.individualPbisLevel
-    );
     const newStudent = {
       name: student.name,
       id: student.id,
@@ -84,7 +76,6 @@ export function getPersonalLevel(data) {
     };
     return newStudent;
   });
-  //   console.log('newStudentData', newStudentData);
   const studentsAtNewLevel = newStudentData.filter(
     (student) => student.isNewLevel
   );
@@ -118,7 +109,6 @@ function createCardsForStudent(student) {
 
 // get the random winner for each TA
 export function getRandomWinners(data) {
-  console.log("getting random winners");
   const listOfAllTaTeachers = [];
   const taToGetWinners = data.map((team) => {
     // for each team get all the ta teachers
@@ -128,7 +118,6 @@ export function getRandomWinners(data) {
     });
     return allTeachers;
   });
-  console.log("taToGetWinners", listOfAllTaTeachers);
   const randomWinners = listOfAllTaTeachers.map((teacher) => {
     const cardsToChooseFrom = [];
     teacher.taStudents.forEach((student) => {
@@ -166,16 +155,13 @@ export function getRandomWinners(data) {
     }
     return newTeacher;
   });
-  console.log("randomWinners", randomWinners);
   return randomWinners;
 }
 
 export function getLowestTaTeamLevel(data) {
-  console.log("getting lowest PBIS Team Level");
   const lowestTaTeamLevel = data.reduce((a, b) =>
     a.currentTaLevel < b.currentTaLevel ? a : b
   ).currentTaLevel;
-  console.log("lowestTaTeamLevel", lowestTaTeamLevel);
 
   return lowestTaTeamLevel;
 }
@@ -183,12 +169,10 @@ export function getLowestTaTeamLevel(data) {
 export function getNewTaTeamLevelGoal(lowestTeam) {
   const newTaTeamLevelGoal =
     lowestTeam % levelsPerSchoolWideLevel ? lowestTeam + 1 : lowestTeam + 2;
-  console.log("newTaTeamLevelGoal", newTaTeamLevelGoal);
   return newTaTeamLevelGoal;
 }
 
 export function getTeachersToUpdate(data) {
-  console.log("getting teachers to update");
   const teachersToUpdate = data
     .map((teacher) => {
       const dataToReturn = {};
@@ -253,7 +237,6 @@ export function getPbisCardsToMarkCollected(data) {
 }
 
 export function getListOfStudentsToUpdate(data) {
-  console.log("getting list of students to update");
   const allStudents = [];
   const students = data.map((team) => {
     // for each team get all the ta teachers
@@ -267,7 +250,6 @@ export function getListOfStudentsToUpdate(data) {
     });
     return allTeachers;
   });
-  console.log("allStudents", allStudents);
   return allStudents;
 }
 

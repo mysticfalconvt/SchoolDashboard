@@ -1,10 +1,9 @@
-import { useMutation } from "@apollo/client";
-import gql from "graphql-tag";
-import Error from "next/error";
-import { useRouter } from "next/router";
-import * as React from "react";
-import { useUser } from "../components/User";
-import { useQueryClient } from "react-query";
+import { useMutation } from '@apollo/client';
+import gql from 'graphql-tag';
+import { useRouter } from 'next/router';
+import * as React from 'react';
+import { useQueryClient } from 'react-query';
+import { useUser } from '../components/User';
 
 const LOGIN_LINK_MUTATION = gql`
   mutation LOGIN_LINK_MUTATION($token: String!, $email: String!) {
@@ -29,12 +28,11 @@ export default function LoginLink() {
   const token = router.query.token;
   const email = router.query.email;
   const user = useUser();
-  console.log(user);
   const [mutation, { data, loading, error }] = useMutation(
     LOGIN_LINK_MUTATION,
     {
       variables: { token, email },
-    }
+    },
   );
   const queryClient = useQueryClient();
 
@@ -50,25 +48,25 @@ export default function LoginLink() {
       //     "RedeemUserMagicAuthTokenSuccess" &&
       user?.email
     ) {
-      router.push("/");
+      router.push('/');
     }
   }, [data, router, user]);
 
   if (
     data?.redeemUserMagicAuthToken?.__typename ===
-    "RedeemUserMagicAuthTokenFailure"
+    'RedeemUserMagicAuthTokenFailure'
   ) {
     return <p>{data?.redeemUserMagicAuthToken?.message}</p>;
   }
   if (
     data?.redeemUserMagicAuthToken?.__typename ===
-    "RedeemUserMagicAuthTokenSuccess"
+    'RedeemUserMagicAuthTokenSuccess'
   ) {
     queryClient.refetchQueries();
 
     return (
       <div>
-        Token Redeemed - Logging in user{" "}
+        Token Redeemed - Logging in user{' '}
         {data?.redeemUserMagicAuthToken?.item?.name}
       </div>
     );

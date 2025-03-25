@@ -106,7 +106,6 @@ export default function Search() {
       staleTime: 1000 * 60 * 60, // 1 hour
     }
   );
-  // console.log('allCalendars', allCalendars);
 
   const [itemsToDisplay, setItemsToDisplay] = useState([]);
 
@@ -130,10 +129,8 @@ export default function Search() {
   const filterUsers = (valueToFilter) => {
     if (valueToFilter === "") {
       setItemsToDisplay([]);
-      // console.log('empty');
       return;
     }
-    // console.log('valueToFilter', valueToFilter);
     const itemsToShow = formatedItems.filter((user) =>
       user.name.toLowerCase().includes(valueToFilter?.toLowerCase())
     );
@@ -143,14 +140,9 @@ export default function Search() {
 
   // if in dev mode display users without role
   if (process.env.NODE_ENV !== "production") {
-    // console.log("dev");
     const allUsersWithoutRole = allUsers?.users.filter(
       (user) => !user.isStaff && !user.isParent && !user.isStudent
     );
-    if (allUsersWithoutRole?.length > 0) {
-      console.log("Users who dont have a role");
-      console.log(allUsersWithoutRole);
-    }
   }
 
   resetIdCounter();

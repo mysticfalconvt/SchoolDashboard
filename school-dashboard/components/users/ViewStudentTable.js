@@ -40,7 +40,6 @@ export default function ViewStudentTable({ users, title }) {
             accessor: "taTeacher.name",
             Cell: ({ row }) => {
               const showLink = !!row.original?.taTeacher?.id;
-              //   console.log(showLink);
               if (showLink)
                 return (
                   <Link href={`/userProfile/${row.original?.taTeacher?.id}`}>
@@ -98,7 +97,6 @@ export default function ViewStudentTable({ users, title }) {
   const hiddenColumns = callbackDisabled
     ? ["callbackCount", "averageTimeToCompleteCallback"]
     : [];
-  console.log(hiddenColumns);
   return (
     <div>
       <Table

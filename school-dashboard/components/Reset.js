@@ -39,10 +39,7 @@ export default function Reset({ token }) {
   console.log(error);
   async function handleSubmit(e) {
     e.preventDefault(); // stop the form from submitting
-    console.log(inputs);
     const res = await reset().catch(console.error);
-    console.log(res);
-    console.log({ data, loading, error });
     resetForm();
     router.push('/');
 

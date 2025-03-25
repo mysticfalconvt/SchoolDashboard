@@ -232,7 +232,6 @@ export default function usePbisCollection() {
       );
       if (oldLevel !== newLevel) {
         student.individualPbisLevel = newLevel;
-        console.log('new personal level winner:', student.name, newLevel);
         return { student: student.id, name: student.name, level: newLevel };
       }
       return null;
@@ -384,7 +383,6 @@ export default function usePbisCollection() {
     const studentWinners = getPersonalLevelWinners(
       data.studentsWithCurrentCounts
     );
-    console.log('student winners', studentWinners);
     const taWinnersAndCards = getTaWinnerAndCardsPerStudent(data.taTeachers);
     setRandomDrawingWinners(taWinnersAndCards);
     setPersonalLevelWinners(studentWinners);
@@ -414,7 +412,6 @@ export default function usePbisCollection() {
         variables: { userId: student },
       })
     );
-    console.log('users', users);
   }
 
   async function runCardCollection() {
@@ -438,7 +435,6 @@ export default function usePbisCollection() {
       (prev, curr) => (prev.currentLevel < curr.currentLevel ? prev : curr),
       {}
     );
-    console.log('lowest level ta team', lowestLevelTaTeam);
     const thePbisGoal =
       lowestLevelTaTeam.currentLevel % 2 === 0
         ? lowestLevelTaTeam.currentLevel + 2
@@ -471,7 +467,6 @@ export default function usePbisCollection() {
       },
     }));
 
-    console.log(newPersonalLevelsForUpdateMutation);
     const updatedStudentLevels = await updateUsersWithNewPersonalLevel({
       variables: {
         data: newPersonalLevelsForUpdateMutation,
@@ -505,7 +500,6 @@ export default function usePbisCollection() {
       category,
       count: collectedCards.filter((card) => card.category === category).length,
     }));
-    // console.log('card counts', cardCounts);
 
     const newCollection = await createNewPbisCollection({
       variables: {

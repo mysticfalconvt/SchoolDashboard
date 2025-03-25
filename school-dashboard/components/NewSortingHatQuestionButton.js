@@ -63,7 +63,6 @@ export default function NewSortingHatQuestion() {
   );
   // TODO: send message when callback assigned
 
-  //   console.log(inputs);
   return (
     <div>
       <GradientButton
@@ -79,9 +78,7 @@ export default function NewSortingHatQuestion() {
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the input fields to the backend:
-            // console.log(inputs);
             const res = await createSortingHatQuestion();
-            // console.log(res);
 
             // Todo: send message when callback assigned
 

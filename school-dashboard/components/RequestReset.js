@@ -29,11 +29,8 @@ export default function RequestReset() {
   );
   async function handleSubmit(e) {
     e.preventDefault(); // stop the form from submitting
-    console.log(inputs);
     const res = await signup().catch(console.error);
-    console.log(res);
-    console.log({ data, loading, error });
-    if(res?.data?.sendUserPasswordResetLink) setIsSent(true);
+    if (res?.data?.sendUserPasswordResetLink) setIsSent(true);
     // resetForm();
     // Send the email and password to the graphqlAPI
   }
@@ -48,23 +45,23 @@ export default function RequestReset() {
           <p>Success! Check {inputs.email} for a link!</p>
         )}
 
-       {!isSent && 
-       <>
-       <label htmlFor="email">
-          Email
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email Address"
-            autoComplete="email"
-            value={inputs.email}
-            onChange={handleChange}
-            required
-            
-            />
-        </label>
-        <GradientButton type="submit" disabled={isSent} aria-disabled={isSent}>{isSent ? "sent" :"Request Reset!"}</GradientButton>
-            </>
+        {!isSent &&
+          <>
+            <label htmlFor="email">
+              Email
+              <input
+                type="email"
+                name="email"
+                placeholder="Your Email Address"
+                autoComplete="email"
+                value={inputs.email}
+                onChange={handleChange}
+                required
+
+              />
+            </label>
+            <GradientButton type="submit" disabled={isSent} aria-disabled={isSent}>{isSent ? "sent" : "Request Reset!"}</GradientButton>
+          </>
         }
       </fieldset>
     </Form>

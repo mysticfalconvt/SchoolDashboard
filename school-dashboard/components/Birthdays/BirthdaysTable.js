@@ -68,9 +68,8 @@ export default function BirthdaysTable({ birthdays }) {
       }
       return acc;
     }, {}) || {};
-  // console.log(undeliiveredCakes);
 
-//filter out cakes left to deliver
+  //filter out cakes left to deliver
   const cakesLeftToDeliver = birthdays?.filter(
     (birthday) => {
       const hasChosen = !!birthday.cakeType;
@@ -90,7 +89,7 @@ export default function BirthdaysTable({ birthdays }) {
       return aDateWithoutYear - bDateWithoutYear;
     }
   );
- 
+
 
   return (
     <div>

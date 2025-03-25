@@ -71,7 +71,6 @@ export default function NewEvents() {
         {/* {resultOfUpdate && (
           <div>
             {resultOfUpdate.map((user) => {
-              console.log(user);
               return (
                 <p key={user.id}>
                   {user.email} - {user.existed ? 'Existing User' : 'New User'}

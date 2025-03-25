@@ -18,9 +18,6 @@ export default function NewUpdateUsers() {
   const { inputs, handleChange, clearForm } = useForm();
   const { data: allUsers } = useQuery("allUsers");
 
-  if (allUsers?.users) {
-    console.log(allUsers?.users);
-  }
 
   const [upateUsersFromJson, { loading, error, data }] = useMutation(
     UPDATE_USER_MUTATION,
@@ -37,7 +34,6 @@ export default function NewUpdateUsers() {
         updatedUsersByName[user.name] = user;
       });
     }
-    console.log("updatedUserByName: ", updatedUsersByName);
 
     if (resultOfUpdate) {
       return allUsers?.users?.filter((user) => {
@@ -46,7 +42,6 @@ export default function NewUpdateUsers() {
     }
     return [];
   }, [resultOfUpdate, allUsers]);
-  console.log("unUpdatedUsers: ", unUpdatedUsers);
   return (
     <div>
       <GradientButton
@@ -92,7 +87,6 @@ export default function NewUpdateUsers() {
         {resultOfUpdate && (
           <div>
             {resultOfUpdate.map((user) => {
-              console.log(user);
               return (
                 <p key={user.email}>
                   {user.email} - {user.existed ? "Existing User" : "New User"}

@@ -175,10 +175,6 @@ export default function useV3PbisCollection() {
 
   const [getData, setGetData] = useState(false);
   const [loading, setLoading] = useState(false);
-  console.log(
-    "latestCollectionDateOr2YearsAgo",
-    latestCollectionDateOr2YearsAgo
-  );
   const { data } = useGQLQuery(
     "pbisCollection",
     PBIS_COLLECTION_QUERY,
@@ -186,25 +182,20 @@ export default function useV3PbisCollection() {
     { enabled: !!getData && !!pbisDates }
   );
 
-  console.log("PBIS Collection Data", data);
   const currentCardsPerTaLevel = data?.taTeachers?.map((teacher) =>
     teacher.taStudents.reduce((acc, cur) => acc + cur.studentPbisCardsCount, 0)
   );
-  console.log("currentCardsPerTaLevel", currentCardsPerTaLevel);
 
   async function runCardCollection() {
     setLoading(true);
-    console.log("Recalculating PBIS");
     const collectionDate = new Date().toISOString();
     const cardsThisCollection = data.pbisCardsCount;
-    console.log("cardsThisCollection", collectionDate, cardsThisCollection);
     const thisCollection = await createPbisCollectionDate({
       variables: {
         date: collectionDate,
         collectedCards: String(cardsThisCollection),
       },
     });
-    console.log("thisCollection", thisCollection);
     const thisCollectionId = thisCollection.data.createPbisCollectionDate.id;
     const previousCollections =
       pbisDates?.pbisCollectionDates.sort(
@@ -227,15 +218,11 @@ export default function useV3PbisCollection() {
       const taTeamPreviousPbisLevel = teacher.taTeamPbisLevel;
       const taTeamPreviousAveragePbisCardsPerStudent =
         teacher.taTeamAveragePbisCardsPerStudent;
-      console.log(taStudents);
       const taTeamCurrentCardsFromAllStudents = taStudents.reduce(
         (acc, cur) => acc + cur.studentPbisCardsCount,
         0
       );
-      console.log(
-        "taTeamCurrentCardsFromAllStudents",
-        taTeamCurrentCardsFromAllStudents
-      );
+
       const taTeamCurrentAveragePbisCardsPerStudent =
         taTeamCurrentCardsFromAllStudents / (taStudents?.length || 1) +
         taTeamPreviousAveragePbisCardsPerStudent;
@@ -249,19 +236,6 @@ export default function useV3PbisCollection() {
       teacher.newCardsPerStudent = taTeamCurrentAveragePbisCardsPerStudent;
       const averageCardsRounded = Math.round(teacher.newCardsPerStudent);
 
-      console.log(
-        "!!! TA TEAM",
-        averageCardsRounded,
-        taTeamCurrentPbisLevel,
-        taTeamCurrentAveragePbisCardsPerStudent,
-        taTeamCurrentAveragePbisCardsPerStudent / 24
-      );
-      console.log("TA Data", {
-        name: teacher.name,
-        taTeamCurrentPbisLevel,
-        taTeamPbisLevelChange,
-        averageCardsRounded,
-      });
       await updateTA({
         variables: {
           id: teacher.id,
@@ -330,7 +304,6 @@ export default function useV3PbisCollection() {
         for (let i = 0; i < cur.studentPbisCardsCount; i++) {
           studentTickets.push(cur.id);
         }
-        console.log("studentTickets", studentTickets);
         return [...acc, ...studentTickets];
       },
       []
@@ -350,7 +323,6 @@ export default function useV3PbisCollection() {
       }
     }
 
-    console.log("randomDrawingWinnerIds", randomDrawingWinnerIds);
     for (const winnerId of randomDrawingWinnerIds) {
       await updateStudentRandomDrawingWinner({
         variables: {

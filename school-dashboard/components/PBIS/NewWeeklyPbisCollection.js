@@ -45,12 +45,10 @@ export default function NewWeeklyPbisCollection() {
                 // setShowForm(false);
                 resetForm();
                 if (res) {
-                  console.log(res);
                   const revalidateRes = await sendRevalidationRequest();
                   // wait for the revalidation to finish for a couple seconds
                   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-                  console.log(revalidateRes);
                   setRunning(false);
                   router.push({
                     pathname: `/pbis`,

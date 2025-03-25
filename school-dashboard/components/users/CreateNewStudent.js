@@ -125,7 +125,6 @@ export default function NewStudent({ student }) {
             // Submit the input fields to the backend:
             // console.log(inputs);
             const res = await createNewStudent();
-            console.log(res);
             if (res.data.createUser) {
               queryClient.refetchQueries();
               setShowForm(false);
