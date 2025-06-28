@@ -5,7 +5,7 @@ export const prodEndpoint =
   process.env.ENDPOINT || `https://api.ncujhs.tech/api/graphql`;
 export const perPage = 4;
 export const callbackDisabled =
-  process.env.NEXT_PUBLIC_CALLBACK_DISABLED || false;
+  process.env.NEXT_PUBLIC_CALLBACK_DISABLED.toLowerCase() === "true" || false;
 export const disciplineDisabled =
   process.env.NEXT_PUBLIC_DISCIPLINE_DISABLED || false;
 
