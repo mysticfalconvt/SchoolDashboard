@@ -50,38 +50,48 @@ export default function Table({
       )}
       <table {...getTableProps()}>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr 
-            key={headerGroup.id}
-            {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th 
-                  key={`${column.id}`} 
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  className={
-                    column.isSorted
-                      ? column.isSortedDesc
-                        ? 'sort-desc'
-                        : 'sort-asc'
-                      : ''
-                  }
-                >
-                  {column.render('Header')}
-                </th>
-              ))}
-            </tr>
-          ))}
+          {headerGroups.map((headerGroup) => {
+            const { key: headerGroupKey, ...headerGroupProps } = headerGroup.getHeaderGroupProps();
+            return (
+              <tr
+                key={headerGroupKey}
+                {...headerGroupProps}>
+                {headerGroup.headers.map((column) => {
+                  const { key: thKey, ...thProps } = column.getHeaderProps(column.getSortByToggleProps());
+                  return (
+                    <th
+                      key={thKey || column.id}
+                      {...thProps}
+                      className={
+                        column.isSorted
+                          ? column.isSortedDesc
+                            ? 'sort-desc'
+                            : 'sort-asc'
+                          : ''
+                      }
+                    >
+                      {column.render('Header')}
+                    </th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);
+            const { key: rowKey, ...rowProps } = row.getRowProps();
             return (
-              <tr key={`row${i}`} {...row.getRowProps()}>
-                {row.cells.map((cell) => (
-                  <td 
-                  key={`${cell.column.id}${i}`}
-                  {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                ))}
+              <tr key={rowKey || `row${i}`} {...rowProps}>
+                {row.cells.map((cell) => {
+                  const { key: cellKey, ...cellProps } = cell.getCellProps();
+                  return (
+                    <td
+                      key={cellKey || `${cell.column.id}${i}`}
+                      {...cellProps}>{cell.render('Cell')}</td>
+                  );
+                })}
               </tr>
             );
           })}

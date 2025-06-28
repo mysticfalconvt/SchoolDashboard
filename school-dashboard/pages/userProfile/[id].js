@@ -96,8 +96,8 @@ export default function UserProfile({ query }) {
   if (isLoading || !me) return <Loading />;
   if (error) return <p>{error.message}</p>;
   if (!isAllowed(me, "isStaff")) return null;
-  const user = data?.user;
-  const { isStudent } = user;
+  const user = data?.user || {};
+  const { isStudent = false } = user;
   return (
     <div>
       <h1>{capitalizeFirstLetter(getDisplayName(user))}</h1>

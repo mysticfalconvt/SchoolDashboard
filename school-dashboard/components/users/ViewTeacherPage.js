@@ -273,18 +273,21 @@ export default function ViewTeacherPage({ teacher }) {
   );
   if (isLoading) return <Loading />;
   //   console.log(data.user);
-  const { user } = data;
-  const { taStudents } = user;
-  const { block1Students } = user;
-  const { block2Students } = user;
-  const { block3Students } = user;
-  const { block4Students } = user;
-  const { block5Students } = user;
-  const { block6Students } = user;
-  const { block7Students } = user;
-  const { block8Students } = user;
-  const { block9Students } = user;
-  const { block10Students } = user;
+  const { user } = data || {};
+  const {
+    taStudents = [],
+    block1Students = [],
+    block2Students = [],
+    block3Students = [],
+    block4Students = [],
+    block5Students = [],
+    block6Students = [],
+    block7Students = [],
+    block8Students = [],
+    block9Students = [],
+    block10Students = [],
+    callbackAssigned = [],
+  } = user || {};
   return (
     <div>
       {me.id === teacher.id && (
@@ -334,41 +337,41 @@ export default function ViewTeacherPage({ teacher }) {
         </ClassCardButtonStyle>
       )}
       <h3>Teacher info</h3>
-      <AssignmentViewCards assignments={user} />
-      {user.taStudents[0] && (
-        <ViewStudentTable users={user.taStudents} title="TA Students" />
+      <AssignmentViewCards assignments={user || {}} />
+      {taStudents[0] && (
+        <ViewStudentTable users={taStudents} title="TA Students" />
       )}
-      {user.block1Students[0] && (
-        <ViewStudentTable users={user.block1Students} title="Block 1" />
+      {block1Students[0] && (
+        <ViewStudentTable users={block1Students} title="Block 1" />
       )}
-      {user.block2Students[0] && (
-        <ViewStudentTable users={user.block2Students} title="Block 2" />
+      {block2Students[0] && (
+        <ViewStudentTable users={block2Students} title="Block 2" />
       )}
-      {user.block3Students[0] && (
-        <ViewStudentTable users={user.block3Students} title="Block 3" />
+      {block3Students[0] && (
+        <ViewStudentTable users={block3Students} title="Block 3" />
       )}
-      {user.block4Students[0] && (
-        <ViewStudentTable users={user.block4Students} title="Block 4" />
+      {block4Students[0] && (
+        <ViewStudentTable users={block4Students} title="Block 4" />
       )}
-      {user.block5Students[0] && (
-        <ViewStudentTable users={user.block5Students} title="Block 5" />
+      {block5Students[0] && (
+        <ViewStudentTable users={block5Students} title="Block 5" />
       )}
-      {user.block6Students[0] && (
-        <ViewStudentTable users={user.block6Students} title="Block 6" />
+      {block6Students[0] && (
+        <ViewStudentTable users={block6Students} title="Block 6" />
       )}
-      {user.block7Students[0] && (
-        <ViewStudentTable users={user.block7Students} title="Block 7" />
+      {block7Students[0] && (
+        <ViewStudentTable users={block7Students} title="Block 7" />
       )}
-      {user.block8Students[0] && (
-        <ViewStudentTable users={user.block8Students} title="Block 8" />
+      {block8Students[0] && (
+        <ViewStudentTable users={block8Students} title="Block 8" />
       )}
-      {user.block9Students[0] && (
-        <ViewStudentTable users={user.block9Students} title="Block 9" />
+      {block9Students[0] && (
+        <ViewStudentTable users={block9Students} title="Block 9" />
       )}
-      {user.block10Students[0] && (
-        <ViewStudentTable users={user.block10Students} title="Block 10" />
+      {block10Students[0] && (
+        <ViewStudentTable users={block10Students} title="Block 10" />
       )}
-      <CallbackCards callbacks={user.callbackAssigned} />
+      <CallbackCards callbacks={callbackAssigned} />
     </div>
   );
 }
