@@ -5,6 +5,7 @@ import { useGQLQuery } from "../../lib/useGqlQuery";
 import DisplayError from "../ErrorMessage";
 import Loading from "../Loading";
 import * as React from "react";
+
 // gql query to get number of cards
 export const TOTAL_PBIS_CARDS = gql`
   query {
@@ -13,6 +14,7 @@ export const TOTAL_PBIS_CARDS = gql`
 `;
 
 const ContainerStyles = styled.div`
+  position: relative;
   height: 150px;
   width: 150px;
   background-color: var(--red);
@@ -24,7 +26,7 @@ const ContainerStyles = styled.div`
 
   .filler {
     width: 100%;
-    height: ${({ percentageLeft }) => percentageLeft}%;
+    height: ${({ 'data-percentage-left': percentageLeft }) => percentageLeft}%;
     background-color: var(--blue);
     position: relative;
     bottom: 0px;
@@ -35,7 +37,6 @@ const ContainerStyles = styled.div`
 
   .label {
     position: absolute;
-    /* padding: 5; */
     color: white;
     font-weight: bold;
     left: 20px;
@@ -44,14 +45,14 @@ const ContainerStyles = styled.div`
   }
   .total {
     position: absolute;
-    /* padding: 5; */
     color: white;
     font-weight: bold;
-    /* left: 20px; */
-    /* right: 20px; */
-    /* bottom: 00px; */
-    transform: translate(${({ cardOffset }) => cardOffset});
-    /* text-align: center; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
   }
   img {
     position: absolute;
@@ -59,7 +60,6 @@ const ContainerStyles = styled.div`
     left: 5%;
     width: 125px;
     height: 125px;
-    /* height: 100%; */
   }
   .falcon {
     position: absolute;
@@ -89,35 +89,21 @@ export default function PbisFalcon({ initialCount }) {
   );
   // last years card total
   const cardGoal = 60000;
-  // console.log('data', data);
   if (isLoading) return <Loading />;
   if (error) return <DisplayError error={error} />;
-  const percentageFull =
-    Math.round((data?.pbisCardsCount / cardGoal) * 10000) / 100;
-  const percentageLeft = 100 - percentageFull;
-  const getTotalCardsOffset = () => {
-    if (percentageLeft > 60) {
-      return "30px, -30px";
-    }
-    if (percentageLeft > 40) {
-      return "30px, -10px";
-    }
-    if (percentageLeft > 30) {
-      return "30px, 20px";
-    }
 
-    return "30px, 30px";
-  };
-  const cardOffset = getTotalCardsOffset();
+  const displayCount = data?.pbisCardsCount;
+  const percentageFull =
+    Math.round((displayCount / cardGoal) * 10000) / 100;
+  const percentageLeft = 100 - percentageFull;
+
   return (
-    <div>
-      <ContainerStyles percentageLeft={percentageLeft} cardOffset={cardOffset}>
-        <div className="filler">
-          <img src="/falcon.svg" alt="falcon" className="falcon" />
-          <span className="label">{`${percentageFull}%`}</span>
-        </div>
-        <span className="total">{data.pbisCardsCount} cards</span>
-      </ContainerStyles>
-    </div>
+    <ContainerStyles data-percentage-left={percentageLeft}>
+      <div className="filler">
+        <img src="/falcon.svg" alt="falcon" className="falcon" />
+        <span className="label">{`${percentageFull}%`}</span>
+      </div>
+      <span className="total">{displayCount} cards</span>
+    </ContainerStyles>
   );
 }

@@ -4,7 +4,7 @@ import SingleCallbackCard from './SingleCallbackCard';
 const CallBackCardsStyles = styled.div`
   display: grid;
   /* width: max(100%, 80vw); */
-  --numberOfCallbackColumns: ${(props) => props.maxColumns || 4};
+  --numberOfCallbackColumns: ${(props) => props['data-max-columns'] || 4};
   /* grid-template-columns: repeat(var(--numberOfCallbackColumns), 1fr); */
   /* grid-template-columns: auto auto; */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -12,10 +12,10 @@ const CallBackCardsStyles = styled.div`
   justify-content: space-around;
   transition: all ease-in 1s;
   /* @media (max-width: 1300px) {
-    --numberOfCallbackColumns: ${(props) => props.maxColumns - 1 || 4};
+    --numberOfCallbackColumns: ${(props) => props['data-max-columns'] - 1 || 4};
   }
   @media (max-width: 1100px) {
-    --numberOfCallbackColumns: ${(props) => props.maxColumns - 2 || 4};
+    --numberOfCallbackColumns: ${(props) => props['data-max-columns'] - 2 || 4};
   }
   @media (max-width: 850px) {
     --numberOfCallbackColumns: 1;
@@ -25,8 +25,8 @@ const CallBackCardsStyles = styled.div`
 export default function CallbackCards({ callbacks, maxColumns }) {
   return (
     <>
-      <h1>You have {callbacks?.length > 0 ? callbacks.length : "no" } Items on callback</h1>
-      <CallBackCardsStyles maxColumns={maxColumns}>
+      <h1>You have {callbacks?.length > 0 ? callbacks.length : "no"} Items on callback</h1>
+      <CallBackCardsStyles data-max-columns={maxColumns}>
         {callbacks?.map((callback) => (
           <SingleCallbackCard
             callback={callback}
