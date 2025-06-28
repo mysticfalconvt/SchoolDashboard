@@ -350,21 +350,35 @@ export async function getStaticProps(context) {
     headers
   );
 
-  const fetchTotalCards = async () => graphQLClient.request(TOTAL_PBIS_CARDS);
-  const fetchHomePageLinks = async () =>
-    graphQLClient.request(GET_HOMEPAGE_LINKS);
-  const fetchWeeklyCalendar = async () =>
+  // Reusable fetch with retry logic
+  const fetchWithRetry = async (fetchFn, retries = 3, delay = 1000) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await fetchFn();
+      } catch (error) {
+        if (attempt === retries) {
+          console.error('Failed to fetch after retries:', error);
+          return { fetchError: error.message || 'Failed to fetch data' };
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  };
+
+  const fetchTotalCards = () => graphQLClient.request(TOTAL_PBIS_CARDS);
+  const fetchHomePageLinks = () => graphQLClient.request(GET_HOMEPAGE_LINKS);
+  const fetchWeeklyCalendar = () =>
     graphQLClient.request(GET_WEEK_CALENDARS, {
       starting: lastSunday,
       ending: nextSaturday,
     });
-  const fetchAllUsersForSearch = async () =>
+  const fetchAllUsersForSearch = () =>
     graphQLClient.request(SEARCH_ALL_USERS_QUERY);
 
-  const totalCards = await fetchTotalCards();
-  const homePageLinks = await fetchHomePageLinks();
-  const weeklyCalendar = await fetchWeeklyCalendar();
-  const allUsersForSearch = await fetchAllUsersForSearch();
+  const totalCards = await fetchWithRetry(fetchTotalCards);
+  const homePageLinks = await fetchWithRetry(fetchHomePageLinks);
+  const weeklyCalendar = await fetchWithRetry(fetchWeeklyCalendar);
+  const allUsersForSearch = await fetchWithRetry(fetchAllUsersForSearch);
   const initialGoogleCalendarEvents = await getCalendarData();
   return {
     props: {
