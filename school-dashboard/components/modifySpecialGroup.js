@@ -6,34 +6,7 @@ import SearchForUserName from "./SearchForUserName";
 import { useUser } from "./User";
 import gql from "graphql-tag";
 import Loading from "./Loading";
-import styled from "styled-components";
 import { SmallGradientButton } from "./styles/Button";
-
-const SpecialGroupStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  button {
-    color: var(--textColor);
-    border-radius: 5px;
-    margin-inline: 3px;
-    background: var(--tableAccentColor);
-    /* opacity: 0.8; */
-  }
-  .remove {
-    border: none;
-    background: transparent;
-  }
-  .studentList {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-`;
 
 const ADD_STUDENT_TO_GROUP_MUTATION = gql`
   mutation ADD_STUDENT_TO_GROUP_MUTATION($id: ID, $studentID: ID) {
@@ -82,7 +55,7 @@ export default function ModifySpecialGroup() {
 
   const studentList = data.teacher.specialGroupStudents;
   return (
-    <SpecialGroupStyles>
+    <div className="flex flex-col items-start justify-center">
       <h4>Student Group</h4>
       {thinking ? <Loading /> : null}
       <SearchForUserName
@@ -93,7 +66,7 @@ export default function ModifySpecialGroup() {
       />
       <SmallGradientButton
         type="button"
-        className="p-4 m-2 bg-stone-500 border-1 border-slate-400 border-solid rounded-md"
+        className="p-4 m-2 bg-stone-500 border border-slate-400 rounded text-[var(--textColor)]"
         onClick={async () => {
           setThinking(true);
           await addStudent();
@@ -105,13 +78,13 @@ export default function ModifySpecialGroup() {
       >
         add {searchValue.userName}
       </SmallGradientButton>
-      <div className="studentList">
+      <div className="flex flex-row items-baseline justify-center flex-wrap gap-5 mt-2">
         {studentList.map((student) => (
           <div key={student.id}>
             <span>{student.name}</span>
             <button
               type="button"
-              className="remove"
+              className="border-none bg-transparent ml-2"
               onClick={async () => {
                 setThinking(true);
                 await removeStudent({
@@ -130,6 +103,6 @@ export default function ModifySpecialGroup() {
           </div>
         ))}
       </div>
-    </SpecialGroupStyles>
+    </div>
   );
 }

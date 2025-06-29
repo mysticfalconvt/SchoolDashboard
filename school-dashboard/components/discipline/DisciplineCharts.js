@@ -13,12 +13,6 @@ import DoughnutChart from "../Chart/DonutChart";
 import BarChart from "../Chart/BarChart";
 import totalsTrueInArray from "../../lib/totalsTrueInArray";
 
-const ChartContainerStyles = styled.div`
-  /* display: flex;
-  flex-wrap: wrap;
-  max-width: 400px; */
-`;
-
 export const weekday = new Array(7);
 weekday[0] = "Sunday";
 weekday[1] = "Monday";
@@ -65,7 +59,7 @@ export default function DisciplineCharts({ disciplines }) {
   const dates = getDayTotals(disciplines);
   // console.log(dates);
   return (
-    <ChartContainerStyles>
+    <div className="flex flex-wrap max-w-md">
       <DoughnutChart title="Day of the Week" chartData={dates} />
       <DoughnutChart title="Class Type" chartData={totalPerClass} />
       <DoughnutChart title="Location" chartData={locations} />
@@ -73,6 +67,6 @@ export default function DisciplineCharts({ disciplines }) {
       <BarChart title="Inappropriate Student Conduct" chartData={conducts} />
       <BarChart title="Teacher Actions" chartData={teacherActions} />
       <BarChart title="Others Involved" chartData={others} />
-    </ChartContainerStyles>
+    </div>
   );
 }

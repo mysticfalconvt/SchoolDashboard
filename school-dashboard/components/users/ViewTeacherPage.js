@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import { useUser } from "../User";
 import Loading from "../Loading";
@@ -7,19 +6,6 @@ import AssignmentViewCards from "../Assignments/AssignmentViewCards";
 import ViewStudentTable from "./ViewStudentTable";
 import CallbackCards from "../Callback/CallbackCards";
 import GiveListOfStudentsACardButton from "../PBIS/GiveListOfStudentsACardButton";
-
-const ClassCardButtonStyle = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  max-width: 80%;
-  flex-wrap: wrap;
-  border-radius: 2rem;
-  border: 2px solid var(--red);
-  padding: 10px;
-  margin: auto;
-`;
 
 const GET_SINGLE_TEACHER = gql`
   query GET_SINGLE_TEACHER($id: ID!, $date: DateTime!) {
@@ -291,7 +277,7 @@ export default function ViewTeacherPage({ teacher }) {
   return (
     <div>
       {me.id === teacher.id && (
-        <ClassCardButtonStyle>
+        <div className="flex flex-row justify-around items-center max-w-[80%] flex-wrap rounded-3xl border-2 border-[var(--red)] p-2.5 mx-auto">
           <h3>Give a whole class a card</h3>
           <GiveListOfStudentsACardButton title="TA" students={taStudents} />
           <GiveListOfStudentsACardButton
@@ -334,7 +320,7 @@ export default function ViewTeacherPage({ teacher }) {
             title="Block 10"
             students={block10Students}
           />
-        </ClassCardButtonStyle>
+        </div>
       )}
       <h3>Teacher info</h3>
       <AssignmentViewCards assignments={user || {}} />

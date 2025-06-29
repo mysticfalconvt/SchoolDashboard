@@ -354,7 +354,7 @@ export default function Users(props) {
   if (error) return <DisplayError>{error.message}</DisplayError>;
   return (
     <div>
-      <div className="flex mb-14 relative">
+      <div className="flex mb-14 relative h-20 items-center">
         <GradientButton
           onClick={() => {
             setUserSortType("staff");

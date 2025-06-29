@@ -5,62 +5,6 @@ import styled from "styled-components";
 import useForm from "../../lib/useForm";
 import { useUser } from "../User";
 
-const AssignmentUpdateStyles = styled.div`
-  position: fixed; /* Stay in place */
-  z-index: 4; /* Sit on top */
-  /* right: 50%; */
-  left: 25%;
-  top: 40%;
-  min-width: 50%;
-  height: auto;
-  // overflow: auto;
-  border-radius: 2rem;
-  h4 {
-    color: white;
-    margin: 0.5rem 0.5rem;
-    text-align: center;
-  }
-  button {
-    color: white;
-    background: var(--blueTrans);
-    border: none;
-    border-radius: 100px;
-    // font-size: 2rem;
-    margin: 0rem 0.5rem;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    color: white;
-    label {
-      padding: 10px;
-      text-align: left;
-    }
-    input,
-    textarea {
-      margin: auto 2rem;
-      min-width: 90%;
-      color: black;
-    }
-    button {
-      margin-bottom: 1rem;
-      // max-width: 10rem;
-      /* margin-left: auto; */
-      /* margin-right: auto; */
-      padding-left: 2rem;
-      padding-right: 3rem;
-      text-align: center;
-    }
-  }
-  .button-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-  }
-`;
-
 const UPDATE_ASSIGNMENTS = gql`
   mutation UPDATE_ASSIGNMENTS(
     $id: ID!
@@ -155,15 +99,15 @@ export default function AssignmentUpdater({
   );
 
   return (
-    <AssignmentUpdateStyles className="bg-slate-900 overflow-hidden border-slate-400 border-solid border-2">
-      <h4 className="flex items-center w-full justify-center">
+    <div className="fixed z-10 left-1/4 top-2/5 min-w-1/2 h-auto rounded-3xl bg-slate-900 overflow-hidden border-slate-400 border-solid border-2">
+      <h4 className="text-white m-2 text-center flex items-center w-full justify-center">
         Update Class Assignment for Block {block}
-        <button type="button" onClick={() => hide(false)} className="w-10 h-10">
+        <button type="button" onClick={() => hide(false)} className="w-10 h-10 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5">
           &times;
         </button>
       </h4>
-      <form>
-        <label htmlFor="Class Name">
+      <form className="flex flex-col justify-center text-white">
+        <label htmlFor="Class Name" className="p-2.5 text-left">
           Class Name:
           <input
             type="text"
@@ -172,9 +116,10 @@ export default function AssignmentUpdater({
             placeholder="student Message"
             value={inputs.classTitle}
             onChange={handleChange}
+            className="mx-8 min-w-[90%] text-black"
           />
         </label>
-        <label htmlFor="message">
+        <label htmlFor="message" className="p-2.5 text-left">
           Current Assignment:
           <textarea
             type="text"
@@ -183,9 +128,10 @@ export default function AssignmentUpdater({
             placeholder="Current Assignment"
             value={inputs.assignment}
             onChange={handleChange}
+            className="mx-8 min-w-[90%] text-black"
           />
         </label>
-        <div className="button-container">
+        <div className="flex flex-row justify-around items-center">
           <button
             type="button"
             onClick={async () => {
@@ -198,12 +144,13 @@ export default function AssignmentUpdater({
               await refetch();
               hide(false);
             }}
+            className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
           >
             Update
           </button>
           <button
             type="button"
-            className="w-80"
+            className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
             onClick={async () => {
               const todaysDate = new Date();
               updateData[`block1AssignmentLastUpdated`] = todaysDate;
@@ -217,25 +164,15 @@ export default function AssignmentUpdater({
               updateData[`block9AssignmentLastUpdated`] = todaysDate;
               updateData[`block10AssignmentLastUpdated`] = todaysDate;
               updateData[`block1Assignment`] = inputs.assignment;
-              // updateData[`block1ClassName`] = inputs.classTitle;
               updateData[`block2Assignment`] = inputs.assignment;
-              // updateData[`block2ClassName`] = inputs.classTitle;
               updateData[`block3Assignment`] = inputs.assignment;
-              // updateData[`block3ClassName`] = inputs.classTitle;
               updateData[`block4Assignment`] = inputs.assignment;
-              // updateData[`block4ClassName`] = inputs.classTitle;
               updateData[`block5Assignment`] = inputs.assignment;
-              // updateData[`block5ClassName`] = inputs.classTitle;
               updateData[`block6Assignment`] = inputs.assignment;
-              // updateData[`block6ClassName`] = inputs.classTitle;
               updateData[`block7Assignment`] = inputs.assignment;
-              // updateData[`block7ClassName`] = inputs.classTitle;
               updateData[`block8Assignment`] = inputs.assignment;
-              // updateData[`block8ClassName`] = inputs.classTitle;
               updateData[`block9Assignment`] = inputs.assignment;
-              // updateData[`block9ClassName`] = inputs.classTitle;
               updateData[`block10Assignment`] = inputs.assignment;
-              // updateData[`block10ClassName`] = inputs.classTitle;
               updateData.id = me.id;
               await updateAssignment({ variables: updateData });
               toast.success(`Updated Assignment for Block ${block}`);
@@ -247,6 +184,6 @@ export default function AssignmentUpdater({
           </button>
         </div>
       </form>
-    </AssignmentUpdateStyles>
+    </div>
   );
 }

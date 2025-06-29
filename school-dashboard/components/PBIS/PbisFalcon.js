@@ -1,6 +1,4 @@
 import gql from "graphql-tag";
-import Image from "next/image";
-import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import DisplayError from "../ErrorMessage";
 import Loading from "../Loading";
@@ -13,68 +11,10 @@ export const TOTAL_PBIS_CARDS = gql`
   }
 `;
 
-const ContainerStyles = styled.div`
-  position: relative;
-  height: 150px;
-  width: 150px;
-  background-color: var(--red);
-  border-radius: 50;
-  margin: 50;
-  margin: 0.5rem;
-  border-radius: 3px;
-  border: 3px solid var(--red);
-
-  .filler {
-    width: 100%;
-    height: ${({ 'data-percentage-left': percentageLeft }) => percentageLeft}%;
-    background-color: var(--blue);
-    position: relative;
-    bottom: 0px;
-    transition: width 1s ease-in-out;
-    text-align: right;
-    border-radius: 3px 3px 0px 0px;
-  }
-
-  .label {
-    position: absolute;
-    color: white;
-    font-weight: bold;
-    left: 20px;
-    right: 20px;
-    text-align: center;
-  }
-  .total {
-    position: absolute;
-    color: white;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 1000;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-  }
-  img {
-    position: absolute;
-    top: 2px;
-    left: 5%;
-    width: 125px;
-    height: 125px;
-  }
-  .falcon {
-    position: absolute;
-    top: 2px;
-    left: 5%;
-    width: 125px;
-    height: 125px;
-  }
-`;
-
 export default function PbisFalcon({ initialCount }) {
   let queryOptions = {};
   const initialData = {};
   initialData.pbisCardsCount = initialCount;
-
   if (initialCount) {
     queryOptions = {
       initialData,
@@ -98,12 +38,18 @@ export default function PbisFalcon({ initialCount }) {
   const percentageLeft = 100 - percentageFull;
 
   return (
-    <ContainerStyles data-percentage-left={percentageLeft}>
-      <div className="filler">
-        <img src="/falcon.svg" alt="falcon" className="falcon" />
-        <span className="label">{`${percentageFull}%`}</span>
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative h-[150px] w-[150px] bg-[var(--blue)] rounded-[20px] m-2 border-[4px] border-[var(--red)] overflow-hidden">
+        {/* Red fill from bottom up */}
+        <div
+          className="absolute left-0 bottom-0 w-full bg-[var(--red)] transition-all duration-1000 ease-in-out z-0"
+          style={{ height: `${percentageFull}%` }}
+        />
+        {/* Falcon and text always on top */}
+        <img src="/falcon.svg" alt="falcon" className="absolute top-2 left-1/2 -translate-x-1/2 w-[125px] h-[125px] z-10 pointer-events-none drop-shadow-[0_0_8px_white]" />
+        <span className="absolute top-4 left-0 w-full text-white font-bold text-center text-lg z-20 drop-shadow">{`${percentageFull}%`}</span>
+        <span className="absolute top-1/2 left-0 w-full text-white font-bold text-center z-20 text-xl drop-shadow" style={{ transform: 'translateY(-50%)' }}>{displayCount} cards</span>
       </div>
-      <span className="total">{displayCount} cards</span>
-    </ContainerStyles>
+    </div>
   );
 }

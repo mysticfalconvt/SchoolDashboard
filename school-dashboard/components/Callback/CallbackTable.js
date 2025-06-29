@@ -9,28 +9,6 @@ import MarkCallbackCompleted from "./MarkCallbackCompleted";
 import gql from "graphql-tag";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 
-export const ToolTipStyles = styled.div`
-  position: relative;
-  display: inline-block;
-  .toolTipText {
-    visibility: hidden;
-    width: clamp(200px, 30vw, 60vw);
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 5px;
-
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
-  }
-
-  :hover .toolTipText {
-    visibility: visible;
-  }
-`;
-
 const GET_STUDENTS_BY_BLOCK_QUERY = gql`
   query GET_STUDENTS_BY_BLOCK($id: ID) {
     user(where: { id: $id }) {
@@ -187,12 +165,12 @@ export default function CallbackTable({ callbacks, showClassBlock = false }) {
               }
               return (
                 <>
-                  <ToolTipStyles>
+                  <div className="relative inline-block group">
                     <Link href={`/callback/${cell.row.original.id}`}>
                       {shortDescription}
                     </Link>
-                    <span className="toolTipText">{cell.value}</span>
-                  </ToolTipStyles>
+                    <span className="invisible group-hover:visible w-[clamp(200px,30vw,60vw)] bg-black/80 text-white text-center rounded-md p-1.5 absolute z-10">{cell.value}</span>
+                  </div>
                 </>
               );
             },

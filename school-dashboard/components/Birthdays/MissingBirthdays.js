@@ -1,6 +1,5 @@
 import gql from 'graphql-tag';
 import React from 'react';
-import styled from 'styled-components';
 import { capitalizeFirstLetter } from '../../lib/nameUtils';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../Loading';
@@ -20,13 +19,6 @@ const MISSING_BIRTHDAYS_QUERY = gql`
   }
 `;
 
-const MissingBirthdayStyles = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-around;
-`;
-
 export default function MissingBirthdays() {
   const me = useUser();
   const { data, isLoading, error } = useGQLQuery(
@@ -42,7 +34,7 @@ export default function MissingBirthdays() {
 
   if (isLoading) return <Loading />;
   return (
-    <MissingBirthdayStyles>
+    <div className="flex flex-row items-start justify-around">
       <div>
         <h3>Needs to choose a cake type</h3>
         {needsToChooseCake?.map((user) => (
@@ -59,6 +51,6 @@ export default function MissingBirthdays() {
           </div>
         ))}
       </div>
-    </MissingBirthdayStyles>
+    </div>
   );
 }

@@ -1,70 +1,51 @@
-import styled from "styled-components";
+import React from "react";
 
-const GradientButton = styled.button`
-  background-image: linear-gradient(to top left, var(--red), var(--blue));
-  color: var(--navTextColor);
-  font-weight: 500;
-  border: 0;
-  border-radius: 1rem;
-  text-transform: uppercase;
-  font-size: 1.6rem;
-  padding: 0.8rem 1.5rem;
-  transform: skew(-2deg);
-  display: inline-block;
-  transition: all 0.5s;
-  margin: 2px;
-  max-height: auto;
-  outline: none;
-  border: 1px solid var(--backgroundColor);
-  &[disabled] {
-    opacity: 0.5;
-  }
-  &:hover {
-    cursor: pointer;
-    /* transform: skew(0deg); */
-    transition: all 0.1s;
-    border: 1px solid var(--red);
-  }
-`;
-export const SmallGradientButton = styled.button`
-  background-image: linear-gradient(to top left, var(--red), var(--blue));
-  color: var(--navTextColor);
-  font-weight: 500;
-  border: 0;
-  border-radius: 1rem;
-  text-transform: uppercase;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  transform: skew(-3deg);
-  display: inline-block;
-  transition: all 0.5s;
-  outline: none;
-  border: 1px solid var(--backgroundColor);
-  &[disabled] {
-    opacity: 0.5;
-  }
-  &:hover {
-    cursor: pointer;
-    /* transform: skew(0deg); */
-    transition: all 0.1s;
-    border: 1px solid var(--red);
-  }
-`;
+// Universal Gradient Button
+const GradientButton = React.forwardRef(function GradientButton(
+  { className = "", children, ...props },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-lg px-6 py-3 skew-x-[-2deg] inline-block transition-all duration-500 m-1 max-h-full outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+});
 
-export const LeftEdgeButton = styled.button`
-  background: linear-gradient(to top left, var(--red), var(--blue));
-  padding: 10px;
-  position: absolute;
-  left: 5px;
-  border-radius: 1rem;
-  opacity: 0.9;
-  font-size: 1.5rem;
-  color: var(--navTextColor);
+// Smaller Gradient Button
+export const SmallGradientButton = React.forwardRef(function SmallGradientButton(
+  { className = "", children, ...props },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-sm px-4 py-2 skew-x-[-3deg] inline-block transition-all duration-500 outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+});
 
-  /* writing-mode: vertical-rl;
-    text-orientation: upright; */
-  word-spacing: 100vw;
-  max-width: min-content;
-  outline: none;
-`;
+// Left Edge Button (vertical, for edge placement)
+export const LeftEdgeButton = React.forwardRef(function LeftEdgeButton(
+  { className = "", children, ...props },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] px-4 py-2 absolute left-2 rounded-xl opacity-90 text-lg text-[var(--navTextColor)] max-w-min outline-none ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+});
+
 export default GradientButton;

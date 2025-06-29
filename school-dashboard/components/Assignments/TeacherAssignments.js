@@ -1,94 +1,10 @@
 import React, { useState } from "react";
 import gql from "graphql-tag";
-import styled from "styled-components";
 import { useUser } from "../User";
 import Loading from "../Loading";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import MessageUpdater from "./AssignmentUpdater";
 import { NUMBER_OF_BLOCKS } from "../../config";
-
-export const TeacherMessagesStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  border: 2px solid var(--blue);
-  border-radius: 2rem;
-  margin: 10px;
-  justify-content: space-around;
-  width: 100%;
-  h3 {
-    margin: 0.5rem;
-  }
-
-  .messageContainer {
-    display: grid;
-    grid-template-columns: repeat(10, auto);
-
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-    }
-  }
-  .singleMessage {
-    display: flex;
-    flex-direction: column;
-    margin: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 2rem;
-    box-shadow: 2px 2px var(--blue);
-    background: linear-gradient(
-      to top right,
-      var(--blueTrans),
-      var(--redTrans)
-    );
-    font-size: 1.2rem;
-    h4,
-    p {
-      margin: 0px;
-    }
-  }
-  .needsUpdate {
-    background: linear-gradient(208deg, var(--red), var(--redTrans));
-    background-size: 400% 400%;
-
-    -webkit-animation: AnimationName 3s ease infinite;
-    -moz-animation: AnimationName 3s ease infinite;
-    animation: AnimationName 3s ease infinite;
-    box-shadow: 2px 2px var(--Red);
-  }
-  @-webkit-keyframes AnimationName {
-    0% {
-      background-position: 0% 57%;
-    }
-    50% {
-      background-position: 100% 44%;
-    }
-    100% {
-      background-position: 0% 57%;
-    }
-  }
-  @-moz-keyframes AnimationName {
-    0% {
-      background-position: 0% 57%;
-    }
-    50% {
-      background-position: 100% 44%;
-    }
-    100% {
-      background-position: 0% 57%;
-    }
-  }
-  @keyframes AnimationName {
-    0% {
-      background-position: 0% 57%;
-    }
-    50% {
-      background-position: 100% 44%;
-    }
-    100% {
-      background-position: 0% 57%;
-    }
-  }
-`;
 
 const GET_MESSAGES = gql`
   query {
@@ -153,10 +69,10 @@ export default function TeacherAssignments() {
           refetch={refetch}
         />
       )}
-      <TeacherMessagesStyles>
-        <h3>Current Class Assignments</h3>
+      <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
+        <h3 className="m-2">Current Class Assignments</h3>
 
-        <div className="messageContainer">
+        <div className="grid grid-cols-10 md:grid-cols-1">
           {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
             const num = i + 1;
             const today = new Date();
@@ -166,7 +82,8 @@ export default function TeacherAssignments() {
             const late = today - messageDate > 600000000;
             return (
               <div
-                className={late ? "singleMessage needsUpdate" : "singleMessage"}
+                className={`flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] text-xl ${late ? "needsUpdate bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]" : ""
+                  }`}
                 key={`key ${num}`}
                 onClick={() => {
                   setBlock(num);
@@ -187,7 +104,23 @@ export default function TeacherAssignments() {
             );
           })}
         </div>
-      </TeacherMessagesStyles>
+      </div>
+      <style jsx>{`
+        @keyframes AnimationName {
+          0% {
+            background-position: 0% 57%;
+          }
+          50% {
+            background-position: 100% 44%;
+          }
+          100% {
+            background-position: 0% 57%;
+          }
+        }
+        .needsUpdate {
+          animation: AnimationName 3s ease infinite;
+        }
+      `}</style>
     </>
   );
 }
