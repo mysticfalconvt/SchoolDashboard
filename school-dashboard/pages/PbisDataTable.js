@@ -4,23 +4,7 @@ import { useUser } from "../components/User";
 import isAllowed from "../lib/isAllowed";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import Loading from "../components/Loading";
-import styled from "styled-components";
 import GradientButton from "../components/styles/Button";
-
-const PbisDataStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  .isAboveAverage {
-    color: rgba(0, 255, 0, 0.6);
-  }
-  .isBelowAverage {
-    color: rgba(255, 0, 0, 0.6);
-  }
-`;
 
 const PBIS_DATA_QUERY = gql`
   query PBISDataQuery {
@@ -248,11 +232,10 @@ export default function PbisDataTable() {
   }
 
   return (
-    <PbisDataStyles>
+    <div className="flex flex-col items-center justify-center w-full h-full">
       <h1>PBIS Data</h1>
       <h2>
-        Overall Average Yearly PBIS:{" "}
-        {roundToOneDecimal(overallAverageYearlyPbis)}
+        Overall Average Yearly PBIS: {roundToOneDecimal(overallAverageYearlyPbis)}
       </h2>
       <GradientButton onClick={() => changeSortMethod(sortMethod)}>
         Sort by {sortMethod === "average" ? "Alphabetical" : "Average"}
@@ -271,8 +254,8 @@ export default function PbisDataTable() {
               key={teacher.id}
               className={
                 teacher.averageYearlyPbis > overallAverageYearlyPbis
-                  ? "isAboveAverage"
-                  : "isBelowAverage"
+                  ? "text-green-500/60"
+                  : "text-red-500/60"
               }
             >
               <td>{teacher.name}</td>
@@ -282,6 +265,6 @@ export default function PbisDataTable() {
           ))}
         </tbody>
       </table>
-    </PbisDataStyles>
+    </div>
   );
 }

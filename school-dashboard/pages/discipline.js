@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import { useRouter } from "next/dist/client/router";
 import { GraphQLClient } from "graphql-request";
 import { useUser } from "../components/User";
@@ -14,24 +13,6 @@ import Loading from "../components/Loading";
 import isAllowed from "../lib/isAllowed";
 import { endpoint, prodEndpoint } from "../config";
 import DisciplineExtraDetails from "../components/discipline/DisciplineExtraDetails";
-
-const DisciplinePageContainer = styled.div`
-  h2 {
-    text-align: center;
-  }
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  div {
-    // max-width: 500px;
-  }
-  .big {
-    flex-basis: 100%;
-
-    width: 1000px;
-    /* background-color: red; */
-  }
-`;
 
 export const DISCIPLINE_DATA = gql`
   query DISCIPLINE_DATA {
@@ -126,7 +107,7 @@ export default function Discipline(props) {
   if (!me || !me?.isStaff) return <p>Not available</p>;
   return (
     <>
-      <DisciplinePageContainer>
+      <div className="flex justify-around flex-wrap gap-4">
         <NewDiscipline refetch={refetch} />
         <GradientButton
           onClick={() =>
@@ -134,7 +115,7 @@ export default function Discipline(props) {
               pathname: `Bullying`,
             })
           }
-          // style={{ maxHeight: "4rem" }}
+        // style={{ maxHeight: "4rem" }}
         >
           Hazing Harassment Bullying
         </GradientButton>
@@ -146,16 +127,16 @@ export default function Discipline(props) {
         {isAllowed(me, "canManageDiscipline") ? (
           <DisciplineExtraDetails disciplines={disciplinesToShow} />
         ) : null}
-      </DisciplinePageContainer>
-      <DisciplinePageContainer>
+      </div>
+      <div className="flex justify-around flex-wrap gap-4">
         <div>
-          <h2>{totalDisciplines} Total Referrals</h2>
+          <h2 className="text-center">{totalDisciplines} Total Referrals</h2>
           <DisciplineTable disciplines={disciplinesToShow} />
         </div>
         <div>
           <DisciplineCharts disciplines={disciplinesWithDateIncrimented} />
         </div>
-      </DisciplinePageContainer>
+      </div>
     </>
   );
 }

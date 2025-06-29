@@ -5,7 +5,6 @@ import { useUser } from "../components/User";
 import isAllowed from "../lib/isAllowed";
 import { endpoint, prodEndpoint } from "../config";
 import SingleVideo from "../components/video/singleVideo";
-import styled from "styled-components";
 import { useState } from "react";
 import Form from "../components/styles/Form";
 import GradientButton from "../components/styles/Button";
@@ -22,13 +21,6 @@ const GET_ALL_VIDEOS_QUERY = gql`
       type
     }
   }
-`;
-
-const MovieContainerStyles = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  grid-gap: 20px;
-  margin-top: 20px;
 `;
 
 export default function MoviesPage({ movieList }) {
@@ -66,7 +58,7 @@ export default function MoviesPage({ movieList }) {
           placeholder="Search"
         />
       </Form>
-      <MovieContainerStyles>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
         {movieList.videos.map((video) => {
           // check if video is in search results
           const isVisible = searchResults.includes(video);
@@ -74,7 +66,7 @@ export default function MoviesPage({ movieList }) {
             <SingleVideo key={video.id} video={video} hidden={!isVisible} />
           );
         })}
-      </MovieContainerStyles>
+      </div>
     </div>
   );
 }

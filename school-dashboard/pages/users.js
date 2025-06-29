@@ -68,39 +68,6 @@ const GET_ALL_TEACHERS = gql`
   }
 `;
 
-const ButtonStyles = styled.div`
-  display: flex;
-  margin-bottom: 3.5rem;
-  .hide {
-    opacity: 0;
-    visibility: hidden;
-    transition: all 1s ease-in-out;
-  }
-  .show {
-    opacity: 1;
-    transition: all 1s ease-in-out;
-  }
-  button {
-    transition: all 1s ease-in-out;
-    position: absolute;
-  }
-  /* button {
-    border: 1px solid var(--background-color);
-    position: absolute;
-    :hover {
-      border: 2px solid var(--red);
-    }
-  }
-  .hide {
-    opacity: 0;
-    visibility: hidden;
-  }
-  .show {
-    opacity: 1;
-  }
-  padding-bottom: 3.5rem; */
-`;
-
 const ArrayValues = ({ values }) => (
   <>
     {values.map((arrayValue, idx) => (
@@ -375,11 +342,11 @@ export default function Users(props) {
 
   const hiddenColumns = callbackDisabled
     ? [
-        "callbackCount",
-        "totalCallback",
-        "callbackItemsCount",
-        "averageTimeToCompleteCallback",
-      ]
+      "callbackCount",
+      "totalCallback",
+      "callbackItemsCount",
+      "averageTimeToCompleteCallback",
+    ]
     : [];
 
   if (!me?.isStaff) return <p>User does not have access</p>;
@@ -387,12 +354,13 @@ export default function Users(props) {
   if (error) return <DisplayError>{error.message}</DisplayError>;
   return (
     <div>
-      <ButtonStyles>
+      <div className="flex mb-14 relative">
         <GradientButton
           onClick={() => {
             setUserSortType("staff");
           }}
-          className={userSortType === "staff" ? "hide" : "show"}
+          className={userSortType === "staff" ? "transition-opacity duration-1000 opacity-0 invisible" : "transition-opacity duration-1000 opacity-100"}
+          style={{ position: 'absolute', left: 0 }}
         >
           Show Teachers
         </GradientButton>
@@ -400,11 +368,12 @@ export default function Users(props) {
           onClick={() => {
             setUserSortType("student");
           }}
-          className={userSortType === "student" ? "hide" : "show"}
+          className={userSortType === "student" ? "transition-opacity duration-1000 opacity-0 invisible" : "transition-opacity duration-1000 opacity-100"}
+          style={{ position: 'absolute', left: 0 }}
         >
           Show Students
         </GradientButton>
-      </ButtonStyles>
+      </div>
       {/* {isAllowed(me, 'isSuperAdmin') && <NewUpdateUsers />}
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />} */}
       {userSortType === "staff" && (

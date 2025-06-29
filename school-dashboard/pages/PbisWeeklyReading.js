@@ -1,25 +1,7 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
-import Loading from "../components/Loading";
 import { capitalizeFirstLetter } from "../lib/nameUtils";
 import { useGQLQuery } from "../lib/useGqlQuery";
-
-const PbisReadingStyles = styled.div`
-  h3 {
-    font-size: 2.5rem;
-  }
-  p {
-    font-size: 2rem;
-  }
-  ul {
-    font-size: 2rem;
-  }
-  .strong {
-    font-size: 3rem;
-  }
-  max-width: 100rem;
-  margin: 0 auto;
-`;
+import Loading from "../components/Loading";
 
 const PBIS_READING_QUERY = gql`
   query PBIS_READING_QUERY {
@@ -83,29 +65,29 @@ export default function PbisWeeklyReading() {
   });
   const totalCards = data.totalCards;
   return (
-    <PbisReadingStyles>
-      <h3>In PBIS News,</h3>
-      <p>
+    <div className="max-w-screen-2xl mx-auto">
+      <h3 className="text-3xl mb-4">In PBIS News,</h3>
+      <p className="text-2xl mb-4">
         As a school, we have earned {totalCards} PBIS cards. Keep up the good
         work. Continue to demonstrate our Habits: Respect, Responsibility, and
         Perseverance.
       </p>
-      <h3>
-        <span className="strong">Congratulations</span> to the following Random
+      <h3 className="text-3xl mb-4">
+        <span className="text-4xl font-bold">Congratulations</span> to the following Random
         Drawing Winners! Please report to the Bus Lobby to claim your reward.
       </h3>
-      <ul>
+      <ul className="text-2xl mb-4">
         {randomDrawingWinners.map((winner) => (
           <li key={winner.id}>{capitalizeFirstLetter(winner?.student.name)}</li>
         ))}
       </ul>
       {hasPersonalLevelWinners && (
-        <h3>
+        <h3 className="text-3xl mb-4">
           The following students have Leveled-Up. Please report to the BUS LOBBY
           to claim your earnings.
         </h3>
       )}
-      <ul>
+      <ul className="text-2xl mb-4">
         {personalLevelWinners.map((winner) => (
           <li key={winner.id}>
             {capitalizeFirstLetter(winner.name)} - {winner.individualPbisLevel}
@@ -113,12 +95,12 @@ export default function PbisWeeklyReading() {
         ))}
       </ul>
       {hasTaTeamsAtNewLevels && (
-        <h3>
+        <h3 className="text-3xl mb-4">
           The following TA Teams have completed their Bingo Box. You will be
           notified when you should receive your celebration.
         </h3>
       )}
-      <ul>
+      <ul className="text-2xl mb-4">
         {tasAtNewLevels.map((winner) => (
           <li key={winner.id}>
             {winner.name} - {winner.taTeamPbisLevel}
@@ -127,14 +109,14 @@ export default function PbisWeeklyReading() {
       </ul>
       {lastCollection?.staffRandomWinners.length ? (
         <>
-          <h3>Congratulations to the following Staff Members</h3>
-          <ul>
+          <h3 className="text-3xl mb-4">Congratulations to the following Staff Members</h3>
+          <ul className="text-2xl mb-4">
             {lastCollection.staffRandomWinners.map((winner) => (
               <li key={winner.id}>{winner.name}</li>
             ))}
-          </ul>{" "}
+          </ul>
         </>
       ) : null}
-    </PbisReadingStyles>
+    </div>
   );
 }

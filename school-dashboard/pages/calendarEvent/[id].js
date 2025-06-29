@@ -1,25 +1,10 @@
 import { GraphQLClient } from "graphql-request";
 import { getDatasetAtEvent } from "react-chartjs-2";
 import { endpoint, prodEndpoint } from "../../config";
-import styled from "styled-components";
 import { useUser } from "../../components/User";
 import EditCalendarEvent from "../../components/calendars/EditCalendar";
 import isAllowed from "../../lib/isAllowed";
 import gql from "graphql-tag";
-
-const CalendarStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background-color: var(--background-color);
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-`;
 
 export default function CalendarEvent({ query, data: calendar }) {
   const me = useUser();
@@ -44,7 +29,7 @@ export default function CalendarEvent({ query, data: calendar }) {
     ? `Link: ${calendar.linkTitle}`
     : "Attached Link";
   return (
-    <CalendarStyles>
+    <div className="flex flex-col items-center justify-center w-full h-full bg-[var(--background-color)] p-5 rounded-md shadow-md overflow-hidden">
       <h1>{calendar.name}</h1>
       <p>{calendar.description}</p>
       <p>
@@ -62,7 +47,7 @@ export default function CalendarEvent({ query, data: calendar }) {
       {isAllowed(me, "isStaff") ? (
         <EditCalendarEvent calendar={calendar} />
       ) : null}
-    </CalendarStyles>
+    </div>
   );
 }
 
