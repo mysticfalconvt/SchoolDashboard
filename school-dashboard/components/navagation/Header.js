@@ -75,7 +75,6 @@ export default function Header() {
           </div>
         )}
       </header>
-      {!!me && <MessagesCount />}
     </>
   );
 }

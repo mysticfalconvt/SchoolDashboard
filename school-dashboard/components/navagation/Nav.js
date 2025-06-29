@@ -5,6 +5,7 @@ import isAllowed from "../../lib/isAllowed";
 import { useRouter } from "next/router";
 import { callbackDisabled, disciplineDisabled } from "../../config";
 import MagicLinkSignIn from "../loginComponents/MagicLinkSignIn";
+import MessagesCount from '../Messages/MessagesCount';
 
 export default function Nav({ mobile = false, onClickLink }) {
   const me = useUser();
@@ -61,7 +62,19 @@ export default function Nav({ mobile = false, onClickLink }) {
         {isAllowed(me, "isStaff") && <NavCard href="/chromebooks">Chromebook</NavCard>}
         {isAllowed(me, "canHaveSpecialGroups") && <NavCard href="/specialGroup">SpGroup</NavCard>}
         <NavCard href="/ePortfolio">E-Portfolio</NavCard>
-        {isAllowed(me, "isSuperAdmin") && <NavCard href="/superUserSettings">⚙️</NavCard>}
+        {isAllowed(me, "isSuperAdmin") && (
+          <div className="flex items-center justify-center my-2">
+            <Link href="/superUserSettings" passHref legacyBehavior>
+              <a
+                className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+                aria-label="Super User Settings"
+              >
+                <span className="skew-x-[20deg] w-full text-center text-xl">⚙️</span>
+              </a>
+            </Link>
+          </div>
+        )}
+        <div className="flex items-center justify-center mt-2"><MessagesCount mobile={true} /></div>
       </div>
     );
   }
@@ -89,7 +102,19 @@ export default function Nav({ mobile = false, onClickLink }) {
         {isAllowed(me, "isStaff") && <NavCard href="/chromebooks">Chromebook</NavCard>}
         {isAllowed(me, "canHaveSpecialGroups") && <NavCard href="/specialGroup">SpGroup</NavCard>}
         <NavCard href="/ePortfolio">E-Portfolio</NavCard>
-        {isAllowed(me, "isSuperAdmin") && <NavCard href="/superUserSettings">⚙️</NavCard>}
+        {isAllowed(me, "isSuperAdmin") && (
+          <div className="flex items-center justify-center my-2">
+            <Link href="/superUserSettings" passHref legacyBehavior>
+              <a
+                className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+                aria-label="Super User Settings"
+              >
+                <span className="skew-x-[20deg] w-full text-center text-xl">⚙️</span>
+              </a>
+            </Link>
+          </div>
+        )}
+        <div className="flex items-center ml-2"><MessagesCount /></div>
       </div>
     </nav>
   );
