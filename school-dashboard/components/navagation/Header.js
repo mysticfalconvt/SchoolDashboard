@@ -1,128 +1,80 @@
 import Link from 'next/link';
-import styled from 'styled-components';
 import { useIsFetching } from 'react-query';
+import { useState } from 'react';
 import { GiFalconMoon } from 'react-icons/gi';
+import { FaBars, FaTimes } from 'react-icons/fa';
 import Search from '../Search';
 import { useUser } from '../User';
 import Nav from './Nav';
 import MessagesCount from '../Messages/MessagesCount';
 import isAllowed from '../../lib/isAllowed';
 
-const Logo = styled.h1`
-  font-size: 3.5rem;
-  margin-left: 3rem;
-  padding-left: 1rem;
-  position: relative;
-  z-index: 4;
-  margin-right: 7rem;
-  background-image: linear-gradient(to top left, var(--red), var(--blue));
-  border-radius: 1rem;
-  transform: skew(-20deg);
-  max-width: min-content;
-  .small {
-    display: none;
-  }
-  a {
-    color: var(--navTextColor);
-    text-decoration: none;
-    text-transform: uppercase;
-    padding: 0.5rem 1rem;
-  }
-  @media (max-width: 1100px) {
-    font-size: 3rem;
-  }
-  @media (max-width: 800px) {
-    display: none;
-  }
-  /* .small {
-    @media (max-width: 800px) {
-      display: block;
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      background-color: red;
-    }
-  } */
-`;
-
-const HeaderStyles = styled.header`
-  background: linear-gradient(to top right, var(--blue), var(--red));
-
-  .bar {
-    border-bottom: 10px solid var(--black, black);
-    display: grid;
-    grid-template-columns: auto 1fr;
-    justify-content: space-between;
-    align-items: stretch;
-  }
-
-  .sub-bar {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    border-bottom: 1px solid var(--black, black);
-  }
-  .loading {
-    -webkit-animation: Animation 0.5s ease infinite;
-    -moz-animation: Animation 0.5s ease infinite;
-    animation: Animation 0.5s ease infinite;
-    @-webkit-keyframes Animation {
-      0% {
-        opacity: 0.7;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0.7;
-      }
-    }
-    @-moz-keyframes Animation {
-      0% {
-        opacity: 0.7;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0.7;
-      }
-    }
-    @keyframes Animation {
-      0% {
-        opacity: 0.7;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0.7;
-      }
-    }
-  }
-`;
-
 export default function Header() {
   const me = useUser();
   const isFetching = useIsFetching();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <>
-      <HeaderStyles>
-        <div className="bar">
-          <Logo className={isFetching ? 'loading' : ''}>
-            <div className="big">
-              <Link className="big" href="/">
-                NCUJHS Dashboard
-              </Link>
-            </div>
-          </Logo>
-          <Nav />
+      <header className="bg-gradient-to-tr from-[var(--blue)] to-[var(--red)]">
+        {/* Mobile: NCUJHS left, hamburger right */}
+        <div className="flex flex-row items-center w-full px-2 py-2 relative md:static">
+          {/* Mobile NCUJHS link with falcon icon */}
+          <div className="flex md:hidden flex-1 items-center gap-2">
+            <img src="/falcon.svg" alt="Falcon" className="h-7 w-7 md:hidden inline-block" />
+            <Link href="/" className="text-white font-extrabold text-2xl tracking-wide px-2 py-1">
+              NCUJHS
+            </Link>
+          </div>
+          {/* Desktop skewed logo/title card */}
+          <div className={`bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] rounded-2xl mx-2 min-w-[220px] h-16 md:h-20 items-center justify-center skew-x-[-20deg] shadow-lg ${isFetching ? 'animate-pulse' : ''} hidden md:flex`}>
+            <Link href="/" className="block skew-x-[20deg]">
+              <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
+                <img src="/falcon.svg" alt="Falcon" className="h-12 w-12 hidden md:inline-block" />
+                <span className="flex flex-col items-start justify-center">
+                  <span className="uppercase font-extrabold text-white text-2xl md:text-4xl leading-none tracking-wide">NCUJHS</span>
+                  <span className="uppercase font-extrabold text-white text-xl md:text-3xl leading-none tracking-wide">Dashboard</span>
+                </span>
+              </span>
+            </Link>
+          </div>
+          {/* Hamburger for mobile (right) */}
+          <button
+            className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <FaBars />
+          </button>
+          {/* Desktop nav */}
+          <div className="flex-1 hidden md:block">
+            <Nav />
+          </div>
         </div>
+        {/* Mobile dropdown menu - covers entire screen, always visible when open */}
+        {menuOpen && (
+          <div className="fixed inset-0 bg-gradient-to-tr from-[var(--blue)] to-[var(--red)] shadow-lg z-[9999] animate-fade-in-down overflow-y-auto flex flex-col">
+            <button
+              className="absolute top-4 right-4 text-white text-3xl focus:outline-none z-60"
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+            >
+              <FaTimes />
+            </button>
+            <div className="mt-16 flex flex-col items-center">
+              <Link href="/" className="mb-4 text-white font-extrabold text-2xl tracking-wide px-4 py-2 rounded-lg bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] shadow hover:brightness-110" onClick={() => setMenuOpen(false)}>
+                Home
+              </Link>
+              <Nav mobile onClickLink={() => setMenuOpen(false)} />
+            </div>
+          </div>
+        )}
         {isAllowed(me, 'isStaff') && (
-          <div className="sub-bar">
+          <div className="grid grid-cols-[1fr_auto] border-b border-black">
             <Search />
           </div>
         )}
-      </HeaderStyles>
+      </header>
       {!!me && <MessagesCount />}
     </>
   );

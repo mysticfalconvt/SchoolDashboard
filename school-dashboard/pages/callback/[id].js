@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import Link from "next/link";
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
@@ -47,37 +46,6 @@ const GET_SINGLE_CALLBACK = gql`
   }
 `;
 
-const SingleCallbackStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2rem;
-  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.2);
-  background: linear-gradient(to top left, var(--redTrans), var(--blueTrans));
-  p {
-    margin: 5px 0;
-  }
-  h1 {
-    border-radius: 2rem;
-    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.2);
-    padding: 0.25rem 1.25rem;
-    margin-top: 10px;
-    margin-bottom: 0;
-    background: linear-gradient(
-      to bottom left,
-      var(--redTrans),
-      var(--blueTrans)
-    );
-  }
-  h2 {
-    /* font-size: 1.5rem; */
-    font-weight: 500;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-`;
-
 export default function SingleCallbackPage({ query }) {
   const me = useUser();
   const { data, isLoading, error, refetch } = useGQLQuery(
@@ -97,8 +65,8 @@ export default function SingleCallbackPage({ query }) {
     ? new Date(callback?.dateCompleted).toLocaleDateString()
     : "Not Yet Completed";
   return (
-    <SingleCallbackStyles>
-      <h1>
+    <div className="flex flex-col items-center justify-center rounded-3xl shadow-lg bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)]">
+      <h1 className="rounded-3xl shadow-lg py-1 px-5 mt-2.5 mb-0 bg-gradient-to-bl from-[var(--redTrans)] to-[var(--blueTrans)]">
         {me?.id === callback?.teacher.id && (
           <SmallGradientButton
             onClick={() => {
@@ -121,17 +89,17 @@ export default function SingleCallbackPage({ query }) {
       </h1>
       {!editing && !duplicating && (
         <>
-          <h2>Assigned By: {callback.teacher.name}</h2>
-          <h2>{callback.student.name}</h2>
-          <p>
+          <h2 className="font-medium mt-0 mb-0">Assigned By: {callback.teacher.name}</h2>
+          <h2 className="font-medium mt-0 mb-0">{callback.student.name}</h2>
+          <p className="my-1.5">
             Average Time For {callback.student.name} To Complete Callback:{" "}
             {callback.student.averageTimeToCompleteCallback
               ? callback.student.averageTimeToCompleteCallback
               : "N/A"}{" "}
             Days
           </p>
-          <p>{callback.description}</p>
-          <p>
+          <p className="my-1.5">{callback.description}</p>
+          <p className="my-1.5">
             Assigned on {dateAssigned} - Completed on {dateCompleted}
           </p>
           {callback.link && (
@@ -175,6 +143,6 @@ export default function SingleCallbackPage({ query }) {
           />
         </>
       )}
-    </SingleCallbackStyles>
+    </div>
   );
 }

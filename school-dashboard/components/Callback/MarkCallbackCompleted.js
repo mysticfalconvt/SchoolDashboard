@@ -1,7 +1,6 @@
 import { useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
 import { useQueryClient } from 'react-query';
-import styled from 'styled-components';
 import { useUser } from '../User';
 import useRecalculateCallback from './recalculateCallback';
 import { SmallGradientButton } from '../styles/Button';
@@ -19,22 +18,6 @@ const MARK_CALLBACK_COMPLETED = gql`
     ) {
       id
     }
-  }
-`;
-
-
-const DeleteCallbackButtonStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  transition: all 0.8s ease-in-out;
-
-  .deleting {
-    transform: scale(0.1);
-    opacity: 0;
   }
 `;
 
@@ -59,17 +42,17 @@ export default function MarkCallbackCompleted({ callback }) {
   //   console.log(`late: ${daysLate}`);
   if (me?.id === callback.teacher.id) {
     return (
-      <DeleteCallbackButtonStyles>
+      <div className="flex flex-col items-center justify-center mt-4 mb-4 transition-all duration-800 ease-in-out">
         <SmallGradientButton
           type="button"
-          className={loading ? 'deleting' : ''}
+          className={loading ? 'scale-10 opacity-0' : ''}
           onClick={async () => {
             // console.log('marking completed');
             const res = await markCompleted();
-            if(res){
+            if (res) {
               toast.success('Callback marked as completed');
               setCallbackID(res.data.updateCallback.id);
-              
+
             }
             // console.log(res.data.updateCallback.id);
             queryClient.refetchQueries();
@@ -77,7 +60,7 @@ export default function MarkCallbackCompleted({ callback }) {
         >
           Mark Completed {daysLate} Days overdue
         </SmallGradientButton>
-      </DeleteCallbackButtonStyles>
+      </div>
     );
   }
   return null;

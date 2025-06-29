@@ -1,41 +1,9 @@
 import Link from "next/link";
-import styled from "styled-components";
 import getDisplayName from "../../lib/displayName";
 import { capitalizeFirstLetter } from "../../lib/nameUtils";
 import { useUser } from "../User";
 import CallbackCardMessages from "./CallbackCardMessages";
 import MarkCallbackCompleted from "./MarkCallbackCompleted";
-
-const SingleCardStyles = styled.div`
-  background: linear-gradient(to top left, var(--redTrans), var(--blueTrans));
-  margin: 1rem;
-  padding: 1rem;
-  border-radius: 1rem;
-  font-size: 1.2rem;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  align-items: center;
-  h1 {
-    margin: 0.5rem 1rem;
-  }
-  p {
-    margin: 0rem 1rem 1rem 1rem;
-  }
-  .link {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.1rem 0.5rem;
-    border-radius: 0.5rem;
-    margin: -0.5rem 0 0.5rem;
-    cursor: pointer;
-  }
-  a {
-    text-align: center;
-  }
-  fieldset {
-    width: 80%;
-  }
-`;
 
 export default function SingleCallbackCard({ callback }) {
   const me = useUser();
@@ -46,25 +14,25 @@ export default function SingleCallbackCard({ callback }) {
 
   if (!callback.student) return null;
   return (
-    <SingleCardStyles>
+    <div className="bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)] m-4 p-4 rounded-2xl text-xl flex flex-col justify-center items-center">
       <Link legacyBehavior href={`/callback/${callback.id}`}>
-        <a>
-          <h1>{callback.title}</h1>
-          <p>
+        <a className="text-center">
+          <h1 className="my-2 mx-4">{callback.title}</h1>
+          <p className="mx-4 mb-4">
             {callback?.teacher?.id === me?.id
               ? ""
               : `${callback.teacher.name} -- `}{" "}
             {dateAssigned}
           </p>
-          <p>
+          <p className="mx-4 mb-4">
             {callback?.student?.id === me?.id
               ? ""
               : `${capitalizeFirstLetter(
-                  getDisplayName(callback.student)
-                )} -- `}{" "}
+                getDisplayName(callback.student)
+              )} -- `}{" "}
             {completed}
           </p>
-          <p>{callback.description}</p>
+          <p className="mx-4 mb-4">{callback.description}</p>
         </a>
       </Link>
       {callback.link && (
@@ -75,11 +43,11 @@ export default function SingleCallbackCard({ callback }) {
               : `http://${callback.link}`
           }
         >
-          <p className="link">{callback.link ? "Link" : ""}</p>
+          <p className="bg-white bg-opacity-20 py-0.5 px-2 rounded-lg -mt-2 mb-2 cursor-pointer">{callback.link ? "Link" : ""}</p>
         </Link>
       )}
       <CallbackCardMessages me={me} callback={callback} />
       {!callback.dateCompleted && <MarkCallbackCompleted callback={callback} />}
-    </SingleCardStyles>
+    </div>
   );
 }

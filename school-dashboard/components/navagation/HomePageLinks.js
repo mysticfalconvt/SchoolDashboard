@@ -1,6 +1,5 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
-import styled from 'styled-components';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
@@ -16,22 +15,6 @@ export const GET_HOMEPAGE_LINKS = gql`
       forStudents
       forTeachers
     }
-  }
-`;
-
-const HomePageLinkStyles = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  padding-left: 2rem;
-  justify-content: space-around;
-  a {
-    background: linear-gradient(to top right, var(--red), var(--blue));
-    color: var(--navTextColor);
-    padding: 0.1rem 1.5rem;
-    height: max-content;
-    border-radius: 2rem;
-    margin: 0.5rem;
   }
 `;
 
@@ -60,17 +43,21 @@ export default function HomePageLinks({ initialData }) {
   });
 
   return (
-    <HomePageLinkStyles>
+    <div className="flex flex-wrap mb-6 pl-8 justify-around">
       {filteredLinks?.map((link) => {
         const linkToUse = link.link.startsWith('http')
           ? `${link.link}`
           : `http://${link.link}`;
         return (
-          <Link key={link.id} href={linkToUse}>
+          <Link
+            key={link.id}
+            href={linkToUse}
+            className="bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] py-0.5 px-6 h-max rounded-full m-2"
+          >
             {link.name}
           </Link>
         );
       })}
-    </HomePageLinkStyles>
+    </div>
   );
 }

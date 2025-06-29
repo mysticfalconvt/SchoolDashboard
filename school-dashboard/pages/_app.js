@@ -1,4 +1,4 @@
-import "../pages/global.css";
+import "../styles/globals.css";
 import * as Sentry from "@sentry/react";
 import * as React from "react";
 
@@ -17,7 +17,7 @@ queryClient.setDefaultOptions({ queries: { staleTime: 10000 } });
 // console.log('MyApp.js');
 // console.log(queryClient.getDefaultOptions());
 function MyApp({ Component, pageProps, apollo }) {
- 
+
   return (
     <>
       <ApolloProvider client={apollo}>

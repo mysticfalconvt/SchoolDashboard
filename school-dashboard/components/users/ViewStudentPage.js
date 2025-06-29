@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import { useUser } from "../User";
 import Loading from "../Loading";
@@ -15,11 +14,6 @@ import getDisplayName from "../../lib/displayName";
 import { callbackDisabled } from "../../config";
 import StudentPbisCardsPerCollection from "../PBIS/studentPbisCardsPerColelction";
 
-const ParentInfoStyles = styled.div`
-  border-radius: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--blue);
-`;
 const GET_SINGLE_TEACHER = gql`
   query GET_SINGLE_TEACHER($id: ID!, $date: DateTime!) {
     user: user(where: { id: $id }) {
@@ -191,14 +185,14 @@ export default function ViewStudentPage({ student }) {
       <AssignmentViewCardsStudent student={user} />
       <StudentPbisData student={user} />
       {user.parent.length > 0 && (
-        <ParentInfoStyles>
+        <div className="rounded-2xl p-4 border border-[var(--blue)]">
           <h4>Parent Contact Info:</h4>
           {user.parent.map((parent) => (
             <p key={`parentID -${parent.id}`}>
               {parent.name} - {parent.email}
             </p>
           ))}
-        </ParentInfoStyles>
+        </div>
       )}
 
       {!callbackDisabled && (

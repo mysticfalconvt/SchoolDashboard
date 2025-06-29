@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import Loading from "../../components/Loading";
 import { useUser } from "../../components/User";
@@ -13,10 +12,6 @@ import EditStudent from "../../components/users/EditStudent";
 import { capitalizeFirstLetter } from "../../lib/nameUtils";
 import getDisplayName from "../../lib/displayName";
 
-const ButtonStyles = styled.div`
-  display: flex;
-  justify-content: space-around;
-`;
 const GET_SINGLE_USER = gql`
   query GET_SINGLE_USER($id: ID!) {
     user(where: { id: $id }) {
@@ -101,7 +96,7 @@ export default function UserProfile({ query }) {
   return (
     <div>
       <h1>{capitalizeFirstLetter(getDisplayName(user))}</h1>
-      <ButtonStyles>
+      <div className="flex justify-around">
         {isAllowed(me, "isStaff") && me.id !== user.id && (
           <>
             {isStudent && <EditStudent student={user} />}
@@ -109,7 +104,7 @@ export default function UserProfile({ query }) {
             {/* <ResetPasswordToPassword userID={query.id} /> */}
           </>
         )}
-      </ButtonStyles>
+      </div>
       {isAllowed(user, "isStaff") && <ViewTeacherPage teacher={user} />}
       {isAllowed(user, "isStudent") && <ViewStudentPage student={user} />}
       {isAllowed(user, "isParent") && <ViewParentPage parent={user} />}
