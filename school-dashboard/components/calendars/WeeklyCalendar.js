@@ -1,6 +1,5 @@
 import gql from "graphql-tag";
 import { useGQLQuery } from "../../lib/useGqlQuery";
-import { WeeklyCalendarContainerStyles } from "../styles/CalendarStyles";
 import { useUser } from "../User";
 import SingleDayCalendar from "./SingleDayCalendar";
 import Loading from "../Loading";
@@ -116,27 +115,14 @@ export default function WeeklyCalendar({
   if (error) return <p>{error.message}</p>;
 
   return (
-    <WeeklyCalendarContainerStyles>
+    <div className="grid grid-cols-8 flex-nowrap mb-1.5 max-[1100px]:grid-cols-4 max-[650px]:grid-cols-1">
       <SingleDayCalendar dailyEvents={dailyEvents.sundayEvents} day="Sunday" />
       <SingleDayCalendar dailyEvents={dailyEvents.mondayEvents} day="Monday" />
-      <SingleDayCalendar
-        dailyEvents={dailyEvents.tuesdayEvents}
-        day="Tuesday"
-        className={todaysDay === 2 ? "today" : ""}
-      />
-      <SingleDayCalendar
-        dailyEvents={dailyEvents.wednesdayEvents}
-        day="Wednesday"
-      />
-      <SingleDayCalendar
-        dailyEvents={dailyEvents.thursdayEvents}
-        day="Thursday"
-      />
+      <SingleDayCalendar dailyEvents={dailyEvents.tuesdayEvents} day="Tuesday" />
+      <SingleDayCalendar dailyEvents={dailyEvents.wednesdayEvents} day="Wednesday" />
+      <SingleDayCalendar dailyEvents={dailyEvents.thursdayEvents} day="Thursday" />
       <SingleDayCalendar dailyEvents={dailyEvents.fridayEvents} day="Friday" />
-      <SingleDayCalendar
-        dailyEvents={dailyEvents.saturdayEvents}
-        day="Saturday"
-      />
-    </WeeklyCalendarContainerStyles>
+      <SingleDayCalendar dailyEvents={dailyEvents.saturdayEvents} day="Saturday" />
+    </div>
   );
 }

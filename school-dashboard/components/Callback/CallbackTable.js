@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { useMemo } from "react";
-import styled from "styled-components";
 import getDisplayName from "../../lib/displayName";
 import Table from "../Table";
 import { useUser } from "../User";

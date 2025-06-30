@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import styled from "styled-components";
 import Link from "next/link";
 import { GraphQLClient } from "graphql-request";
 import { useUser } from "../components/User";
@@ -13,76 +12,6 @@ import GradientButton, {
 } from "../components/styles/Button";
 import isAllowed from "../lib/isAllowed";
 import { ADMIN_ID, endpoint, prodEndpoint } from "../config";
-
-const ChartContainerStyles = styled.div`
-  display: grid;
-  flex-wrap: wrap;
-  grid-template-columns: repeat(3, minmax(150px, 350px));
-
-  justify-content: space-evenly;
-  align-items: center;
-  @media print {
-    display: none;
-  }
-`;
-
-const AnnouncementStyle = styled.h2`
-  text-align: center;
-  font-size: 2em;
-  font-weight: bold;
-  color: red;
-  animation: color-change 3s infinite;
-  @keyframes color-change {
-    0% {
-      color: var(--red);
-    }
-    50% {
-      color: var(--blue);
-    }
-    100% {
-      color: var(--red);
-    }
-  }
-`;
-export const TeamCardStyles = styled.div`
-  /* display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around; */
-  display: grid;
-  grid-template-columns: repeat(4, minmax(200px, 1fr));
-  page-break-before: always;
-  width: 100%;
-  div {
-    page-break-inside: avoid;
-    text-align: center;
-    padding: 5px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    h3 {
-      color: var(--blue);
-      text-shadow: 2px 2px var(--red);
-    }
-  }
-`;
-const TitleBarStyles = styled.div`
-  display: flex;
-  /* flex-direction: column; */
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  .pbisLinks {
-    display: flex;
-    /* flex-direction: column; */
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-    flex-wrap: wrap;
-    button {
-      margin: 5px;
-    }
-  }
-`;
 
 const PBIS_PAGE_QUERY = gql`
   query PBIS_PAGE_QUERY($teamId: ID) {
@@ -234,7 +163,7 @@ export default function Pbis(props) {
 
   return (
     <div>
-      <TitleBarStyles>
+      <div className="flex justify-around items-center w-full">
         {/* {JSON.stringify(rawListOfLinks)} */}
         <div>
           <h1 className="hidePrint">School-Wide PBIS Data</h1>
@@ -248,7 +177,7 @@ export default function Pbis(props) {
         </div>
         <div>
           <h2 className="hidePrint">Links</h2>
-          <div className="pbisLinks">
+          <div className="flex justify-around items-center w-full flex-wrap">
             {isAllowed(me, "canManagePbis") && (
               <>
                 <Link to="/PbisWeeklyReading" href="/PbisWeeklyReading">
@@ -289,8 +218,8 @@ export default function Pbis(props) {
             ))}
           </div>
         </div>
-      </TitleBarStyles>
-      <ChartContainerStyles className="hidePrint">
+      </div>
+      <div className="grid grid-cols-3 gap-4 justify-evenly items-center print:hidden">
         {me && <PbisFalcon initialCount={totalSchoolCards} />}
         <DoughnutChart
           title="School-Wide Cards By Category"
@@ -303,7 +232,7 @@ export default function Pbis(props) {
             chartData={teamWideCardsInCategories}
           />
         )}
-      </ChartContainerStyles>
+      </div>
       <PbisCardChart className="hidePrint" cardCounts={cardCounts} />
       <div>
         {lastPbisCollection && (
@@ -311,19 +240,19 @@ export default function Pbis(props) {
         )}
       </div>
       <h3>Current Team Data</h3>
-      <TeamCardStyles>
+      <div className="grid grid-cols-4 gap-4 w-full print:break-before-page">
         {TAs?.filter((ta) => ta.taStudents.length && ta.id !== ADMIN_ID)
           .sort((a, b) => a.taTeamPbisLevel - b.taTeamPbisLevel)
           .map((ta) => (
-            <div key={ta.id} className="gridCard">
-              <h3>{ta.name}</h3>
+            <div key={ta.id} className="text-center p-1 m-1 border border-gray-300 rounded print:break-inside-avoid">
+              <h3 className="text-blue-600 drop-shadow-[2px_2px_var(--red)]">{ta.name}</h3>
 
               <h4>Level -{ta.taTeamPbisLevel}-</h4>
               <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
               <p>Total of {ta.taStudents?.length} students</p>
             </div>
           ))}
-      </TeamCardStyles>
+      </div>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
     </div>
   );

@@ -1,6 +1,5 @@
 import gql from "graphql-tag";
 import { useMemo, useState } from "react";
-import styled from "styled-components";
 import { useMutation } from "@apollo/client";
 import { useQueryClient } from "react-query";
 import Loading from "../components/Loading";
@@ -17,7 +16,7 @@ function arrayOfNumbersOneToFourInRandomOrder() {
 
 const SORTING_HAT_QUESTION_QUERY = gql`
   query SORTING_HAT_QUESTION_QUERY {
-    allSortingHatQuestions {
+    sortingHatQuestions {
       id
       question
       gryffindorChoice
@@ -40,128 +39,6 @@ const UPDATE_HOUSE = gql`
   }
 `;
 
-export const SortingHatStyles = styled.div`
-  @import url("http://fonts.cdnfonts.com/css/parry-hotter");
-
-  font-family: "HarryPotter7";
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  max-width: 1000px;
-  margin: 0 auto;
-  font-size: 2rem;
-  transition: all 0.3s ease-in-out;
-
-  h1 {
-    flex-basis: 100%;
-    font-size: 4rem;
-  }
-  h2 {
-    font-size: 3.5rem;
-    text-align: center;
-  }
-
-  button {
-    margin-top: 20px;
-    color: white;
-    -webkit-text-stroke: 1px white;
-    background: linear-gradient(
-      80deg,
-      rgba(14, 26, 64, 1) 5%,
-      rgba(96, 96, 92, 1) 12%,
-      rgba(42, 98, 61, 1) 29%,
-      rgba(26, 71, 42, 1) 32%,
-      rgba(170, 170, 170, 1) 39%,
-      rgba(238, 186, 48, 1) 57%,
-      rgba(116, 0, 1, 1) 68%,
-      rgba(255, 244, 177, 1) 90%,
-      rgba(255, 219, 0, 1) 94%,
-      rgba(93, 93, 93, 1) 100%
-    );
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 3rem;
-    cursor: pointer;
-    font-family: "HarryPotter7";
-  }
-
-  .questionContainer {
-    display: flex;
-    width: 100%;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  button :nth-child(1) {
-    order: ${(props) => props.gryffindorOrder};
-  }
-  button :nth-child(2) {
-    order: ${(props) => props.slytherinOrder};
-  }
-  button :nth-child(3) {
-    order: ${(props) => props.ravenclawOrder};
-  }
-  button :nth-child(4) {
-    order: ${(props) => props.hufflepuffOrder};
-  }
-  -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 2s; /* Firefox < 16 */
-  -ms-animation: fadein 2s; /* Internet Explorer */
-  -o-animation: fadein 2s; /* Opera < 12.1 */
-  animation: fadein 2s;
-
-  @keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Firefox < 16 */
-  @-moz-keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Safari, Chrome and Opera > 12.1 */
-  @-webkit-keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Internet Explorer */
-  @-ms-keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Opera < 12.1 */
-  @-o-keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-`;
 export default function GetSorted() {
   const me = useUser();
   const queryClient = useQueryClient();
@@ -187,9 +64,9 @@ export default function GetSorted() {
   // console.log(data);
 
   if (isLoading) return <Loading />;
-  const maxQuestionNumber = data.allSortingHatQuestions.length - 1;
+  const maxQuestionNumber = data?.sortingHatQuestions.length - 1;
 
-  const currentQuestion = data?.allSortingHatQuestions[questionNumber];
+  const currentQuestion = data?.sortingHatQuestions[questionNumber];
   const winningHouse = Object.keys(housePoints).reduce((a, b) =>
     housePoints[a] > housePoints[b] ? a : b
   );
@@ -235,13 +112,8 @@ export default function GetSorted() {
         rel="stylesheet"
       />
       {isAllowed(me, "isStaff") && <NewSortingHatQuestion />}
-      <SortingHatStyles
-        gryffindorOrder={randomOrder[0]}
-        hufflepuffOrder={randomOrder[1]}
-        ravenclawOrder={randomOrder[2]}
-        slytherinOrder={randomOrder[3]}
-      >
-        <h1>Get Sorted into your house</h1>
+      <div className="flex flex-col justify-center items-center max-w-[1000px] mx-auto text-2xl transition-all duration-300 font-harrypotter">
+        <h1 className="w-full text-4xl">Get Sorted into your house</h1>
         {questionNumber <= maxQuestionNumber ? (
           <SortingHatQuestions
             currentQuestion={currentQuestion}
@@ -249,7 +121,7 @@ export default function GetSorted() {
           />
         ) : (
           <>
-            <h2>You are {winningHouse}</h2>
+            <h2 className="text-3xl text-center">You are {winningHouse}</h2>
             <button
               type="button"
               onClick={async () => {
@@ -262,6 +134,7 @@ export default function GetSorted() {
                 await queryClient.refetchQueries("me");
                 setQuestionNumber(0);
               }}
+              className="mt-5 text-white bg-gradient-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded px-4 py-2 text-3xl cursor-pointer font-harrypotter"
             >
               Accept your choice
             </button>
@@ -276,13 +149,14 @@ export default function GetSorted() {
                 });
                 setQuestionNumber(0);
               }}
+              className="mt-5 text-white bg-gradient-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded px-4 py-2 text-3xl cursor-pointer font-harrypotter"
             >
               {" "}
               Start Over
             </button>
           </>
         )}
-      </SortingHatStyles>
+      </div>
     </>
   );
 }

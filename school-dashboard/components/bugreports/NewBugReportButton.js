@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 import { useRouter } from "next/dist/client/router";
 import { useQueryClient } from "react-query";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import Form, { FormContainer } from "../styles/Form";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 import SearchForUserName from "../SearchForUserName";
@@ -66,10 +66,9 @@ export default function NewBugReportButton() {
       >
         {showForm ? "Close the form" : "Bug Report / Feature Request"}
       </GradientButton>
-      <FormContainerStyles>
+      <FormContainer visible={showForm}>
         <Form
           className={showForm ? "visible" : "hidden"}
-          // hidden={!showForm}
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the input fields to the backend:
@@ -137,7 +136,7 @@ export default function NewBugReportButton() {
             <button type="submit">+ Publish</button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormContainer>
     </div>
   );
 }

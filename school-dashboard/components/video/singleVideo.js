@@ -1,20 +1,12 @@
-import styled from "styled-components";
 export default function SingleVideo({ video, hidden }) {
   const isYouTube = video.type === "youtube";
   const isGoogle = video.type === "google drive";
-
-  const VideoStyles = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  `;
 
   const getEmbedComponent = (video, hidden) => {
     if (hidden) return null;
     if (isYouTube) {
       return (
-        <VideoStyles title={video.name + " - " + video.description}>
+        <div className="flex flex-col items-center justify-center" title={video.name + " - " + video.description}>
           {video.name}
           <iframe
             title={video.name + video.description}
@@ -26,11 +18,11 @@ export default function SingleVideo({ video, hidden }) {
             height="300"
           />
           {video.description}
-        </VideoStyles>
+        </div>
       );
     } else if (isGoogle) {
       return (
-        <VideoStyles title={video.name + " - " + video.description}>
+        <div className="flex flex-col items-center justify-center" title={video.name + " - " + video.description}>
           {video.name}
           <iframe
             title={video.name + video.description}
@@ -42,7 +34,7 @@ export default function SingleVideo({ video, hidden }) {
             height="300"
           />
           {video.description}
-        </VideoStyles>
+        </div>
       );
     }
   };

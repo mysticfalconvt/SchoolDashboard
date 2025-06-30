@@ -8,7 +8,7 @@ import useForm from "../lib/useForm";
 import useSendEmail from "../lib/useSendEmail";
 import { useUser } from "./User";
 import GradientButton from "./styles/Button";
-import Form, { FormContainerStyles, FormGroupStyles } from "./styles/Form";
+import Form, { FormContainer } from "./styles/Form";
 import DisplayError from "./ErrorMessage";
 
 const CREATE_SORTING_QUESTION = gql`
@@ -71,90 +71,108 @@ export default function NewSortingHatQuestion() {
       >
         {showForm ? "Close the form" : "New Sorting Hat Question"}
       </GradientButton>
-      <FormContainerStyles>
-        <Form
-          className={showForm ? "visible" : "hidden"}
-          // hidden={!showForm}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            // Submit the input fields to the backend:
-            const res = await createSortingHatQuestion();
-
-            // Todo: send message when callback assigned
-
-            queryClient.refetchQueries("SortingHatQuestions");
-            clearForm();
-            setShowForm(false);
-          }}
-        >
-          <h2>Add a New Sorting Hat Question</h2>
-          <DisplayError error={error} />
-          <fieldset disabled={loading} aria-busy={loading}>
-            <label htmlFor="question">
-              Question
-              <textarea
-                id="question"
-                name="question"
-                placeholder="question"
-                required
-                value={inputs.question}
-                onChange={handleChange}
-                rows="5"
-              />
-            </label>
-            <label htmlFor="gryffindorChoice">
-              Gryffindor Choice
-              <textarea
-                id="gryffindorChoice"
-                name="gryffindorChoice"
-                placeholder="gryffindorChoice"
-                required
-                value={inputs.gryffindorChoice}
-                onChange={handleChange}
-                rows="2"
-              />
-            </label>
-            <label htmlFor="ravenclawChoice">
-              Ravenclaw Choice
-              <textarea
-                id="ravenclawChoice"
-                name="ravenclawChoice"
-                placeholder="ravenclawChoice"
-                required
-                value={inputs.ravenclawChoice}
-                onChange={handleChange}
-                rows="2"
-              />
-            </label>
-            <label htmlFor="hufflepuffChoice">
-              Hufflepuff Choice
-              <textarea
-                id="hufflepuffChoice"
-                name="hufflepuffChoice"
-                placeholder="hufflepuffChoice"
-                required
-                value={inputs.hufflepuffChoice}
-                onChange={handleChange}
-                rows="2"
-              />
-            </label>
-            <label htmlFor="slytherinChoice">
-              Slytherin Choice
-              <textarea
-                id="slytherinChoice"
-                name="slytherinChoice"
-                placeholder="slytherinChoice"
-                required
-                value={inputs.slytherinChoice}
-                onChange={handleChange}
-                rows="2"
-              />
-            </label>
-
-            <button type="submit">+ Publish</button>
-          </fieldset>
-        </Form>
-      </FormContainerStyles>
+      <FormContainer visible={showForm}>
+        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={() => setShowForm(false)}
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <Form className="w-full bg-transparent border-0 shadow-none p-0"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const res = await createSortingHatQuestion();
+              queryClient.refetchQueries("SortingHatQuestions");
+              clearForm();
+              setShowForm(false);
+            }}
+          >
+            <h2 className="text-white font-bold text-xl mb-4">Add a New Sorting Hat Question</h2>
+            <DisplayError error={error} />
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mb-4">
+                <label htmlFor="question" className="block text-white font-semibold mb-1">
+                  Question
+                </label>
+                <textarea
+                  id="question"
+                  name="question"
+                  placeholder="question"
+                  required
+                  value={inputs.question}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="gryffindorChoice" className="block text-white font-semibold mb-1">
+                  Gryffindor Choice
+                </label>
+                <textarea
+                  id="gryffindorChoice"
+                  name="gryffindorChoice"
+                  placeholder="gryffindorChoice"
+                  required
+                  value={inputs.gryffindorChoice}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="ravenclawChoice" className="block text-white font-semibold mb-1">
+                  Ravenclaw Choice
+                </label>
+                <textarea
+                  id="ravenclawChoice"
+                  name="ravenclawChoice"
+                  placeholder="ravenclawChoice"
+                  required
+                  value={inputs.ravenclawChoice}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="hufflepuffChoice" className="block text-white font-semibold mb-1">
+                  Hufflepuff Choice
+                </label>
+                <textarea
+                  id="hufflepuffChoice"
+                  name="hufflepuffChoice"
+                  placeholder="hufflepuffChoice"
+                  required
+                  value={inputs.hufflepuffChoice}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="slytherinChoice" className="block text-white font-semibold mb-1">
+                  Slytherin Choice
+                </label>
+                <textarea
+                  id="slytherinChoice"
+                  name="slytherinChoice"
+                  placeholder="slytherinChoice"
+                  required
+                  value={inputs.slytherinChoice}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <button type="submit" className="mt-6">+ Publish</button>
+            </fieldset>
+          </Form>
+        </div>
+      </FormContainer>
     </div>
   );
 }

@@ -1,10 +1,9 @@
 import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import React, { useState } from "react";
-import styled from "styled-components";
 import { toast } from "react-hot-toast";
 import { QueryClient, useQueryClient } from "react-query";
-import Form, { FormGroupStyles } from "../styles/Form";
+import Form, { FormGroup } from "../styles/Form";
 import { SmallGradientButton } from "../styles/Button";
 
 export const UPDATE_CALLBACK_MESSAGES_MUTATION = gql`
@@ -33,57 +32,6 @@ const studentMessageOptions = [
   "I am finished. Please check my work.",
   "I am stuck. I will come see you.",
 ];
-
-const AnimatedInput = styled.p`
-  position: relative;
-  /* width: 100%; */
-  /* height: 100%; */
-  border: none;
-  /* border-bottom: 1px solid #e1e1e1; */
-  padding: 0;
-  margin: 0;
-  font-size: 14px;
-  color: var(--textColor);
-  text-align: center;
-  transition: all 0.3s;
-  input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: 14px;
-    color: #4d4d4d;
-    text-align: center;
-    transition: all 0.3s;
-    border-radius: 5px;
-  }
-  .hasText {
-    /* border-bottom: 1px solid #e1e1e1; */
-    color: white;
-    font-size: 1.6rem;
-    /* max-width: 100px;  */
-    padding: 0.5rem;
-    /* overflow-wrap: break-word; */
-    word-break: break-word;
-    /* text-decoration: none; */
-  }
-  .inputUpdating {
-    animation: color-change 0.5s infinite;
-    @keyframes color-change {
-      0% {
-        color: var(--red);
-      }
-      50% {
-        color: var(--blue);
-        font-size: 16px;
-      }
-      100% {
-        color: var(--red);
-      }
-    }
-  }
-`;
 
 export default function CallbackCardMessages({ me, callback }) {
   const isTeacher = me?.id === callback.teacher.id;
@@ -178,64 +126,47 @@ export default function CallbackCardMessages({ me, callback }) {
       // hidden={!showForm}
       onSubmit={handleSubmit}
     >
-      <FormGroupStyles>
+      <FormGroup>
         <fieldset disabled={loading} aria-busy={loading}>
           {!isStudent && (
-            <AnimatedInput>
+            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
               Student:
-              <span className={callback?.messageFromStudent ? "hasText" : ""}>
+              <span className={callback?.messageFromStudent ? "text-white text-[1.6rem] p-2 break-words hasText" : ""}>
                 {callback.messageFromStudent || "----"}
               </span>
               <span>{callback.messageFromStudentDate || ""}</span>
-            </AnimatedInput>
+            </p>
           )}
           {!isTeacher && (
-            <AnimatedInput>
+            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
               Teacher:
-              <span className={callback?.messageFromTeacher ? "hasText" : ""}>
+              <span className={callback?.messageFromTeacher ? "text-white text-[1.6rem] p-2 break-words hasText" : ""}>
                 {callback.messageFromTeacher || "----"}
               </span>
               <span>{callback.messageFromTeacherDate || "----"}</span>
-            </AnimatedInput>
+            </p>
           )}
           {isStudent && (
-            <>
-              <AnimatedInput>
-                Student Message:
-                {/* <textarea
-                  id={`student - ${callback.id}`}
-                  placeholder="Message from Student"
-                  value={studentMessage}
-                  className={loading ? "inputUpdating" : ""}
-                  onKeyDown={submitOnEnter}
-                  onChange={(e) => {
-                    //   console.log(e.target.value);
-                    setStudentMessage(e.target.value);
-                    const todaysDate = new Date().toLocaleDateString();
-                    setStudentMessageDate(todaysDate);
-                  }}
-                /> */}
-                {/* a select box for student messages */}
-                <select
-                  id={`student - ${callback.id}`}
-                  value={studentMessage}
-                  selected={studentMessage}
-                  className={loading ? "inputUpdating" : ""}
-                  onChange={handleSelectStudentMessage}
-                >
-                  {studentMessageOptionsArray.map((option) => (
-                    <option
-                      key={option.key}
-                      value={option.value}
-                      selected={option.selected}
-                    >
-                      {option.value}
-                    </option>
-                  ))}
-                </select>
-                <span>{studentMessageDate || "-"}</span>
-              </AnimatedInput>
-            </>
+            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
+              Student Message:
+              <select
+                id={`student - ${callback.id}`}
+                value={studentMessage}
+                className={loading ? "inputUpdating" : ""}
+                onChange={handleSelectStudentMessage}
+              >
+                {studentMessageOptionsArray.map((option) => (
+                  <option
+                    key={option.key}
+                    value={option.value}
+                    selected={option.selected}
+                  >
+                    {option.value}
+                  </option>
+                ))}
+              </select>
+              <span>{studentMessageDate || "-"}</span>
+            </p>
           )}
 
           {isTeacher && (
@@ -269,7 +200,7 @@ export default function CallbackCardMessages({ me, callback }) {
                   Delete Student Message
                 </SmallGradientButton>
               )}
-              <AnimatedInput>
+              <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
                 Teacher:
                 <textarea
                   id={`teacher-${callback.id}`}
@@ -286,11 +217,28 @@ export default function CallbackCardMessages({ me, callback }) {
                   title="Enter to submit change, Shift-Enter for new line"
                 />
                 <span>{teacherMessageDate || "-"}</span>
-              </AnimatedInput>
+              </p>
             </>
           )}
         </fieldset>
-      </FormGroupStyles>
+      </FormGroup>
+      <style jsx>{`
+        .inputUpdating {
+          animation: color-change 0.5s infinite;
+        }
+        @keyframes color-change {
+          0% {
+            color: var(--red);
+          }
+          50% {
+            color: var(--blue);
+            font-size: 16px;
+          }
+          100% {
+            color: var(--red);
+          }
+        }
+      `}</style>
     </Form>
   );
 }

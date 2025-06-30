@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles } from "../styles/Form";
+import Form, { FormContainer } from "../styles/Form";
 import { useUser } from "../User";
 import useSendEmail from "../../lib/useSendEmail";
 import { useNewParentAccount } from "../../lib/useNewParentAccount";
@@ -33,7 +33,7 @@ export default function SendParentEmailSignupButton({ student }) {
           : "Send A Parent Account Signup Email"}
       </GradientButton>
       <div style={{ position: "relative", marginLeft: "-300px" }}>
-        <FormContainerStyles>
+        <FormContainer visible={showForm}>
           <Form
             className={showForm ? "visible" : "hidden"}
             onSubmit={async (e) => {
@@ -98,7 +98,7 @@ export default function SendParentEmailSignupButton({ student }) {
               <button type="submit">Send Email</button>
             </fieldset>
           </Form>
-        </FormContainerStyles>
+        </FormContainer>
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { SmallGradientButton } from '../styles/Button';
-import { SingleCalendarStyle } from '../styles/CalendarStyles';
 
 export default function DisplaySingleCalendarEvent({ calendar }) {
   const [displayDetails, setDisplayDetails] = useState(true);
@@ -11,8 +10,8 @@ export default function DisplaySingleCalendarEvent({ calendar }) {
   const isToday = date.toDateString() === today.toDateString();
   // console.log(`${calendar.name} - ${date} - ${today}`);
   return (
-    <SingleCalendarStyle>
-      <div className="title">
+    <div className="flex flex-col basis-1/4">
+      <div className="m-4 p-4 rounded-2xl opacity-80 bg-gradient-to-tl from-[var(--red)] to-[var(--blue)]">
         <h2>
           <span style={{ color: 'var(--red)' }} hidden={!isToday}>
             Today 📆{' '}
@@ -24,9 +23,9 @@ export default function DisplaySingleCalendarEvent({ calendar }) {
           {displayDetails ? 'Details' : 'Hide Details'}
         </SmallGradientButton>
       </div>
-      <div className="detailsContainer">
-        <div className="details" hidden={displayDetails}>
-          <div>
+      <div className="ml-2.5 w-2.5 h-2.5 z-[100]">
+        <div className="w-[200px] overflow-visible" hidden={displayDetails}>
+          <div className="mt-[-2rem] p-4 bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-white opacity-80 rounded-xl">
             <p>{calendar.description}</p>
             {calendar.link ? (
               <Link
@@ -47,6 +46,6 @@ export default function DisplaySingleCalendarEvent({ calendar }) {
           </div>
         </div>
       </div>
-    </SingleCalendarStyle>
+    </div>
   );
 }

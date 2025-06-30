@@ -1,31 +1,11 @@
 import gql from "graphql-tag";
 import React, { useMemo } from "react";
-import styled from "styled-components";
 import Link from "next/link";
 import NewBullying from "../components/discipline/BullyingButton";
 import Loading from "../components/Loading";
 import Table from "../components/Table";
 import { useUser } from "../components/User";
 import { useGQLQuery } from "../lib/useGqlQuery";
-
-const BullyingPageContainer = styled.div`
-  h2 {
-    text-align: center;
-  }
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  flex-direction: column;
-  div {
-    max-width: 500px;
-  }
-  .big {
-    flex-basis: 100%;
-
-    width: 1000px;
-    /* background-color: red; */
-  }
-`;
 
 const BULLYING_DATA_QUERY = gql`
   query BULLYING_DATA_QUERY {
@@ -92,15 +72,18 @@ export default function Bullying() {
   );
   if (isLoading) return <Loading />;
   return (
-    <BullyingPageContainer>
-      <NewBullying refetch={refetch} />
-      <h2>Hazing Harassment Bullying</h2>
-      <Table
-        className="big"
-        columns={columns}
-        data={data?.bullyings}
-        searchColumn="studentOffender.name"
-      />
-    </BullyingPageContainer>
+    <div className="flex flex-col flex-wrap justify-around">
+      <div className="max-w-[500px]">
+        <NewBullying refetch={refetch} />
+      </div>
+      <h2 className="text-center">Hazing Harassment Bullying</h2>
+      <div className="flex-basis-full w-[1000px]">
+        <Table
+          columns={columns}
+          data={data?.bullyings}
+          searchColumn="studentOffender.name"
+        />
+      </div>
+    </div>
   );
 }

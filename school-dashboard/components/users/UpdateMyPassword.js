@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import React from "react";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles } from "../styles/Form";
+import Form, { FormContainer } from "../styles/Form";
 import { useUser } from "../User";
 
 const RESET_PASSWORD_TO_PASSWORD_MUTATION = gql`
@@ -35,7 +36,7 @@ export default function UpdateMyPassword() {
         {showForm ? "Hide  Update  Password  " : "Update My Password"}
       </GradientButton>
       <div style={{ position: "relative", marginTop: "-320px" }}>
-        <FormContainerStyles>
+        <FormContainer visible={showForm}>
           <Form
             className={showForm ? "visible moveUp" : "hidden"}
             onSubmit={async (e) => {
@@ -65,7 +66,7 @@ export default function UpdateMyPassword() {
               <button type="submit">update Data</button>
             </fieldset>
           </Form>
-        </FormContainerStyles>
+        </FormContainer>
       </div>
     </div>
   );

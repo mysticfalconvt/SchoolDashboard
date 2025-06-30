@@ -6,7 +6,7 @@ import useForm from "../../lib/useForm";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import DisplayError from "../ErrorMessage";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles } from "../styles/Form";
+import Form, { FormContainer } from "../styles/Form";
 import { NUMBER_OF_BLOCKS } from "../../config";
 
 const LIST_OF_TEACHERS_QUERY = gql`
@@ -96,7 +96,7 @@ export default function EditStudent({ student }) {
       <GradientButton onClick={() => setShowForm(!showForm)}>
         {showForm ? "Close" : "Edit Student"}
       </GradientButton>
-      <FormContainerStyles>
+      <FormContainer visible={showForm}>
         <Form
           className={showForm ? "visible" : "hidden"}
           style={{ width: "500px" }}
@@ -160,7 +160,7 @@ export default function EditStudent({ student }) {
             </button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormContainer>
     </div>
   );
 }

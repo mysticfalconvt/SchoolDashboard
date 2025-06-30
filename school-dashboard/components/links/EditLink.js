@@ -3,12 +3,14 @@ import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import { useQueryClient } from "react-query";
 import GradientButton, { SmallGradientButton } from "../styles/Button";
-import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import Form, { FormContainer, FormGroup } from "../styles/Form";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 
 import { useUser } from "../User";
 import useRevalidatePage from "../../lib/useRevalidatePage";
+import Toggle from "react-toggle";
+import "react-toggle/style.css";
 
 const UPDATE_LINK_MUTATION = gql`
   mutation UPDATE_LINK_MUTATION(
@@ -16,10 +18,26 @@ const UPDATE_LINK_MUTATION = gql`
     $name: String!
     $description: String
     $link: String
+    $forTeachers: Boolean!
+    $forStudents: Boolean!
+    $forParents: Boolean!
+    $onHomePage: Boolean!
+    $forPbis: Boolean!
+    $forEPortfolio: Boolean!
   ) {
     updateLink(
       where: { id: $id }
-      data: { name: $name, description: $description, link: $link }
+      data: {
+        name: $name
+        description: $description
+        link: $link
+        forTeachers: $forTeachers
+        forStudents: $forStudents
+        forParents: $forParents
+        onHomePage: $onHomePage
+        forPbis: $forPbis
+        forEPortfolio: $forEPortfolio
+      }
     ) {
       id
     }
@@ -46,6 +64,12 @@ export default function EditLink({
     name: link.name,
     description: link.description,
     link: link.link,
+    forTeachers: link.forTeachers ?? false,
+    forStudents: link.forStudents ?? false,
+    forParents: link.forParents ?? false,
+    onHomePage: link.onHomePage ?? false,
+    forPbis: link.forPbis ?? false,
+    forEPortfolio: link.forEPortfolio ?? false,
   });
   const user = useUser();
 
@@ -79,82 +103,102 @@ export default function EditLink({
       >
         {showForm ? "close" : "Edit Link"}
       </SmallGradientButton>
-      <FormContainerStyles>
-        <Form
-          className={visibleForm === link.id ? "visible" : "hidden"}
-          style={{ width: "500px" }}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            // Submit the input fields to the backend:
-            // console.log(inputs);
-            const res = await updateLink();
-            revalidateIndex();
-            revalidateLinksPage();
-            refetch();
-            setVisibleForm(null);
-            // console.log(inputs);
-          }}
-        >
-          <h2>Edit Link</h2>
-          <DisplayError error={error} />
-          <fieldset disabled={loading} aria-busy={loading}>
-            {/* <FormGroupStyles> */}
-            <label htmlFor="name">
-              Name
-              <input
-                style={{ marginLeft: "0" }}
-                required
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Title of Assignment"
-                value={inputs.name || ""}
-                onChange={handleChange}
-              />
-            </label>
-            {/* </FormGroupStyles> */}
-            <label htmlFor="description">
-              Description
-              <textarea
-                id="description"
-                name="description"
-                placeholder="Assignment Description"
-                required
-                value={inputs.description}
-                onChange={handleChange}
-                rows="5"
-              />
-            </label>
-            <label htmlFor="link">
-              Link
-              <input
-                style={{ marginLeft: "0" }}
-                id="link"
-                name="link"
-                placeholder="Link to website"
-                value={inputs.link}
-                onChange={handleChange}
-              />
-            </label>
-            <button type="submit">+ Publish</button>
-            {user?.isSuperAdmin ? (
-              <button
-                type="button"
-                onClick={async () => {
-                  const res = await deleteLink();
-                  // console.log(res);
-                  revalidateIndex();
-                  revalidateLinksPage();
-                  queryClient.refetchQueries("allLinks");
-                  setVisibleForm(null);
-                }}
-              >
-                Delete
-              </button>
-            ) : null}
-          </fieldset>
-        </Form>
-      </FormContainerStyles>
+      <FormContainer visible={visibleForm === link.id}>
+        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={() => setVisibleForm(null)}
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <Form className="w-full bg-transparent border-0 shadow-none p-0">
+            <h1 className="text-white font-bold text-xl mb-4">Edit Link</h1>
+            <DisplayError error={error} />
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mb-4">
+                <label htmlFor="name" className="block text-white font-semibold mb-1">
+                  Link Title
+                </label>
+                <input
+                  required
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Link Title"
+                  value={inputs.name}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="link" className="block text-white font-semibold mb-1">
+                  Link
+                </label>
+                <input
+                  type="text"
+                  id="link"
+                  name="link"
+                  placeholder="Input Link Here"
+                  value={inputs.link}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="description" className="block text-white font-semibold mb-1">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  placeholder="Description"
+                  required
+                  value={inputs.description}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mt-4 mb-2 font-bold text-white">Visibility Options</div>
+              <div className="flex flex-col gap-2">
+                {[{ id: "forTeachers", label: "Visible to Teachers" },
+                { id: "forStudents", label: "Visible to Students" },
+                { id: "forParents", label: "Visible to Parents" },
+                { id: "onHomePage", label: "Show on The HomePage" },
+                { id: "forPbis", label: "Show on The PBIS Page" },
+                { id: "forEPortfolio", label: "Show on The E-Portfolio Page" }].map(({ id, label }) => (
+                  <label key={id} htmlFor={id} className="flex items-center justify-between text-white font-medium">
+                    <span>{label}</span>
+                    <Toggle
+                      id={id}
+                      name={id}
+                      checked={inputs[id]}
+                      onChange={handleChange}
+                    />
+                  </label>
+                ))}
+              </div>
+              <button type="submit" className="mt-6">+ Publish</button>
+              {user?.isSuperAdmin ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const res = await deleteLink();
+                    revalidateIndex();
+                    revalidateLinksPage();
+                    queryClient.refetchQueries("allLinks");
+                    setVisibleForm(null);
+                  }}
+                  className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                >
+                  Delete
+                </button>
+              ) : null}
+            </fieldset>
+          </Form>
+        </div>
+      </FormContainer>
     </div>
   );
 }

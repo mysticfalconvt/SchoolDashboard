@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import toast from 'react-hot-toast';
 import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
+import Form, { FormContainer, FormGroup } from '../styles/Form';
 import useForm from '../../lib/useForm';
 import DisplayError from '../ErrorMessage';
 import SearchForUserName from '../SearchForUserName';
@@ -71,7 +71,7 @@ export default function NewCallback({ refetch }) {
         {showForm ? 'Close the form' : 'New Callback Assignment'}
       </GradientButton>
 
-      <FormContainerStyles>
+      <FormContainer visible={showForm}>
         <Form
           className={showForm ? 'visible' : 'hidden'}
           // hidden={!showForm}
@@ -106,7 +106,7 @@ export default function NewCallback({ refetch }) {
           <h2>Add a New Callback Assignment</h2>
           <DisplayError error={error} />
           <fieldset disabled={loading} aria-busy={loading}>
-            <FormGroupStyles>
+            <FormGroup>
               <div>
                 <label htmlFor="studentName">Student Name</label>
                 <SearchForUserName
@@ -140,7 +140,7 @@ export default function NewCallback({ refetch }) {
                   onChange={handleChange}
                 />
               </label>
-            </FormGroupStyles>
+            </FormGroup>
             <label htmlFor="description">
               Description
               <textarea
@@ -166,7 +166,7 @@ export default function NewCallback({ refetch }) {
             <button type="submit">+ Publish</button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormContainer>
     </div>
   );
 }

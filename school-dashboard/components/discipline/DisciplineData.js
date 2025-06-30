@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-import styled from 'styled-components';
 import { useRouter } from 'next/dist/client/router';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisciplineCharts from './DisciplineCharts';
@@ -11,24 +10,6 @@ import CellPhoneAddButton from './CellPhoneAddButton';
 import ShowCellphoneViolations from './ShowCellphoneViolations';
 import GradientButton, { SmallGradientButton } from '../styles/Button';
 import Loading from '../Loading';
-
-const DisciplinePageContainer = styled.div`
-  h2 {
-    text-align: center;
-  }
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  div {
-    max-width: 500px;
-  }
-  .big {
-    flex-basis: 100%;
-
-    width: 1000px;
-    /* background-color: red; */
-  }
-`;
 
 export const DISCIPLINE_DATA = gql`
   query DISCIPLINE_DATA {
@@ -117,7 +98,7 @@ export default function DisciplineData() {
   if (!me || !me?.isStaff) return <p>Not available</p>;
   return (
     <>
-      <DisciplinePageContainer>
+      <div className="flex justify-around flex-wrap">
         <NewDiscipline refetch={refetch} />
         <GradientButton
           onClick={() =>
@@ -133,16 +114,16 @@ export default function DisciplineData() {
         <ShowCellphoneViolations
           cellViolations={data?.allCellPhoneViolations}
         />
-      </DisciplinePageContainer>
-      <DisciplinePageContainer>
-        <div>
-          <h2>{totalDisciplines} Total Referrals</h2>
+      </div>
+      <div className="flex justify-around flex-wrap">
+        <div className="max-w-[500px]">
+          <h2 className="text-center">{totalDisciplines} Total Referrals</h2>
           <DisciplineTable disciplines={disciplinesToShow} />
         </div>
-        <div>
+        <div className="max-w-[500px]">
           <DisciplineCharts disciplines={disciplinesWithDateIncrimented} />
         </div>
-      </DisciplinePageContainer>
+      </div>
     </>
   );
 }

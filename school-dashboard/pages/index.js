@@ -1,5 +1,4 @@
 import Head from "next/head";
-import styled from "styled-components";
 import gql from "graphql-tag";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -36,16 +35,6 @@ import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalend
 import PbisWidget from "../components/PBIS/PbisWidget";
 import CreateSingleChromebookCheck from "../components/Chromebooks/CreateSingleChromebookCheck";
 import { google } from "googleapis";
-
-const DashboardContainerStyles = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  align-items: center;
-  @media (max-width: 650px) {
-    flex-wrap: wrap;
-  }
-`;
 
 const GET_STUDENT_CLASSSWORK_QUERY = gql`
   query GET_SINGLE_TEACHER($id: ID!) {
@@ -155,7 +144,7 @@ export default function Home(props) {
         <h1 className="center">
           Welcome to the NCUJHS Dashboard {getDisplayName(me)}
         </h1>
-        <DashboardContainerStyles>
+        <div className="flex flex-wrap justify-around items-center">
           <PbisWidget initialCardCount={props?.totalCards} />
           {me && isAllowed(me || {}, "isStaff") && (
             <PbisCardFormButton teacher={me} />
@@ -215,7 +204,7 @@ export default function Home(props) {
                 <ViewStudentPage student={child} />
               </div>
             ))}
-        </DashboardContainerStyles>
+        </div>
       </main>
 
       <footer>

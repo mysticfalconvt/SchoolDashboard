@@ -3,7 +3,7 @@ import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import Toggle from "react-toggle";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles } from "../styles/Form";
+import Form, { FormContainer, FormGroup } from "../styles/Form";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 import { useUser } from "../User";
@@ -76,121 +76,87 @@ export default function NewLink({ refetchLinks, hidden }) {
       >
         {showForm ? "Close the form" : "Add A New Link"}
       </GradientButton>
-      <FormContainerStyles>
-        <Form
-          className={showForm ? "visible" : "hidden"}
-          // hidden={!showForm}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            // Submit the inputfields to the backend:
-            const res = await createLink();
-            if (inputs.onHomePage) {
-              revalidateIndexPage();
-            }
-            resetForm();
-            refetchLinks();
-            revalidateLinkPage();
-            revalidateEPortfolioPage();
-            setShowForm(false);
-          }}
-        >
-          <h1>Add a New Link</h1>
-          <DisplayError error={error} />
-          <fieldset disabled={loading} aria-busy={loading}>
-            <label htmlFor="name">
-              Link Title
-              <input
-                required
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Link Title"
-                value={inputs.name}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="link">
-              Link
-              <input
-                type="text"
-                id="link"
-                name="link"
-                placeholder="Input Link Here"
-                value={inputs.link}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label htmlFor="description">
-              Description
-              <textarea
-                id="description"
-                name="description"
-                placeholder="Description"
-                required
-                value={inputs.description}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="forTeachers">
-              <span>Visible to Teachers </span>
-              <Toggle
-                checked={inputs.forTeachers}
-                id="forTeachers"
-                name="forTeachers"
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="forStudents">
-              <span>Visible to Students </span>
-              <Toggle
-                id="forStudents"
-                name="forStudents"
-                checked={inputs.forStudents}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="forParents">
-              <span>Visible to Parents </span>
-              <Toggle
-                id="forParents"
-                name="forParents"
-                checked={inputs.forParents}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="onHomePage">
-              <span>Show on The HomePage </span>
-              <Toggle
-                id="onHomePage"
-                name="onHomePage"
-                checked={inputs.onHomePage}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="forPbis">
-              <span>Show on The PBIS Page </span>
-              <Toggle
-                id="forPbis"
-                name="forPbis"
-                checked={inputs.forPbis}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="forEPortfolio">
-              <span>Show on The E-Portfolio Page </span>
-              <Toggle
-                id="forEPortfolio"
-                name="forEPortfolio"
-                checked={inputs.forEPortfolio}
-                onChange={handleChange}
-              />
-            </label>
-
-            <button type="submit">+ Add A New Link</button>
-          </fieldset>
-        </Form>
-      </FormContainerStyles>
+      <FormContainer visible={showForm}>
+        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={() => setShowForm(false)}
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <Form className="w-full bg-transparent border-0 shadow-none p-0">
+            <h1 className="text-white font-bold text-xl mb-4">Add a New Link</h1>
+            <DisplayError error={error} />
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mb-4">
+                <label htmlFor="name" className="block text-white font-semibold mb-1">
+                  Link Title
+                </label>
+                <input
+                  required
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Link Title"
+                  value={inputs.name}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="link" className="block text-white font-semibold mb-1">
+                  Link
+                </label>
+                <input
+                  type="text"
+                  id="link"
+                  name="link"
+                  placeholder="Input Link Here"
+                  value={inputs.link}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="description" className="block text-white font-semibold mb-1">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  placeholder="Description"
+                  required
+                  value={inputs.description}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
+              <div className="mt-4 mb-2 font-bold text-white">Visibility Options</div>
+              <div className="flex flex-col gap-2">
+                {[{ id: "forTeachers", label: "Visible to Teachers" },
+                { id: "forStudents", label: "Visible to Students" },
+                { id: "forParents", label: "Visible to Parents" },
+                { id: "onHomePage", label: "Show on The HomePage" },
+                { id: "forPbis", label: "Show on The PBIS Page" },
+                { id: "forEPortfolio", label: "Show on The E-Portfolio Page" }].map(({ id, label }) => (
+                  <label key={id} htmlFor={id} className="flex items-center justify-between text-white font-medium">
+                    <span>{label}</span>
+                    <Toggle
+                      id={id}
+                      name={id}
+                      checked={inputs[id]}
+                      onChange={handleChange}
+                    />
+                  </label>
+                ))}
+              </div>
+              <button type="submit" className="mt-6">+ Add A New Link</button>
+            </fieldset>
+          </Form>
+        </div>
+      </FormContainer>
     </div>
   );
 }

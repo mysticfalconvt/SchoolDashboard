@@ -2,7 +2,7 @@ import { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 import GradientButton from "../styles/Button";
 import useForm from "../../lib/useForm";
-import Form, { FormContainerStyles } from "../styles/Form";
+import Form, { FormContainer } from "../styles/Form";
 import DisplayError from "../ErrorMessage";
 
 const UPDATE_EVENTS_MUTATION = gql`
@@ -33,7 +33,7 @@ export default function NewEvents() {
         Add New Events
       </GradientButton>
       <div>
-        <FormContainerStyles>
+        <FormContainer visible={showForm}>
           <Form
             className={showForm ? "visible" : "hidden"}
             onSubmit={async (e) => {
@@ -67,7 +67,7 @@ export default function NewEvents() {
               <button type="submit">update Data</button>
             </fieldset>
           </Form>
-        </FormContainerStyles>
+        </FormContainer>
         {/* {resultOfUpdate && (
           <div>
             {resultOfUpdate.map((user) => {

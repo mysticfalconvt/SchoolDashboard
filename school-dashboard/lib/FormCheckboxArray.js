@@ -1,42 +1,4 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const CheckBoxArrayStyles = styled.div`
-  h3 {
-    text-align: center;
-    border-bottom: solid var(--grey);
-  }
-  div {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-  }
-  input[type='checkbox'] {
-    display: none;
-  }
-  input[type='checkbox'] + span {
-    display: inline-block;
-    position: relative;
-    font-size: 1.5rem;
-    top: -1px;
-    /* width: 12px; */
-    /* height: 12px; */
-    margin: 0;
-    vertical-align: middle;
-    /* background: white left top no-repeat; */
-    padding: 1px 10px;
-    cursor: pointer;
-    border-radius: 1rem;
-  }
-  input[type='checkbox']:checked + span {
-    border: 1px solid var(--blue);
-    background: var(--red);
-  }
-
-  input[type='checkbox'] + span {
-    margin-right: 4px;
-  }
-`;
 
 export default function FormCheckboxArray({
   inputs,
@@ -45,23 +7,25 @@ export default function FormCheckboxArray({
   listOfCheckBoxes,
 }) {
   return (
-    <CheckBoxArrayStyles>
-      <h3>{name}</h3>
-      <div>
+    <div className="w-full">
+      <h3 className="text-center border-b border-gray-400 mb-2">{name}</h3>
+      <div className="flex flex-wrap justify-around gap-2">
         {listOfCheckBoxes.map((singleCheckBox) => (
-          //   console.log(singleCheckBox);
-          <label key={`item#${singleCheckBox}`} htmlFor={singleCheckBox}>
+          <label key={`item#${singleCheckBox}`} htmlFor={singleCheckBox} className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               id={singleCheckBox}
               name={singleCheckBox}
               checked={inputs[singleCheckBox] || false}
               onChange={handleChange}
+              className="peer hidden"
             />
-            <span> {singleCheckBox}</span>
+            <span className="inline-block relative text-xl px-3 py-1 rounded-xl cursor-pointer border border-transparent transition peer-checked:border-blue-600 peer-checked:bg-[var(--red)]">
+              {singleCheckBox}
+            </span>
           </label>
         ))}
       </div>
-    </CheckBoxArrayStyles>
+    </div>
   );
 }

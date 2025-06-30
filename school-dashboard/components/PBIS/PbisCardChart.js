@@ -1,22 +1,8 @@
 import gql from "graphql-tag";
 import React from "react";
-import styled from "styled-components";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import LineChart from "../Chart/LineChart";
 import Loading from "../Loading";
-
-const LineChartStyles = styled.div`
-  /* position: relative; */
-  width: 90%;
-  height: 300px;
-  margin: 10px auto;
-  padding: 0;
-  /* background-color: var(y); */
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-  @media print {
-    display: none;
-  }
-`;
 
 export default function PbisCardChart(initialData) {
   // if (isLoading) return <Loading />;
@@ -29,12 +15,12 @@ export default function PbisCardChart(initialData) {
   }));
 
   return (
-    <LineChartStyles>
+    <div className="w-[90%] h-[300px] mx-auto my-2 p-0 shadow-[0_0_10px_0_rgba(0,0,0,0.1)] print:hidden">
       <LineChart
         title="Marbles Per Week"
         chartData={chartData}
         label="Marbles Per Week"
       />
-    </LineChartStyles>
+    </div>
   );
 }

@@ -68,7 +68,7 @@ export default function MessagesCount({ mobile = false }) {
                 {mobile ? `${unread} messages` : unread}
               </span>
             </button>
-            {viewAllMessages && <MessagesList messages={data?.messages || []} />}
+            {viewAllMessages && <MessagesList messages={data?.messages || []} onClose={() => setViewAllMessages(false)} />}
           </>
         </CSSTransition>
       </TransitionGroup>

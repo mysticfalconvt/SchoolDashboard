@@ -4,7 +4,6 @@ import gql from "graphql-tag";
 import debounce from "lodash.debounce";
 import { useRouter } from "next/dist/client/router";
 import { useState } from "react";
-import { DropDown, DropDownItem, SearchStyles } from "./styles/DropDown";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import { useUser } from "./User";
 
@@ -79,7 +78,7 @@ export default function SearchForUserName({
   });
 
   return (
-    <SearchStyles>
+    <div className="relative">
       <div {...getComboboxProps()}>
         <input
           {...getInputProps({
@@ -87,29 +86,28 @@ export default function SearchForUserName({
             placeholder: "Search for a User",
             id: name,
             name,
-            className: isLoading ? "loading" : "",
-            // value,
+            className: `w-full p-2 bg-[var(--backgroundColor)] text-[var(--textColor)] border-0 text-2xl focus:ring-2 focus:ring-yellow-300 rounded dark:bg-[var(--backgroundColorDark)] dark:text-[var(--textColorDark)] ${isLoading ? 'animate-pulse ring-2 ring-yellow-300' : ''}`,
           })}
         />
       </div>
-      <DropDown {...getMenuProps()}>
+      <div {...getMenuProps()} className="absolute w-full z-20 border border-[var(--lightGrey)] bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700">
         {isOpen &&
           items.map((item, index) => {
-            const { isStudent } = item;
+            const highlighted = index === highlightedIndex;
             return (
-              <DropDownItem
+              <div
                 {...getItemProps({ item, index })}
                 key={item.id}
-                highlighted={index === highlightedIndex}
+                className={`flex items-center border-b border-[var(--lightGrey)] px-4 py-3 transition-all duration-200 cursor-pointer ${highlighted ? 'bg-gray-100 dark:bg-gray-800 dark:text-white pl-8 border-l-4 border-yellow-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
               >
                 {item.name}
-              </DropDownItem>
+              </div>
             );
           })}
         {isOpen && !items.length && !isLoading && (
-          <DropDownItem>Sorry, No users found for {inputValue}</DropDownItem>
+          <div className="flex items-center border-b border-[var(--lightGrey)] px-4 py-3">Sorry, No users found for {inputValue}</div>
         )}
-      </DropDown>
-    </SearchStyles>
+      </div>
+    </div>
   );
 }

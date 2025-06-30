@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 import GradientButton from "../styles/Button";
-import Form, { FormContainerStyles, FormGroupStyles } from "../styles/Form";
+import Form, { FormContainer, FormGroup } from "../styles/Form";
 import useForm from "../../lib/useForm";
 import DisplayError from "../ErrorMessage";
 
@@ -57,10 +57,9 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
 
   return (
     <div>
-      {/* <FormContainerStyles> */}
+      {/* <FormContainer visible={showForm}> */}
       <Form
-        className="visible"
-        // hidden={!showForm}
+        className={showForm ? "visible" : "hidden"}
         onSubmit={async (e) => {
           e.preventDefault();
           // Submit the input fields to the backend:
@@ -82,7 +81,7 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
         <h2>Edit Callback Assignment</h2>
         <DisplayError error={error} />
         <fieldset disabled={loading} aria-busy={loading}>
-          <FormGroupStyles>
+          <FormGroup>
             <div>
               <label htmlFor="studentName">Student Name</label>
               <p>{callback.student.name}</p>
@@ -111,7 +110,7 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
                 onChange={handleChange}
               />
             </label>
-          </FormGroupStyles>
+          </FormGroup>
           <label htmlFor="description">
             Description
             <textarea
@@ -137,7 +136,7 @@ export default function CallbackEditor({ callback, refetch, setEditing }) {
           <button type="submit">+ Publish</button>
         </fieldset>
       </Form>
-      {/* </FormContainerStyles> */}
+      {/* </FormContainer> */}
     </div>
   );
 }

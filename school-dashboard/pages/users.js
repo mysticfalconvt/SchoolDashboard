@@ -1,7 +1,6 @@
 import { gql, GraphQLClient } from "graphql-request";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import styled from "styled-components";
 import DisplayError from "../components/ErrorMessage";
 import GradientButton from "../components/styles/Button";
 import Table from "../components/Table";

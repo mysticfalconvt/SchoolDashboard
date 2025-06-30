@@ -6,7 +6,7 @@ import DisplayError from '../ErrorMessage';
 import CallbackTable from './CallbackTable';
 import 'react-toggle/style.css';
 import CallbackCards from './CallbackCards';
-import { FormContainerStyles } from '../styles/Form';
+import { FormContainer } from '../styles/Form';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../Loading';
 
@@ -76,8 +76,8 @@ export default function TaCallbacks() {
   //   setShowTable(showTable);
   // }
   return (
-    <div style={{width: "100vw"  }}>
-      <FormContainerStyles>
+    <div style={{ width: "100vw" }}>
+      <FormContainer visible={true}>
         <label>
           <span> Show Callbacks As Table</span>
           <Toggle
@@ -85,7 +85,7 @@ export default function TaCallbacks() {
             onChange={() => setShowTable(!showTable)}
           />
         </label>
-      </FormContainerStyles>
+      </FormContainer>
       {showTable && <CallbackTable callbacks={callbacks} />}
 
       {!showTable && <CallbackCards maxColumns={3} callbacks={callbacks} />}

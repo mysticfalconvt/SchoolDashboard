@@ -4,7 +4,6 @@ import { useRouter } from "next/dist/client/router";
 import { useState, useMemo } from "react";
 import { capitalizeFirstLetter, UserTypeDisplay } from "../lib/nameUtils";
 import { useGQLQuery } from "../lib/useGqlQuery";
-import { DropDown, DropDownItem, SearchStyles } from "./styles/DropDown";
 import { useUser } from "./User";
 import { commandPallettePaths } from "../lib/CommandPallettePaths";
 import { GET_CALENDARS } from "./calendars/Calendars";
@@ -177,36 +176,36 @@ export default function Search() {
   });
 
   return (
-    <SearchStyles>
+    <div className="relative">
       <div {...getComboboxProps()}>
         <input
           {...getInputProps({
             type: "search",
             placeholder: "Search for anything...",
             id: "search",
-            className: isLoading ? "loading" : "",
             tabIndex: 1,
-            // autoFocus: true,
+            className: `w-full p-2 bg-[var(--backgroundColor)] text-[var(--textColor)] border-0 text-2xl focus:ring-2 focus:ring-yellow-300 rounded dark:bg-gray-900 dark:text-[var(--textColorDark)] ${isLoading ? 'animate-pulse ring-2 ring-yellow-300' : ''}`,
           })}
         />
       </div>
-      <DropDown {...getMenuProps()}>
+      <div {...getMenuProps()} className="absolute w-full z-20 border border-[var(--lightGrey)] bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700">
         {isOpen &&
           items.map((item, index) => {
+            const highlighted = index === highlightedIndex;
             return (
-              <DropDownItem
+              <div
                 {...getItemProps({ item, index })}
                 key={item.id}
-                highlighted={index === highlightedIndex}
+                className={`flex items-center border-b border-[var(--lightGrey)] px-4 py-3 transition-all duration-200 cursor-pointer ${highlighted ? 'bg-gray-100 dark:bg-gray-800 dark:text-white pl-8 border-l-4 border-yellow-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
               >
                 {item.icon} {item.name}
-              </DropDownItem>
+              </div>
             );
           })}
         {isOpen && !items.length && !isLoading && (
-          <DropDownItem>Sorry, Not found for {inputValue}</DropDownItem>
+          <div className="flex items-center border-b border-[var(--lightGrey)] px-4 py-3">Sorry, Not found for {inputValue}</div>
         )}
-      </DropDown>
-    </SearchStyles>
+      </div>
+    </div>
   );
 }

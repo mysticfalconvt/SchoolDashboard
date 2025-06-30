@@ -1,37 +1,10 @@
 import gql from "graphql-tag";
 import React, { useMemo } from "react";
-import styled from "styled-components";
 import Link from "next/link";
 import { GraphQLClient } from "graphql-request";
-import NewBullying from "../components/discipline/BullyingButton";
-import Loading from "../components/Loading";
 import Table from "../components/Table";
-import { useUser } from "../components/User";
 import { useGQLQuery } from "../lib/useGqlQuery";
 import { endpoint, NUMBER_OF_BLOCKS, prodEndpoint } from "../config";
-
-const TeacherWorkPageContainer = styled.div`
-  h2 {
-    text-align: center;
-  }
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  flex-direction: column;
-  div {
-    max-width: 100%;
-  }
-  h3 {
-    margin: 0;
-    padding: 0;
-    font-size: 1.5rem;
-  }
-  p {
-    margin: 0;
-    padding: 0;
-    font-size: 1.2rem;
-  }
-`;
 
 const ALL_TEACHERS_QUERY = gql`
   query BULLYING_DATA_QUERY {
@@ -73,41 +46,47 @@ const ALL_TEACHERS_QUERY = gql`
 `;
 
 function DisplayClasswork({ data, block }) {
-  // console.log(data);
-  if (data) {
-    const classname = data[`block${block}ClassName`];
-    const assignment = data[`block${block}Assignment`];
-    const lastUpdated = data[`block${block}AssignmentLastUpdated`];
-    const daysSinceLastUpdated = Math.floor(
-      (Date.now() - new Date(lastUpdated).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const wasUpdatedInLastYear = daysSinceLastUpdated < 365;
+  if (!data) return null;
 
-    return (
-      <div>
-        {wasUpdatedInLastYear ? (
-          <>
-            <h3>
-              <strong>{classname}</strong>
-            </h3>
-            <p>
-              <strong>{assignment}</strong>
-            </p>
-            <p>
-              <strong>Updated {daysSinceLastUpdated} days ago</strong>
-            </p>
-          </>
-        ) : (
-          <h3>Not Updated</h3>
-        )}
-      </div>
-    );
-  }
+  const classname = data[`block${block}ClassName`];
+  const assignment = data[`block${block}Assignment`];
+  const lastUpdated = data[`block${block}AssignmentLastUpdated`];
+
+  // Simple check if data exists without date calculations
+  const hasData = classname && assignment && lastUpdated;
+
+  // Format date deterministically to avoid hydration issues
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="max-w-full">
+      {hasData ? (
+        <>
+          <h3 className="m-0 p-0 text-xl font-semibold">
+            <strong>{classname}</strong>
+          </h3>
+          <p className="m-0 p-0 text-lg">
+            <strong>{assignment}</strong>
+          </p>
+          <p className="m-0 p-0 text-lg">
+            <strong>Last Updated: {formatDate(lastUpdated)}</strong>
+          </p>
+        </>
+      ) : (
+        <h3 className="m-0 p-0 text-xl font-semibold">No Data</h3>
+      )}
+    </div>
+  );
 }
 
 export default function AllTeacherCurrentWork(props) {
-  const me = useUser();
-  // console.log(props)
+  // Temporarily remove useUser to test hydration
+  // const me = useUser();
+
   const { data } = useGQLQuery(
     "allTeachers",
     ALL_TEACHERS_QUERY,
@@ -117,7 +96,6 @@ export default function AllTeacherCurrentWork(props) {
       initialData: props?.initialWorkData,
     }
   );
-  // console.log(data?.users)
 
   const columns = useMemo(() => {
     const columns = [
@@ -217,13 +195,13 @@ export default function AllTeacherCurrentWork(props) {
         ),
       },
     ];
-  }, []);
-  // if (isLoading) return <Loading />;
+  }, [NUMBER_OF_BLOCKS]);
+
   return (
-    <TeacherWorkPageContainer>
-      <h1>All Teachers Current Work</h1>
+    <div className="flex flex-col flex-wrap justify-around w-full">
+      <h1 className="text-center text-2xl font-bold mb-6">All Teacher Current Work</h1>
       <Table data={data?.users || []} columns={columns} searchColumn="name" />
-    </TeacherWorkPageContainer>
+    </div>
   );
 }
 

@@ -3,8 +3,10 @@ import { useMutation } from '@apollo/client';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../../components/Loading';
 import DisplayError from '../../components/ErrorMessage';
-import Form, { FormContainerStyles } from '../../components/styles/Form';
+import Form, { FormContainer } from '../../components/styles/Form';
 import useForm from '../../lib/useForm';
+import { useState } from "react";
+import { useRouter } from "next/router";
 
 // const GET_STUDENT_FOR_PARENT = gql`
 //   query GET_STUDENT_FOR_PARENT($id: ID!) {
@@ -63,9 +65,9 @@ export default function SingleCallbackPage({ query }) {
   // const student = data.User;
   return (
     <div>
-      <FormContainerStyles>
+      <FormContainer visible={true}>
         <Form
-          className="visible"
+          method="POST"
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the inputfields to the backend:
@@ -137,7 +139,7 @@ export default function SingleCallbackPage({ query }) {
             <button type="submit">Register</button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormContainer>
     </div>
   );
 }

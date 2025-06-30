@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import GradientButton, { SmallGradientButton } from '../styles/Button';
-import { OneDayCalendarStyles } from '../styles/CalendarStyles';
 
 function DisplayEvent({ event }) {
   const day = new Date(event.date).toLocaleDateString();
@@ -46,14 +45,14 @@ function DisplayEvent({ event }) {
 
 export default function SingleDayCalendar({ dailyEvents, day }) {
   const todaysDay = new Date().toLocaleString('en-us', { weekday: 'long' });
+  const todayClass = "bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] p-4 rounded-2xl min-w-min border-none text-white/50 basis-[35%] col-span-2";
+  const notTodayClass = "text-[var(--blue)] m-0.5 border-2 border-[var(--blue)] rounded-2xl basis-[10%]";
   return (
-    <>
-      <div className={todaysDay === day ? 'today' : 'notToday'}>
-        <h2>{day}</h2>
-        {dailyEvents?.map((today) => (
-          <DisplayEvent key={today.id} event={today} />
-        ))}
-      </div>
-    </>
+    <div className={todaysDay === day ? todayClass : notTodayClass}>
+      <h2>{day}</h2>
+      {dailyEvents?.map((today) => (
+        <DisplayEvent key={today.id} event={today} />
+      ))}
+    </div>
   );
 }

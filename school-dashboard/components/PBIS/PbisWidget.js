@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import PbisFalcon from "./PbisFalcon";
 import { useUser } from "../User";
-import { styled } from "styled-components";
 
 export default function PbisWidget({ initialCardCount = 0 }) {
   const me = useUser();

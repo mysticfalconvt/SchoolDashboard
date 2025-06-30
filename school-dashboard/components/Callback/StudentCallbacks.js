@@ -6,9 +6,13 @@ import DisplayError from "../ErrorMessage";
 import CallbackTable from "./CallbackTable";
 import "react-toggle/style.css";
 import CallbackCards from "./CallbackCards";
-import { FormContainerStyles } from "../styles/Form";
+import { FormContainer } from "../styles/Form";
 import { useGQLQuery } from "../../lib/useGqlQuery";
 import Loading from "../Loading";
+import { useMutation } from "@apollo/client";
+import { useRouter } from "next/router";
+import { useQueryClient } from "react-query";
+import GradientButton from "../styles/Button";
 
 const MY_CALLBACK_ASSIGNMENTS = gql`
   query MY_CALLBACK_ASSIGNMENTS($student: ID) {
@@ -66,7 +70,7 @@ export default function StudentCallbacks() {
   // }
   return (
     <div>
-      <FormContainerStyles>
+      <FormContainer visible={true}>
         <label>
           <span>Show Completed </span>
           <Toggle
@@ -75,13 +79,13 @@ export default function StudentCallbacks() {
           />
         </label>
         <label>
-          {/* <span> Show As Table</span> */}
-          {/* <Toggle
+          <span> Show Callbacks As Table</span>
+          <Toggle
             checked={showTable}
             onChange={() => setShowTable(!showTable)}
-          /> */}
+          />
         </label>
-      </FormContainerStyles>
+      </FormContainer>
       {showTable && <CallbackTable callbacks={callbacks} />}
 
       {!showTable && <CallbackCards callbacks={callbacks} />}

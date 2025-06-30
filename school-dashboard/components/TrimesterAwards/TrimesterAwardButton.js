@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
 import GradientButton, { SmallGradientButton } from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
+import Form, { FormContainer } from '../styles/Form';
 import useForm from '../../lib/useForm';
 import DisplayError from '../ErrorMessage';
 import { useUser } from '../User';
@@ -66,7 +66,7 @@ export default function TrimesterAwardButton({ student, trimester, refetch }) {
       >
         {showForm ? 'close' : 'Trimester Award'}
       </GradientButton>
-      <FormContainerStyles>
+      <FormContainer visible={showForm}>
         <Form
           className={showForm ? 'visible' : 'hidden'}
           style={{ width: '500px' }}
@@ -85,7 +85,7 @@ export default function TrimesterAwardButton({ student, trimester, refetch }) {
           <DisplayError error={error} />
           <h2>Trimester Award for {student.name}</h2>
           <fieldset disabled={loading} aria-busy={loading}>
-            {/* <FormGroupStyles> */}
+            {/* <FormGroup> */}
             <label htmlFor="howl">
               H.O.W.L.
               <select
@@ -103,12 +103,12 @@ export default function TrimesterAwardButton({ student, trimester, refetch }) {
                 <option value="Perseverance">Perseverance</option>
               </select>
             </label>
-            {/* </FormGroupStyles> */}
+            {/* </FormGroup> */}
 
             <button type="submit">+ Submit</button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormContainer>
     </div>
   );
 }

@@ -1,36 +1,27 @@
 import React from 'react';
-import styled from 'styled-components';
 import SingleMessageInList from './SingleMessageInList';
 
-const MessageListStyles = styled.div`
-  position: fixed; /* Stay in place */
-  z-index: 4; /* Sit on top */
-  right: 10%;
-  top: 10%;
-  width: 40%; /* Full width */
-  height: 80%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
-  border-radius: 2rem;
-
-  div {
-    display: flex;
-    flex-direction: column;
-  }
-  h3 {
-    color: white;
-  }
-`;
-
-export default function MessagesList({ messages }) {
+export default function MessagesList({ messages, onClose = () => { } }) {
   // console.log(messages);
   return (
-    <MessageListStyles>
-      {messages.map((message) => (
-        // console.log(message);
-        <SingleMessageInList key={message.id} message={message} />
-      ))}
-    </MessageListStyles>
+    <div className="fixed top-0 right-0 h-full w-full max-w-md z-40 bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-l-4 border-gray-400 shadow-2xl flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b border-gray-300">
+        <h3 className="text-white text-2xl font-bold">Messages</h3>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-white text-3xl font-extrabold bg-black bg-opacity-40 rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto flex flex-col p-4 gap-2">
+        {messages.map((message) => (
+          // console.log(message);
+          <SingleMessageInList key={message.id} message={message} />
+        ))}
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import GradientButton from "../styles/Button";
-import styled from "styled-components";
-import totalsFromArray from "../../lib/totalsFromArray";
 import {
   classTypeList,
   locationList,
@@ -12,37 +10,6 @@ import {
 } from "../../lib/disciplineData";
 import totalsTrueInArray from "../../lib/totalsTrueInArray";
 import { getDayTotals } from "./DisciplineCharts";
-
-const DisciplineExtraDetailsModal = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: var(--backgroundColor);
-  z-index: 1000;
-  width: 100vw;
-  max-width: 1000px; !important;
-  height: 80vh;
-  border-radius: 10px;
-
-  padding: 20px;
-  box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  h3 {
-    margin: 0;
-    text-align: center;
-    border-bottom: 1px solid var(--red);
-  }
-  p {
-    margin: 0;
-    text-align: left;
-  }
-
-`;
 
 export default function DisciplineExtraDetails({ disciplines }) {
   const [showModal, setShowModal] = useState(false);
@@ -110,7 +77,7 @@ export default function DisciplineExtraDetails({ disciplines }) {
       </GradientButton>
 
       {showModal && (
-        <DisciplineExtraDetailsModal>
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--backgroundColor)] z-[1000] w-screen max-w-[1000px] h-[80vh] rounded-xl p-6 shadow-2xl flex flex-col justify-start items-stretch">
           <h2>
             Extra Details
             <GradientButton
@@ -126,13 +93,9 @@ export default function DisciplineExtraDetails({ disciplines }) {
               {!showCounts ? "Show Details" : "Show Counts"}
             </GradientButton>
           </h2>
-          <h3 style={{ textAlign: "center" }}>Total: {totalDisciplines}</h3>
+          <h3 className="text-center border-b border-[var(--red)]">Total: {totalDisciplines}</h3>
           <div
-            style={{
-              display: "flex",
-              overflowY: "scroll",
-              justifyContent: "space-around",
-            }}
+            className="flex overflow-y-auto justify-around gap-8"
           >
             {!showCounts ? (
               <>
@@ -204,7 +167,7 @@ export default function DisciplineExtraDetails({ disciplines }) {
               </div>
             )}
           </div>
-        </DisciplineExtraDetailsModal>
+        </div>
       )}
     </>
   );
