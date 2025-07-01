@@ -4,7 +4,7 @@ export default function AssignmentViewCardsStudent({ student }) {
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
       <h3 className="m-2">Current Class Assignments</h3>
-      <div className="grid grid-cols-10 md:grid-cols-1">
+      <div className="grid grid-cols-1 md:grid-cols-10">
         {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
           const num = i + 1;
           if (!student[`block${num}Teacher`]) {

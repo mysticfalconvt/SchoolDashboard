@@ -98,91 +98,106 @@ export default function AssignmentUpdater({
   );
 
   return (
-    <div className="fixed z-10 left-1/4 top-2/5 min-w-1/2 h-auto rounded-3xl bg-slate-900 overflow-hidden border-slate-400 border-solid border-2">
-      <h4 className="text-white m-2 text-center flex items-center w-full justify-center">
-        Update Class Assignment for Block {block}
-        <button type="button" onClick={() => hide(false)} className="w-10 h-10 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5">
-          &times;
-        </button>
-      </h4>
-      <form className="flex flex-col justify-center text-white">
-        <label htmlFor="Class Name" className="p-2.5 text-left">
-          Class Name:
-          <input
-            type="text"
-            id="classTitle"
-            name="classTitle"
-            placeholder="student Message"
-            value={inputs.classTitle}
-            onChange={handleChange}
-            className="mx-8 min-w-[90%] text-black"
-          />
-        </label>
-        <label htmlFor="message" className="p-2.5 text-left">
-          Current Assignment:
-          <textarea
-            type="text"
-            id="assignment"
-            name="assignment"
-            placeholder="Current Assignment"
-            value={inputs.assignment}
-            onChange={handleChange}
-            className="mx-8 min-w-[90%] text-black"
-          />
-        </label>
-        <div className="flex flex-row justify-around items-center">
+    <>
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        onClick={() => hide(false)}
+      />
+
+      {/* Modal */}
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <h4 className="text-white text-xl font-semibold">
+            Update Class Assignment for Block {block}
+          </h4>
           <button
             type="button"
-            onClick={async () => {
-              updateData[`block${block}AssignmentLastUpdated`] = new Date();
-              updateData[`block${block}Assignment`] = inputs.assignment;
-              updateData[`block${block}ClassName`] = inputs.classTitle;
-              updateData.id = me.id;
-              await updateAssignment({ variables: updateData });
-              toast.success(`Updated Assignment for Block ${block}`);
-              await refetch();
-              hide(false);
-            }}
-            className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+            onClick={() => hide(false)}
+            className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)]  rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
           >
-            Update
-          </button>
-          <button
-            type="button"
-            className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
-            onClick={async () => {
-              const todaysDate = new Date();
-              updateData[`block1AssignmentLastUpdated`] = todaysDate;
-              updateData[`block2AssignmentLastUpdated`] = todaysDate;
-              updateData[`block3AssignmentLastUpdated`] = todaysDate;
-              updateData[`block4AssignmentLastUpdated`] = todaysDate;
-              updateData[`block5AssignmentLastUpdated`] = todaysDate;
-              updateData[`block6AssignmentLastUpdated`] = todaysDate;
-              updateData[`block7AssignmentLastUpdated`] = todaysDate;
-              updateData[`block8AssignmentLastUpdated`] = todaysDate;
-              updateData[`block9AssignmentLastUpdated`] = todaysDate;
-              updateData[`block10AssignmentLastUpdated`] = todaysDate;
-              updateData[`block1Assignment`] = inputs.assignment;
-              updateData[`block2Assignment`] = inputs.assignment;
-              updateData[`block3Assignment`] = inputs.assignment;
-              updateData[`block4Assignment`] = inputs.assignment;
-              updateData[`block5Assignment`] = inputs.assignment;
-              updateData[`block6Assignment`] = inputs.assignment;
-              updateData[`block7Assignment`] = inputs.assignment;
-              updateData[`block8Assignment`] = inputs.assignment;
-              updateData[`block9Assignment`] = inputs.assignment;
-              updateData[`block10Assignment`] = inputs.assignment;
-              updateData.id = me.id;
-              await updateAssignment({ variables: updateData });
-              toast.success(`Updated Assignment for Block ${block}`);
-              await refetch();
-              hide(false);
-            }}
-          >
-            Update All Blocks
+            ×
           </button>
         </div>
-      </form>
-    </div>
+        <form className="flex flex-col justify-center text-white">
+          <label htmlFor="Class Name" className="p-2.5 text-left">
+            Class Name:
+            <input
+              type="text"
+              id="classTitle"
+              name="classTitle"
+              placeholder="student Message"
+              value={inputs.classTitle}
+              onChange={handleChange}
+              className="mx-8 min-w-[90%] text-black"
+            />
+          </label>
+          <label htmlFor="message" className="p-2.5 text-left">
+            Current Assignment:
+            <textarea
+              type="text"
+              id="assignment"
+              name="assignment"
+              placeholder="Current Assignment"
+              value={inputs.assignment}
+              onChange={handleChange}
+              className="mx-8 min-w-[90%] text-black"
+            />
+          </label>
+          <div className="flex flex-row justify-around items-center">
+            <button
+              type="button"
+              onClick={async () => {
+                updateData[`block${block}AssignmentLastUpdated`] = new Date();
+                updateData[`block${block}Assignment`] = inputs.assignment;
+                updateData[`block${block}ClassName`] = inputs.classTitle;
+                updateData.id = me.id;
+                await updateAssignment({ variables: updateData });
+                toast.success(`Updated Assignment for Block ${block}`);
+                await refetch();
+                hide(false);
+              }}
+              className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+            >
+              Update
+            </button>
+            <button
+              type="button"
+              className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+              onClick={async () => {
+                const todaysDate = new Date();
+                updateData[`block1AssignmentLastUpdated`] = todaysDate;
+                updateData[`block2AssignmentLastUpdated`] = todaysDate;
+                updateData[`block3AssignmentLastUpdated`] = todaysDate;
+                updateData[`block4AssignmentLastUpdated`] = todaysDate;
+                updateData[`block5AssignmentLastUpdated`] = todaysDate;
+                updateData[`block6AssignmentLastUpdated`] = todaysDate;
+                updateData[`block7AssignmentLastUpdated`] = todaysDate;
+                updateData[`block8AssignmentLastUpdated`] = todaysDate;
+                updateData[`block9AssignmentLastUpdated`] = todaysDate;
+                updateData[`block10AssignmentLastUpdated`] = todaysDate;
+                updateData[`block1Assignment`] = inputs.assignment;
+                updateData[`block2Assignment`] = inputs.assignment;
+                updateData[`block3Assignment`] = inputs.assignment;
+                updateData[`block4Assignment`] = inputs.assignment;
+                updateData[`block5Assignment`] = inputs.assignment;
+                updateData[`block6Assignment`] = inputs.assignment;
+                updateData[`block7Assignment`] = inputs.assignment;
+                updateData[`block8Assignment`] = inputs.assignment;
+                updateData[`block9Assignment`] = inputs.assignment;
+                updateData[`block10Assignment`] = inputs.assignment;
+                updateData.id = me.id;
+                await updateAssignment({ variables: updateData });
+                toast.success(`Updated Assignment for Block ${block}`);
+                await refetch();
+                hide(false);
+              }}
+            >
+              Update All Blocks
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }
