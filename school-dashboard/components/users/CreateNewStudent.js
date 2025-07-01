@@ -114,293 +114,143 @@ export default function NewStudent({ student }) {
   return (
     <div>
       <GradientButton onClick={() => setShowForm(!showForm)}>
-        {showForm ? "close" : "Create a New Student"}
+        {showForm ? "Close the form" : "Create a New Student"}
       </GradientButton>
-      <FormContainerStyles>
-        <Form
-          className={showForm ? "visible" : "hidden"}
-          style={{ width: "500px" }}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            // Submit the input fields to the backend:
-            // console.log(inputs);
-            const res = await createNewStudent();
-            if (res.data.createUser) {
-              queryClient.refetchQueries();
-              setShowForm(false);
-              resetForm();
-              //toast success and link to student page
-              toast.success(
-                <Link href={`/userProfile/${res.data.createUser.id}`}>
-                  {`Created a new account for ${res.data.createUser.name}   Click here to view their profile`}
-                </Link>,
-                { duration: 10000 }
-              );
-              revalidateIndexPage();
-            } else {
-              toast.error(`Error creating new account`);
-            }
-          }}
-        >
-          <h2>Create New Student</h2>
-          <DisplayError error={error} />
-          <fieldset disabled={loading} aria-busy={loading}>
-            {/* <FormGroupStyles> */}
-            <label htmlFor="name">
-              Name
-              <input
-                style={{ marginLeft: "0" }}
-                required
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Student Name"
-                value={inputs.name || ""}
-                onChange={handleChange}
-              />
-            </label>
-            <label htmlFor="email">
-              Email
-              <input
-                style={{ marginLeft: "0" }}
-                required
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Student Email"
-                value={inputs.email || ""}
-                onChange={handleChange}
-              />
-            </label>
-            {/* </FormGroupStyles> */}
-            <label htmlFor="ta">
-              TA
-              <select
-                id="ta"
-                name="ta"
-                placeholder="TA Teacher"
-                value={inputs.ta}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block1">
-              Block 1
-              <select
-                id="block1"
-                name="block1"
-                placeholder="Block 1 Teacher"
-                value={inputs.block1}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block2">
-              Block 2
-              <select
-                id="block2"
-                name="block2"
-                placeholder="Block 2 Teacher"
-                value={inputs.block2}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block3">
-              Block 3
-              <select
-                id="block3"
-                name="block3"
-                placeholder="Block 3 Teacher"
-                value={inputs.block3 || ""}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block4">
-              Block 4
-              <select
-                id="block4"
-                name="block4"
-                placeholder="Block 4 Teacher"
-                value={inputs.block4}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block5">
-              Block 5
-              <select
-                id="block5"
-                name="block5"
-                placeholder="Block 5 Teacher"
-                value={inputs.block5}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block6">
-              Block 6
-              <select
-                id="block6"
-                name="block6"
-                placeholder="Block 6 Teacher"
-                value={inputs.block6}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block7">
-              Block 7
-              <select
-                id="block7"
-                name="block7"
-                placeholder="Block 7 Teacher"
-                value={inputs.block7}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block8">
-              Block 8
-              <select
-                id="block8"
-                name="block8"
-                placeholder="Block 8 Teacher"
-                value={inputs.block8}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.name}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block9">
-              Block 9
-              <select
-                id="block9"
-                name="block9"
-                placeholder="Block 9 Teacher"
-                value={inputs.block9}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={`item${item.id}`} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor="block10">
-              Block 10
-              <select
-                id="block10"
-                name="block10"
-                placeholder="Block 10 Teacher"
-                value={inputs.block10}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  None
-                </option>
-                {teacherList.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+      {showForm && (
+        <>
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowForm(false)}
+          />
 
-            <button type="submit"> + Publish </button>
-            <button type="button" onClick={resetForm}>
-              reset
-            </button>
-          </fieldset>
-        </Form>
-      </FormContainerStyles>
+          {/* Modal */}
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+              <h4 className="text-white text-xl font-semibold">
+                Create New Student
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              <Form
+                className="w-full bg-transparent border-0 shadow-none p-0"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  // Submit the input fields to the backend:
+                  const res = await createNewStudent();
+                  if (res.data.createUser) {
+                    queryClient.refetchQueries();
+                    setShowForm(false);
+                    resetForm();
+                    toast.success(
+                      <Link href={`/userProfile/${res.data.createUser.id}`}>
+                        {`Created a new account for ${res.data.createUser.name}   Click here to view their profile`}
+                      </Link>,
+                      { duration: 10000 }
+                    );
+                    revalidateIndexPage();
+                  } else {
+                    toast.error(`Error creating new account`);
+                  }
+                }}
+              >
+                <DisplayError error={error} />
+                <fieldset disabled={loading} aria-busy={loading} className="border-0 p-0">
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-white font-semibold mb-1">
+                      Name
+                    </label>
+                    <input
+                      style={{ marginLeft: "0" }}
+                      required
+                      type="text"
+                      id="name"
+                      name="name"
+                      placeholder="Student Name"
+                      value={inputs.name || ""}
+                      onChange={handleChange}
+                      className="w-full p-2 rounded border"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="email" className="block text-white font-semibold mb-1">
+                      Email
+                    </label>
+                    <input
+                      style={{ marginLeft: "0" }}
+                      required
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="Student Email"
+                      value={inputs.email || ""}
+                      onChange={handleChange}
+                      className="w-full p-2 rounded border"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="ta" className="block text-white font-semibold mb-1">
+                      TA
+                    </label>
+                    <select
+                      id="ta"
+                      name="ta"
+                      placeholder="TA Teacher"
+                      value={inputs.ta}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 rounded border"
+                    >
+                      <option value="" disabled>
+                        None
+                      </option>
+                      {teacherList.map((item) => (
+                        <option key={`item${item.name}`} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Repeat for all blocks */}
+                  {[...Array(10)].map((_, i) => (
+                    <div className="mb-4" key={`block${i + 1}`}>
+                      <label htmlFor={`block${i + 1}`} className="block text-white font-semibold mb-1">
+                        Block {i + 1}
+                      </label>
+                      <select
+                        id={`block${i + 1}`}
+                        name={`block${i + 1}`}
+                        placeholder={`Block ${i + 1} Teacher`}
+                        value={inputs[`block${i + 1}`]}
+                        onChange={handleChange}
+                        required
+                        className="w-full p-2 rounded border"
+                      >
+                        <option value="" disabled>
+                          None
+                        </option>
+                        {teacherList.map((item) => (
+                          <option key={`block${i + 1}-${item.name}`} value={item.id}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                  <button type="submit" className="mt-6">+ Create Student</button>
+                </fieldset>
+              </Form>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

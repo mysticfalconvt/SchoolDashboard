@@ -13,7 +13,7 @@ export function FormContainer({ children, visible, className = "", modal = false
   const isVisible = visible === true || visible === "visible";
   return (
     <div
-      className={`$${modal ? 'z-[1000] absolute left-0 right-0 mx-auto' : 'relative'} ${isVisible
+      className={`${modal ? 'z-[1000] absolute left-0 right-0 mx-auto' : 'relative'} ${isVisible
         ? "transition-all duration-500 visible w-[min(75%,1000px)]"
         : "transition-all duration-500 hidden w-[min(75%,1000px)]"
         } ${className}`}
@@ -23,6 +23,12 @@ export function FormContainer({ children, visible, className = "", modal = false
     </div>
   );
 }
+
+// Export FormContainerStyles as an alias for FormContainer for backward compatibility
+export const FormContainerStyles = FormContainer;
+
+// Export FormGroupStyles as an alias for FormGroup for backward compatibility
+export const FormGroupStyles = FormGroup;
 
 const Form = React.forwardRef(function Form(
   { children, className = "", ...props },
