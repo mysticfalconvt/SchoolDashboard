@@ -100,7 +100,7 @@ export default function CallbackTable({ callbacks, showClassBlock = false }) {
 
       return { ...callback, student, block };
     });
-    return callbackWithName.sort((a, b) => {
+    return callbackWithName?.sort((a, b) => {
       if (a.student.name < b.student.name) {
         return -1;
       }
@@ -276,8 +276,8 @@ export default function CallbackTable({ callbacks, showClassBlock = false }) {
   return (
     <div>
       <p>
-        You have {callbacksMemo.length} item
-        {callbacksMemo.length === 1 ? "" : "s"} on Callback{" "}
+        You have {callbacksMemo?.length} item
+        {callbacksMemo?.length === 1 ? "" : "s"} on Callback{" "}
       </p>
       <Table
         data={callbacksMemo || []}

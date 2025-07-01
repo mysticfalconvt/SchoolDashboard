@@ -75,6 +75,7 @@ export default function TaCallbacks() {
   // } else {
   //   setShowTable(showTable);
   // }
+  if (callbacks.length === 0) return <p>You have no callback items</p>;
   return (
     <div style={{ width: "100vw" }}>
       <FormContainer visible={true}>
@@ -86,8 +87,7 @@ export default function TaCallbacks() {
           />
         </label>
       </FormContainer>
-      {showTable && <CallbackTable callbacks={callbacks} />}
-
+      {showTable && <CallbackTable callbackFormContainer />}
       {!showTable && <CallbackCards maxColumns={3} callbacks={callbacks} />}
     </div>
   );

@@ -8,12 +8,12 @@ export function FormGroup({ children, className = "" }) {
   );
 }
 
-export function FormContainer({ children, visible, className = "" }) {
+export function FormContainer({ children, visible, className = "", modal = false }) {
   // visible: true/false or 'visible'/'hidden' for modal transitions
   const isVisible = visible === true || visible === "visible";
   return (
     <div
-      className={`z-[1000] absolute left-0 right-0 mx-auto ${isVisible
+      className={`$${modal ? 'z-[1000] absolute left-0 right-0 mx-auto' : 'relative'} ${isVisible
         ? "transition-all duration-500 visible w-[min(75%,1000px)]"
         : "transition-all duration-500 hidden w-[min(75%,1000px)]"
         } ${className}`}
