@@ -8,7 +8,6 @@ import CallbackTable from "../components/Callback/CallbackTable";
 import "react-toggle/style.css";
 import CallbackCards from "../components/Callback/CallbackCards";
 import NewCallback from "../components/Callback/NewCallbackButton";
-import { FormContainer } from "../components/styles/Form";
 import Loading from "../components/Loading";
 import NewCallbackMultiStudent from "../components/Callback/newCallbackMultiStudent";
 import { SmallGradientButton } from "../components/styles/Button";
@@ -74,12 +73,14 @@ export default function Callback() {
     <div>
       {/* Controls Section: Buttons in one row, toggles left-aligned below */}
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 py-6">
-        <div className="flex flex-row flex-nowrap items-center gap-4 justify-center overflow-x-auto">
-          <NewCallback refetch={refetch} />
-          <NewCallbackMultiStudent refetch={refetch} />
-          <SmallGradientButton>
-            <Link href="/mystudentscallback">My class students callback</Link>
-          </SmallGradientButton>
+        <div className="flex flex-row flex-nowrap items-center gap-4 justify-center">
+          <div className="flex flex-row items-center gap-2">
+            <NewCallback refetch={refetch} />
+            <NewCallbackMultiStudent refetch={refetch} />
+            <SmallGradientButton>
+              <Link href="/mystudentscallback">My class students callback</Link>
+            </SmallGradientButton>
+          </div>
         </div>
         <div className="flex flex-row flex-wrap items-center gap-6 justify-start w-full">
           <label className="flex items-center gap-2 font-bold text-white">
