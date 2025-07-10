@@ -58,63 +58,94 @@ export default function CountPhysicalCards({ taStudents, refetch }) {
       >
         Log TA Cards
       </GradientButton>
-      <div>
-        <FormContainerStyles>
-          <Form
-            className={showForm ? "visible" : "hidden"}
-            style={{ width: "max-content" }}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              // Submit the inputfields to the backend:
-              //   const res = await countCardsMutation();
-              const cardsToCreate = await createCards(inputs, me.id);
-              const res = await countCardsMutation({
-                variables: { cards: cardsToCreate },
-              });
-              // get all the unique students from the cards
-              // get the unique student ids
+      {showForm && (
+        <>
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowForm(false)}
+          />
 
-              refetch();
-              resetForm();
-              setShowForm(false);
-            }}
-          >
-            <h1>Log TA Cards</h1>
-            <DisplayError error={error} />
-            <fieldset disabled={loading} aria-busy={loading}>
-              {taStudents.map((student) => (
-                <div
-                  key={student.id}
-                  style={{
-                    // display: 'inline',
-                    // width: '5rem',
-                    marginLeft: "10px",
-                    display: "grid",
-                    gridTemplateColumns: "50% 5rem",
-                  }}
-                >
-                  <label htmlFor={student.id} style={{ display: "inline" }}>
-                    {student.name}
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="15"
-                    id={student.id}
-                    name={student.id}
-                    placeholder="Enter number of cards"
-                    value={inputs[student.id]}
-                    onChange={handleChange}
-                    onWheel={(e) => e.target.blur()}
-                  />
-                </div>
-              ))}
+          {/* Modal */}
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+              <h4 className="text-white text-xl font-semibold">
+                Log TA Cards
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <Form
+                className="w-full bg-transparent border-0 shadow-none p-0"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  // Submit the inputfields to the backend:
+                  //   const res = await countCardsMutation();
+                  const cardsToCreate = await createCards(inputs, me.id);
+                  const res = await countCardsMutation({
+                    variables: { cards: cardsToCreate },
+                  });
+                  // get all the unique students from the cards
+                  // get the unique student ids
 
-              <button type="submit">update Data</button>
-            </fieldset>
-          </Form>
-        </FormContainerStyles>
-      </div>
+                  refetch();
+                  resetForm();
+                  setShowForm(false);
+                }}
+              >
+                <DisplayError error={error} />
+                <fieldset disabled={loading} aria-busy={loading}>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {taStudents.map((student) => (
+                      <div
+                        key={student.id}
+                        className="flex items-center justify-between gap-4"
+                      >
+                        <label htmlFor={student.id} className="text-white font-semibold flex-1">
+                          {student.name}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="15"
+                          id={student.id}
+                          name={student.id}
+                          placeholder="0"
+                          value={inputs[student.id]}
+                          onChange={handleChange}
+                          onWheel={(e) => e.target.blur()}
+                          className="w-24 p-2 rounded border bg-white text-gray-900 text-center"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 mt-6">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                    >
+                      Update Data
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </fieldset>
+              </Form>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

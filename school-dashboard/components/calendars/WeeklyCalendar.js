@@ -115,7 +115,7 @@ export default function WeeklyCalendar({
   if (error) return <p>{error.message}</p>;
 
   return (
-    <div className="grid grid-cols-8 flex-nowrap mb-1.5 max-[1100px]:grid-cols-4 max-[650px]:grid-cols-1">
+    <div className="grid grid-cols-8 mb-1.5 max-[1100px]:grid-cols-4 max-[650px]:grid-cols-1">
       <SingleDayCalendar dailyEvents={dailyEvents.sundayEvents} day="Sunday" />
       <SingleDayCalendar dailyEvents={dailyEvents.mondayEvents} day="Monday" />
       <SingleDayCalendar dailyEvents={dailyEvents.tuesdayEvents} day="Tuesday" />

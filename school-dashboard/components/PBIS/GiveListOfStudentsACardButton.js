@@ -44,38 +44,66 @@ const Form = ({
   loading,
 }) => {
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-0 flex flex-col  items-center ">
-      <form
-        onSubmit={handleCreateCards}
-        // form is a small modal
-        className="h-96 w-2/3 z-50 flex flex-col items-center justify-start  "
-      >
-        <fieldset
-          disabled={loading}
-          aria-busy={loading}
-          className="flex flex-row gap-5 justify-center items-center z-50 bg-slate-500 mt-96  h-full w-full p-4 rounded-xl shadow-lg"
-        >
-          <label htmlFor="message" className="w-full flex gap-2">
-            Message
-            <input
-              type="text"
-              name="message"
-              id="message"
-              className="text-black w-full"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-          </label>
+    <>
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        onClick={() => setDisplayForm(false)}
+      />
 
-          <GradientButton type="button" onClick={() => handleCreateCards()}>
-            Give a card to {title}
-          </GradientButton>
-          <GradientButton onClick={() => setDisplayForm(false)}>
-            Cancel
-          </GradientButton>
-        </fieldset>
-      </form>
-    </div>
+      {/* Modal */}
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <h4 className="text-white text-xl font-semibold">
+            Give PBIS Card to {title}
+          </h4>
+          <button
+            type="button"
+            onClick={() => setDisplayForm(false)}
+            className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+          >
+            ×
+          </button>
+        </div>
+        <div className="p-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateCards();
+            }}
+            className="w-full bg-transparent border-0 shadow-none p-0"
+          >
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mb-4">
+                <label htmlFor="message" className="block text-white font-semibold mb-1">
+                  Message
+                </label>
+                <input
+                  type="text"
+                  name="message"
+                  id="message"
+                  className="w-full p-2 rounded border bg-white text-gray-900"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 mt-6">
+                <button type="submit" className="flex-1">
+                  Give a card to {title}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayForm(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ const GradientButton = React.forwardRef(function GradientButton(
   return (
     <button
       ref={ref}
-      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-lg px-6 py-3 skew-x-[-2deg] inline-block transition-all duration-500 m-1 max-h-full outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 ${className}`}
+      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-lg px-6 py-3 skew-x-[-2deg] inline-block transition-all duration-500 m-1 max-h-full outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 break-words whitespace-normal ${className}`}
       {...props}
     >
       {children}
@@ -24,7 +24,7 @@ export const SmallGradientButton = React.forwardRef(function SmallGradientButton
   return (
     <button
       ref={ref}
-      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-sm px-4 py-2 skew-x-[-3deg] inline-block transition-all duration-500 outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 ${className}`}
+      className={`bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-sm px-4 py-2 skew-x-[-3deg] inline-block transition-all duration-500 outline-none disabled:opacity-50 hover:border-[var(--red)] hover:brightness-110 break-words whitespace-normal ${className}`}
       {...props}
     >
       {children}
