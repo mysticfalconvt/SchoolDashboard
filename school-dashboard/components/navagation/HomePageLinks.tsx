@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
-import { useUser } from '../User';
+import { useUser, type User } from '../User';
 import GradientButton from '../styles/Button';
 
 export const GET_HOMEPAGE_LINKS = gql`
   query GET_HOMEPAGE_LINKS {
-    links(where: { onHomePage: {equals:true} }) {
+    links(where: { onHomePage: { equals: true } }) {
       id
       link
       name
@@ -19,27 +19,44 @@ export const GET_HOMEPAGE_LINKS = gql`
   }
 `;
 
-export default function HomePageLinks({ initialData }) {
+interface Link {
+  id: string;
+  link: string;
+  name: string;
+  forParents: boolean;
+  forStudents: boolean;
+  forTeachers: boolean;
+}
+
+interface HomePageLinksProps {
+  me?: User;
+  initialData?: {
+    links: Link[];
+  };
+}
+
+export default function HomePageLinks({ me, initialData }: HomePageLinksProps) {
   // console.log('initialData', initialData);
-  const me = useUser();
+  const currentUser = useUser();
+  const user = me || currentUser;
   // console.log('me', me);
   const { data, isLoading, error } = useGQLQuery(
     'HomePageLinks',
     GET_HOMEPAGE_LINKS,
     {},
     {
-      enabled: !!me,
+      enabled: !!user,
       initialData,
       staleTime: 1000 * 60 * 3, // 3 minutes
-    }
+    },
   );
 
-  if (!me) return <Loading />;
+  if (!user) return <Loading />;
   if (error) return <DisplayError>{error.message}</DisplayError>;
   const filteredLinks = data?.links?.filter((link) => {
-    if (link.forParents && me.isParent) return true;
-    if (link.forStudents && me.isStudent) return true;
-    if (link.forTeachers && me.isStaff) return true;
+    if (link.forParents && user.isParent) return true;
+    if (link.forStudents && user.isStudent) return true;
+    if (link.forTeachers && user.isStaff) return true;
     return false;
   });
 

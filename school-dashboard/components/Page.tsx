@@ -1,17 +1,20 @@
-import PropTypes from 'prop-types';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
-import { Toaster, ToastBar, toast } from 'react-hot-toast';
+import React, { useEffect, useState } from 'react';
+import { ToastBar, Toaster, toast } from 'react-hot-toast';
 import Header from './navagation/Header';
-import ThemeSwitcher from './styles/ThemeSwitcher';
 import { SmallGradientButton } from './styles/Button';
+import ThemeSwitcher from './styles/ThemeSwitcher';
 
-export default function Page({ children }) {
+interface PageProps {
+  children: React.ReactNode;
+}
+
+export default function Page({ children }: PageProps) {
   // get theme from local storage
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // set theme to local storage and update document class
-  const setLocalTheme = (newTheme) => {
+  const setLocalTheme = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
 
@@ -29,7 +32,7 @@ export default function Page({ children }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const localTheme = localStorage.getItem('theme');
-      if (localTheme) {
+      if (localTheme && (localTheme === 'light' || localTheme === 'dark')) {
         setTheme(localTheme);
         // Set initial document class
         if (localTheme === 'dark') {
@@ -86,13 +89,7 @@ export default function Page({ children }) {
           </ToastBar>
         )}
       </Toaster>
-      <div className="max-w-[var(--maxWidth)] mx-auto p-8">
-        {children}
-      </div>
+      <div className="max-w-[var(--maxWidth)] mx-auto p-8">{children}</div>
     </div>
   );
 }
-
-Page.propTypes = {
-  children: PropTypes.any,
-};

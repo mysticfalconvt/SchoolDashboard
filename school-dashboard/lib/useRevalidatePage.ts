@@ -1,7 +1,5 @@
-import { useUser } from '../components/User';
-
-export default function useRevalidatePage(pathName) {
-  const sendRevalidationRequest = async () => {
+export default function useRevalidatePage(pathName: string) {
+  const sendRevalidationRequest = async (): Promise<Response> => {
     console.log(pathName);
     const apiEndpoint = '/api/revalidate';
     return fetch(apiEndpoint, {

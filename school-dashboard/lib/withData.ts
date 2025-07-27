@@ -1,23 +1,33 @@
-import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
-import { onError } from '@apollo/link-error';
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  NormalizedCacheObject,
+} from '@apollo/client';
 import { getDataFromTree } from '@apollo/client/react/ssr';
+import { onError } from '@apollo/link-error';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import withApollo from 'next-with-apollo';
 import { endpoint, prodEndpoint } from '../config';
-import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
-function createClient({ headers, initialState }) {
+interface CreateClientOptions {
+  headers?: Record<string, string>;
+  initialState?: NormalizedCacheObject;
+}
+
+function createClient({ headers, initialState }: CreateClientOptions) {
   return new ApolloClient({
     link: ApolloLink.from([
       onError(({ graphQLErrors, networkError }) => {
         if (graphQLErrors)
           graphQLErrors.forEach(({ message, locations, path }) =>
             console.log(
-              `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-            )
+              `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+            ),
           );
         if (networkError)
           console.log(
-            `[Network error]: ${networkError}. Backend is unreachable. Is it running?`
+            `[Network error]: ${networkError}. Backend is unreachable. Is it running?`,
           );
       }),
       // this uses apollo-link-http under the hood, so all the options here come from that package

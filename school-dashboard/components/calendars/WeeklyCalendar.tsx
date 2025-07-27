@@ -1,9 +1,8 @@
-import gql from "graphql-tag";
-import { useGQLQuery } from "../../lib/useGqlQuery";
-import { useUser } from "../User";
-import SingleDayCalendar from "./SingleDayCalendar";
-import Loading from "../Loading";
-import { useMemo } from "react";
+import gql from 'graphql-tag';
+import { useMemo } from 'react';
+import { useGQLQuery } from '../../lib/useGqlQuery';
+import { useUser, type User } from '../User';
+import SingleDayCalendar from './SingleDayCalendar';
 
 export const GET_WEEK_CALENDARS = gql`
   query GET_WEEK_CALENDARS($starting: DateTime, $ending: DateTime) {
@@ -26,16 +25,16 @@ export const GET_WEEK_CALENDARS = gql`
   }
 `;
 
-export function getLastAndNextSunday(d) {
+export function getLastAndNextSunday(d: Date) {
   const lastSunday = new Date(
     d.getFullYear(),
     d.getMonth(),
-    d.getDate() - d.getDay()
+    d.getDate() - d.getDay(),
   );
   const nextSunday = new Date(
     d.getFullYear(),
     d.getMonth(),
-    d.getDate() + (7 - d.getDay())
+    d.getDate() + (7 - d.getDay()),
   );
   const l = new Date(d);
   l.setDate(l.getDate() - l.getDay());
@@ -47,7 +46,31 @@ export function getLastAndNextSunday(d) {
   };
 }
 
-function getDatesFromDayOfTheWeek(data, day) {
+interface CalendarEvent {
+  name: string;
+  id: string;
+  description: string;
+  date: string;
+  author: { name: string };
+  status: string;
+  dateCreated: string;
+  link: string;
+  linkTitle: string;
+}
+
+interface GoogleCalendarEvent {
+  date: string;
+  name: string;
+  description: string;
+  link: string;
+  id: string;
+  isGoogleCalendarEvent: boolean;
+}
+
+function getDatesFromDayOfTheWeek(
+  data: (CalendarEvent | GoogleCalendarEvent)[],
+  day: number,
+) {
   const dates = data?.filter((date) => {
     const d = new Date(date.date);
     return d.getDay() === day;
@@ -55,17 +78,29 @@ function getDatesFromDayOfTheWeek(data, day) {
   return dates;
 }
 
+interface WeeklyCalendarProps {
+  me?: User;
+  initialData?: {
+    calendars: CalendarEvent[];
+  };
+  initialGoogleCalendarEvents?: {
+    events: GoogleCalendarEvent[];
+  };
+}
+
 export default function WeeklyCalendar({
+  me,
   initialData,
   initialGoogleCalendarEvents,
-}) {
+}: WeeklyCalendarProps) {
   const today = new Date();
-  const me = useUser();
-  // const status = me.isStaff ? 'Teachers' : 'Students';
+  const currentUser = useUser();
+  const user = me || currentUser;
+  // const status = user.isStaff ? 'Teachers' : 'Students';
   const todaysDay = today.getDay();
   const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
   const { data, isLoading, error } = useGQLQuery(
-    "weekCalendars",
+    'weekCalendars',
     GET_WEEK_CALENDARS,
     {
       starting: lastSunday,
@@ -74,7 +109,7 @@ export default function WeeklyCalendar({
     {
       initialData,
       staleTime: 1000 * 60 * 3, // 3 minutes
-    }
+    },
   );
   const dailyEvents = useMemo(() => {
     const gcEvents = initialGoogleCalendarEvents?.events.filter((event) => {
@@ -84,10 +119,10 @@ export default function WeeklyCalendar({
 
     // filter calendars by who can see them
     const filteredCalendars = data?.calendars?.filter((calendar) => {
-      if (calendar.status === "Both") return true;
-      if (calendar.status === "Teachers" && me.isStaff) return true;
-      if (calendar.status === "Students" && me.isStudent) return true;
-      if (calendar.status === "Students" && me.isParent) return true;
+      if (calendar.status === 'Both') return true;
+      if (calendar.status === 'Teachers' && user.isStaff) return true;
+      if (calendar.status === 'Students' && user.isStudent) return true;
+      if (calendar.status === 'Students' && user.isParent) return true;
       return false;
     });
     const filteredCalendarsWithGoogle = [
@@ -96,7 +131,7 @@ export default function WeeklyCalendar({
     ].sort((a, b) => {
       const aDate = new Date(a.date);
       const bDate = new Date(b.date);
-      return aDate - bDate;
+      return aDate.getTime() - bDate.getTime();
     });
 
     const dailyEvents = {
@@ -109,8 +144,8 @@ export default function WeeklyCalendar({
       saturdayEvents: getDatesFromDayOfTheWeek(filteredCalendarsWithGoogle, 6),
     };
     return dailyEvents;
-  }, [initialGoogleCalendarEvents, data, lastSunday, nextSaturday, me]);
-  if (!me) return <p />;
+  }, [initialGoogleCalendarEvents, data, lastSunday, nextSaturday, user]);
+  if (!user) return <p />;
   // if (isLoading) return <Loading />;
   if (error) return <p>{error.message}</p>;
 
@@ -118,11 +153,23 @@ export default function WeeklyCalendar({
     <div className="grid grid-cols-8 mb-1.5 max-[1100px]:grid-cols-4 max-[650px]:grid-cols-1">
       <SingleDayCalendar dailyEvents={dailyEvents.sundayEvents} day="Sunday" />
       <SingleDayCalendar dailyEvents={dailyEvents.mondayEvents} day="Monday" />
-      <SingleDayCalendar dailyEvents={dailyEvents.tuesdayEvents} day="Tuesday" />
-      <SingleDayCalendar dailyEvents={dailyEvents.wednesdayEvents} day="Wednesday" />
-      <SingleDayCalendar dailyEvents={dailyEvents.thursdayEvents} day="Thursday" />
+      <SingleDayCalendar
+        dailyEvents={dailyEvents.tuesdayEvents}
+        day="Tuesday"
+      />
+      <SingleDayCalendar
+        dailyEvents={dailyEvents.wednesdayEvents}
+        day="Wednesday"
+      />
+      <SingleDayCalendar
+        dailyEvents={dailyEvents.thursdayEvents}
+        day="Thursday"
+      />
       <SingleDayCalendar dailyEvents={dailyEvents.fridayEvents} day="Friday" />
-      <SingleDayCalendar dailyEvents={dailyEvents.saturdayEvents} day="Saturday" />
+      <SingleDayCalendar
+        dailyEvents={dailyEvents.saturdayEvents}
+        day="Saturday"
+      />
     </div>
   );
 }

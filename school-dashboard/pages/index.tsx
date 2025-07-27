@@ -1,40 +1,36 @@
-import Head from "next/head";
-import gql from "graphql-tag";
-import Link from "next/link";
-import toast from "react-hot-toast";
-import { GraphQLClient } from "graphql-request";
+import { google } from 'googleapis';
+import { GraphQLClient } from 'graphql-request';
+import gql from 'graphql-tag';
+import type { GetStaticProps } from 'next';
+import Link from 'next/link';
+import AssignmentViewCardsStudent from '../components/Assignments/AssignmentViewCardsStudent';
+import TeacherAssignments from '../components/Assignments/TeacherAssignments';
+import NewBugReportButton from '../components/bugreports/NewBugReportButton';
 import WeeklyCalendar, {
-  getLastAndNextSunday,
   GET_WEEK_CALENDARS,
-} from "../components/calendars/WeeklyCalendar";
-import StudentCallbacks from "../components/Callback/StudentCallbacks";
-import SignOut from "../components/loginComponents/SignOut";
+  getLastAndNextSunday,
+} from '../components/calendars/WeeklyCalendar';
+import StudentCallbacks from '../components/Callback/StudentCallbacks';
+import TaCallbacks from '../components/Callback/TaCallback';
+import CreateSingleChromebookCheck from '../components/Chromebooks/CreateSingleChromebookCheck';
+import SignOut from '../components/loginComponents/SignOut';
 import HomePageLinks, {
   GET_HOMEPAGE_LINKS,
-} from "../components/navagation/HomePageLinks";
-import { useUser } from "../components/User";
-import isAllowed from "../lib/isAllowed";
-import DisplayPbisCardWidget from "../components/PBIS/DisplayPbisCardsWidget";
-import StudentPbisData from "../components/PBIS/StudentPbisData";
-import RequestReset from "../components/RequestReset";
-import PbisFalcon, { TOTAL_PBIS_CARDS } from "../components/PBIS/PbisFalcon";
-import PbisCardFormButton from "../components/PBIS/PbisCardFormButton";
-import TeacherAssignments from "../components/Assignments/TeacherAssignments";
-import TaCallbacks from "../components/Callback/TaCallback";
-import UpdateMyPassword from "../components/users/UpdateMyPassword";
-import ViewStudentPage from "../components/users/ViewStudentPage";
-import StudentCakeChooser from "../components/Birthdays/StudentCakeChooser";
-import NewBugReportButton from "../components/bugreports/NewBugReportButton";
-import { useGQLQuery } from "../lib/useGqlQuery";
-import AssignmentViewCardsStudent from "../components/Assignments/AssignmentViewCardsStudent";
-import GradientButton from "../components/styles/Button";
-import { callbackDisabled, endpoint, prodEndpoint } from "../config";
-import { SEARCH_ALL_USERS_QUERY } from "../components/Search";
-import getDisplayName from "../lib/displayName";
-import { getGoogleCalendarEvents } from "../components/calendars/getGoogleCalendarEvents";
-import PbisWidget from "../components/PBIS/PbisWidget";
-import CreateSingleChromebookCheck from "../components/Chromebooks/CreateSingleChromebookCheck";
-import { google } from "googleapis";
+} from '../components/navagation/HomePageLinks';
+import DisplayPbisCardWidget from '../components/PBIS/DisplayPbisCardsWidget';
+import PbisCardFormButton from '../components/PBIS/PbisCardFormButton';
+import { TOTAL_PBIS_CARDS } from '../components/PBIS/PbisFalcon';
+import PbisWidget from '../components/PBIS/PbisWidget';
+import StudentPbisData from '../components/PBIS/StudentPbisData';
+import RequestReset from '../components/RequestReset';
+import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
+import GradientButton from '../components/styles/Button';
+import { useUser } from '../components/User';
+import ViewStudentPage from '../components/users/ViewStudentPage';
+import { callbackDisabled, endpoint, prodEndpoint } from '../config';
+import getDisplayName from '../lib/displayName';
+import isAllowed from '../lib/isAllowed';
+import { useGQLQuery } from '../lib/useGqlQuery';
 
 const GET_STUDENT_CLASSSWORK_QUERY = gql`
   query GET_SINGLE_TEACHER($id: ID!) {
@@ -117,24 +113,32 @@ const GET_STUDENT_CLASSSWORK_QUERY = gql`
   }
 `;
 
-export default function Home(props) {
+interface HomeProps {
+  totalCards?: number;
+  homePageLinks?: any;
+  weeklyCalendar?: any;
+  allUsersForSearch?: any;
+  initialGoogleCalendarEvents?: any;
+}
+
+export default function Home(props: HomeProps) {
   // console.log(process.env.NODE_ENV);
   const me = useUser();
   const { data, isLoading, error } = useGQLQuery(
     `SingleStudentClasswork-${me?.id}`,
     GET_STUDENT_CLASSSWORK_QUERY,
     { id: me?.id },
-    { enabled: !!me?.isStudent && !!me?.id }
+    { enabled: !!me?.isStudent && !!me?.id },
   );
   const { data: allUsers } = useGQLQuery(
-    "allUsers",
+    'allUsers',
     SEARCH_ALL_USERS_QUERY,
     {},
     {
       enabled: !!me,
       staleTime: 1000 * 60 * 60, // 1 hour
       initialData: props?.allUsersForSearch,
-    }
+    },
   );
 
   if (!me) return null;
@@ -146,7 +150,7 @@ export default function Home(props) {
         </h1>
         <div className="flex flex-wrap justify-around items-center">
           <PbisWidget initialCardCount={props?.totalCards} />
-          {me && isAllowed(me || {}, "isStaff") && (
+          {me && isAllowed(me, 'isStaff') && (
             <PbisCardFormButton teacher={me} />
           )}
           {/* {me && isAllowed(me || {}, "isStaff") && (
@@ -157,7 +161,7 @@ export default function Home(props) {
               <button type="button">Emergency</button>
             </a>
           )} */}
-          {me && isAllowed(me || {}, "hasClasses") && (
+          {me && isAllowed(me, 'hasClasses') && (
             <GradientButton>
               <Link href={`/userProfile/${me?.id}`}>My Students</Link>
             </GradientButton>
@@ -173,18 +177,16 @@ export default function Home(props) {
               <Link href="/allTeacherCurrentWork">Current Work</Link>
             </GradientButton>
           )} */}
-          {me && isAllowed(me || {}, "isStaff") && (
-            <CreateSingleChromebookCheck />
-          )}
-          <HomePageLinks me={me || {}} initialData={props?.homePageLinks} />
-          {isAllowed(me, "hasClasses") && <TeacherAssignments />}
+          {me && isAllowed(me, 'isStaff') && <CreateSingleChromebookCheck />}
+          <HomePageLinks me={me} initialData={props?.homePageLinks} />
+          {isAllowed(me, 'hasClasses') && <TeacherAssignments />}
           <WeeklyCalendar
-            me={me || {}}
+            me={me}
             initialData={props?.weeklyCalendar}
             initialGoogleCalendarEvents={props?.initialGoogleCalendarEvents}
           />
-          {isAllowed(me, "hasTA") && !callbackDisabled && <TaCallbacks />}
-          {me && isAllowed(me, "isStudent") && (
+          {isAllowed(me, 'hasTA') && !callbackDisabled && <TaCallbacks />}
+          {me && isAllowed(me, 'isStudent') && (
             <div>
               <StudentPbisData student={me} />
               {/* {me?.birthday && !me?.birthday?.cakeType && (
@@ -198,7 +200,7 @@ export default function Home(props) {
             </div>
           )}
           {me &&
-            isAllowed(me, "isParent") &&
+            isAllowed(me, 'isParent') &&
             me.children.map((child) => (
               <div key={child.id}>
                 <ViewStudentPage student={child} />
@@ -209,7 +211,7 @@ export default function Home(props) {
 
       <footer>
         {me ? (
-          <div style={{ display: "flex", justifyContent: "start" }}>
+          <div style={{ display: 'flex', justifyContent: 'start' }}>
             <SignOut />
             <NewBugReportButton />
             {/* <UpdateMyPassword /> */}
@@ -221,29 +223,43 @@ export default function Home(props) {
     </div>
   );
 }
-const getCalendarData = async () => {
+
+interface CalendarEvent {
+  status: string;
+  isMultiDayEvent: boolean;
+  isGCDate: boolean;
+  isGCDateTime: boolean;
+  date: string;
+  endDate: string;
+  name: string;
+  description: string;
+  link: string;
+  id: string;
+  isGoogleCalendarEvent: boolean;
+}
+
+const getCalendarData = async (): Promise<CalendarEvent[]> => {
   const calendarId = process.env.CALENDAR_ID;
   const scopes = [
-    "https://www.googleapis.com/auth/calendar.readonly",
-    "https://www.googleapis.com/auth/calendar.events.readonly",
+    'https://www.googleapis.com/auth/calendar.readonly',
+    'https://www.googleapis.com/auth/calendar.events.readonly',
   ];
   const now = new Date(); // now
   const timeMin = new Date(now.getFullYear(), now.getMonth(), 1); // 1 week before current month
   const timeMax = new Date(now.getFullYear(), now.getMonth() + 4, 0); // 1 week after current month
 
-  const credentials = JSON.parse(process.env.CREDENTIALS || "");
+  const credentials = JSON.parse(process.env.CREDENTIALS || '');
 
   const jwt = new google.auth.JWT(
     credentials.client_email,
     undefined,
     credentials.private_key,
-    scopes
+    scopes,
   );
 
-  const loginAuth = google.auth.fromJSON(credentials);
   const calendar = await google.calendar({
-    version: "v3",
-    auth: loginAuth,
+    version: 'v3',
+    auth: jwt,
   });
 
   const Calendar = await calendar.events.list({
@@ -254,20 +270,21 @@ const getCalendarData = async () => {
     timeMax: timeMax.toISOString(),
 
     singleEvents: true,
-    orderBy: "startTime",
+    orderBy: 'startTime',
   });
 
   const rawEvents = Calendar.data.items || [];
 
   let events = rawEvents.map((event) => {
-    const status = "Both";
+    const status = 'Both';
     const isGCDate = event.start.date ? true : false;
     const isGCDateTime = event.start.dateTime ? true : false;
     const startDate = new Date(event.start.date || event.start.dateTime);
     const endDate = new Date(event.end.date || event.end.dateTime);
-    const isMultiDayEvent = endDate - startDate > 1000 * 60 * 60 * 24;
+    const isMultiDayEvent =
+      endDate.getTime() - startDate.getTime() > 1000 * 60 * 60 * 24;
     const date = new Date(
-      isGCDate ? startDate.setDate(startDate.getDate() + 1) : startDate
+      isGCDate ? startDate.setDate(startDate.getDate() + 1) : startDate,
     );
     const name = event.summary;
     const description = event.description;
@@ -293,38 +310,38 @@ const getCalendarData = async () => {
   multiDayEvents.forEach((event) => {
     const start = new Date(event?.date);
     const end = new Date(event?.endDate || event?.date || new Date());
-    const days = (end - start) / (1000 * 60 * 60 * 24);
+    const days = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
     for (let i = 1; i < days; i++) {
       const newDate = new Date(start);
       newDate.setDate(newDate.getDate() + i);
       const newEvent = {
         ...event,
-        date: newDate.toISOString(),
+        date: newDate,
         isMultiDayEvent: false,
       };
       events.push(newEvent);
     }
   });
   events = events.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
   const initialGoogleCalendarEvents = events.map((event) => {
     return {
       ...event,
-      date: event?.date ? new Date(event.date).toISOString() : "",
-      endDate: event?.endDate ? new Date(event.endDate).toISOString() : "",
-      description: event.description || "",
+      date: event?.date ? new Date(event.date).toISOString() : '',
+      endDate: event?.endDate ? new Date(event.endDate).toISOString() : '',
+      description: event.description || '',
     };
   });
   return initialGoogleCalendarEvents;
 };
 
-export async function getStaticProps(context) {
+export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
   // console.log(context);
   // fetch PBIS Page data from the server
   const headers = {
-    credentials: "include",
-    mode: "cors",
+    credentials: 'include' as const,
+    mode: 'cors' as const,
     headers: {
       authorization: `test auth for keystone`,
     },
@@ -335,19 +352,26 @@ export async function getStaticProps(context) {
   const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === "development" ? endpoint : prodEndpoint,
-    headers
+    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    headers,
   );
 
   // Reusable fetch with retry logic
-  const fetchWithRetry = async (fetchFn, retries = 3, delay = 1000) => {
+  const fetchWithRetry = async (
+    fetchFn: () => Promise<any>,
+    retries = 3,
+    delay = 1000,
+  ) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         return await fetchFn();
       } catch (error) {
         if (attempt === retries) {
           console.error('Failed to fetch after retries:', error);
-          return { fetchError: error.message || 'Failed to fetch data' };
+          return {
+            fetchError:
+              error instanceof Error ? error.message : 'Failed to fetch data',
+          };
         }
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -379,4 +403,4 @@ export async function getStaticProps(context) {
     }, // will be passed to the page component as props
     revalidate: 60 * 60,
   };
-}
+};
