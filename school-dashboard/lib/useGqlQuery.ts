@@ -1,7 +1,7 @@
 import type { DocumentNode } from 'graphql';
-import { GraphQLClient } from 'graphql-request';
 import { useQuery, UseQueryOptions } from 'react-query';
 import { endpoint, prodEndpoint } from '../config';
+import { GraphQLClient } from './graphqlClient';
 
 export const useGQLQuery = <TData = any>(
   key: string,

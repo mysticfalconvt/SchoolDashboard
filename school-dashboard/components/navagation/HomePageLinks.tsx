@@ -52,7 +52,7 @@ export default function HomePageLinks({ me, initialData }: HomePageLinksProps) {
   );
 
   if (!user) return <Loading />;
-  if (error) return <DisplayError>{error.message}</DisplayError>;
+  if (error) return <DisplayError error={error as any} />;
   const filteredLinks = data?.links?.filter((link) => {
     if (link.forParents && user.isParent) return true;
     if (link.forStudents && user.isStudent) return true;

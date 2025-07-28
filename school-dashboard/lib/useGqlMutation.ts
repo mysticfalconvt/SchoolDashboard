@@ -1,7 +1,7 @@
 import type { DocumentNode } from 'graphql';
-import { GraphQLClient } from 'graphql-request';
 import { useMutation, UseMutationOptions } from 'react-query';
 import { endpoint } from '../config';
+import { GraphQLClient } from './graphqlClient';
 
 export const useGQLMutation = <
   TData = any,

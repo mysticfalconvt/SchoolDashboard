@@ -1,5 +1,4 @@
 import { google } from 'googleapis';
-import { GraphQLClient } from 'graphql-request';
 import gql from 'graphql-tag';
 import type { GetStaticProps } from 'next';
 import Link from 'next/link';
@@ -29,6 +28,7 @@ import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
 import { callbackDisabled, endpoint, prodEndpoint } from '../config';
 import getDisplayName from '../lib/displayName';
+import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
