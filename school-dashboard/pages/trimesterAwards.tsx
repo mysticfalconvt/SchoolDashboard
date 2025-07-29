@@ -122,7 +122,7 @@ const TrimesterAwards: React.FC = () => {
           <h2>All Students</h2>
           <TrimesterAwardsAllStudentsTable
             students={students}
-            trimester={currentTrimester}
+            trimester={currentTrimester.toString()}
             refetch={refetch}
           />
         </>
