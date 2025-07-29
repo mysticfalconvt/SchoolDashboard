@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useState } from 'react';
 import CallbackCardMessages from '../../components/Callback/CallbackCardMessages';
@@ -150,7 +150,6 @@ const SingleCallbackPage: NextPage<SingleCallbackPageProps> = ({ query }) => {
           </p>
           {callback.link && (
             <Link
-              legacyBehavior
               href={
                 callback.link?.startsWith('http')
                   ? callback.link
@@ -191,6 +190,18 @@ const SingleCallbackPage: NextPage<SingleCallbackPageProps> = ({ query }) => {
       )}
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<
+  SingleCallbackPageProps
+> = async (context) => {
+  return {
+    props: {
+      query: {
+        id: context.params?.id as string,
+      },
+    },
+  };
 };
 
 export default SingleCallbackPage;

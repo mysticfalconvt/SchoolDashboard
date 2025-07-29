@@ -1,11 +1,11 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainer } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainer } from '../styles/Form';
-import { useUser } from '../User';
 
 const RESET_PASSWORD_TO_PASSWORD_MUTATION = gql`
   mutation RESET_PASSWORD_TO_PASSWORD_MUTATION($id: ID!, $password: String!) {
@@ -27,14 +27,8 @@ export default function UpdateMyPassword() {
   const me = useUser() as User;
   const [showForm, setShowForm] = React.useState(false);
   const { inputs, handleChange, resetForm } = useForm({ newPassword: '' });
-  const [resetThePassword, { loading, error, data }] = useMutation(
+  const [resetThePassword, { loading, error, data }] = useGqlMutation(
     RESET_PASSWORD_TO_PASSWORD_MUTATION,
-    {
-      variables: {
-        id: me?.id,
-        password: inputs.newPassword,
-      },
-    },
   );
 
   return (
@@ -49,7 +43,10 @@ export default function UpdateMyPassword() {
             onSubmit={async (e) => {
               e.preventDefault();
               // Submit the inputfields to the backend:
-              const res = await resetThePassword();
+              await resetThePassword({
+                id: me?.id,
+                password: inputs.newPassword,
+              });
               resetForm();
               setShowForm(false);
             }}

@@ -1,9 +1,10 @@
-import { gql, useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import gql from 'graphql-tag';
 import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
 
 const UPDATE_EVENTS_MUTATION = gql`
   mutation UPDATE_EVENTS_MUTATION($eventData: String!) {
@@ -20,11 +21,8 @@ interface FormInputs {
 export default function NewEvents() {
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm } = useForm();
-  const [upateUsersFromJson, { loading, error, data }] = useMutation(
+  const [upateUsersFromJson, { loading, error, data }] = useGqlMutation(
     UPDATE_EVENTS_MUTATION,
-    {
-      variables: { eventData: inputs.userData },
-    },
   );
   const [resultOfUpdate, setResultOfUpdate] = useState<any>(null);
 
@@ -64,9 +62,11 @@ export default function NewEvents() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   // Submit the inputfields to the backend:
-                  const res = await upateUsersFromJson();
+                  await upateUsersFromJson({
+                    eventData: inputs.userData,
+                  });
                   // setResultOfUpdate(
-                  //   JSON.parse(res.data.updateStudentSchedules.name)
+                  //   JSON.parse(res.updateStudentSchedules.name)
                   // );
                   // clearForm();
                   setShowForm(false);

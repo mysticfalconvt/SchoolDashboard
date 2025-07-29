@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -142,8 +142,11 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const [getData, setGetData] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [countCardsDateMutation] = useMutation(COUNT_CARDS_DATE_MUTATION, {});
-  const [updateTaAverageCardsMutation] = useMutation(
+  const [
+    countCardsDateMutation,
+    { data: countData, loading: countLoading, error },
+  ] = useGqlMutation(COUNT_CARDS_DATE_MUTATION);
+  const [updateTaAverageCardsMutation] = useGqlMutation(
     UPDATE_TA_AVERAGE_CARDS_MUTATION,
     {},
   );
@@ -204,10 +207,8 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
     // create the new PBIS Collection
     const latestCollection = await countCardsDateMutation({
-      variables: {
-        date: collectionDateString,
-        collectedCards: String(data?.pbisCardsCount || 0),
-      },
+      date: collectionDateString,
+      collectedCards: String(data?.pbisCardsCount || 0),
     });
 
     // update each ta teacher with their new data
@@ -227,11 +228,9 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
       );
 
       await updateTaAverageCardsMutation({
-        variables: {
-          id: teacher.id,
-          averagePbisCardsPerStudent: Math.round(totalAverageCardsPerStudent),
-          taTeamPbisLevel: newTeamLevel || 0,
-        },
+        id: teacher.id,
+        averagePbisCardsPerStudent: Math.round(totalAverageCardsPerStudent),
+        taTeamPbisLevel: newTeamLevel || 0,
       });
     });
 

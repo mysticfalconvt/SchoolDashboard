@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import { useState } from 'react';
 import AdminDisciplineData from '../../components/discipline/AdminDisciplineData';
 import Loading from '../../components/Loading';
@@ -108,6 +108,18 @@ interface SingleDisciplineReferralPageProps {
     id: string;
   };
 }
+
+export const getServerSideProps: GetServerSideProps<
+  SingleDisciplineReferralPageProps
+> = async (context) => {
+  return {
+    props: {
+      query: {
+        id: context.params?.id as string,
+      },
+    },
+  };
+};
 
 const SingleDisciplineReferralPage: NextPage<
   SingleDisciplineReferralPageProps

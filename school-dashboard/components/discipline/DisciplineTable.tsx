@@ -36,7 +36,7 @@ const DisciplineTable: React.FC<DisciplineTableProps> = ({ disciplines }) => {
             Header: 'Student',
             accessor: 'student.name',
             Cell: ({ cell }: { cell: any }) => (
-              <Link href={`/discipline/${cell?.row?.original?.id || ''}`}>
+              <Link href={`/discipline/${cell?.row?.original?.id || ''}`} >
                 {capitalizeFirstLetter(cell.value)}
               </Link>
             ),
@@ -45,7 +45,7 @@ const DisciplineTable: React.FC<DisciplineTableProps> = ({ disciplines }) => {
             Header: 'Teacher',
             accessor: 'teacher.name',
             Cell: ({ cell }: { cell: any }) => (
-              <Link href={`/discipline/${cell?.row?.original?.id || ''}`}>
+              <Link href={`/discipline/${cell?.row?.original?.id || ''}`} >
                 {cell.value}
               </Link>
             ),

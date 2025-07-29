@@ -8,10 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@apollo/client": "^3.10.3",
-    "@apollo/link-error": "^2.0.0-beta.3",
     "@ramonak/react-progress-bar": "^5.2.0",
-    "@sentry/nextjs": "^7.114.0",
+    "@sentry/nextjs": "^9.42.1",
     "@sentry/react": "^7.114.0",
     "apollo-upload-client": "^18.0.1",
     "babel-core": "^7.0.0-bridge.0",
@@ -22,8 +20,7 @@
     "graphql-request": "^7.0.1",
     "graphql-tag": "^2.12.6",
     "lodash.debounce": "^4.0.8",
-    "next": "^12",
-    "next-with-apollo": "^5.3.0",
+    "next": "^15.4.4",
     "prop-types": "^15.8.1",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",
@@ -58,7 +55,8 @@
     "npm": "10.7.0",
     "postcss": "^8.4.38",
     "prettier": "3.2.5",
-    "tailwindcss": "^3.4.3"
+    "tailwindcss": "^3.4.3",
+    "typescript": "5.8.3"
   },
   "eslintConfig": {
     "extends": [

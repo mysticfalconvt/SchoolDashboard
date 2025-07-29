@@ -1,13 +1,13 @@
-import { useMutation } from '@apollo/client';
+import { NUMBER_OF_BLOCKS } from '@/components/../config';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { NUMBER_OF_BLOCKS } from '../../config';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
 
 const LIST_OF_TEACHERS_QUERY = gql`
   query {
@@ -104,12 +104,7 @@ export default function EditStudent({ student }: EditStudentProps) {
   const { inputs, handleChange, clearForm, resetForm } = useForm(initialInputs);
   const mutation = generateMutation(NUMBER_OF_BLOCKS);
 
-  const [updateStudent, { loading }] = useMutation(mutation, {
-    variables: {
-      ...inputs,
-      id: student.id,
-    },
-  });
+  const [updateStudent, { loading }] = useGqlMutation(mutation);
 
   const teacherListRaw = data?.teacherList || [];
   const teacherList = teacherListRaw.sort((a: Teacher, b: Teacher) =>
@@ -148,7 +143,10 @@ export default function EditStudent({ student }: EditStudentProps) {
                 className="w-full bg-transparent border-0 shadow-none p-0"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const res = await updateStudent();
+                  await updateStudent({
+                    ...inputs,
+                    id: student.id,
+                  });
                   queryClient.refetchQueries();
                   setShowForm(false);
                 }}

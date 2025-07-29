@@ -1,14 +1,14 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import Form, { FormGroupStyles } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import useCreateMessage from '../Messages/useCreateMessage';
-import SearchForUserName from '../SearchForUserName';
-import Form, { FormGroupStyles } from '../styles/Form';
-import { useUser } from '../User';
 import useRecalculateCallback from './recalculateCallback';
 
 const DUPLICATE_CALLBACK_MUTATION = gql`
@@ -85,16 +85,8 @@ export default function DuplicateCallback({
   const [studentCallbackIsFor, setStudentCallbackIsFor] =
     useState<StudentUser | null>(null);
   // console.log(studentCallbackIsFor);
-  const [updateCallback, { loading, error, data }] = useMutation(
+  const [updateCallback, { loading, error, data }] = useGqlMutation(
     DUPLICATE_CALLBACK_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        dateAssigned: new Date(inputs.dateAssigned.concat('T24:00:00.000Z')),
-        student: studentCallbackIsFor?.userId,
-        teacher: user?.id,
-      },
-    },
   );
   // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
@@ -111,24 +103,29 @@ export default function DuplicateCallback({
           e.preventDefault();
           // Submit the input fields to the backend:
           // console.log(inputs);
-          const res = await updateCallback();
+          await updateCallback({
+            ...inputs,
+            dateAssigned: new Date(
+              inputs.dateAssigned.concat('T24:00:00.000Z'),
+            ),
+            student: studentCallbackIsFor?.userId,
+            teacher: user?.id,
+          });
           // console.log(res);
           createMessage({
             subject: 'New Callback Assignment',
             message: `you received a new callback item from ${user.name}`,
             receiver: studentCallbackIsFor?.userId,
-            link: `/callback/${res?.data?.createCallback.id}`,
+            link: `/callback/new`,
           });
 
-          setCallbackID(res.data.createCallback.id);
+          setCallbackID('new');
           router.push({
-            pathname: `/callback/${res.data.createCallback.id}`,
+            pathname: `/callback/new`,
           });
-          if (res) {
-            toast.success(
-              `Created Callback for ${studentCallbackIsFor?.userName}`,
-            );
-          }
+          toast.success(
+            `Created Callback for ${studentCallbackIsFor?.userName}`,
+          );
           setDuplicating(false);
           // console.log(inputs);
         }}

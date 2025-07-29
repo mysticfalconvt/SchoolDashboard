@@ -106,14 +106,13 @@ const Calendars: React.FC<CalendarsProps> = ({
             Cell: ({ cell, value }: any) => {
               return (
                 <Link
-                  legacyBehavior
                   href={
                     !cell.row.original.isGoogleCalendarEvent
                       ? `/calendarEvent/${cell.row.original.id}`
                       : cell.row.original.link
                   }
                 >
-                  <a>{value}</a>
+                  {value}
                 </Link>
               );
             },
@@ -124,14 +123,13 @@ const Calendars: React.FC<CalendarsProps> = ({
             Cell: ({ cell, value }: any) => {
               return (
                 <Link
-                  legacyBehavior
                   href={
                     !cell.row.original.isGoogleCalendarEvent
                       ? `/calendarEvent/${cell.row.original.id}`
                       : cell.row.original.link
                   }
                 >
-                  <a>{value}</a>
+                  {value}
                 </Link>
               );
             },

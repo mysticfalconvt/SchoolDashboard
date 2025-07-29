@@ -85,7 +85,7 @@ export const getStaticProps: GetStaticProps<BirthdayPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchBirthdayData = async () =>
+  const fetchBirthdayData = async (): Promise<{ birthdays: Birthday[] }> =>
     graphQLClient.request(ALL_BIRTHDAYS_QUERY);
 
   const initialBirthdays = await fetchBirthdayData();

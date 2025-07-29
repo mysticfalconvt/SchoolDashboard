@@ -102,7 +102,7 @@ export const getStaticProps: GetStaticProps<ChromebooksPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchChromebookAssignments = async () =>
+  const fetchChromebookAssignments = async (): Promise<{ users: User[] }> =>
     graphQLClient.request(GET_CHROMEBOOK_ASSIGNMENTS_QUERY);
 
   const initialChromebookAssignments = await fetchChromebookAssignments();

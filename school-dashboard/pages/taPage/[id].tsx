@@ -351,7 +351,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchData = async () => graphQLClient.request(TA_TEACHER_LIST_QUERY);
+  const fetchData = async (): Promise<{ users: any[] }> =>
+    graphQLClient.request(TA_TEACHER_LIST_QUERY);
   const data = await fetchData();
   const usersToUse = data?.users || [];
 

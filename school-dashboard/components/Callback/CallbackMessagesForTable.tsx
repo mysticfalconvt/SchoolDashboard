@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useUser } from '../User';
 import { UPDATE_CALLBACK_MESSAGES_MUTATION } from './CallbackCardMessages';
 
 interface Teacher {
@@ -47,24 +47,18 @@ export default function CallbackMessagesForTable({
   const [studentMessageDate, setStudentMessageDate] = useState(
     callbackItem.messageFromStudentDate || '',
   );
-  const [updateCallback] = useMutation(UPDATE_CALLBACK_MESSAGES_MUTATION, {
-    variables: {
+  const [updateCallback] = useGqlMutation(UPDATE_CALLBACK_MESSAGES_MUTATION);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updateCallback({
       id: callbackItem.id,
       messageFromTeacher: teacherMessage,
       messageFromTeacherDate: teacherMessageDate,
       messageFromStudent: studentMessage,
       messageFromStudentDate: studentMessageDate,
-    },
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await updateCallback();
-    if (res) {
-      toast.success(
-        `Updated Callback Message for ${callbackItem.student.name}`,
-      );
-    }
+    });
+    toast.success(`Updated Callback Message for ${callbackItem.student.name}`);
   };
 
   const submitOnEnter = (e: React.KeyboardEvent) => {

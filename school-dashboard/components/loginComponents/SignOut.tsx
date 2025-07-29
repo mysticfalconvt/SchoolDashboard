@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
+import GradientButton from '@/components/styles/Button';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import { useQueryClient } from 'react-query';
-import GradientButton from '../styles/Button';
 
 interface SignOutData {
   endSession: boolean;
@@ -16,15 +16,13 @@ const SIGN_OUT_MUTATION = gql`
 
 const SignOut: React.FC = () => {
   const queryClient = useQueryClient();
-  const [signout] = useMutation<SignOutData>(SIGN_OUT_MUTATION, {
-    // refetchQueries: [{ query: CURRENT_USER_QUERY }],
-  });
+  const [signout] = useGqlMutation<SignOutData>(SIGN_OUT_MUTATION);
 
   return (
     <GradientButton
       type="button"
       onClick={async () => {
-        const res = await signout();
+        await signout({});
         queryClient.refetchQueries();
         queryClient.removeQueries();
         queryClient.clear();

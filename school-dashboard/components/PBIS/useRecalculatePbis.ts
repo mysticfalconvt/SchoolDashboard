@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useEffect, useState } from 'react';
 
@@ -19,14 +19,15 @@ export default function useRecalculatePBIS(): UseRecalculatePBISReturn {
     string | undefined
   >();
 
-  const [updateCardCount, { loading: cardLoading }] = useMutation(UPDATE_PBIS, {
-    variables: { userId: studentIdToRecalculatePbis },
-  });
+  const [updateCardCount, { loading: cardLoading }] =
+    useGqlMutation(UPDATE_PBIS);
   useEffect(() => {
     if (studentIdToRecalculatePbis) {
       // console.log('updating');
       // console.log(`id: ${studentIdToRecalculatePbis}`);
-      updateCardCount();
+      updateCardCount({
+        userId: studentIdToRecalculatePbis,
+      });
     }
   }, [studentIdToRecalculatePbis, updateCardCount]);
 

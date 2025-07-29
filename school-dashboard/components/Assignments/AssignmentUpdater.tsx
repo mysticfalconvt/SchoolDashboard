@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import toast from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import { useUser } from '../User';
 
 interface AssignmentData {
   [key: string]: string | Date;
@@ -107,12 +107,8 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
     assignment: (assignments[`block${block}Assignment`] as string) || '',
   });
   const updateData: AssignmentData = {};
-  const [updateAssignment, { loading, error, data }] = useMutation(
-    UPDATE_ASSIGNMENTS,
-    {
-      variables: updateData,
-    },
-  );
+  const [updateAssignment, { loading, error, data }] =
+    useGqlMutation(UPDATE_ASSIGNMENTS);
 
   return (
     <>
@@ -168,7 +164,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
                 updateData[`block${block}Assignment`] = inputs.assignment;
                 updateData[`block${block}ClassName`] = inputs.classTitle;
                 updateData.id = me.id;
-                await updateAssignment({ variables: updateData });
+                await updateAssignment(updateData);
                 toast.success(`Updated Assignment for Block ${block}`);
                 await refetch();
                 hide(false);
@@ -203,7 +199,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
                 updateData[`block9Assignment`] = inputs.assignment;
                 updateData[`block10Assignment`] = inputs.assignment;
                 updateData.id = me.id;
-                await updateAssignment({ variables: updateData });
+                await updateAssignment(updateData);
                 toast.success(`Updated Assignment for Block ${block}`);
                 await refetch();
                 hide(false);

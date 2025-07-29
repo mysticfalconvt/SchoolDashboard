@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 
 const DELETE_MESSAGE_MUTATION = gql`
@@ -22,10 +22,10 @@ interface DeleteMessageData {
 export default function useDeleteMessage() {
   //   console.log(`message: ${JSON.stringify(message)}`);
 
-  const [deleteMessage] = useMutation<
+  const [deleteMessage] = useGqlMutation<
     DeleteMessageData,
     DeleteMessageVariables
-  >(DELETE_MESSAGE_MUTATION, {});
+  >(DELETE_MESSAGE_MUTATION);
 
   return deleteMessage;
 }

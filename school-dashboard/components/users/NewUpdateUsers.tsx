@@ -1,13 +1,14 @@
-import { gql, useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import { SEARCH_ALL_USERS_QUERY } from '@/components/Search';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
+import gql from 'graphql-tag';
 import * as React from 'react';
 import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import DisplayError from '../ErrorMessage';
-import { SEARCH_ALL_USERS_QUERY } from '../Search';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
-import { useUser } from '../User';
 
 const UPDATE_USER_MUTATION = gql`
   mutation UPDATE_USER_MUTATION($studentScheduleData: JSON!) {
@@ -44,12 +45,8 @@ export default function NewUpdateUsers() {
     },
   );
 
-  const [upateUsersFromJson, { loading, error, data }] = useMutation(
-    UPDATE_USER_MUTATION,
-    {
-      variables: { studentScheduleData: inputs.userData },
-    },
-  );
+  const [upateUsersFromJson, { loading, error, data }] =
+    useGqlMutation(UPDATE_USER_MUTATION);
   const [resultOfUpdate, setResultOfUpdate] = useState<UpdateResult[] | null>(
     null,
   );
@@ -105,9 +102,11 @@ export default function NewUpdateUsers() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   // Submit the inputfields to the backend:
-                  const res = await upateUsersFromJson();
+                  await upateUsersFromJson({
+                    studentScheduleData: inputs.userData,
+                  });
                   setResultOfUpdate(
-                    JSON.parse(res.data.updateStudentSchedules),
+                    JSON.parse(data?.updateStudentSchedules || '[]'),
                   );
                   setShowForm(false);
                 }}

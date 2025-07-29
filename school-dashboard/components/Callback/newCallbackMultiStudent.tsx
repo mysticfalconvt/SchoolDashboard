@@ -1,16 +1,16 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import { useUser } from '@/components/User';
+import { todaysDateForForm } from '@/components/calendars/formatTodayForForm';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import DisplayError from '../ErrorMessage';
-import useCreateMessage from '../Messages/useCreateMessage';
-import { useUser } from '../User';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
 import StudentList from './StudentListForMultiSelectCallback';
 import useRecalculateCallback from './recalculateCallback';
 
@@ -123,16 +123,8 @@ export default function NewCallbackMultiStudent({
     [],
   );
 
-  const [createCallback, { loading, error }] = useMutation(
+  const [createCallback, { loading, error }] = useGqlMutation(
     CREATE_CALLBACK_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        dateAssigned: new Date(inputs.dateAssigned.concat('T24:00:00.000Z')),
-        teacher: user?.id,
-        student: studentsCallbackIsFor?.[0],
-      },
-    },
   );
 
   const { data, isLoading } = useGQLQuery(
@@ -154,27 +146,21 @@ export default function NewCallbackMultiStudent({
     // console.log(studentsCallbackIsFor);
     if (studentsCallbackIsFor?.length > 0) {
       for (const student of studentsCallbackIsFor) {
-        const res = await createCallback({
-          variables: {
-            ...inputs,
-            dateAssigned: new Date(
-              inputs.dateAssigned.concat('T24:00:00.000Z'),
-            ),
-            teacher: user?.id,
-            student,
-          },
+        await createCallback({
+          ...inputs,
+          dateAssigned: new Date(inputs.dateAssigned.concat('T24:00:00.000Z')),
+          teacher: user?.id,
+          student,
         });
-        setCallbackID(res.data.createCallback.id);
+        setCallbackID('new');
         // console.log(res);
         createMessage({
           subject: 'New Callback Assignment',
-          message: `you received a new callback item from ${res.data.createCallback.student.name}`,
+          message: `you received a new callback item from ${user.name}`,
           receiver: student,
-          link: `/callback/${res?.data?.createCallback.id}`,
+          link: `/callback/new`,
         });
-        toast.success(
-          `Created Callback for ${res.data.createCallback.student.name}`,
-        );
+        toast.success(`Created Callback for student`);
       }
       refetch();
       resetForm();

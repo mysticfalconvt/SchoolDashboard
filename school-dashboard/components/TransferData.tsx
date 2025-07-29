@@ -178,7 +178,8 @@ const getData = async (): Promise<DisciplineItem[]> => {
 
   const graphQLClient = new GraphQLClient(inputEndPoint, headers);
 
-  const fetchData = async () => graphQLClient.request(queryToFetch);
+  const fetchData = async (): Promise<{ allDisciplines: DisciplineItem[] }> =>
+    graphQLClient.request(queryToFetch);
 
   console.log('fetching Data');
   const dataToReturn = await fetchData();

@@ -4,7 +4,6 @@ import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
 import { useUser, type User } from '../User';
-import GradientButton from '../styles/Button';
 
 export const GET_HOMEPAGE_LINKS = gql`
   query GET_HOMEPAGE_LINKS {
@@ -67,14 +66,13 @@ export default function HomePageLinks({ me, initialData }: HomePageLinksProps) {
           ? `${link.link}`
           : `http://${link.link}`;
         return (
-          <GradientButton key={link.id}>
-            <Link
-              href={linkToUse}
-              className="bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] py-0.5 px-6 h-max rounded-full m-2"
-            >
-              {link.name}
-            </Link>
-          </GradientButton>
+          <Link
+            key={link.id}
+            href={linkToUse}
+            className="bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] py-0.5 px-6 h-max rounded-full m-2 inline-block"
+          >
+            {link.name}
+          </Link>
         );
       })}
     </>

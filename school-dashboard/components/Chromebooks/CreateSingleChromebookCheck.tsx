@@ -1,9 +1,11 @@
-import { useMutation } from '@apollo/client';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton, {
+  SmallGradientButton,
+} from '@/components/styles/Button';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useState } from 'react';
-import useSendEmail from '../../lib/useSendEmail';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton, { SmallGradientButton } from '../styles/Button';
-import { useUser } from '../User';
 import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
   CREATE_QUICK_PBIS,
@@ -32,19 +34,16 @@ interface EmailData {
 
 export default function CreateSingleChromebookCheck() {
   const me = useUser() as User;
-  const [createChromebookCheck] = useMutation(CREATE_CHROMEBOOK_CHECK_MUTATION);
+  const [createChromebookCheck, { data, loading, error }] = useGqlMutation(
+    CREATE_CHROMEBOOK_CHECK_MUTATION,
+  );
   const [message, setMessage] = useState('');
   const [studentFor, setStudentCheckIsFor] = useState<StudentUser | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [status, setStatus] = useState('idle');
   const { sendEmail, emailLoading } = useSendEmail();
 
-  const [createCard] = useMutation(CREATE_QUICK_PBIS, {
-    variables: {
-      teacher: me?.id,
-      student: studentFor?.userId,
-    },
-  });
+  const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   return (
     <>
       <GradientButton onClick={() => setShowForm(!showForm)}>
@@ -111,12 +110,10 @@ export default function CreateSingleChromebookCheck() {
                 messageToSend = `${status} - ${message} - ${me.name}`;
               }
 
-              const res = await createChromebookCheck({
-                variables: {
-                  chromebookCheck: {
-                    student: { connect: { id: studentFor?.userId } },
-                    message: messageToSend,
-                  },
+              await createChromebookCheck({
+                chromebookCheck: {
+                  student: { connect: { id: studentFor?.userId } },
+                  message: messageToSend,
                 },
               });
 
@@ -124,42 +121,41 @@ export default function CreateSingleChromebookCheck() {
               const isGoodCheck = goodCheckMessages.some((goodMessage) =>
                 messageToSend.startsWith(goodMessage),
               );
-              if (
-                res.data.createChromebookCheck.id &&
-                goodCheckMessages.includes(messageToSend) &&
-                isGoodCheck
-              ) {
-                await createCard();
-                await createCard();
-                await createCard();
+              if (goodCheckMessages.includes(messageToSend) && isGoodCheck) {
+                await createCard({
+                  teacher: me?.id,
+                  student: studentFor?.userId,
+                });
+                await createCard({
+                  teacher: me?.id,
+                  student: studentFor?.userId,
+                });
+                await createCard({
+                  teacher: me?.id,
+                  student: studentFor?.userId,
+                });
               }
 
-              if (
-                res.data?.createChromebookCheck?.id &&
-                me?.id &&
-                !isGoodCheck
-              ) {
+              if (me?.id && !isGoodCheck) {
                 chromebookEmails.forEach(async (email) => {
                   const emailToSend: EmailData = {
                     toAddress: email,
                     fromAddress: me?.email,
-                    subject: `New Chromebook Check for ${res.data.createChromebookCheck?.student?.name}`,
+                    subject: `New Chromebook Check for ${studentFor?.userName}`,
                     body: `
-                <p>There is a new Chromebook check for ${res.data.createChromebookCheck.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
-                <p>${res.data.createChromebookCheck.message}</p>
+                <p>There is a new Chromebook check for ${studentFor?.userName} at NCUJHS.TECH created by ${me.name}. </p>
+                <p>${messageToSend}</p>
                  `,
                   };
-                  const emailRes = await sendEmail({
+                  await sendEmail({
                     variables: {
                       emailData: emailToSend,
                     },
                   });
                 });
               }
-              if (res?.data?.createChromebookCheck) {
-                setMessage('');
-                setShowForm(false);
-              }
+              setMessage('');
+              setShowForm(false);
             }}
           >
             Create Chromebook Check

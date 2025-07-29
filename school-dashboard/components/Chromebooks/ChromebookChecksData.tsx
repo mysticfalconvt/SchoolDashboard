@@ -256,13 +256,15 @@ export default function ChromebookChecksData({
       </div>
       <ChromebookMessageLegend />
       <table className="table-auto border-collapse border border-slate-500 border-spacing-2 border-spacing-x-2 border-spacing-y-2 mt-2">
-        {checksToShow.map((assignment) => (
-          <ChromebookCheckRow
-            key={assignment.student.id}
-            assignment={assignment as any}
-            showGreens={displayGreen}
-          />
-        ))}
+        <tbody>
+          {checksToShow.map((assignment) => (
+            <ChromebookCheckRow
+              key={assignment.student.id}
+              assignment={assignment as any}
+              showGreens={displayGreen}
+            />
+          ))}
+        </tbody>
       </table>
     </div>
   );

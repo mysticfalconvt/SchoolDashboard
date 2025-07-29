@@ -1,14 +1,14 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainer } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import useForm from '../../lib/useForm';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainer } from '../styles/Form';
-import { useUser } from '../User';
 
 interface CalendarEvent {
   id: string;
@@ -82,23 +82,14 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
   });
   const user = useUser();
 
-  const [updateLink, { loading, error }] = useMutation(
+  const [updateLink, { data, loading, error }] = useGqlMutation(
     UPDATE_CALENDAR_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        id: calendar.id,
-        date: new Date(inputs.date + 'T00:00:00'),
-      },
-    },
   );
 
-  const [deleteLink, { loading: deleteLoading, error: deleteError }] =
-    useMutation(DELETE_CALENDAR_MUTATION, {
-      variables: {
-        id: calendar.id,
-      },
-    });
+  const [
+    deleteLink,
+    { data: deleteData, loading: deleteLoading, error: deleteError },
+  ] = useGqlMutation(DELETE_CALENDAR_MUTATION);
 
   const queryClient = useQueryClient();
 
@@ -121,7 +112,11 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
             className="w-full bg-transparent border-0 shadow-none p-0"
             onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
               e.preventDefault();
-              const res = await updateLink();
+              const res = await updateLink({
+                ...inputs,
+                id: calendar.id,
+                date: new Date(inputs.date + 'T00:00:00'),
+              });
               revalidateIndex();
               revalidateCalendarPage();
               setShowForm(false);
@@ -225,7 +220,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
               <button
                 type="button"
                 onClick={async () => {
-                  const res = await deleteLink();
+                  const res = await deleteLink({});
                   revalidateIndex();
                   revalidateCalendarPage();
                   queryClient.refetchQueries('allCalendars');

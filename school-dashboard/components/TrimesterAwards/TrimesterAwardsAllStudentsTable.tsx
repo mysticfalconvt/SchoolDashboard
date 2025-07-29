@@ -57,11 +57,11 @@ export default function TrimesterAwardsAllStudentsTable({
             Cell: ({ cell }: { cell: { row: { original: Student } } }) => (
               // console.log(cell.row.original);
               // <p>test</p>
-              <TrimesterAwardButton
+              (<TrimesterAwardButton
                 student={cell.row.original}
                 trimester={trimester}
                 refetch={refetch}
-              />
+              />)
             ),
           },
           {

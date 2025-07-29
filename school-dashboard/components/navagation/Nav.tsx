@@ -43,17 +43,16 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           : 'bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] rounded-lg mx-1 min-w-[90px] h-10 flex items-center justify-center skew-x-[-20deg] shadow transition-transform duration-200 hover:brightness-110 hover:shadow-lg'
       }
     >
-      <Link href={href} passHref legacyBehavior>
-        <a
-          className={
-            mobile
-              ? 'uppercase font-bold text-white text-center px-4 py-3 block text-lg skew-x-[20deg] whitespace-nowrap w-full'
-              : 'uppercase font-bold text-white text-center px-2 py-1 block text-base skew-x-[20deg] whitespace-nowrap'
-          }
-          onClick={mobile && onClickLink ? onClickLink : undefined}
-        >
-          {children}
-        </a>
+      <Link
+        href={href}
+        className={
+          mobile
+            ? 'uppercase font-bold text-white text-center px-4 py-3 block text-lg skew-x-[20deg] whitespace-nowrap w-full'
+            : 'uppercase font-bold text-white text-center px-2 py-1 block text-base skew-x-[20deg] whitespace-nowrap'
+        }
+        onClick={mobile && onClickLink ? onClickLink : undefined}
+      >
+        {children}
       </Link>
     </div>
   );
@@ -83,15 +82,14 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
         <NavCard href="/ePortfolio">E-Portfolio</NavCard>
         {isAllowed(me, 'isSuperAdmin') && (
           <div className="flex items-center justify-center my-2">
-            <Link href="/superUserSettings" passHref legacyBehavior>
-              <a
-                className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
-                aria-label="Super User Settings"
-              >
-                <span className="skew-x-[20deg] w-full text-center text-xl">
-                  ⚙️
-                </span>
-              </a>
+            <Link
+              href="/superUserSettings"
+              className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+              aria-label="Super User Settings"
+            >
+              <span className="skew-x-[20deg] w-full text-center text-xl">
+                ⚙️
+              </span>
             </Link>
           </div>
         )}
@@ -133,15 +131,14 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
         <NavCard href="/ePortfolio">E-Portfolio</NavCard>
         {isAllowed(me, 'isSuperAdmin') && (
           <div className="flex items-center justify-center my-2">
-            <Link href="/superUserSettings" passHref legacyBehavior>
-              <a
-                className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
-                aria-label="Super User Settings"
-              >
-                <span className="skew-x-[20deg] w-full text-center text-xl">
-                  ⚙️
-                </span>
-              </a>
+            <Link
+              href="/superUserSettings"
+              className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+              aria-label="Super User Settings"
+            >
+              <span className="skew-x-[20deg] w-full text-center text-xl">
+                ⚙️
+              </span>
             </Link>
           </div>
         )}

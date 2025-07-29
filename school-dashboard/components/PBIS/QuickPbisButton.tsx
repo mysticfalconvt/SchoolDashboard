@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
+import { SmallGradientButton } from '@/components/styles/Button';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useQueryClient } from 'react-query';
-import { SmallGradientButton } from '../styles/Button';
-import { useUser } from '../User';
 
 const CREATE_QUICK_PBIS = gql`
   mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {
@@ -35,12 +35,10 @@ export default function QuickPbisButton({
 }: QuickPbisButtonProps) {
   const me = useUser();
   const teacher = me.id;
-  const [createCard, { loading, error, data }] = useMutation(
-    CREATE_QUICK_PBIS,
-    { variables: { teacher, student: id } },
-  );
+  const [createCard, { loading, error, data }] =
+    useGqlMutation(CREATE_QUICK_PBIS);
   // console.log(id);
-  // const [updateCardCount, { loading: cardLoading }] = useMutation(UPDATE_PBIS, {
+  // const [updateCardCount, { loading: cardLoading }] = useGqlMutation(UPDATE_PBIS, {
   //   variables: { userId: id },
   // });
   const queryClient = useQueryClient();
@@ -52,9 +50,12 @@ export default function QuickPbisButton({
         e.preventDefault();
         // console.log(teacher);
         // console.log('creating card');
-        const res = await createCard();
+        await createCard({
+          teacher,
+          student: id,
+        });
         // console.log(res);
-        // await updateCardCount();
+        // await updateCardCount({});
         queryClient.refetchQueries();
       }}
     >

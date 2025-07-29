@@ -1,5 +1,5 @@
-import * as Sentry from '@sentry/nextjs';
-import type { NextPage } from 'next';
+// import * as Sentry from '@sentry/nextjs';
+import { NextPage } from 'next';
 import Head from 'next/head';
 
 const SentryExamplePage: NextPage = () => {
@@ -48,18 +48,18 @@ const SentryExamplePage: NextPage = () => {
             margin: '18px',
           }}
           onClick={() => {
-            Sentry.startSpan(
-              {
-                name: 'Example Frontend Span',
-                op: 'test',
-              },
-              async () => {
-                const res = await fetch('/api/sentry-example-api');
-                if (!res.ok) {
-                  throw new Error('Sentry Example Frontend Error');
-                }
-              },
-            );
+            // Sentry.startSpan(
+            //   {
+            //     name: 'Example Frontend Span',
+            //     op: 'test',
+            //   },
+            //   async () => {
+            //     const res = await fetch('/api/sentry-example-api');
+            //     if (!res.ok) {
+            //       throw new Error('Sentry Example Frontend Error');
+            //     }
+            //   },
+            // );
           }}
         >
           Throw error!

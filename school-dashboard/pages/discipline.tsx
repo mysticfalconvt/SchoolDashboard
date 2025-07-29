@@ -226,8 +226,10 @@ export const getStaticProps: GetStaticProps<DisciplinePageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchDisciplineData = async () =>
-    graphQLClient.request(DISCIPLINE_DATA);
+  const fetchDisciplineData = async (): Promise<{
+    disciplines: Discipline[];
+    cellPhoneViolations: CellPhoneViolation[];
+  }> => graphQLClient.request(DISCIPLINE_DATA);
 
   const initialDisciplineData = await fetchDisciplineData();
 

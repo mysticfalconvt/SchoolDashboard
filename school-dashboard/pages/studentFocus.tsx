@@ -177,7 +177,7 @@ export const getStaticProps: GetStaticProps<StudentFocusPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchStudentFoci = async () =>
+  const fetchStudentFoci = async (): Promise<{ studentFoci: StudentFocus[] }> =>
     graphQLClient.request(ALL_STUDENT_FOCUS_QUERY);
 
   const initialStudentFoci = await fetchStudentFoci();

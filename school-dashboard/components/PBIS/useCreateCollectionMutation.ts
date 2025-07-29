@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from 'react-query';
@@ -42,10 +42,14 @@ export default function useCreateMessage() {
   >();
   //   console.log(`message: ${JSON.stringify(message)}`);
 
-  const [createNewPbisCollection] = useMutation(
+  const [createNewPbisCollection] = useGqlMutation(
     CREATE_PBIS_COLLECTION_MUTATION,
-    {
-      variables: {
+  );
+  useEffect(() => {
+    if (collection) {
+      // console.log('creating new pbis collection');
+      // console.log(`collection: ${JSON.stringify(collection)}`);
+      createNewPbisCollection({
         name: collection?.name || '',
         randomDrawingWinners: JSON.stringify(
           collection?.randomDrawingWinners || [],
@@ -57,14 +61,7 @@ export default function useCreateMessage() {
         taTeamNewLevelWinners: JSON.stringify(
           collection?.taTeamNewLevelWinners || [],
         ),
-      },
-    },
-  );
-  useEffect(() => {
-    if (collection) {
-      // console.log('creating new pbis collection');
-      // console.log(`collection: ${JSON.stringify(collection)}`);
-      createNewPbisCollection();
+      });
       setTimeout(() => {
         queryClient.refetchQueries();
       }, 1000);

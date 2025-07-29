@@ -1,29 +1,42 @@
 import type { DocumentNode } from 'graphql';
-import { useMutation, UseMutationOptions } from 'react-query';
-import { endpoint } from '../config';
+import { useMutation, UseMutationOptions, useQueryClient } from 'react-query';
+import { endpoint, prodEndpoint } from '../config';
 import { GraphQLClient } from './graphqlClient';
 
-export const useGQLMutation = <
-  TData = any,
-  TError = Error,
-  TVariables = Record<string, any>,
->(
-  key: string,
-  query: DocumentNode,
-  variables?: TVariables,
-  config: Partial<UseMutationOptions<TData, TError, TVariables>> = {},
+export const useGqlMutation = <TData = any, TVariables = any>(
+  mutation: DocumentNode,
+  options: Partial<UseMutationOptions<TData, Error, TVariables>> = {},
 ) => {
+  const queryClient = useQueryClient();
+
   const headers = {
-    headers: {
-      authorization: `Bearer token goes here`,
-    },
+    credentials: 'include' as const,
+    mode: 'cors' as const,
   };
 
-  const graphQLClient = new GraphQLClient(endpoint, headers);
-  const fetchData = async (vars?: TVariables): Promise<TData> =>
-    await graphQLClient.request(query, (vars || variables) as object);
+  const graphQLClient = new GraphQLClient(
+    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    headers,
+  );
 
-  // const fetchData = async () => await request(endpoint, query, variables);
+  const mutateFn = async (variables?: TVariables): Promise<TData> =>
+    await graphQLClient.request(mutation, variables as object);
 
-  return useMutation<TData, TError, TVariables>(key, fetchData, config);
+  const mutationResult = useMutation<TData, Error, TVariables>(mutateFn, {
+    onSuccess: () => {
+      // Invalidate and refetch all queries
+      queryClient.invalidateQueries();
+    },
+    ...options,
+  });
+
+  // Return in Apollo-style format for backward compatibility
+  return [
+    mutationResult.mutate,
+    {
+      data: mutationResult.data,
+      loading: mutationResult.isLoading,
+      error: mutationResult.error,
+    },
+  ] as const;
 };

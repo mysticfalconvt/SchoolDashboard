@@ -1,15 +1,15 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import { SmallGradientButton } from '@/components/styles/Button';
+import Form, { FormContainer } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useMemo, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import useForm from '../../lib/useForm';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import { SmallGradientButton } from '../styles/Button';
-import Form, { FormContainer } from '../styles/Form';
-import { useUser } from '../User';
 
 interface Link {
   id: string;
@@ -134,30 +134,13 @@ const EditLink: React.FC<EditLinkProps> = ({
   });
   const user = useUser();
 
-  const [updateLink, { loading, error }] = useMutation<
+  const [updateLink, { loading, error }] = useGqlMutation<
     UpdateLinkData,
     UpdateLinkVariables
-  >(UPDATE_LINK_MUTATION, {
-    variables: {
-      id: link.id,
-      name: inputs.name,
-      description: inputs.description,
-      link: inputs.link,
-      forTeachers: inputs.forTeachers,
-      forStudents: inputs.forStudents,
-      forParents: inputs.forParents,
-      onHomePage: inputs.onHomePage,
-      forPbis: inputs.forPbis,
-      forEPortfolio: inputs.forEPortfolio,
-    },
-  });
+  >(UPDATE_LINK_MUTATION);
 
   const [deleteLink, { loading: deleteLoading, error: deleteError }] =
-    useMutation<DeleteLinkData, DeleteLinkVariables>(DELETE_LINK_MUTATION, {
-      variables: {
-        id: link.id,
-      },
-    });
+    useGqlMutation<DeleteLinkData, DeleteLinkVariables>(DELETE_LINK_MUTATION);
   const queryClient = useQueryClient();
 
   const isVisible = useMemo(() => {
@@ -186,7 +169,26 @@ const EditLink: React.FC<EditLinkProps> = ({
           >
             ×
           </button>
-          <Form className="w-full bg-transparent border-0 shadow-none p-0">
+          <Form
+            className="w-full bg-transparent border-0 shadow-none p-0"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await updateLink({
+                id: link.id,
+                name: inputs.name,
+                description: inputs.description,
+                link: inputs.link,
+                forTeachers: inputs.forTeachers,
+                forStudents: inputs.forStudents,
+                forParents: inputs.forParents,
+                onHomePage: inputs.onHomePage,
+                forPbis: inputs.forPbis,
+                forEPortfolio: inputs.forEPortfolio,
+              });
+              refetch?.();
+              setVisibleForm(null);
+            }}
+          >
             <h1 className="text-white font-bold text-xl mb-4">Edit Link</h1>
             <DisplayError error={error as any} />
             <fieldset disabled={loading} aria-busy={loading}>
@@ -279,7 +281,7 @@ const EditLink: React.FC<EditLinkProps> = ({
                 <button
                   type="button"
                   onClick={async () => {
-                    const res = await deleteLink();
+                    await deleteLink({ id: link.id });
                     revalidateIndex();
                     revalidateLinksPage();
                     queryClient.refetchQueries('allLinks');

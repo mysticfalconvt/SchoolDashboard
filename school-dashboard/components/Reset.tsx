@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import React from 'react';
-import useForm from '../lib/useForm';
 import Error from './ErrorMessage';
 import Form from './styles/Form';
 
@@ -53,16 +53,10 @@ const Reset: React.FC<ResetProps> = ({ token }) => {
     password: '',
     token,
   });
-  const [reset, { data, loading, error }] = useMutation<
+  const [reset, { data, loading, error }] = useGqlMutation<
     ResetMutationData,
     ResetMutationVariables
-  >(RESET_MUTATION, {
-    variables: {
-      email: inputs.email,
-      password: inputs.password,
-      token: inputs.token,
-    },
-  });
+  >(RESET_MUTATION);
   const successfulError = data?.redeemUserPasswordResetToken?.code
     ? data?.redeemUserPasswordResetToken
     : undefined;
@@ -70,7 +64,11 @@ const Reset: React.FC<ResetProps> = ({ token }) => {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // stop the form from submitting
-    const res = await reset().catch(console.error);
+    await reset({
+      email: inputs.email,
+      password: inputs.password,
+      token: inputs.token,
+    });
     resetForm();
     router.push('/');
 

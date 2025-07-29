@@ -22,10 +22,8 @@ export function UserTypeDisplay(user: User): string {
 export function capitalizeFirstLetter(
   string: string | undefined | null,
 ): string {
-  return (
-    string?.replace(
-      /\w\S*/g,
-      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
-    ) ?? ''
-  );
+  return (string?.replace(
+    /\w\S*/g,
+    (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+  ) ?? '');
 }

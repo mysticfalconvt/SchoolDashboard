@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import useForm from '../../lib/useForm';
@@ -64,21 +64,7 @@ export default function TrimesterAwardButton({
 
   // console.log(studentCardIsFor);
 
-  const [createTrimesterAward, { loading, error, data }] = useMutation(
-    ADD_AWARD_MUTATION,
-    {
-      variables: {
-        teacher,
-        student: student.id,
-        howl: inputs.howl,
-        trimester: trimester.toString(),
-      },
-    },
-  );
-  if (error) {
-    console.log(error);
-    return <p>{error.message}</p>;
-  }
+  const [createTrimesterAward, { data, loading, error }] = useGqlMutation(ADD_AWARD_MUTATION);
   return (
     <div>
       <GradientButton
@@ -95,8 +81,12 @@ export default function TrimesterAwardButton({
             e.preventDefault();
             // Submit the input fields to the backend:
             // console.log(inputs);
-            const res = await createTrimesterAward();
-            // console.log(res);
+            createTrimesterAward({
+              teacher,
+              student: student.id,
+              howl: inputs.howl,
+              trimester: trimester.toString(),
+            });
             resetForm();
             await refetch();
             setShowForm(false);

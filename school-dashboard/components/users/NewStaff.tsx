@@ -1,9 +1,10 @@
-import { gql, useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import gql from 'graphql-tag';
 import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
 
 const UPDATE_USER_MUTATION = gql`
   mutation UPDATE_USER_MUTATION($staffData: JSON!) {
@@ -25,12 +26,8 @@ export default function NewUpdateUsers() {
   const { inputs, handleChange, clearForm } = useForm();
   const inputJson = JSON.parse(inputs?.userData || '{}');
 
-  const [updateUsersFromJson, { loading, error, data }] = useMutation(
-    UPDATE_USER_MUTATION,
-    {
-      variables: { staffData: inputJson },
-    },
-  );
+  const [updateUsersFromJson, { loading, error, data }] =
+    useGqlMutation(UPDATE_USER_MUTATION);
   const [resultOfUpdate, setResultOfUpdate] = useState<UpdateResult[] | null>(
     null,
   );
@@ -72,8 +69,10 @@ export default function NewUpdateUsers() {
                   e.preventDefault();
                   const inputJson = JSON.parse(inputs?.userData || '{}');
                   if (!inputJson) return;
-                  const res = await updateUsersFromJson();
-                  setResultOfUpdate(JSON.parse(res.data.addStaff));
+                  await updateUsersFromJson({
+                    staffData: inputJson,
+                  });
+                  setResultOfUpdate(JSON.parse(data?.addStaff || '[]'));
                   clearForm();
                   setShowForm(false);
                 }}

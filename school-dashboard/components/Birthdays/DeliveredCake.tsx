@@ -1,10 +1,10 @@
-import { useMutation } from '@apollo/client';
+import GradientButton from '@/components/styles/Button';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { FaBirthdayCake } from 'react-icons/fa';
 import { GrCheckbox, GrCheckboxSelected } from 'react-icons/gr';
 import { useQueryClient } from 'react-query';
-import GradientButton from '../styles/Button';
 
 interface Cake {
   id: string;
@@ -44,10 +44,10 @@ const DeliveredCake: React.FC<DeliveredCakeProps> = ({ cake }) => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  const [updateBirthday, { error, data }] = useMutation<
-    UpdateBirthdayData,
-    UpdateBirthdayVariables
-  >(UPDATE_BIRTHDAY_FOR_DELIVERED_CAKE_MUTATION, {});
+  const [updateBirthday, { data, loading: mutationLoading, error }] =
+    useGqlMutation<UpdateBirthdayData, UpdateBirthdayVariables>(
+      UPDATE_BIRTHDAY_FOR_DELIVERED_CAKE_MUTATION,
+    );
 
   return (
     <GradientButton
@@ -56,7 +56,8 @@ const DeliveredCake: React.FC<DeliveredCakeProps> = ({ cake }) => {
         setLoading(true);
 
         const updatedBirthday = await updateBirthday({
-          variables: { id: cake.id, isDelivered: !isDelivered },
+          id: cake.id,
+          isDelivered: !isDelivered,
         });
         await queryClient.refetchQueries('AllBirthdays');
         setLoading(false);

@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import { useQueryClient } from 'react-query';
@@ -161,7 +161,9 @@ export default function GiveListOfStudentsACardButton({
   const [message, setMessage] = React.useState(
     `${me.name} gave a card to the entire class`,
   );
-  const [createCard, { loading, error }] = useMutation(CREATE_CLASS_PBIS_CARD);
+  const [createCard, { data, loading, error }] = useGqlMutation(
+    CREATE_CLASS_PBIS_CARD,
+  );
 
   const handleCreateCards = React.useCallback(async () => {
     const listOfStudentIds = students.map((student) => student.id);

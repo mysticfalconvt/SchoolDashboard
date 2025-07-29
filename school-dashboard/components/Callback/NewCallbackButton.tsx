@@ -1,16 +1,16 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import { useUser } from '@/components/User';
+import { todaysDateForForm } from '@/components/calendars/formatTodayForForm';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import useCreateMessage from '../Messages/useCreateMessage';
-import SearchForUserName from '../SearchForUserName';
-import { useUser } from '../User';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
 import useRecalculateCallback from './recalculateCallback';
 
 const CREATE_CALLBACK_MUTATION = gql`
@@ -68,14 +68,28 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
   const [studentCallbackIsFor, setStudentCallbackIsFor] =
     useState<StudentUser | null>(null);
 
-  const [createCallback, { loading, error, data }] = useMutation(
+  const [createCallback, { loading, error, data }] = useGqlMutation(
     CREATE_CALLBACK_MUTATION,
     {
-      variables: {
-        ...inputs,
-        dateAssigned: new Date(inputs.dateAssigned.concat('T24:00:00.000Z')),
-        teacher: user?.id,
-        student: studentCallbackIsFor?.userId,
+      onSuccess: (result) => {
+        const newCallbackId = result?.createCallback?.id;
+        if (newCallbackId) {
+          setCallbackID(newCallbackId);
+          createMessage({
+            subject: 'New Callback Assignment',
+            message: `you received a new callback item from ${user.name}`,
+            receiver: studentCallbackIsFor?.userId,
+            link: `/callback/${newCallbackId}`,
+          });
+          refetch();
+          resetForm();
+          toast.success(
+            `Created Callback for ${studentCallbackIsFor?.userName}`,
+          );
+          router.push({
+            pathname: `/callback/${newCallbackId}`,
+          });
+        }
       },
     },
   );
@@ -91,8 +105,8 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
       </GradientButton>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-[80vw] max-w-4xl mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+          <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-[80vw] max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setShowForm(false)}
@@ -105,21 +119,13 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
               className="w-full bg-transparent border-0 shadow-none p-0"
               onSubmit={async (e) => {
                 e.preventDefault();
-                const res = await createCallback();
-                setCallbackID(res.data.createCallback.id);
-                createMessage({
-                  subject: 'New Callback Assignment',
-                  message: `you received a new callback item from ${user.name}`,
-                  receiver: studentCallbackIsFor?.userId,
-                  link: `/callback/${res?.data?.createCallback.id}`,
-                });
-                refetch();
-                resetForm();
-                toast.success(
-                  `Created Callback for ${studentCallbackIsFor?.userName}`,
-                );
-                router.push({
-                  pathname: `/callback/${res.data.createCallback.id}`,
+                await createCallback({
+                  ...inputs,
+                  dateAssigned: new Date(
+                    inputs.dateAssigned.concat('T24:00:00.000Z'),
+                  ),
+                  teacher: user?.id,
+                  student: studentCallbackIsFor?.userId,
                 });
               }}
             >

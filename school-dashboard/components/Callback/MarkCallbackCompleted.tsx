@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import { SmallGradientButton } from '@/components/styles/Button';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
-import { SmallGradientButton } from '../styles/Button';
-import { useUser } from '../User';
 import useRecalculateCallback from './recalculateCallback';
 
 const MARK_CALLBACK_COMPLETED = gql`
@@ -46,15 +46,8 @@ export default function MarkCallbackCompleted({
   const daysLate = Math.round(
     (today.getTime() - dateAssigned.getTime()) / 1000 / 60 / 60 / 24,
   );
-  const [markCompleted, { loading, error }] = useMutation(
+  const [markCompleted, { loading, error }] = useGqlMutation(
     MARK_CALLBACK_COMPLETED,
-    {
-      variables: {
-        id: callback.id,
-        dateCompleted: today,
-        daysLate,
-      },
-    },
   );
 
   //   console.log(`late: ${daysLate}`);
@@ -66,12 +59,14 @@ export default function MarkCallbackCompleted({
           className={loading ? 'scale-10 opacity-0' : ''}
           onClick={async () => {
             // console.log('marking completed');
-            const res = await markCompleted();
-            if (res) {
-              toast.success('Callback marked as completed');
-              setCallbackID(res.data.updateCallback.id);
-            }
-            // console.log(res.data.updateCallback.id);
+            await markCompleted({
+              id: callback.id,
+              dateCompleted: today,
+              daysLate,
+            });
+            toast.success('Callback marked as completed');
+            setCallbackID(callback.id);
+            // console.log(res.updateCallback.id);
             queryClient.refetchQueries();
           }}
         >

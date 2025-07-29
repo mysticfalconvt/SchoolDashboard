@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
+import { SmallGradientButton } from '@/components/styles/Button';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import useForm from '../../lib/useForm';
-import { SmallGradientButton } from '../styles/Button';
 
 interface Discipline {
   id: string;
@@ -46,15 +46,10 @@ const AdminDisciplineData: React.FC<AdminDisciplineDataProps> = ({
     adminComments: discipline.adminComments || discipline.teacherComments || '',
   });
   const [edit, setEdit] = useState(false);
-  const [updateDiscipline, { loading, error, data }] = useMutation<
+  const [updateDiscipline, { loading, error, data }] = useGqlMutation<
     UpdateDisciplineData,
     UpdateDisciplineVariables
-  >(UPDATE_DISCIPLINE_ADMIN, {
-    variables: {
-      id: discipline.id,
-      adminComments: inputs.adminComments,
-    },
-  });
+  >(UPDATE_DISCIPLINE_ADMIN);
 
   return (
     <div>
@@ -68,7 +63,10 @@ const AdminDisciplineData: React.FC<AdminDisciplineDataProps> = ({
           if (!edit) {
             setEdit(true);
           } else {
-            await updateDiscipline();
+            await updateDiscipline({
+              id: discipline.id,
+              adminComments: inputs.adminComments,
+            });
             await refetch?.();
             // alert('Changes Saved');
             setEdit(false);

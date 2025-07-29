@@ -23,7 +23,6 @@ import PbisWidget from '../components/PBIS/PbisWidget';
 import StudentPbisData from '../components/PBIS/StudentPbisData';
 import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
-import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
 import { callbackDisabled, endpoint, prodEndpoint } from '../config';
@@ -114,10 +113,10 @@ const GET_STUDENT_CLASSSWORK_QUERY = gql`
 `;
 
 interface HomeProps {
-  totalCards?: number;
-  homePageLinks?: any;
-  weeklyCalendar?: any;
-  allUsersForSearch?: any;
+  totalCards?: number | null;
+  homePageLinks?: any | null;
+  weeklyCalendar?: any | null;
+  allUsersForSearch?: any | null;
   initialGoogleCalendarEvents?: any;
 }
 
@@ -142,9 +141,19 @@ export default function Home(props: HomeProps) {
   );
 
   if (!me) return null;
+
+  // Handle case where static props failed to load data
+  const hasStaticDataError =
+    !props?.totalCards && !props?.homePageLinks && !props?.weeklyCalendar;
   return (
     <div>
       <main>
+        {hasStaticDataError && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+            <strong>Warning:</strong> Some data could not be loaded. This may be
+            due to the server being unavailable.
+          </div>
+        )}
         <h1 className="center">
           Welcome to the NCUJHS Dashboard {getDisplayName(me)}
         </h1>
@@ -162,9 +171,12 @@ export default function Home(props: HomeProps) {
             </a>
           )} */}
           {me && isAllowed(me, 'hasClasses') && (
-            <GradientButton>
-              <Link href={`/userProfile/${me?.id}`}>My Students</Link>
-            </GradientButton>
+            <Link
+              href={`/userProfile/${me?.id}`}
+              className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-lg px-6 py-3 skew-x-[-2deg] inline-block transition-all duration-500 m-1 max-h-full outline-none hover:border-[var(--red)] hover:brightness-110 break-words whitespace-normal"
+            >
+              My Students
+            </Link>
           )}
           {/* {me && isAllowed(me || {}, "isStaff") && (
             <GradientButton>
@@ -366,16 +378,27 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
       try {
         return await fetchFn();
       } catch (error) {
+        console.error(`Attempt ${attempt} failed:`, error);
         if (attempt === retries) {
           console.error('Failed to fetch after retries:', error);
-          return {
-            fetchError:
-              error instanceof Error ? error.message : 'Failed to fetch data',
-          };
+          return null; // Return null instead of an object with fetchError
         }
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
+  };
+
+  // Add a timeout to prevent hanging
+  const fetchWithTimeout = async (
+    fetchFn: () => Promise<any>,
+    timeout = 5000,
+  ) => {
+    return Promise.race([
+      fetchFn(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), timeout),
+      ),
+    ]);
   };
 
   const fetchTotalCards = () => graphQLClient.request(TOTAL_PBIS_CARDS);
@@ -388,17 +411,25 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
   const fetchAllUsersForSearch = () =>
     graphQLClient.request(SEARCH_ALL_USERS_QUERY);
 
-  const totalCards = await fetchWithRetry(fetchTotalCards);
-  const homePageLinks = await fetchWithRetry(fetchHomePageLinks);
-  const weeklyCalendar = await fetchWithRetry(fetchWeeklyCalendar);
-  const allUsersForSearch = await fetchWithRetry(fetchAllUsersForSearch);
+  const totalCards = await fetchWithRetry(() =>
+    fetchWithTimeout(fetchTotalCards),
+  );
+  const homePageLinks = await fetchWithRetry(() =>
+    fetchWithTimeout(fetchHomePageLinks),
+  );
+  const weeklyCalendar = await fetchWithRetry(() =>
+    fetchWithTimeout(fetchWeeklyCalendar),
+  );
+  const allUsersForSearch = await fetchWithRetry(() =>
+    fetchWithTimeout(fetchAllUsersForSearch),
+  );
   const initialGoogleCalendarEvents = await getCalendarData();
   return {
     props: {
-      totalCards: totalCards.pbisCardsCount,
-      homePageLinks,
-      weeklyCalendar,
-      allUsersForSearch,
+      totalCards: totalCards?.pbisCardsCount ?? null,
+      homePageLinks: homePageLinks ?? null,
+      weeklyCalendar: weeklyCalendar ?? null,
+      allUsersForSearch: allUsersForSearch ?? null,
       initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
     }, // will be passed to the page component as props
     revalidate: 60 * 60,

@@ -1,14 +1,14 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainer } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import useForm from '../../lib/useForm';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainer } from '../styles/Form';
-import { useUser } from '../User';
 
 interface NewLinkProps {
   refetchLinks?: () => void;
@@ -96,23 +96,10 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
   });
   const user = useUser();
   //   console.log(`user ${user.id}`);
-  const [createLink, { loading, error, data }] = useMutation<
+  const [createLink, { loading, error, data }] = useGqlMutation<
     CreateLinkData,
     CreateLinkVariables
-  >(CREATE_LINK_MUTATION, {
-    variables: {
-      name: inputs.name,
-      description: inputs.description,
-      forTeachers: inputs.forTeachers,
-      forStudents: inputs.forStudents,
-      forParents: inputs.forParents,
-      onHomePage: inputs.onHomePage,
-      forPbis: inputs.forPbis,
-      forEPortfolio: inputs.forEPortfolio,
-      link: inputs.link,
-      modifiedBy: user?.id || '',
-    },
-  });
+  >(CREATE_LINK_MUTATION);
   // console.log(inputs);
   if (hidden) return null;
 
@@ -134,7 +121,27 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
           >
             ×
           </button>
-          <Form className="w-full bg-transparent border-0 shadow-none p-0">
+          <Form
+            className="w-full bg-transparent border-0 shadow-none p-0"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await createLink({
+                name: inputs.name,
+                description: inputs.description,
+                forTeachers: inputs.forTeachers,
+                forStudents: inputs.forStudents,
+                forParents: inputs.forParents,
+                onHomePage: inputs.onHomePage,
+                forPbis: inputs.forPbis,
+                forEPortfolio: inputs.forEPortfolio,
+                link: inputs.link,
+                modifiedBy: user?.id || '',
+              });
+              refetchLinks?.();
+              resetForm();
+              setShowForm(false);
+            }}
+          >
             <h1 className="text-white font-bold text-xl mb-4">
               Add a New Link
             </h1>

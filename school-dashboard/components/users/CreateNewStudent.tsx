@@ -1,14 +1,14 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainerStyles } from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
 
 // TODO: update this edit into create new student
 
@@ -117,17 +117,14 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
     block10: '',
   });
 
-  const [createNewStudent, { loading, error }] = useMutation(
+  const [createNewStudent, { loading, error }] = useGqlMutation(
     CREATE_NEW_STUDENT_MUTATION,
-    {
-      variables: inputs,
-    },
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createNewStudent();
+      await createNewStudent(inputs);
       toast.success('Student created successfully!');
       resetForm();
       setShowForm(false);
@@ -145,241 +142,123 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
       >
         {showForm ? 'Close the form' : 'Add A New Student'}
       </GradientButton>
-      <FormContainerStyles>
-        <Form
-          className={showForm ? 'visible' : 'hidden'}
-          onSubmit={handleSubmit}
-        >
-          <h1>Add a New Student</h1>
-          <DisplayError error={error as any} />
-          <fieldset disabled={loading} aria-busy={loading}>
-            <label htmlFor="name">
-              Student Name
-              <input
-                required
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Student Name"
-                value={inputs.name}
-                onChange={handleChange}
-              />
-            </label>
+      <FormContainerStyles visible={showForm}>
+        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-4xl mx-auto">
+          <button
+            type="button"
+            onClick={() => setShowForm(false)}
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <Form
+            className="w-full bg-transparent border-0 shadow-none p-0"
+            onSubmit={handleSubmit}
+          >
+            <h1 className="text-white font-bold text-xl mb-4">
+              Add a New Student
+            </h1>
+            <DisplayError error={error as any} />
+            <fieldset disabled={loading} aria-busy={loading}>
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-white font-semibold mb-1"
+                >
+                  Student Name
+                </label>
+                <input
+                  required
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Student Name"
+                  value={inputs.name}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
 
-            <label htmlFor="email">
-              Student Email
-              <input
-                required
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Student Email"
-                value={inputs.email}
-                onChange={handleChange}
-              />
-            </label>
+              <div className="mb-4">
+                <label
+                  htmlFor="email"
+                  className="block text-white font-semibold mb-1"
+                >
+                  Student Email
+                </label>
+                <input
+                  required
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Student Email"
+                  value={inputs.email}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded border"
+                />
+              </div>
 
-            <label htmlFor="ta">
-              TA Teacher
-              <select
-                id="ta"
-                name="ta"
-                value={inputs.ta}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a TA Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
+              <div className="mb-4">
+                <label
+                  htmlFor="ta"
+                  className="block text-white font-semibold mb-1"
+                >
+                  TA Teacher
+                </label>
+                <select
+                  id="ta"
+                  name="ta"
+                  value={inputs.ta}
+                  onChange={handleChange}
+                  required
+                  className="w-full p-2 rounded border"
+                >
+                  <option value="">Select a TA Teacher</option>
+                  {data?.teacherList?.map((teacher: any) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((blockNum) => (
+                  <div key={blockNum} className="mb-4">
+                    <label
+                      htmlFor={`block${blockNum}`}
+                      className="block text-white font-semibold mb-1"
+                    >
+                      Block {blockNum} Teacher
+                    </label>
+                    <select
+                      id={`block${blockNum}`}
+                      name={`block${blockNum}`}
+                      value={inputs[`block${blockNum}` as keyof StudentInputs]}
+                      onChange={handleChange}
+                      required
+                      className="w-full p-2 rounded border"
+                    >
+                      <option value="">
+                        Select a Block {blockNum} Teacher
+                      </option>
+                      {data?.teacherList?.map((teacher: any) => (
+                        <option key={teacher.id} value={teacher.id}>
+                          {teacher.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 ))}
-              </select>
-            </label>
+              </div>
 
-            <label htmlFor="block1">
-              Block 1 Teacher
-              <select
-                id="block1"
-                name="block1"
-                value={inputs.block1}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 1 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block2">
-              Block 2 Teacher
-              <select
-                id="block2"
-                name="block2"
-                value={inputs.block2}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 2 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block3">
-              Block 3 Teacher
-              <select
-                id="block3"
-                name="block3"
-                value={inputs.block3}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 3 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block4">
-              Block 4 Teacher
-              <select
-                id="block4"
-                name="block4"
-                value={inputs.block4}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 4 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block5">
-              Block 5 Teacher
-              <select
-                id="block5"
-                name="block5"
-                value={inputs.block5}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 5 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block6">
-              Block 6 Teacher
-              <select
-                id="block6"
-                name="block6"
-                value={inputs.block6}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 6 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block7">
-              Block 7 Teacher
-              <select
-                id="block7"
-                name="block7"
-                value={inputs.block7}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 7 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block8">
-              Block 8 Teacher
-              <select
-                id="block8"
-                name="block8"
-                value={inputs.block8}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 8 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block9">
-              Block 9 Teacher
-              <select
-                id="block9"
-                name="block9"
-                value={inputs.block9}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 9 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label htmlFor="block10">
-              Block 10 Teacher
-              <select
-                id="block10"
-                name="block10"
-                value={inputs.block10}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select a Block 10 Teacher</option>
-                {data?.teacherList?.map((teacher: any) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <button type="submit">+ Add A New Student</button>
-          </fieldset>
-        </Form>
+              <button type="submit" className="mt-6">
+                + Add A New Student
+              </button>
+            </fieldset>
+          </Form>
+        </div>
       </FormContainerStyles>
     </div>
   );

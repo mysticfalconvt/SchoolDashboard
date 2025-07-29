@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import useForm from '../lib/useForm';
 import Error from './ErrorMessage';
 import GradientButton from './styles/Button';
 import Form from './styles/Form';
@@ -29,22 +29,17 @@ const RequestReset: React.FC = () => {
   const { inputs, handleChange, resetForm } = useForm({
     email: '',
   });
-  const [signup, { data, loading, error }] = useMutation<
+  const [signup, { data, loading, error }] = useGqlMutation<
     RequestResetData,
     RequestResetVariables
-  >(REQUEST_RESET_MUTATION, {
-    variables: {
-      email: inputs.email.toLowerCase(),
-    },
-    // refectch the currently logged in user
-    // refetchQueries: [{ query: CURRENT_USER_QUERY }],
-  });
+  >(REQUEST_RESET_MUTATION);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // stop the form from submitting
-    const res = await signup().catch(console.error);
-    if (res && 'data' in res && res.data?.sendUserPasswordResetLink)
-      setIsSent(true);
+    await signup({
+      email: inputs.email.toLowerCase(),
+    });
+    if (data?.sendUserPasswordResetLink) setIsSent(true);
     // resetForm();
     // Send the email and password to the graphqlAPI
   }

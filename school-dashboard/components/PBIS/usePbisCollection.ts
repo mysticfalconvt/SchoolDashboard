@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -202,7 +202,7 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
   const [getData, setGetData] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const [createNewPbisCollection] = useMutation(
+  const [createNewPbisCollection] = useGqlMutation(
     CREATE_PBIS_COLLECTION_MUTATION,
     {},
   );
@@ -361,9 +361,7 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
       collectedCards: String(data?.totalCards?.count || 0),
     };
 
-    const latestCollection = await createNewPbisCollection({
-      variables: pbisCollectionData,
-    });
+    const latestCollection = await createNewPbisCollection(pbisCollectionData);
 
     return latestCollection;
   }

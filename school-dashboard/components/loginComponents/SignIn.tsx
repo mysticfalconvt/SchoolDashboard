@@ -1,13 +1,13 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 // @ts-ignore
+import { endpoint, prodEndpoint } from '@/components/../config';
+import Error from '@/components/ErrorMessage';
+import Form from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
 import { request } from 'graphql-request';
 import gql from 'graphql-tag';
 import React from 'react';
 import { useQueryClient } from 'react-query';
-import { endpoint, prodEndpoint } from '../../config';
-import useForm from '../../lib/useForm';
-import Error from '../ErrorMessage';
-import Form from '../styles/Form';
 
 interface FormInputs {
   email: string;
@@ -57,17 +57,10 @@ const SignIn: React.FC = () => {
     password: '',
   });
   const queryClient = useQueryClient();
-  const [signin, { data, loading }] = useMutation<SignInData, SignInVariables>(
-    SIGNIN_MUTATION,
-    {
-      variables: {
-        email: inputs?.email?.toLowerCase() || '',
-        password: inputs?.password || '',
-      },
-      // refetch the currently logged in user
-      // refetchQueries: [{ query: CURRENT_USER_QUERY }],
-    },
-  );
+  const [signin, { data, loading }] = useGqlMutation<
+    SignInData,
+    SignInVariables
+  >(SIGNIN_MUTATION);
   // console.log(lowercaseEmail);
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // stop the form from submitting
@@ -76,7 +69,10 @@ const SignIn: React.FC = () => {
       email: inputs.email,
       password: inputs.password,
     });
-    const res = await signin();
+    const res = await signin({
+      email: inputs.email.toLowerCase(),
+      password: inputs.password,
+    });
     queryClient.refetchQueries();
     // refetch();
     resetForm();
@@ -135,13 +131,13 @@ async function signinNew({ email, password }: FormInputs) {
       email: email.toLowerCase(),
       password,
     },
-    Headers,
+    {},
   );
   // console.log("signin",res);
-  const token = res.authenticateUserWithPassword.sessionToken;
+  const token = (res as any).authenticateUserWithPassword.sessionToken;
   // console.log("token",token);
   localStorage.setItem('token', token);
-  return res.data;
+  return (res as any).data;
 }
 
 export default SignIn;

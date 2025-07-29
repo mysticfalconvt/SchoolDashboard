@@ -110,7 +110,7 @@ export const getServerSideProps: GetServerSideProps<
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchThisCalendar = async () =>
+  const fetchThisCalendar = async (): Promise<{ calendar: CalendarEvent }> =>
     graphQLClient.request(GET_SINGLE_CALENDAR_EVENT, { id: context.query.id });
 
   const thisCalendar = await fetchThisCalendar();

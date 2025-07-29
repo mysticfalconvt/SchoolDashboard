@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import { UPDATE_PBIS } from '../../lib/pbisUtils';
@@ -169,24 +169,33 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
   const [loading, setLoading] = React.useState(false);
   const [currentPbisTeamGoal, setCurrentPbisTeamGoal] = React.useState(2);
 
-  const [countCardsMutation] = useMutation(COUNT_PBIS_CARD_MUTATION, {});
-  const [updateCardCount, { loading: cardLoading }] = useMutation(UPDATE_PBIS);
+  const [
+    countCardsMutation,
+    { data: countData, loading: countLoading, error: countError },
+  ] = useGqlMutation(COUNT_PBIS_CARD_MUTATION);
+  const [
+    updateCardCount,
+    { data: updateData, loading: updateLoading, error: updateError },
+  ] = useGqlMutation(UPDATE_PBIS);
 
-  const [updateTaTeacherWithoutPreviousWinner] = useMutation(
+  const [updateTaTeacherWithoutPreviousWinner] = useGqlMutation(
     UPDATE_TEACHER_WITH_NEW_PBIS_WINNER_MUTATION_WITHOUT_PREVIOUS,
     {},
   );
-  const [updatePbisTeamData] = useMutation(
+  const [updatePbisTeamData] = useGqlMutation(
     UPDATE_PBIS_TEAM_WITH_NEW_DATA_MUTATION,
     {},
   );
-  const [updateTaTeacherWithPreviousWinner] = useMutation(
+  const [updateTaTeacherWithPreviousWinner] = useGqlMutation(
     UPDATE_TEACHER_WITH_NEW_PBIS_WINNER_MUTATION,
     {},
   );
-  const [bulkUpdateUsers] = useMutation(BULK_UPDATE_USERS_MUTATION, {});
+  const [
+    bulkUpdateUsers,
+    { data: bulkData, loading: bulkLoading, error: bulkError },
+  ] = useGqlMutation(BULK_UPDATE_USERS_MUTATION);
 
-  const [createNewPbisCollection] = useMutation(
+  const [createNewPbisCollection] = useGqlMutation(
     CREATE_PBIS_COLLECTION_MUTATION,
     {},
   );
@@ -226,7 +235,7 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
 
     // create the new PBIS Collection
     const latestCollection = await createNewPbisCollection({
-      variables: pbisCollectionData,
+      ...pbisCollectionData,
     });
 
     // update the students who went up a level
@@ -239,22 +248,18 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
       }),
     );
     const updatedStudents = await bulkUpdateUsers({
-      variables: { data: studentsToUpdateLevel },
+      data: studentsToUpdateLevel,
     });
     // update each ta teacher with their new pbis winner
     const teachersToUpdate = getTeachersToUpdate(randomDrawingWinners);
     const updatedTeachers = await bulkUpdateUsers({
-      variables: {
-        data: teachersToUpdate,
-      },
+      data: teachersToUpdate,
     });
 
     // update each ta team with their new data
     const taTeamsToUpdate = getTaTeamsToUpdate(taTeamData);
     const updatedPbisTeams = await updatePbisTeamData({
-      variables: {
-        data: taTeamsToUpdate,
-      },
+      data: taTeamsToUpdate,
     });
     // mark all new cards as collected
     const cardsToUpdate = getPbisCardsToMarkCollected(
@@ -265,9 +270,7 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
     // update each chunk of cards
     for (let i = 0; i < chunks.length; i++) {
       const updatedCards = await countCardsMutation({
-        variables: {
-          data: chunks[i],
-        },
+        data: chunks[i],
       });
     }
 
@@ -282,9 +285,7 @@ export default function usePbisCollection(): UsePbisCollectionReturn {
     const recalculatedPBIS = await Promise.all(
       studentsToUpdate.map((student) =>
         updateCardCount({
-          variables: {
-            userId: student,
-          },
+          userId: student,
         }),
       ),
     );

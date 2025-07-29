@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from 'react-query';
@@ -53,24 +53,22 @@ export default function useCreateMessage() {
   const [message, createMessage] = useState<CreateMessageInput | undefined>();
   //   console.log(`message: ${JSON.stringify(message)}`);
 
-  const [createMessageMutation] = useMutation<
+  const [createMessageMutation] = useGqlMutation<
     CreateMessageData,
     CreateMessageVariables
-  >(CREATE_MESSAGE_MUTATION, {
-    variables: {
-      subject: message?.subject || '',
-      message: message?.message || '',
-      sender: me?.id || '',
-      receiver: message?.receiver || '',
-      link: message?.link || '',
-    },
-  });
+  >(CREATE_MESSAGE_MUTATION);
 
   useEffect(() => {
     if (message) {
       // console.log('creating message');
       // console.log(`message: ${JSON.stringify(message)}`);
-      createMessageMutation();
+      createMessageMutation({
+        subject: message?.subject || '',
+        message: message?.message || '',
+        sender: me?.id || '',
+        receiver: message?.receiver || '',
+        link: message?.link || '',
+      });
       setTimeout(() => {
         queryClient.refetchQueries('myMessages');
       }, 1000);

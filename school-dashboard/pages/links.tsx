@@ -201,7 +201,7 @@ export const getStaticProps: GetStaticProps<LinksPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchAllLinks = async () =>
+  const fetchAllLinks = async (): Promise<{ links: LinkData[] }> =>
     graphQLClient.request(GET_ALL_STATIC_LINKS_QUERY);
 
   const rawLinksList = await fetchAllLinks();

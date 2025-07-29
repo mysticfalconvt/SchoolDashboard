@@ -35,9 +35,7 @@ const SingleMessageInList: React.FC<SingleMessageInListProps> = ({
             className={`font-bold text-lg ${message.read ? 'text-gray-800 dark:text-gray-100' : 'text-blue-700 dark:text-blue-400 font-extrabold'}`}
             onClick={async () => {
               setViewMessage(!viewMessage);
-              const res = await markMessageRead({
-                variables: { id: message.id },
-              });
+              await markMessageRead({ id: message.id });
             }}
             style={{ cursor: 'pointer' }}
           >
@@ -61,9 +59,7 @@ const SingleMessageInList: React.FC<SingleMessageInListProps> = ({
             <button
               type="button"
               onClick={async () => {
-                const res = await deleteMessage({
-                  variables: { id: message.id },
-                });
+                await deleteMessage({ id: message.id });
                 queryClient.refetchQueries('myMessages');
               }}
               className="absolute bottom-3 right-3 bg-red-600 hover:bg-red-700 text-white border-none p-2 text-base rounded-full cursor-pointer shadow"

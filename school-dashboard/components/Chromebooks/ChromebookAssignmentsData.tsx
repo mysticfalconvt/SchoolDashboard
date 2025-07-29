@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import { SmallGradientButton } from '@/components/styles/Button';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useMemo, useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import { SmallGradientButton } from '../styles/Button';
 
 const GET_ALL_TEACHERS_QUERY = gql`
   query GET_ALL_TEACHERS_QUERY {
@@ -84,7 +84,7 @@ const EditStudentRow = ({
   const [editable, setEditable] = useState(false);
   const queryClient = useQueryClient();
   const [studentName, setStudentName] = useState(assignment.student?.name);
-  const [removeChromebookAssignment] = useMutation(
+  const [removeChromebookAssignment] = useGqlMutation(
     REMOVE_CHROMEBOOK_STUDENT_ASSIGNMENT_MUTATION,
   );
 
@@ -106,32 +106,19 @@ const EditStudentRow = ({
           value={assignment.student?.id || ''}
           onChange={async (e) => {
             if (e.target.value === 'REMOVE') {
-              const res = await removeChromebookAssignment({
-                variables: {
-                  id: assignment.id,
-                },
+              await removeChromebookAssignment({
+                id: assignment.id,
               });
-
-              if (res?.data?.updateChromebookAssignment) {
-                // queryClient.refetchQueries("Chromebook Assignments");
-                setStudentName(
-                  res.data.updateChromebookAssignment.student?.name,
-                );
-                setEditable(false);
-              }
+              setStudentName('');
+              setEditable(false);
               return;
             }
-            const res = await updateChromebookAssignment({
-              variables: {
-                id: assignment.id,
-                studentId: e.target.value,
-              },
+            await updateChromebookAssignment({
+              id: assignment.id,
+              studentId: e.target.value,
             });
-            if (res?.data?.updateChromebookAssignment) {
-              //   queryClient.refetchQueries("Chromebook Assignments");
-              setStudentName(res.data.updateChromebookAssignment.student?.name);
-              setEditable(false);
-            }
+            setStudentName('');
+            setEditable(false);
           }}
         >
           <option value=""></option>
@@ -199,9 +186,8 @@ export default function ChromebookAssignmentsData({
     );
   }, [studentsData, studentsWithAssignments]);
 
-  const [updateChromebookAssignment, { loading: updateLoading }] = useMutation(
-    UPDATE_CHROMEBOOK_STUDENT_ASSIGNMENT_MUTATION,
-  );
+  const [updateChromebookAssignment, { loading: updateLoading }] =
+    useGqlMutation(UPDATE_CHROMEBOOK_STUDENT_ASSIGNMENT_MUTATION);
 
   return (
     <div>

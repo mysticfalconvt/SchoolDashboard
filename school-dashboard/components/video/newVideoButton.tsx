@@ -1,15 +1,15 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainerStyles } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import useForm from '../../lib/useForm';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import { useUser } from '../User';
 
 const CREATE_VIDEO_MUTATION = gql`
   mutation CREATE_VIDEO_MUTATION(
@@ -60,11 +60,8 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
   });
   const user = useUser();
   //   console.log(`user ${user.id}`);
-  const [createLink, { loading, error, data }] = useMutation(
+  const [createLink, { loading, error, data }] = useGqlMutation(
     CREATE_VIDEO_MUTATION,
-    {
-      variables: inputs,
-    },
   );
   // console.log(inputs);
   if (hidden) return null;
@@ -83,7 +80,7 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the inputfields to the backend:
-            const res = await createLink();
+            await createLink(inputs);
             if (inputs.onHomePage) {
               revalidateIndexPage();
             }

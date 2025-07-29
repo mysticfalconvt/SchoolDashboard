@@ -1,10 +1,10 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainerStyles } from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
 
 interface Birthday {
   id: string;
@@ -78,16 +78,10 @@ const StudentCakeChooser: React.FC<StudentCakeChooserProps> = ({
   });
   // const user = useUser();
 
-  const [updateLink, { loading, error, data }] = useMutation<
+  const [updateLink, { data, loading, error }] = useGqlMutation<
     UpdateBirthdayData,
     UpdateBirthdayVariables
-  >(UPDATE_BIRTHDAY_MUTATION, {
-    variables: {
-      cakeType: inputs.cakeType,
-      date: new Date(inputs?.date || null),
-      id: birthday.id,
-    },
-  });
+  >(UPDATE_BIRTHDAY_MUTATION);
 
   return (
     <div>
@@ -111,7 +105,11 @@ const StudentCakeChooser: React.FC<StudentCakeChooserProps> = ({
               return;
             }
 
-            const res = await updateLink();
+            const res = await updateLink({
+              cakeType: inputs.cakeType,
+              date: new Date(inputs?.date || null),
+              id: birthday.id,
+            });
 
             // refetch();
             setShowForm(false);

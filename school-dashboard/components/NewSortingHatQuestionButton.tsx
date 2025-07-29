@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import React, { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import useForm from '../lib/useForm';
 
 import DisplayError from './ErrorMessage';
 import { useUser } from './User';
@@ -55,18 +55,8 @@ const NewSortingHatQuestion: React.FC = () => {
   });
   const me = useUser();
 
-  const [createSortingHatQuestion, { loading, error }] = useMutation(
+  const [createSortingHatQuestion, { data, loading, error }] = useGqlMutation(
     CREATE_SORTING_QUESTION,
-    {
-      variables: {
-        question: inputs.question,
-        gryffindorChoice: inputs.gryffindorChoice,
-        ravenclawChoice: inputs.ravenclawChoice,
-        hufflepuffChoice: inputs.hufflepuffChoice,
-        slytherinChoice: inputs.slytherinChoice,
-        createdBy: me.id,
-      },
-    },
   );
   // TODO: send message when callback assigned
 
@@ -92,7 +82,14 @@ const NewSortingHatQuestion: React.FC = () => {
             className="w-full bg-transparent border-0 shadow-none p-0"
             onSubmit={async (e) => {
               e.preventDefault();
-              const res = await createSortingHatQuestion();
+              const res = await createSortingHatQuestion({
+                question: inputs.question,
+                gryffindorChoice: inputs.gryffindorChoice,
+                ravenclawChoice: inputs.ravenclawChoice,
+                hufflepuffChoice: inputs.hufflepuffChoice,
+                slytherinChoice: inputs.slytherinChoice,
+                createdBy: me.id,
+              });
               queryClient.refetchQueries('SortingHatQuestions');
               clearForm();
               setShowForm(false);

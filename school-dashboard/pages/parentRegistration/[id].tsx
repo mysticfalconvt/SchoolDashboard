@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/../components/ErrorMessage';
+import Form, { FormContainer } from '@/components/../components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
-import { NextPage } from 'next';
-import DisplayError from '../../components/ErrorMessage';
-import Form, { FormContainer } from '../../components/styles/Form';
-import useForm from '../../lib/useForm';
+import { GetServerSideProps, NextPage } from 'next';
 
 // const GET_STUDENT_FOR_PARENT = gql`
 //   query GET_STUDENT_FOR_PARENT($id: ID!) {
@@ -69,7 +69,7 @@ const ParentRegistrationPage: NextPage<ParentRegistrationPageProps> = ({
   //   { id: query.id }
   // );
 
-  const [createNewUser, { loading, data: newUser, error }] = useMutation(
+  const [createNewUser, { loading, data: newUser, error }] = useGqlMutation(
     SIGNUP_MUTATION,
     {},
   );
@@ -98,7 +98,7 @@ const ParentRegistrationPage: NextPage<ParentRegistrationPageProps> = ({
 
             // console.log(res);
             //   setResultOfUpdate(
-            //     JSON.parse(res.data.updateStudentSchedules.name)
+            //     JSON.parse(res.updateStudentSchedules.name)
             //   );
             //   // clearForm();
             //   setShowForm(false);
@@ -156,6 +156,19 @@ const ParentRegistrationPage: NextPage<ParentRegistrationPageProps> = ({
       </FormContainer>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<
+  ParentRegistrationPageProps
+> = async (context) => {
+  return {
+    props: {
+      query: {
+        id: context.params?.id as string,
+        name: context.query.name as string,
+      },
+    },
+  };
 };
 
 export default ParentRegistrationPage;

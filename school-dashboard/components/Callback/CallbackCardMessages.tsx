@@ -1,10 +1,10 @@
-import { useMutation } from '@apollo/client';
+import { SmallGradientButton } from '@/components/styles/Button';
+import Form, { FormGroup } from '@/components/styles/Form';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
-import { SmallGradientButton } from '../styles/Button';
-import Form, { FormGroup } from '../styles/Form';
 
 export const UPDATE_CALLBACK_MESSAGES_MUTATION = gql`
   mutation UPDATE_CALLBACK_MESSAGES_MUTATION(
@@ -88,25 +88,20 @@ export default function CallbackCardMessages({
   );
   // console.log(studentMessageDate)
   const queryClient = useQueryClient();
-  const [updateCallback, { loading, error, data }] = useMutation(
+  const [updateCallback, { loading, error, data }] = useGqlMutation(
     UPDATE_CALLBACK_MESSAGES_MUTATION,
-    {
-      variables: {
-        id: callback.id,
-        messageFromTeacher: teacherMessage,
-        messageFromTeacherDate: teacherMessageDate,
-        messageFromStudent: studentMessage,
-        messageFromStudentDate: studentMessageDate,
-      },
-    },
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await updateCallback();
-    if (res) {
-      toast.success(`Updated Callback Message for ${callback.student.name}`);
-    }
+    await updateCallback({
+      id: callback.id,
+      messageFromTeacher: teacherMessage,
+      messageFromTeacherDate: teacherMessageDate,
+      messageFromStudent: studentMessage,
+      messageFromStudentDate: studentMessageDate,
+    });
+    toast.success(`Updated Callback Message for ${callback.student.name}`);
   };
 
   const submitOnEnter = (e: React.KeyboardEvent) => {
@@ -120,18 +115,14 @@ export default function CallbackCardMessages({
     const studentMessage =
       e.target.value === studentDeleteMessage ? '' : e.target.value;
     const todaysDate = new Date().toLocaleDateString();
-    const res = await updateCallback({
-      variables: {
-        id: callback.id,
-        messageFromTeacher: teacherMessage,
-        messageFromStudent: studentMessage,
-        messageFromStudentDate: todaysDate,
-      },
+    await updateCallback({
+      id: callback.id,
+      messageFromTeacher: teacherMessage,
+      messageFromStudent: studentMessage,
+      messageFromStudentDate: todaysDate,
     });
     await queryClient.refetchQueries('myStudentCallbacks');
-    if (res) {
-      toast.success(`Updated Callback Message for ${callback.student.name}`);
-    }
+    toast.success(`Updated Callback Message for ${callback.student.name}`);
   };
   const getStudentMessageOptionsArray = (): MessageOption[] => {
     const options: MessageOption[] = studentMessageOptions.map((option) => ({
@@ -233,20 +224,16 @@ export default function CallbackCardMessages({
                   }}
                   onClick={async () => {
                     const todaysDate = new Date().toLocaleDateString();
-                    const res = await updateCallback({
-                      variables: {
-                        id: callback.id,
-                        messageFromTeacher: teacherMessage,
-                        messageFromStudent: '',
-                        messageFromStudentDate: todaysDate,
-                      },
+                    await updateCallback({
+                      id: callback.id,
+                      messageFromTeacher: teacherMessage,
+                      messageFromStudent: '',
+                      messageFromStudentDate: todaysDate,
                     });
-                    await queryClient.refetchQueries();
-                    if (res) {
-                      toast.success(
-                        `Updated Callback Message for ${callback.student.name}`,
-                      );
-                    }
+                    await queryClient.refetchQueries({});
+                    toast.success(
+                      `Updated Callback Message for ${callback.student.name}`,
+                    );
                   }}
                 >
                   Delete Student Message

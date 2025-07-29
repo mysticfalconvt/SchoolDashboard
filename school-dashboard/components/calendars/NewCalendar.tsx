@@ -1,12 +1,12 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainer } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import useForm from '../../lib/useForm';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form, { FormContainer } from '../styles/Form';
-import { useUser } from '../User';
 import { todaysDateForForm } from './formatTodayForForm';
 
 const CREATE_CALENDAR_MUTATION = gql`
@@ -66,16 +66,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
   });
   const user = useUser();
   //   console.log(`user ${user.id}`);
-  const [createCalendar, { loading, error, data }] = useMutation(
-    CREATE_CALENDAR_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        author: user?.id,
-        date: new Date(inputs.date + 'T00:00:00'),
-      },
-    },
-  );
+  const [createCalendar, { data, loading, error }] = useGqlMutation(CREATE_CALENDAR_MUTATION);
   if (hidden) return null;
   return (
     <div>
@@ -100,13 +91,13 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
             onSubmit={async (e) => {
               e.preventDefault();
               // Submit the inputfields to the backend:
-              const res = await createCalendar();
-              if (res) {
-                const indexRes = await revalidateIndexPage();
-                const calendarRes = await revalidateCalendarPage();
-                // console.log(indexRes);
-                // console.log(calendarRes);
-              }
+              await createCalendar({
+                ...inputs,
+                author: user?.id,
+                date: new Date(inputs.date + 'T00:00:00'),
+              });
+              await revalidateIndexPage();
+              await revalidateCalendarPage();
               resetForm();
               refetchCalendars();
               setShowForm(false);

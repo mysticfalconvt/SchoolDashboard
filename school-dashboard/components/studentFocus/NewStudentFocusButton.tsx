@@ -1,19 +1,22 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton from '@/components/styles/Button';
+import Form, {
+  FormContainerStyles,
+  FormGroupStyles,
+} from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
 
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import useSendEmail from '../../lib/useSendEmail';
-import useCreateMessage from '../Messages/useCreateMessage';
-import { useUser } from '../User';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import { useUser } from '@/components/User';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 
 const GET_GUIDANCE_EMAILS = gql`
   query GET_GUIDANCE_EMAILS {
@@ -101,17 +104,8 @@ export default function NewStudentFocusButton({
   const guidanceEmailList = guidanceAccounts.map((g: GuidanceUser) => g.email);
   // console.log('guidanceEmailList', guidanceEmailList);
   const { sendEmail, emailLoading } = useSendEmail();
-  const [createStudentFocus, { loading, error, data }] = useMutation(
-    CREATE_STUDENT_FOCUS,
-    {
-      variables: {
-        comments: inputs.comments,
-        category: inputs.category,
-        teacher: user?.id,
-        student: studentWhoIsFor?.userId,
-      },
-    },
-  );
+  const [createStudentFocus, { loading, error, data }] =
+    useGqlMutation(CREATE_STUDENT_FOCUS);
   // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
   const revalidatePage = useRevalidatePage('/studentFocus');
@@ -134,33 +128,36 @@ export default function NewStudentFocusButton({
             // Submit the input fields to the backend:
             // console.log(inputs);
             setEmailSending(true);
-            const res = await createStudentFocus();
+            await createStudentFocus({
+              comments: inputs.comments,
+              category: inputs.category,
+              teacher: user?.id,
+              student: studentWhoIsFor?.userId,
+            });
             // console.log(res);
 
             // Todo: send message when callback assigned
             createMessage({
               subject: 'New Student Focus',
-              message: `${res?.data?.createStudentFocus?.student.name} has a new Student Focus from ${user.name}`,
-              receiver: res?.data?.createStudentFocus?.student.taTeacher?.id,
+              message: `${data?.createStudentFocus?.student.name} has a new Student Focus from ${user.name}`,
+              receiver: data?.createStudentFocus?.student.taTeacher?.id,
               link: ``,
             });
 
-            if (res.data.createStudentFocus.id) {
+            if (data?.createStudentFocus?.id) {
               for (const email of guidanceEmailList) {
                 const emailToSend = {
                   toAddress: email,
                   fromAddress: user.email,
-                  subject: `New Student Focus for ${res.data.createStudentFocus.student.name}`,
+                  subject: `New Student Focus for ${data.createStudentFocus.student.name}`,
                   body: `
-                <p>There is a new Student Focus Entry for ${res.data.createStudentFocus.student.name} at NCUJHS.TECH created by ${user.name}. </p>
+                <p>There is a new Student Focus Entry for ${data.createStudentFocus.student.name} at NCUJHS.TECH created by ${user.name}. </p>
                 <p><a href="https://ncujhs.tech/studentFocus">Click Here to View</a></p> 
                 `,
                 };
                 // console.log(emailToSend);
                 const emailRes = await sendEmail({
-                  variables: {
-                    emailData: emailToSend,
-                  },
+                  emailData: emailToSend,
                 });
               }
             }

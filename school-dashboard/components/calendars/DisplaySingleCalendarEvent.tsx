@@ -54,7 +54,7 @@ const DisplaySingleCalendarEvent: React.FC<DisplaySingleCalendarEventProps> = ({
                     ? calendar.link
                     : `http://${calendar.link}`
                 }
-              >
+                >
                 {calendar.linkTitle || 'Link'}
               </Link>
             ) : (

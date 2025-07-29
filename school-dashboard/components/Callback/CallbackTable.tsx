@@ -196,7 +196,7 @@ export default function CallbackTable({
             }) => (
               <Link
                 href={`/userProfile/${cell?.row?.original?.student?.id || ''}`}
-              >
+                >
                 {cell.value}
               </Link>
             ),
@@ -211,7 +211,7 @@ export default function CallbackTable({
             }) => (
               <Link
                 href={`/userProfile/${cell?.row?.original?.teacher?.id || ''}`}
-              >
+                >
                 {cell.value}
               </Link>
             ),
@@ -224,7 +224,7 @@ export default function CallbackTable({
             }: {
               cell: { value: string; row: { original: Callback } };
             }) => (
-              <Link href={`/callback/${cell.row.original.id}`}>
+              <Link href={`/callback/${cell.row.original.id}`} >
                 {cell.value}
               </Link>
             ),
@@ -252,7 +252,7 @@ export default function CallbackTable({
               return (
                 <>
                   <div className="relative inline-block group">
-                    <Link href={`/callback/${cell.row.original.id}`}>
+                    <Link href={`/callback/${cell.row.original.id}`} >
                       {shortDescription}
                     </Link>
                     <span className="invisible group-hover:visible w-[clamp(200px,30vw,60vw)] bg-black/80 text-white text-center rounded-md p-1.5 absolute z-10">
@@ -292,7 +292,7 @@ export default function CallbackTable({
             Cell: ({ cell: { value } }: { cell: { value?: string } }) => (
               <Link
                 href={value?.startsWith('http') ? value : `http://${value}`}
-              >
+                >
                 {value ? 'Link' : ''}
               </Link>
             ),

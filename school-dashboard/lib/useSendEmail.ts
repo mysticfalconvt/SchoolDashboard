@@ -1,6 +1,6 @@
-import { useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
 import { useEffect, useState } from 'react';
+import { useGqlMutation } from './useGqlMutation';
 
 const SEND_EMAIL_MUTATION = gql`
   mutation SEND_EMAIL_MUTATION($emailData: JSON!) {
@@ -15,8 +15,8 @@ interface EmailData {
 export default function useSendEmail() {
   const [email, setEmail] = useState<EmailData | null>(null);
 
-  const [sendEmail, { loading: emailLoading }] =
-    useMutation(SEND_EMAIL_MUTATION);
+  const [sendEmail, { data, loading: emailLoading, error }] =
+    useGqlMutation(SEND_EMAIL_MUTATION);
 
   useEffect(() => {
     if (email) {
@@ -25,9 +25,7 @@ export default function useSendEmail() {
       const emailToSend = email;
       // console.log(emailToSend);
       sendEmail({
-        variables: {
-          emailData: emailToSend,
-        },
+        emailData: emailToSend,
       });
     }
   }, [email, sendEmail]);

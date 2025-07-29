@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import Loading from '../../components/Loading';
 import { useUser } from '../../components/User';
 import EditStudent from '../../components/users/EditStudent';
@@ -160,6 +160,18 @@ const UserProfile: NextPage<UserProfilePageProps> = ({ query }) => {
       )}
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<
+  UserProfilePageProps
+> = async (context) => {
+  return {
+    props: {
+      query: {
+        id: context.params?.id as string,
+      },
+    },
+  };
 };
 
 export default UserProfile;

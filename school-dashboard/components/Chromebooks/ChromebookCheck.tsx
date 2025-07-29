@@ -1,12 +1,12 @@
-import { useMutation } from '@apollo/client';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useSendEmail from '../../lib/useSendEmail';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import { useUser } from '../User';
 
 export const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   mutation CREATE_CHROMEBOOK_CHECK_MUTATION(
@@ -103,12 +103,10 @@ function SingleChromebookCheckForm({
   const [message, setMessage] = useState('');
   const [isDisabled, setIsDisabled] = useState(false);
   const queryClient = useQueryClient();
-  const [createChromebookCheck, { loading, error }] = useMutation(
+  const [createChromebookCheck, { loading, error }] = useGqlMutation(
     CREATE_CHROMEBOOK_CHECK_MUTATION,
   );
-  const [createCard] = useMutation(CREATE_QUICK_PBIS, {
-    variables: { teacher: me?.id, student: student?.id },
-  });
+  const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   const { sendEmail, emailLoading } = useSendEmail();
   return (
     <form
@@ -116,51 +114,39 @@ function SingleChromebookCheckForm({
       onSubmit={async (e) => {
         e.preventDefault();
         setIsDisabled(true);
-        const res = await createChromebookCheck({
-          variables: {
-            chromebookCheck: {
-              student: { connect: { id: student.id } },
-              message:
-                message === 'Other'
-                  ? customMessage
-                  : `${message} - ${customMessage}`,
-            },
+        await createChromebookCheck({
+          chromebookCheck: {
+            student: { connect: { id: student.id } },
+            message:
+              message === 'Other'
+                ? customMessage
+                : `${message} - ${customMessage}`,
           },
         });
         if (error) {
           console.log(error);
           setIsDisabled(false);
         }
-        if (
-          res.data.createChromebookCheck.id &&
-          goodCheckMessages.includes(message) &&
-          student?.id
-        ) {
-          await createCard();
-          await createCard();
-          await createCard();
+        if (goodCheckMessages.includes(message) && student?.id) {
+          await createCard({ teacher: me?.id, student: student?.id });
+          await createCard({ teacher: me?.id, student: student?.id });
+          await createCard({ teacher: me?.id, student: student?.id });
         }
         queryClient.refetchQueries();
-        if (
-          res.data?.createChromebookCheck?.id &&
-          me?.id &&
-          !goodCheckMessages.includes(message)
-        ) {
+        if (me?.id && !goodCheckMessages.includes(message)) {
           chromebookEmails.forEach(async (email) => {
             const emailToSend: EmailData = {
               toAddress: email,
               fromAddress: me.email,
-              subject: `New Chromebook Check for ${res.data.createChromebookCheck?.student?.name}`,
+              subject: `New Chromebook Check for ${student?.name}`,
               body: `
-          <p>There is a new Chromebook check for ${res.data.createChromebookCheck?.student?.name} at NCUJHS.TECH created by ${me.name}. </p>
-          <p>${res.data.createChromebookCheck.message}</p>
+          <p>There is a new Chromebook check for ${student?.name} at NCUJHS.TECH created by ${me.name}. </p>
+          <p>${message === 'Other' ? customMessage : `${message} - ${customMessage}`}</p>
            `,
             };
             // console.log(emailToSend);
-            const emailRes = await sendEmail({
-              variables: {
-                emailData: emailToSend,
-              },
+            await sendEmail({
+              emailData: emailToSend,
             });
           });
         }

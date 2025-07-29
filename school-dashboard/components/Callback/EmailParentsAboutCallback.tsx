@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import GradientButton from '@/components/styles/Button';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
-import useSendEmail from '../../lib/useSendEmail';
-import GradientButton from '../styles/Button';
-import { useUser } from '../User';
 
 const CREATE_STUDENT_FOCUS = gql`
   mutation CREATE_STUDENT_FOCUS(
@@ -93,7 +93,8 @@ export default function EmailParentsAboutCallback({
   disabled,
 }: EmailParentsAboutCallbackProps) {
   const [loading, setLoading] = React.useState(false);
-  const [createStudentFocus] = useMutation(CREATE_STUDENT_FOCUS);
+  const [createStudentFocus, { data, loading: mutationLoading, error }] =
+    useGqlMutation(CREATE_STUDENT_FOCUS);
   const [emailSent, setEmailSent] = React.useState(false);
   const me = useUser() as User;
   const { sendEmail, emailLoading } = useSendEmail();
@@ -120,9 +121,7 @@ export default function EmailParentsAboutCallback({
           // Send email
           // console.log('sending email to', emailToSend);
           await sendEmail({
-            variables: {
-              emailData: emailToSend,
-            },
+            emailData: emailToSend,
           });
           return emailToSend;
         });

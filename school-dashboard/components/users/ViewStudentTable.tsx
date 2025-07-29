@@ -49,7 +49,7 @@ export default function ViewStudentTable({
                 : nameWithFirstLetterUpperCase;
               return (
                 <>
-                  <Link href={`/userProfile/${row.original.id}`}>
+                  <Link href={`/userProfile/${row.original.id}`} >
                     {nameToShow}
                   </Link>
                   <QuickPbisButton id={row.original.id} />
@@ -65,7 +65,7 @@ export default function ViewStudentTable({
               const showLink = !!row.original?.taTeacher?.id;
               if (showLink)
                 return (
-                  <Link href={`/userProfile/${row.original?.taTeacher?.id}`}>
+                  <Link href={`/userProfile/${row.original?.taTeacher?.id}`} >
                     {row.original?.taTeacher?.name}
                   </Link>
                 );

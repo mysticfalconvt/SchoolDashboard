@@ -4,9 +4,7 @@ import { useUser } from './User';
 
 interface SortedHouseProps {
   house: string;
-  updateHouse: (variables: {
-    variables: { id: string; house: string };
-  }) => Promise<any>;
+  updateHouse: (variables: { id: string; house: string }) => void;
   me: ReturnType<typeof useUser>;
 }
 
@@ -30,10 +28,8 @@ const SortedHouse: React.FC<SortedHouseProps> = ({
           type="button"
           onClick={async () => {
             await updateHouse({
-              variables: {
-                id: me.id,
-                house: '',
-              },
+              id: me.id,
+              house: '',
             });
             queryClient.refetchQueries('me');
           }}

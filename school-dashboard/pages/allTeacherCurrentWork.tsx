@@ -277,7 +277,7 @@ export const getStaticProps: GetStaticProps<
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchTeacherWork = async () =>
+  const fetchTeacherWork = async (): Promise<{ users: TeacherData[] }> =>
     graphQLClient.request(ALL_TEACHERS_QUERY);
 
   const initialWorkData = await fetchTeacherWork();

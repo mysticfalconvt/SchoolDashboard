@@ -1,17 +1,17 @@
-import { useMutation } from '@apollo/client';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import DisplayError from '@/components/ErrorMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton from '@/components/styles/Button';
+import Form, { FormContainerStyles } from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import useSendEmail from '../../lib/useSendEmail';
-import DisplayError from '../ErrorMessage';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles } from '../styles/Form';
-import { useUser } from '../User';
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
@@ -106,15 +106,8 @@ const CellPhoneAddButton: React.FC = () => {
         }`
       : ''
   }`;
-  const [createCellViolation, { loading, error, data }] = useMutation(
+  const [createCellViolation, { loading, error, data }] = useGqlMutation(
     ADD_CELLPHONE_MUTATION,
-    {
-      variables: {
-        teacher,
-        student: studentCardIsFor?.userId,
-        description: description,
-      },
-    },
   );
   const isThirdViolation =
     studentCellPhoneViolations?.cellPhoneViolationsCount === 2;
@@ -145,37 +138,33 @@ const CellPhoneAddButton: React.FC = () => {
             // Submit the input fields to the backend:
             // console.log(inputs);
             setEmailSending(true);
-            const res = await createCellViolation();
+            await createCellViolation({
+              teacher,
+              student: studentCardIsFor?.userId,
+              description: description,
+            });
             // console.log(res);
-            if (res.data.createCellPhoneViolation.id) {
-              for (const email of adminEmailArray || []) {
-                const emailToSend = {
-                  toAddress: email,
-                  fromAddress: me?.email || '',
-                  subject: `New Cell Phone Violation for ${res.data.createCellPhoneViolation.student.name}`,
-                  body: `
-                  <p>There is a new Cell Phone Violation for ${
-                    res.data.createCellPhoneViolation.student.name
-                  } at NCUJHS.TECH created by ${me?.name}. </p>
-                  <p><a href="https://ncujhs.tech/discipline">Click Here to View</a></p>
-                  ${isThirdViolation ? '<p>Third Violation!!</p>' : ''}
-                  <p>Violation Description: ${
-                    res.data.createCellPhoneViolation.description
-                  }</p>
-                  `,
-                };
-                // console.log(emailToSend);
-                const emailRes = await sendEmail({
-                  variables: {
-                    emailData: emailToSend,
-                  },
-                });
-              }
+            for (const email of adminEmailArray || []) {
+              const emailToSend = {
+                toAddress: email,
+                fromAddress: me?.email || '',
+                subject: `New Cell Phone Violation for ${studentCardIsFor?.name}`,
+                body: `
+                <p>There is a new Cell Phone Violation for ${
+                  studentCardIsFor?.name
+                } at NCUJHS.TECH created by ${me?.name}. </p>
+                <p><a href="https://ncujhs.tech/discipline">Click Here to View</a></p>
+                ${isThirdViolation ? '<p>Third Violation!!</p>' : ''}
+                <p>Violation Description: ${description}</p>
+                `,
+              };
+              // console.log(emailToSend);
+              await sendEmail({
+                emailData: emailToSend,
+              });
             }
 
-            if (res) {
-              toast.success('Cell Phone Violation Created');
-            }
+            toast.success('Cell Phone Violation Created');
             setEmailSending(false);
             const revalidationResponse = revalidatePage();
             // console.log(revalidationResponse);

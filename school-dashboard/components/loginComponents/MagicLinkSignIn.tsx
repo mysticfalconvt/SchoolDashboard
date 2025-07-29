@@ -1,8 +1,6 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
-import { endpoint, prodEndpoint } from '../../config';
-import { GraphQLClient } from '../../lib/graphqlClient';
 import useForm from '../../lib/useForm';
 import Error from '../ErrorMessage';
 import Form from '../styles/Form';
@@ -58,34 +56,31 @@ const MagicLinkSignIn: React.FC = () => {
   const [magicLinkSent, setMagicLinkSent] = React.useState(false);
   const [
     sendMagicLink,
-    { data: sendMagicLinkData, loading: sendMagicLinkLoading },
-  ] = useMutation(SEND_MAGIC_LINK_MUTATION);
+    { data: sendData, loading: sendMagicLinkLoading, error: sendError },
+  ] = useGqlMutation(SEND_MAGIC_LINK_MUTATION);
 
-  const [signin, { data, loading }] = useMutation(SIGNIN_MUTATION, {
-    variables: {
-      email: inputs?.email?.toLowerCase(),
-      password: inputs?.password,
-    },
-    // refetch the currently logged in user
-    // refetchQueries: [{ query: CURRENT_USER_QUERY }],
-  });
+  const [
+    signin,
+    { data: signinData, loading: signinLoading, error: signinError },
+  ] = useGqlMutation(SIGNIN_MUTATION);
   // console.log(lowercaseEmail);
 
   const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newRes = await sendMagicLink({
-      variables: { email: inputs?.email?.toLowerCase() },
-    });
-    if (newRes?.data?.sendUserMagicAuthLink) {
+    try {
+      await sendMagicLink({
+        email: inputs?.email?.toLowerCase(),
+      });
       setMagicLinkSent(true);
+    } catch (error) {
+      console.error('Error sending magic link:', error);
     }
-    console.log(newRes);
   };
 
   const error =
-    data?.authenticateUserWithPassword.__typename ===
+    signinData?.authenticateUserWithPassword.__typename ===
     'UserAuthenticationWithPasswordFailure'
-      ? data?.authenticateUserWithPassword
+      ? signinData?.authenticateUserWithPassword
       : undefined;
 
   return (
@@ -129,29 +124,5 @@ const MagicLinkSignIn: React.FC = () => {
     </Form>
   );
 };
-
-// const endpoint = "http://localhost:3000/api/graphql";
-
-async function signinNew({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) {
-  const endppointToUse =
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint;
-
-  const graphQLClient = new GraphQLClient(endppointToUse);
-  const res = await graphQLClient.request(SIGNIN_MUTATION, {
-    email: email.toLowerCase(),
-    password,
-  });
-  // console.log("signin",res);
-  const token = res.authenticateUserWithPassword.sessionToken;
-  // console.log("token",token);
-  localStorage.setItem('token', token);
-  return res.data;
-}
 
 export default MagicLinkSignIn;

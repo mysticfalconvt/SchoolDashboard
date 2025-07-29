@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { ADMIN_ID } from '../../config';
@@ -69,16 +69,10 @@ const NewBugReportButton: React.FC = () => {
   const me = useUser();
   const { sendEmail } = useSendEmail();
 
-  const [createBugReport, { loading, error, data }] = useMutation<
+  const [createBugReport, { data, loading, error }] = useGqlMutation<
     BugReportData,
     BugReportVariables
-  >(CREATE_BUG_REPORT_MUTATION, {
-    variables: {
-      name: inputs.name,
-      description: inputs.description,
-      submittedBy: me?.id || '',
-    },
-  });
+  >(CREATE_BUG_REPORT_MUTATION);
   const createMessage = useCreateMessage();
 
   return (
@@ -118,37 +112,42 @@ const NewBugReportButton: React.FC = () => {
                   e.preventDefault();
                   // Submit the input fields to the backend:
                   // console.log(inputs);
-                  const res = await createBugReport();
-                  // console.log(res);
+                  try {
+                    await createBugReport({
+                      name: inputs.name,
+                      description: inputs.description,
+                      submittedBy: me?.id || '',
+                    });
 
-                  // Todo: send message when callback assigned
-                  createMessage({
-                    subject: 'New Bug Report',
-                    message: `${res?.data?.createBugReport?.submittedBy.name} reported a bug or asked for a feature`,
-                    receiver: ADMIN_ID,
-                    link: ``,
-                  });
+                    // Todo: send message when callback assigned
+                    createMessage({
+                      subject: 'New Bug Report',
+                      message: `${me?.name} reported a bug or asked for a feature`,
+                      receiver: ADMIN_ID,
+                      link: ``,
+                    });
 
-                  // Create email to send
-                  const email: EmailData = {
-                    toAddress: 'rboskind@gmail.com',
-                    fromAddress: me?.email || '',
-                    subject: `NCUJHS.Tech Bug Report from ${res?.data?.createBugReport?.submittedBy.name}`,
-                    body: `
-                          <p>This is a bug report from ${res?.data?.createBugReport?.submittedBy.name}. </p>
-                          <p>${inputs.name}</p>
-                          <p>${inputs.description}</p>
-                          `,
-                  };
+                    // Create email to send
+                    const email: EmailData = {
+                      toAddress: 'rboskind@gmail.com',
+                      fromAddress: me?.email || '',
+                      subject: `NCUJHS.Tech Bug Report from ${me?.name}`,
+                      body: `
+                            <p>This is a bug report from ${me?.name}. </p>
+                            <p>${inputs.name}</p>
+                            <p>${inputs.description}</p>
+                            `,
+                    };
 
-                  //send email to Admin
-                  const emailRes = await sendEmail({
-                    variables: {
+                    //send email to Admin
+                    const emailRes = await sendEmail({
                       emailData: email,
-                    },
-                  });
-                  resetForm();
-                  setShowForm(false);
+                    });
+                    resetForm();
+                    setShowForm(false);
+                  } catch (error) {
+                    console.error('Error creating bug report:', error);
+                  }
                 }}
               >
                 <DisplayError error={error as any} />

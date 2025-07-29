@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import { useGQLQuery } from '../lib/useGqlQuery';
 import { SPECIAL_GROUP_QUERY } from '../pages/specialGroup';
 import Loading from './Loading';
 import SearchForUserName from './SearchForUserName';
@@ -55,13 +55,11 @@ const ModifySpecialGroup: React.FC = () => {
 
   const [searchValue, setSearchValue] = useState<SearchValue | null>(null);
   const [thinking, setThinking] = useState(false);
-  const [addStudent] = useMutation(ADD_STUDENT_TO_GROUP_MUTATION, {
-    variables: {
-      id: me?.id,
-      studentID: searchValue?.userId,
-    },
-  });
-  const [removeStudent] = useMutation(REMOVE_STUDENT_FROM_GROUP_MUTATION);
+  const [addStudent] = useGqlMutation(ADD_STUDENT_TO_GROUP_MUTATION);
+  const [
+    removeStudent,
+    { data: removeData, loading: removeLoading, error: removeError },
+  ] = useGqlMutation(REMOVE_STUDENT_FROM_GROUP_MUTATION);
 
   const studentList = data?.teacher?.specialGroupStudents || [];
   return (
@@ -79,8 +77,11 @@ const ModifySpecialGroup: React.FC = () => {
         className="p-4 m-2 bg-stone-500 border border-slate-400 rounded text-[var(--textColor)]"
         onClick={async () => {
           setThinking(true);
-          await addStudent();
-          await refetch();
+          await addStudent({
+            id: me?.id,
+            studentID: searchValue?.userId,
+          });
+          await refetch({});
           setSearchValue(null);
           setThinking(false);
         }}
@@ -98,12 +99,10 @@ const ModifySpecialGroup: React.FC = () => {
               onClick={async () => {
                 setThinking(true);
                 await removeStudent({
-                  variables: {
-                    id: me?.id,
-                    studentID: student?.id,
-                  },
+                  id: me?.id,
+                  studentID: student?.id,
                 });
-                await refetch();
+                await refetch({});
                 setSearchValue(null);
                 setThinking(false);
               }}

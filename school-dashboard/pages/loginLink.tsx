@@ -1,9 +1,9 @@
-import { useMutation } from '@apollo/client';
+import { useUser } from '@/components/User';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useQueryClient } from 'react-query';
-import { useUser } from '../components/User';
 
 const LOGIN_LINK_MUTATION = gql`
   mutation LOGIN_LINK_MUTATION($token: String!, $email: String!) {
@@ -28,17 +28,16 @@ export default function LoginLink() {
   const token = router.query.token;
   const email = router.query.email;
   const user = useUser();
-  const [mutation, { data, loading, error }] = useMutation(
-    LOGIN_LINK_MUTATION,
-    {
-      variables: { token, email },
-    },
-  );
+  const [mutation, { data, loading, error }] =
+    useGqlMutation(LOGIN_LINK_MUTATION);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
     if (token && email && !data) {
-      mutation();
+      mutation({
+        token,
+        email,
+      });
     }
   }, [token, email, data, mutation]);
 

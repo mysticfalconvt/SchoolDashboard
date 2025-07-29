@@ -54,7 +54,7 @@ const Bullying: NextPage = () => {
             Header: 'Student',
             accessor: 'studentOffender.name',
             Cell: ({ cell }: any) => (
-              <Link href={`/hhb/${cell?.row?.original?.id || ''}`}>
+              <Link href={`/hhb/${cell?.row?.original?.id || ''}`} >
                 {cell?.value || 'N/A'}
               </Link>
             ),
@@ -63,7 +63,7 @@ const Bullying: NextPage = () => {
             Header: 'Teacher',
             accessor: 'teacherAuthor.name',
             Cell: ({ cell }: any) => (
-              <Link href={`/hhb/${cell?.row?.original?.id || ''}`}>
+              <Link href={`/hhb/${cell?.row?.original?.id || ''}`} >
                 {cell?.value || 'N/A'}
               </Link>
             ),

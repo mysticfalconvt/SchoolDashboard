@@ -46,25 +46,23 @@ export default function SingleCallbackCard({
   if (!callback.student) return null;
   return (
     <div className="bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)] m-4 p-4 rounded-2xl text-xl flex flex-col justify-center items-center">
-      <Link legacyBehavior href={`/callback/${callback.id}`}>
-        <a className="text-center">
-          <h1 className="my-2 mx-4">{callback.title}</h1>
-          <p className="mx-4 mb-4">
-            {callback?.teacher?.id === me?.id
-              ? ''
-              : `${callback.teacher.name} -- `}{' '}
-            {dateAssigned}
-          </p>
-          <p className="mx-4 mb-4">
-            {callback?.student?.id === me?.id
-              ? ''
-              : `${capitalizeFirstLetter(
-                  getDisplayName(callback.student as any),
-                )} -- `}{' '}
-            {completed}
-          </p>
-          <p className="mx-4 mb-4">{callback.description}</p>
-        </a>
+      <Link href={`/callback/${callback.id}`} className="text-center block">
+        <h1 className="my-2 mx-4">{callback.title}</h1>
+        <p className="mx-4 mb-4">
+          {callback?.teacher?.id === me?.id
+            ? ''
+            : `${callback.teacher.name} -- `}{' '}
+          {dateAssigned}
+        </p>
+        <p className="mx-4 mb-4">
+          {callback?.student?.id === me?.id
+            ? ''
+            : `${capitalizeFirstLetter(
+                getDisplayName(callback.student as any),
+              )} -- `}{' '}
+          {completed}
+        </p>
+        <p className="mx-4 mb-4">{callback.description}</p>
       </Link>
       {callback.link && (
         <Link
@@ -73,10 +71,9 @@ export default function SingleCallbackCard({
               ? callback.link
               : `http://${callback.link}`
           }
+          className="bg-white bg-opacity-20 py-0.5 px-2 rounded-lg -mt-2 mb-2 cursor-pointer inline-block"
         >
-          <p className="bg-white bg-opacity-20 py-0.5 px-2 rounded-lg -mt-2 mb-2 cursor-pointer">
-            {callback.link ? 'Link' : ''}
-          </p>
+          {callback.link ? 'Link' : ''}
         </Link>
       )}
       <CallbackCardMessages me={me} callback={callback} />

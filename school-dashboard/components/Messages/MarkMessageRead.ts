@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 
 const MARK_MESSAGE_READ_MUTATION = gql`
@@ -22,10 +22,10 @@ interface MarkMessageReadData {
 export default function useMarkMessageRead() {
   //   console.log(`message: ${JSON.stringify(message)}`);
 
-  const [markMessageRead] = useMutation<
+  const [markMessageRead] = useGqlMutation<
     MarkMessageReadData,
     MarkMessageReadVariables
-  >(MARK_MESSAGE_READ_MUTATION, {});
+  >(MARK_MESSAGE_READ_MUTATION);
 
   return markMessageRead;
 }

@@ -1,15 +1,18 @@
-import { useMutation } from '@apollo/client';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import { todaysDateForForm } from '@/components/calendars/formatTodayForForm';
+import DisplayError from '@/components/ErrorMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton from '@/components/styles/Button';
+import Form, {
+  FormContainerStyles,
+  FormGroupStyles,
+} from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useSendEmail from '../../lib/useSendEmail';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import DisplayError from '../ErrorMessage';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import { useUser } from '../User';
 
 interface FormInputs {
   dateReported: string;
@@ -133,23 +136,10 @@ const NewBullying: React.FC<NewBullyingProps> = ({ refetch }) => {
     useState<SearchResult | null>(null);
   const { sendEmail, emailLoading } = useSendEmail();
 
-  const [createHHB, { loading, error }] = useMutation<
+  const [createHHB, { loading, error }] = useGqlMutation<
     CreateBullyingData,
     CreateBullyingVariables
-  >(CREATE_HHB_MUTATION, {
-    variables: {
-      teacher: user?.id || '',
-      student: studentReferralIsFor?.userId || '',
-      dateReported: new Date(inputs.dateReported).toISOString(),
-      dateOfEvent: new Date(inputs.dateOfEvent).toISOString(),
-      studentReporter: inputs.studentReporter,
-      employeeWitness: inputs.employeeWitness,
-      studentWitness: inputs.studentWitness,
-      initialActions: inputs.initialActions,
-      nextSteps: inputs.nextSteps,
-      teacherComments: inputs.teacherComments,
-    },
-  });
+  >(CREATE_HHB_MUTATION);
 
   return (
     <div>
@@ -166,25 +156,32 @@ const NewBullying: React.FC<NewBullyingProps> = ({ refetch }) => {
           onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             // Submit the input fields to the backend:
-            const res = await createHHB();
-            if (res.data?.createBullying.id) {
-              // loop over each email in adminEmailArray and send an email to each one async and await
-              for (const email of adminEmailArray || []) {
-                const emailToSend: EmailData = {
-                  toAddress: email,
-                  fromAddress: me?.email || '',
-                  subject: `New HHB Referral for ${res.data.createBullying.studentOffender.name}`,
-                  body: `
-                <p>There is a new HHB Referral for ${res.data.createBullying.studentOffender.name} at NCUJHS.TECH created by ${me?.name}. </p>
-                <p><a href="https://ncujhs.tech/hhb/${res.data.createBullying.id}">Click Here to View</a></p>
-                 `,
-                };
-                const emailRes = await sendEmail({
-                  variables: {
-                    emailData: emailToSend,
-                  },
-                });
-              }
+            await createHHB({
+              teacher: user?.id || '',
+              student: studentReferralIsFor?.userId || '',
+              dateReported: new Date(inputs.dateReported).toISOString(),
+              dateOfEvent: new Date(inputs.dateOfEvent).toISOString(),
+              studentReporter: inputs.studentReporter,
+              employeeWitness: inputs.employeeWitness,
+              studentWitness: inputs.studentWitness,
+              initialActions: inputs.initialActions,
+              nextSteps: inputs.nextSteps,
+              teacherComments: inputs.teacherComments,
+            });
+            // loop over each email in adminEmailArray and send an email to each one async and await
+            for (const email of adminEmailArray || []) {
+              const emailToSend: EmailData = {
+                toAddress: email,
+                fromAddress: me?.email || '',
+                subject: `New HHB Referral for ${studentReferralIsFor?.userName}`,
+                body: `
+              <p>There is a new HHB Referral for ${studentReferralIsFor?.userName} at NCUJHS.TECH created by ${me?.name}. </p>
+              <p><a href="https://ncujhs.tech/hhb/new">Click Here to View</a></p>
+               `,
+              };
+              await sendEmail({
+                emailData: emailToSend,
+              });
             }
 
             resetForm();

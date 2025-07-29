@@ -469,8 +469,10 @@ export const getStaticProps: GetStaticProps<UsersPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchStudents = async () => graphQLClient.request(GET_ALL_STUDENTS);
-  const fetchTeachers = async () => graphQLClient.request(GET_ALL_TEACHERS);
+  const fetchStudents = async (): Promise<{ students: Student[] }> =>
+    graphQLClient.request(GET_ALL_STUDENTS);
+  const fetchTeachers = async (): Promise<{ teachers: Teacher[] }> =>
+    graphQLClient.request(GET_ALL_TEACHERS);
 
   const students = await fetchStudents();
   const teachers = await fetchTeachers();

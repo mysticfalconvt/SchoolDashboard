@@ -180,7 +180,7 @@ export const getStaticProps: GetStaticProps<EPortfolioPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchAllLinks = async () =>
+  const fetchAllLinks = async (): Promise<{ links: Link[] }> =>
     graphQLClient.request(GET_ALL_PORTFOLIO_LINKS_QUERY);
 
   const rawLinksList = await fetchAllLinks();

@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import type { User } from '../components/User';
+import { useGqlMutation } from './useGqlMutation';
 import { useAsyncGQLQuery } from './useGqlQuery';
 import useSendEmail from './useSendEmail';
 
@@ -115,14 +115,13 @@ export function useNewParentAccount() {
   const { sendEmail, emailLoading } = useSendEmail();
   const getStudentData = useAsyncGQLQuery(STUDENT_INFO_QUERY);
   const getParentData = useAsyncGQLQuery(PARENT_INFO_QUERY);
-  const [createNewUser, { loading, data: newUser, error }] = useMutation(
+  const [createNewUser, { data, loading, error }] = useGqlMutation(
     SIGNUP_NEW_PARENT_MUTATION,
-    {},
   );
   const [
     updateStudentWithExistingParent,
-    { loading: updatingStudent, error: updateStudentError },
-  ] = useMutation(UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION, {});
+    { data: updateData, loading: updatingStudent, error: updateStudentError },
+  ] = useGqlMutation(UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION);
 
   async function createParentAccount(
     props: CreateParentAccountProps,
@@ -153,10 +152,8 @@ export function useNewParentAccount() {
     // link this student to that parent account
     if (isThisAnExistingParent) {
       const res = await updateStudentWithExistingParent({
-        variables: {
-          id: student.id,
-          parent: { connect: { id: existingParentID } },
-        },
+        id: student.id,
+        parent: { connect: { id: existingParentID } },
       });
       setCreatingParentAccount(false);
       return {
@@ -168,13 +165,11 @@ export function useNewParentAccount() {
     const password = Math.random().toString(36).substring(2, 10);
     if (!isThisAnExistingParent) {
       const newParent = await createNewUser({
-        variables: {
-          email: parentEmail,
-          name: parentEmail,
-          password,
-          children: { connect: { id: student.id } },
-          isParent: true,
-        },
+        email: parentEmail,
+        name: parentEmail,
+        password,
+        children: { connect: { id: student.id } },
+        isParent: true,
       });
       // email to parent with password
       const emailToSend = {
@@ -194,9 +189,7 @@ export function useNewParentAccount() {
      `,
       };
       const emailRes = await sendEmail({
-        variables: {
-          emailData: emailToSend,
-        },
+        emailData: emailToSend,
       });
       setCreatingParentAccount(false);
       return {

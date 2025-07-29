@@ -1,6 +1,6 @@
-import { useMutation } from '@apollo/client';
+import GradientButton from '@/components/styles/Button';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
-import GradientButton from '../styles/Button';
 
 const RESET_PASSWORD_TO_PASSWORD_MUTATION = gql`
   mutation RESET_PASSWORD_TO_PASSWORD_MUTATION($id: ID!) {
@@ -17,20 +17,19 @@ interface ResetPasswordToPasswordProps {
 export default function ResetPasswordToPassword({
   userID,
 }: ResetPasswordToPasswordProps) {
-  const [resetThePassword, { loading, error, data }] = useMutation(
+  const [resetThePassword, { loading, error, data }] = useGqlMutation(
     RESET_PASSWORD_TO_PASSWORD_MUTATION,
-    {
-      variables: {
-        id: userID,
-      },
-    },
   );
 
   return (
     <GradientButton
       type="button"
       disabled={loading || data}
-      onClick={() => resetThePassword()}
+      onClick={() =>
+        resetThePassword({
+          id: userID,
+        })
+      }
     >
       {!data && !loading && <span>Reset Password to Password</span>}
       {loading && 'Resetting password...'}

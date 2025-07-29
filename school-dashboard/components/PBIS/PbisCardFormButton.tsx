@@ -1,13 +1,12 @@
-import { useMutation } from '@apollo/client';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useForm from '../../lib/useForm';
-import useCreateMessage from '../Messages/useCreateMessage';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
-import { useUser } from '../User';
 
 const CREATE_PBIS_CARD = gql`
   mutation CREATE_QUICK_PBIS(
@@ -65,14 +64,8 @@ function CardForm({ visible, hide }: CardFormProps) {
   const [studentCardIsFor, setStudentCardIsFor] = useState<
     StudentUser | undefined
   >();
-  const [createCard, { loading, error, data }] = useMutation(CREATE_PBIS_CARD, {
-    variables: {
-      teacher,
-      student: studentCardIsFor?.userId,
-      message: inputs.message,
-      category: inputs.category,
-    },
-  });
+  const [createCard, { loading, error, data }] =
+    useGqlMutation(CREATE_PBIS_CARD);
   const createMessage = useCreateMessage();
   if (error) {
     console.log(error);
@@ -164,16 +157,18 @@ function CardForm({ visible, hide }: CardFormProps) {
             className={`mt-4 w-full ${!studentCardIsFor || !inputs.category ? 'text-[var(--red)]' : ''}`}
             onClick={async (e) => {
               e.preventDefault();
-              const res = await createCard();
+              await createCard({
+                teacher,
+                student: studentCardIsFor?.userId,
+                message: inputs.message,
+                category: inputs.category,
+              });
               await createMessage({
                 subject: 'New PBIS Card',
-                message: `you received a new PBIS Card from ${me.name} for ${inputs.category}`,
+                message: inputs.message,
                 receiver: studentCardIsFor?.userId || '',
-                link: ``,
+                link: '',
               });
-              if (res) {
-                toast.success(`Added Card For ${studentCardIsFor?.userName}`);
-              }
               hide(false);
             }}
           >

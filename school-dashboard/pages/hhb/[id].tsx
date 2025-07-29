@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import Loading from '../../components/Loading';
 import { useUser } from '../../components/User';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -100,6 +100,18 @@ const ViewSingleHHB: NextPage<ViewSingleHHBProps> = ({ query }) => {
       <p>Description: {bullying.description}</p>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps<
+  ViewSingleHHBProps
+> = async (context) => {
+  return {
+    props: {
+      query: {
+        id: context.params?.id as string,
+      },
+    },
+  };
 };
 
 export default ViewSingleHHB;

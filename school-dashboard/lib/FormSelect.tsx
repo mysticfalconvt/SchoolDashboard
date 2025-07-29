@@ -29,9 +29,9 @@ export default function FormSelect({
         <option value="">-----</option>
         {listOfOptions.map((item) => (
           //   console.log(item);
-          <option key={`item${item}`} value={item}>
+          (<option key={`item${item}`} value={item}>
             {item}
-          </option>
+          </option>)
         ))}
       </select>
     </label>

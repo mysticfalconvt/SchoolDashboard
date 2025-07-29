@@ -40,7 +40,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
       <div className="flex-1 overflow-y-auto flex flex-col p-4 gap-2">
         {messages.map((message) => (
           // console.log(message);
-          <SingleMessageInList key={message.id} message={message} />
+          (<SingleMessageInList key={message.id} message={message} />)
         ))}
       </div>
     </div>

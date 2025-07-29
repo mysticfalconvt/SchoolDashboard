@@ -68,7 +68,7 @@ export default function ViewTaStudentTable({
                 ? `${nameWithFirstLetterUpperCase} - (${preferredName})`
                 : nameWithFirstLetterUpperCase;
               return (
-                <Link href={`/userProfile/${row.original.id}`}>
+                <Link href={`/userProfile/${row.original.id}`} >
                   {nameToShow}
                 </Link>
               );
@@ -103,9 +103,7 @@ export default function ViewTaStudentTable({
               //   console.log(showLink);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block1Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block1Teacher?.id}`} >
                     {row.original?.block1Teacher?.name}
                   </Link>
                 );
@@ -120,9 +118,7 @@ export default function ViewTaStudentTable({
               //   console.log(showLink);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block2Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block2Teacher?.id}`} >
                     {row.original?.block2Teacher?.name}
                   </Link>
                 );
@@ -137,9 +133,7 @@ export default function ViewTaStudentTable({
               //   console.log(showLink);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block3Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block3Teacher?.id}`} >
                     {row.original?.block3Teacher?.name}
                   </Link>
                 );
@@ -154,9 +148,7 @@ export default function ViewTaStudentTable({
               //   console.log(showLink);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block4Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block4Teacher?.id}`} >
                     {row.original?.block4Teacher?.name}
                   </Link>
                 );
@@ -171,9 +163,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block5Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block5Teacher?.id}`} >
                     {row.original?.block5Teacher?.name}
                   </Link>
                 );
@@ -188,9 +178,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block6Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block6Teacher?.id}`} >
                     {row.original?.block6Teacher?.name}
                   </Link>
                 );
@@ -205,9 +193,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block7Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block7Teacher?.id}`} >
                     {row.original?.block7Teacher?.name}
                   </Link>
                 );
@@ -222,9 +208,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block8Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block8Teacher?.id}`} >
                     {row.original?.block8Teacher?.name}
                   </Link>
                 );
@@ -239,9 +223,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block9Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block9Teacher?.id}`} >
                     {row.original?.block9Teacher?.name}
                   </Link>
                 );
@@ -256,9 +238,7 @@ export default function ViewTaStudentTable({
               // console.log(row);
               if (showLink)
                 return (
-                  <Link
-                    href={`/userProfile/${row.original?.block10Teacher?.id}`}
-                  >
+                  <Link href={`/userProfile/${row.original?.block10Teacher?.id}`} >
                     {row.original?.block10Teacher?.name}
                   </Link>
                 );

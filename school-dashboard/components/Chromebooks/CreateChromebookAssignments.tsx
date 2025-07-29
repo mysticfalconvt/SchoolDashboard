@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client';
+import GradientButton from '@/components/styles/Button';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import GradientButton from '../styles/Button';
 
 const GET_TA_TEACHER_LIST_QUERY = gql`
   query GET_TA_TEACHER_LIST_QUERY {
@@ -75,7 +75,7 @@ export default function CreateChromebookAssignments() {
   const teachersWithoutAssignments = teacherIds?.filter(
     (teacher) => !chromebookTeachers?.includes(teacher),
   );
-  const [createChromebookAssignment] = useMutation(
+  const [createChromebookAssignment] = useGqlMutation(
     CREATE_CHROMEBOOK_ASSIGNMENT_MUTATION,
     {},
   );

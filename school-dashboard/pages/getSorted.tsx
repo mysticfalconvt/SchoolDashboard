@@ -1,15 +1,15 @@
-import { useMutation } from '@apollo/client';
+import Loading from '@/components/Loading';
+import NewSortingHatQuestion from '@/components/NewSortingHatQuestionButton';
+import SortedHouse from '@/components/SortedHouse';
+import SortingHatQuestions from '@/components/SortingHatQuestions';
+import { useUser } from '@/components/User';
+import isAllowed from '@/lib/isAllowed';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import type { NextPage } from 'next';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
-import Loading from '../components/Loading';
-import NewSortingHatQuestion from '../components/NewSortingHatQuestionButton';
-import SortedHouse from '../components/SortedHouse';
-import SortingHatQuestions from '../components/SortingHatQuestions';
-import { useUser } from '../components/User';
-import isAllowed from '../lib/isAllowed';
-import { useGQLQuery } from '../lib/useGqlQuery';
 
 function arrayOfNumbersOneToFourInRandomOrder(): number[] {
   return [1, 2, 3, 4].sort(() => Math.random() - 0.5);
@@ -75,7 +75,8 @@ const GetSorted: NextPage = () => {
     arrayOfNumbersOneToFourInRandomOrder(),
   );
 
-  const [updateHouse] = useMutation(UPDATE_HOUSE);
+  const [updateHouse, { data: updateData, loading, error }] =
+    useGqlMutation(UPDATE_HOUSE);
 
   const { data, isLoading, refetch } = useGQLQuery(
     'SortingHatQuestions',
@@ -149,10 +150,8 @@ const GetSorted: NextPage = () => {
               type="button"
               onClick={async () => {
                 await updateHouse({
-                  variables: {
-                    id: me.id,
-                    house: winningHouse,
-                  },
+                  id: me.id,
+                  house: winningHouse,
                 });
                 await queryClient.refetchQueries('me');
                 setQuestionNumber(0);

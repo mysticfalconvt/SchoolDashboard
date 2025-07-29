@@ -326,7 +326,20 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchData = async () => graphQLClient.request(PBIS_PAGE_STATIC_QUERY);
+  const fetchData = async (): Promise<{
+    totalSchoolCards: number;
+    chromebookCards: number;
+    classCards: number;
+    quickCards: number;
+    respectCards: number;
+    responsibilityCards: number;
+    perseveranceCards: number;
+    physicalCards: number;
+    lastCollection: any[];
+    pbisLinks: PbisLink[];
+    TAs: TA[];
+    cardCounts: CardCount[];
+  }> => graphQLClient.request(PBIS_PAGE_STATIC_QUERY);
   const data = await fetchData();
   const totalSchoolCards = data?.totalSchoolCards || 0;
 

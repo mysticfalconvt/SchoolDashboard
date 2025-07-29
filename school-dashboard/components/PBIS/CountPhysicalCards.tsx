@@ -1,11 +1,11 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import GradientButton from '@/components/styles/Button';
+import Form from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import GradientButton from '../styles/Button';
-import Form from '../styles/Form';
-import { useUser } from '../User';
 
 const CREATE_CARD_MUTATION = gql`
   mutation CREATE_CARD_MUTATION($cards: [PbisCardCreateInput!]!) {
@@ -74,7 +74,7 @@ export default function CountPhysicalCards({
   const { inputs, handleChange, clearForm, resetForm } =
     useForm(taStudentCounts);
   const [countCardsMutation, { loading, error, data }] =
-    useMutation(CREATE_CARD_MUTATION);
+    useGqlMutation(CREATE_CARD_MUTATION);
 
   return (
     <div>
@@ -110,10 +110,10 @@ export default function CountPhysicalCards({
                 onSubmit={async (e) => {
                   e.preventDefault();
                   // Submit the inputfields to the backend:
-                  //   const res = await countCardsMutation();
+                  //   const res = await countCardsMutation({});
                   const cardsToCreate = await createCards(inputs, me.id);
                   const res = await countCardsMutation({
-                    variables: { cards: cardsToCreate },
+                    cards: cardsToCreate,
                   });
                   // get all the unique students from the cards
                   // get the unique student ids

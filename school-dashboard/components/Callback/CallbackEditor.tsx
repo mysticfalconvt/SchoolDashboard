@@ -1,12 +1,12 @@
-import { useMutation } from '@apollo/client';
+import DisplayError from '@/components/ErrorMessage';
+import Form, { FormGroup } from '@/components/styles/Form';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import useForm from '../../lib/useForm';
-import DisplayError from '../ErrorMessage';
-import Form, { FormGroup } from '../styles/Form';
 
-import useCreateMessage from '../Messages/useCreateMessage';
-import { useUser } from '../User';
+import useCreateMessage from '@/components/Messages/useCreateMessage';
+import { useUser } from '@/components/User';
 
 const UPDATE_CALLBACK_MUTATION = gql`
   mutation UPDATE_CALLBACK_MUTATION(
@@ -77,15 +77,8 @@ export default function CallbackEditor({
   const user = useUser() as User;
   const [studentCallbackIsFor, setStudentCallbackIsFor] = useState(null);
 
-  const [updateCallback, { loading, error, data }] = useMutation(
+  const [updateCallback, { loading, error, data }] = useGqlMutation(
     UPDATE_CALLBACK_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        dateAssigned: new Date(inputs.dateAssigned),
-        id: callback.id,
-      },
-    },
   );
   // TODO: send message when callback assigned
   const createMessage = useCreateMessage();
@@ -99,13 +92,17 @@ export default function CallbackEditor({
           e.preventDefault();
           // Submit the input fields to the backend:
           // console.log(inputs);
-          const res = await updateCallback();
+          await updateCallback({
+            ...inputs,
+            dateAssigned: new Date(inputs.dateAssigned),
+            id: callback.id,
+          });
 
           createMessage({
             subject: 'Updated Callback Assignment',
             message: `${user.name} updated a callback item`,
             receiver: callback.student.id,
-            link: `/callback/${res?.data?.updateCallback.id}`,
+            link: `/callback/${callback.id}`,
           });
           refetch();
           setEditing(false);

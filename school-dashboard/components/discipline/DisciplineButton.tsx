@@ -1,8 +1,3 @@
-import { useMutation } from '@apollo/client';
-import gql from 'graphql-tag';
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
 import {
   classTypeList,
   locationList,
@@ -10,19 +5,27 @@ import {
   studentConductList,
   teacherActionList,
   timeOfDayList,
-} from '../../lib/disciplineData';
-import FormCheckboxArray from '../../lib/FormCheckboxArray';
-import FormSelect from '../../lib/FormSelect';
-import useForm from '../../lib/useForm';
-import { useGQLQuery } from '../../lib/useGqlQuery';
-import useRevalidatePage from '../../lib/useRevalidatePage';
-import useSendEmail from '../../lib/useSendEmail';
-import { todaysDateForForm } from '../calendars/formatTodayForForm';
-import DisplayError from '../ErrorMessage';
-import SearchForUserName from '../SearchForUserName';
-import GradientButton from '../styles/Button';
-import Form, { FormContainerStyles, FormGroupStyles } from '../styles/Form';
-import { useUser } from '../User';
+} from '@/components/../lib/disciplineData';
+import FormCheckboxArray from '@/components/../lib/FormCheckboxArray';
+import FormSelect from '@/components/../lib/FormSelect';
+import useRevalidatePage from '@/components/../lib/useRevalidatePage';
+import useSendEmail from '@/components/../lib/useSendEmail';
+import { todaysDateForForm } from '@/components/calendars/formatTodayForForm';
+import DisplayError from '@/components/ErrorMessage';
+import SearchForUserName from '@/components/SearchForUserName';
+import GradientButton from '@/components/styles/Button';
+import Form, {
+  FormContainerStyles,
+  FormGroupStyles,
+} from '@/components/styles/Form';
+import { useUser } from '@/components/User';
+import useForm from '@/lib/useForm';
+import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
+import gql from 'graphql-tag';
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useQueryClient } from 'react-query';
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
@@ -146,19 +149,8 @@ const NewDiscipline: React.FC<NewDisciplineProps> = ({ refetch }) => {
 
   const { sendEmail, emailLoading } = useSendEmail();
   //   console.log(`user ${user.id}`);
-  const [createDiscipline, { loading, error }] = useMutation(
+  const [createDiscipline, { loading, error }] = useGqlMutation(
     CREATE_DISCIPLINE_MUTATION,
-    {
-      variables: {
-        ...inputs,
-        teacher: user?.id,
-        student: studentReferralIsFor?.userId,
-        classType,
-        location,
-        timeOfDay,
-        date: new Date(inputs.date),
-      },
-    },
   );
   const isDevelopment = process.env.NODE_ENV === 'development';
   return (
@@ -176,37 +168,40 @@ const NewDiscipline: React.FC<NewDisciplineProps> = ({ refetch }) => {
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the input fields to the backend:
-            const res = await createDiscipline();
+            await createDiscipline({
+              ...inputs,
+              teacher: user?.id,
+              student: studentReferralIsFor?.userId,
+              classType,
+              location,
+              timeOfDay,
+              date: new Date(inputs.date),
+            });
             setEmailSending(true);
-            if (res.data.createDiscipline.id && adminEmailArray) {
+            if (adminEmailArray) {
               // loop over each email in adminEmailArray and send an email to each one async and await
               for (const email of adminEmailArray) {
                 const emailToSend = {
                   toAddress: email,
                   fromAddress: me.email,
-                  subject: `New Discipline Referral for ${res.data.createDiscipline.student.name}`,
+                  subject: `New Discipline Referral for ${studentReferralIsFor?.userName}`,
                   body: `
-              <p>There is a new Discipline Referral for ${res.data.createDiscipline.student.name} at NCUJHS.TECH created by ${me.name}. </p>
-              <p><a href="https://ncujhs.tech/discipline/${res.data.createDiscipline.id}">Click Here to View</a></p>
+              <p>There is a new Discipline Referral for ${studentReferralIsFor?.userName} at NCUJHS.TECH created by ${me.name}. </p>
+              <p><a href="https://ncujhs.tech/discipline/new">Click Here to View</a></p>
                `,
                 };
                 // console.log(emailToSend);
 
-                const emailRes = await sendEmail({
-                  variables: {
-                    emailData: emailToSend,
-                  },
+                await sendEmail({
+                  emailData: emailToSend,
                 });
-                console.log(emailRes);
               }
             }
             resetForm();
             refetch();
             setEmailSending(false);
             const revalidateResponse = revalidatePage();
-            if (res) {
-              toast.success('Discipline Referral Created');
-            }
+            toast.success('Discipline Referral Created');
             queryClient.refetchQueries('allDisciplines');
             setStudentReferralIsFor(null);
             setShowForm(false);

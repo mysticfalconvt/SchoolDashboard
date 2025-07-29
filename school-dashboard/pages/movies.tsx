@@ -100,7 +100,7 @@ export const getStaticProps: GetStaticProps<MoviesPageProps> = async () => {
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
     headers,
   );
-  const fetchAllVideos = async () =>
+  const fetchAllVideos = async (): Promise<{ videos: Video[] }> =>
     graphQLClient.request(GET_ALL_VIDEOS_QUERY);
 
   const movieList = await fetchAllVideos();
