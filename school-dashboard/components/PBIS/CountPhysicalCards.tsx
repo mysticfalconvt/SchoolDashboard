@@ -144,7 +144,7 @@ export default function CountPhysicalCards({
                           id={student.id}
                           name={student.id}
                           placeholder="0"
-                          value={inputs[student.id]}
+                          value={inputs[student.id] || ''}
                           onChange={handleChange}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           className="w-24 p-2 rounded border bg-white text-gray-900 text-center"

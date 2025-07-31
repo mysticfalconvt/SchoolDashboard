@@ -24,7 +24,8 @@ export default function useForm(initial: FormInputs = {}) {
     let finalValue: any = value;
 
     if (type === 'number') {
-      finalValue = parseInt(value);
+      const parsedValue = parseInt(value);
+      finalValue = isNaN(parsedValue) ? '' : parsedValue;
     }
     if (type === 'file') {
       const files = (e.target as HTMLInputElement).files;

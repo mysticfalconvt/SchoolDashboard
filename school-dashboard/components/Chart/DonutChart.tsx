@@ -49,7 +49,7 @@ const DoughnutChart: React.FC<DoughnutChartProps> = ({ title, chartData }) => {
   };
 
   return (
-    <div>
+    <div className="w-1/2">
       <div className="header">
         <h4 className="title">{title}</h4>
       </div>

@@ -1,4 +1,3 @@
-// import { gql, useQuery } from '@apollo/client';
 import gql from 'graphql-tag';
 import { useGQLQuery } from '../lib/useGqlQuery';
 

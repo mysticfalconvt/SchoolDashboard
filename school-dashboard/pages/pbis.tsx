@@ -30,7 +30,7 @@ const PBIS_PAGE_QUERY = gql`
 `;
 
 const PBIS_PAGE_STATIC_QUERY = gql`
-  query PBIS_PAGE_STATIC_QUERY {
+  query PBIS_PAGE_STATIC_QUERY($lastCollectionDate: DateTime) {
     totalSchoolCards: pbisCardsCount
 
     chromebookCards: pbisCardsCount(
@@ -53,7 +53,13 @@ const PBIS_PAGE_STATIC_QUERY = gql`
       taTeamPbisLevel
       taTeamAveragePbisCardsPerStudent
       taStudents {
+        id
+        name
         studentPbisCardsCount
+        uncountedCards: studentPbisCardsCount(
+          where: { dateGiven: { gt: $lastCollectionDate } }
+        )
+        individualPbisLevel
       }
     }
 
@@ -116,7 +122,11 @@ interface PbisCard {
 }
 
 interface TaStudent {
+  id: string;
+  name: string;
   studentPbisCardsCount: number;
+  uncountedCards: number;
+  individualPbisLevel: number;
 }
 
 interface TA {
@@ -301,6 +311,23 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
               <h4>Level -{ta.taTeamPbisLevel}-</h4>
               <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
               <p>Total of {ta.taStudents?.length} students</p>
+              <p>
+                Uncounted cards:{' '}
+                {ta.taStudents?.reduce(
+                  (sum, student) => sum + (student.uncountedCards || 0),
+                  0,
+                )}
+              </p>
+              <div className="text-xs mt-2">
+                {ta.taStudents?.map((student: TaStudent) => (
+                  <div key={student.id} className="text-left">
+                    <span className="font-semibold">{student.name}:</span>{' '}
+                    {student.studentPbisCardsCount} total,{' '}
+                    {student.uncountedCards} uncounted, Level{' '}
+                    {student.individualPbisLevel}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
       </div>
@@ -338,7 +365,34 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
     pbisLinks: PbisLink[];
     TAs: TA[];
     cardCounts: CardCount[];
-  }> => graphQLClient.request(PBIS_PAGE_STATIC_QUERY);
+  }> => {
+    // First get the last collection date
+    const lastCollectionQuery = gql`
+      query GET_LAST_COLLECTION_DATE {
+        lastCollection: pbisCollectionDates(
+          orderBy: { collectionDate: desc }
+          take: 1
+        ) {
+          id
+          collectionDate
+        }
+      }
+    `;
+
+    const lastCollectionData = (await graphQLClient.request(
+      lastCollectionQuery,
+    )) as {
+      lastCollection: Array<{ id: string; collectionDate: string }>;
+    };
+    const lastCollectionDate =
+      lastCollectionData?.lastCollection?.[0]?.collectionDate ||
+      new Date(0).toISOString();
+
+    // Then get the main data with the last collection date
+    return graphQLClient.request(PBIS_PAGE_STATIC_QUERY, {
+      lastCollectionDate,
+    });
+  };
   const data = await fetchData();
   const totalSchoolCards = data?.totalSchoolCards || 0;
 
