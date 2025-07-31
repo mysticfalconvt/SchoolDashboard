@@ -168,14 +168,13 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
     'PbisPageInfo',
     PBIS_PAGE_QUERY,
     {
-      teamId,
-      // countId: teamId,
+      teamId: teamId || undefined, // Convert null to undefined to avoid sending null
       forTeachers: me?.isStaff || null,
       forStudents: me?.isStudent || null,
       forParents: me?.isParent || null,
     },
     {
-      enabled: !!me && !!teamId,
+      enabled: !!me && !!teamId, // Only run query when we have a valid teamId
     },
   );
   // if (isLoading) return <Loading />;
@@ -188,7 +187,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
   const lastPbisCollection = props?.lastPbisCollection || null;
   const rawListOfLinks = props?.pbisLinks || [];
   const cardCounts = props?.cardCounts;
-  const totalTeamCards = data?.totalTeamCards;
+  const totalTeamCards = hasTeam ? data?.totalTeamCards || 0 : 0;
 
   // get the number of cards in each category for the team
   const teamWideCardsInCategories =

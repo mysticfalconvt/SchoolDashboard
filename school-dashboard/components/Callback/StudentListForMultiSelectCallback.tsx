@@ -60,36 +60,49 @@ export default function StudentList({
     ...(block9Students || []),
     ...(block10Students || []),
   ];
-  const allStudentsAlphabetical = allStudents.sort((a, b) => {
+
+  // Remove duplicates based on student ID
+  const uniqueStudents = allStudents.filter(
+    (student, index, self) =>
+      index === self.findIndex((s) => s.id === student.id),
+  );
+
+  const allStudentsAlphabetical = uniqueStudents.sort((a, b) => {
     if (firstNameSort) {
-      const aLastName = a.name.split(' ')[1].toLowerCase();
-      const bLastName = b.name.split(' ')[1].toLowerCase();
+      const aLastName = a.name.split(' ')[1]?.toLowerCase() || '';
+      const bLastName = b.name.split(' ')[1]?.toLowerCase() || '';
       return aLastName > bLastName ? 1 : -1;
     } else {
-      const aFirstName = a.name.split(' ')[0].toLowerCase();
-      const bFirstName = b.name.split(' ')[0].toLowerCase();
+      const aFirstName = a.name.split(' ')[0]?.toLowerCase() || '';
+      const bFirstName = b.name.split(' ')[0]?.toLowerCase() || '';
       return aFirstName > bFirstName ? 1 : -1;
     }
   });
 
   function DisplaySingleClass({ classList }: DisplaySingleClassProps) {
+    // Remove duplicates from classList as well
+    const uniqueClassList = classList.filter(
+      (student, index, self) =>
+        index === self.findIndex((s) => s.id === student.id),
+    );
+
     // sort classList alphabetically by last name
-    classList.sort((a, b) => {
+    uniqueClassList.sort((a, b) => {
       if (firstNameSort) {
-        const aFirstName = a.name.split(' ')[0].toLowerCase();
-        const bFirstName = b.name.split(' ')[0].toLowerCase();
+        const aFirstName = a.name.split(' ')[0]?.toLowerCase() || '';
+        const bFirstName = b.name.split(' ')[0]?.toLowerCase() || '';
         return aFirstName > bFirstName ? 1 : -1;
       } else {
-        const aLastName = a.name.split(' ')[1].toLowerCase();
-        const bLastName = b.name.split(' ')[1].toLowerCase();
+        const aLastName = a.name.split(' ')[1]?.toLowerCase() || '';
+        const bLastName = b.name.split(' ')[1]?.toLowerCase() || '';
         return aLastName > bLastName ? 1 : -1;
       }
     });
 
-    return classList.map((student) => (
+    return uniqueClassList.map((student) => (
       <li
         className="list-none overflow-hidden flex flex-row items-start justify-start p-0 h-5"
-        key={student.id}
+        key={`${student.id}-${student.name}`}
       >
         <label htmlFor={student.id} className="ml-2.5 text-sm flex p-0">
           <input

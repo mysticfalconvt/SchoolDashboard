@@ -1,7 +1,8 @@
 import useRevalidatePage from '@/components/../lib/useRevalidatePage';
 import DisplayError from '@/components/ErrorMessage';
 import GradientButton from '@/components/styles/Button';
-import Form, { FormContainerStyles } from '@/components/styles/Form';
+import { FormDialog } from '@/components/styles/Dialog';
+import Form from '@/components/styles/Form';
 import { useUser } from '@/components/User';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
@@ -73,10 +74,14 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
       >
         {showForm ? 'Close the form' : 'Add A New Video'}
       </GradientButton>
-      <FormContainerStyles>
+      <FormDialog
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="Add a New Video"
+        size="lg"
+      >
         <Form
-          className={showForm ? 'visible' : 'hidden'}
-          // hidden={!showForm}
+          className="w-full bg-transparent border-0 shadow-none p-0"
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the inputfields to the backend:
@@ -91,7 +96,6 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
             setShowForm(false);
           }}
         >
-          <h1>Add a New Link</h1>
           <DisplayError error={error as any} />
           <fieldset disabled={loading} aria-busy={loading}>
             <label htmlFor="name">
@@ -165,7 +169,7 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
             <button type="submit">+ Add A New Video</button>
           </fieldset>
         </Form>
-      </FormContainerStyles>
+      </FormDialog>
     </div>
   );
 };

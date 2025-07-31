@@ -84,15 +84,22 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(function Form(
           width: 100%;
           padding: 0.5rem;
           font-size: 1rem;
-          background-color: var(--backgroundColor);
-          color: var(--textColor);
-          border: 1px solid black;
+          background-color: #1a1a1a;
+          color: #ffffff;
+          border: 1px solid #404040;
+          border-radius: 0.25rem;
+          transition: border-color 0.2s ease;
+        }
+        input::placeholder,
+        textarea::placeholder {
+          color: #a0a0a0;
         }
         input:focus,
         textarea:focus,
         select:focus {
           outline: 0;
           border-color: var(--red);
+          background-color: #2a2a2a;
         }
         button,
         input[type='submit'] {
@@ -115,7 +122,17 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(function Form(
           overflow-y: hidden;
         }
         input[type='date']::-webkit-calendar-picker-indicator {
-          filter: invert(50%);
+          filter: invert(1);
+        }
+        select {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.5rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          padding-right: 2.5rem;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
         }
         fieldset {
           border: 0;

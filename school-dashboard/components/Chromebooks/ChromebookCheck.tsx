@@ -1,6 +1,8 @@
 import useSendEmail from '@/components/../lib/useSendEmail';
 import DisplayError from '@/components/ErrorMessage';
 import GradientButton from '@/components/styles/Button';
+import { FormDialog } from '@/components/styles/Dialog';
+import Form from '@/components/styles/Form';
 import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
@@ -86,6 +88,7 @@ interface User {
 
 interface SingleChromebookCheckFormProps {
   student: Student;
+  onComplete: () => void;
 }
 
 interface EmailData {
@@ -97,6 +100,7 @@ interface EmailData {
 
 function SingleChromebookCheckForm({
   student,
+  onComplete,
 }: SingleChromebookCheckFormProps) {
   const me = useUser() as User;
   const [customMessage, setCustomMessage] = useState('');
@@ -108,72 +112,75 @@ function SingleChromebookCheckForm({
   );
   const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   const { sendEmail, emailLoading } = useSendEmail();
-  return (
-    <form
-      key={`chromebook-form${student?.id}`}
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setIsDisabled(true);
-        await createChromebookCheck({
-          chromebookCheck: {
-            student: { connect: { id: student.id } },
-            message:
-              message === 'Other'
-                ? customMessage
-                : `${message} - ${customMessage}`,
-          },
-        });
-        if (error) {
-          console.log(error);
-          setIsDisabled(false);
-        }
-        if (goodCheckMessages.includes(message) && student?.id) {
-          await createCard({ teacher: me?.id, student: student?.id });
-          await createCard({ teacher: me?.id, student: student?.id });
-          await createCard({ teacher: me?.id, student: student?.id });
-        }
-        queryClient.refetchQueries();
-        if (me?.id && !goodCheckMessages.includes(message)) {
-          chromebookEmails.forEach(async (email) => {
-            const emailToSend: EmailData = {
-              toAddress: email,
-              fromAddress: me.email,
-              subject: `New Chromebook Check for ${student?.name}`,
-              body: `
-          <p>There is a new Chromebook check for ${student?.name} at NCUJHS.TECH created by ${me.name}. </p>
-          <p>${message === 'Other' ? customMessage : `${message} - ${customMessage}`}</p>
-           `,
-            };
-            // console.log(emailToSend);
-            await sendEmail({
-              emailData: emailToSend,
-            });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsDisabled(true);
+
+    try {
+      await createChromebookCheck({
+        chromebookCheck: {
+          student: { connect: { id: student.id } },
+          message:
+            message === 'Other'
+              ? customMessage
+              : `${message} - ${customMessage}`,
+        },
+      });
+
+      if (goodCheckMessages.includes(message) && student?.id) {
+        await createCard({ teacher: me?.id, student: student?.id });
+        await createCard({ teacher: me?.id, student: student?.id });
+        await createCard({ teacher: me?.id, student: student?.id });
+      }
+
+      queryClient.refetchQueries();
+
+      if (me?.id && !goodCheckMessages.includes(message)) {
+        chromebookEmails.forEach(async (email) => {
+          const emailToSend: EmailData = {
+            toAddress: email,
+            fromAddress: me.email,
+            subject: `New Chromebook Check for ${student?.name}`,
+            body: `
+        <p>There is a new Chromebook check for ${student?.name} at NCUJHS.TECH created by ${me.name}. </p>
+        <p>${message === 'Other' ? customMessage : `${message} - ${customMessage}`}</p>
+         `,
+          };
+          await sendEmail({
+            emailData: emailToSend,
           });
-        }
-      }}
-    >
+        });
+      }
+
+      onComplete();
+    } catch (error) {
+      console.log(error);
+      setIsDisabled(false);
+    }
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
       <DisplayError error={error as any} />
-      <fieldset
-        disabled={loading || isDisabled}
-        aria-busy={loading}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h2>{student?.name}</h2>
-        <label
-          htmlFor="status"
-          className="flex"
-          key={`status-chromebook-${student.id}`}
-        >
-          Status:{' '}
+      <fieldset disabled={loading || isDisabled} aria-busy={loading}>
+        <div className="mb-4">
+          <h2 className="text-white font-bold text-xl mb-4">
+            Chromebook Check for {student?.name}
+          </h2>
+        </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="status"
+            className="block text-white font-semibold mb-1"
+          >
+            Status
+          </label>
           <select
             name="status"
             id="status"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="w-full p-2 rounded border appearance-none"
             onChange={(e) => {
               setMessage(e.target.value);
               if (e.target.value === 'As Issued') {
@@ -187,22 +194,27 @@ function SingleChromebookCheckForm({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label htmlFor="message" key={`message-chromebook-${student.id}`}>
-          Message
+        <div className="mb-4">
+          <label
+            htmlFor="message"
+            className="block text-white font-semibold mb-1"
+          >
+            Message
+          </label>
           <input
-            className="bg-gray-50 border border-gray-500 text-stone-900 disabled:bg-gray-50 disabled:border-none "
             type="text"
             name="message"
             id="message"
             value={customMessage}
-            // disabled={message !== "Other"}
             onChange={(e) => setCustomMessage(e.target.value)}
+            className="w-full p-2 rounded border"
+            placeholder="Enter additional details..."
           />
-        </label>
+        </div>
 
-        <GradientButton
+        <button
           type="submit"
           disabled={
             loading ||
@@ -210,17 +222,19 @@ function SingleChromebookCheckForm({
             !message ||
             (message === 'Other' && !customMessage)
           }
+          className="mt-6"
         >
-          Submit
-        </GradientButton>
+          Submit Check
+        </button>
       </fieldset>
-    </form>
+    </Form>
   );
 }
 
 export default function ChromebookCheck() {
   const me = useUser() as User;
   const [showForm, setShowForm] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const { data: taTeacher } = useGQLQuery(
     `TAChromebookAssignments-${me?.id}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
@@ -229,24 +243,52 @@ export default function ChromebookCheck() {
   );
 
   const students = taTeacher?.user?.taStudents || [];
+
+  const handleStudentSelect = (student: Student) => {
+    setSelectedStudent(student);
+    setShowForm(true);
+  };
+
+  const handleFormComplete = () => {
+    setShowForm(false);
+    setSelectedStudent(null);
+  };
+
   return (
     <div>
       {students?.length > 0 ? (
-        <GradientButton
-          style={{ marginTop: '10px' }}
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? 'Hide Chromebook Checks' : 'TA Chromebook Checks'}
-        </GradientButton>
-      ) : null}
-      <div>
-        {showForm &&
-          students.map((student) => (
-            <div key={`chromebook-check-${student.id}`}>
-              <SingleChromebookCheckForm student={student} />
-            </div>
+        <div className="space-y-2">
+          <h3 className="text-white font-semibold mb-2">
+            TA Chromebook Checks
+          </h3>
+          {students.map((student) => (
+            <GradientButton
+              key={`chromebook-check-${student.id}`}
+              onClick={() => handleStudentSelect(student)}
+              style={{ marginBottom: '8px' }}
+            >
+              Chromebook Check: {student.name}
+            </GradientButton>
           ))}
-      </div>
+        </div>
+      ) : null}
+
+      <FormDialog
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setSelectedStudent(null);
+        }}
+        title="Chromebook Check"
+        size="md"
+      >
+        {selectedStudent && (
+          <SingleChromebookCheckForm
+            student={selectedStudent}
+            onComplete={handleFormComplete}
+          />
+        )}
+      </FormDialog>
     </div>
   );
 }
