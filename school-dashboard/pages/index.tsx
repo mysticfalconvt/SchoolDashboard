@@ -351,21 +351,17 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
 export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   // get dates for calendar
   const today = new Date();
   const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
 
   // Reusable fetch with retry logic

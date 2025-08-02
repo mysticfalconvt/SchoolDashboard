@@ -9,17 +9,15 @@ export const useGQLQuery = <TData = any>(
   variables?: Record<string, any>,
   config: Partial<UseQueryOptions<TData, Error, TData>> = {},
 ) => {
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    // headers: {
-    //   authorization: `Bearer token goes here`,
-    // },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        credentials: 'include',
+        mode: 'cors',
+        // authorization: `Bearer token goes here`,
+      },
+    },
   );
   // console.log(GraphQLClient);
   const fetchData = async (): Promise<TData> =>
@@ -31,17 +29,15 @@ export const useGQLQuery = <TData = any>(
 };
 
 export const useAsyncGQLQuery = <TData = any>(query: DocumentNode) => {
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    // headers: {
-    //   authorization: `Bearer token goes here`,
-    // },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        credentials: 'include',
+        mode: 'cors',
+        // authorization: `Bearer token goes here`,
+      },
+    },
   );
   // console.log(GraphQLClient);
   const fetchData = async (variables?: Record<string, any>): Promise<TData> =>

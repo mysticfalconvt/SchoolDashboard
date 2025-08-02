@@ -3,8 +3,8 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import { endpoint, prodEndpoint } from '@/components/../config';
 import Error from '@/components/ErrorMessage';
 import Form from '@/components/styles/Form';
+import { GraphQLClient } from '@/lib/graphqlClient';
 import useForm from '@/lib/useForm';
-import { request } from 'graphql-request';
 import gql from 'graphql-tag';
 import React from 'react';
 import { useQueryClient } from 'react-query';
@@ -124,20 +124,16 @@ async function signinNew({ email, password }: FormInputs) {
   const endppointToUse =
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint;
 
-  const res = await request(
-    endppointToUse,
-    SIGNIN_MUTATION,
-    {
-      email: email.toLowerCase(),
-      password,
-    },
-    {},
-  );
+  const client = new GraphQLClient(endppointToUse);
+  const res = await client.request(SIGNIN_MUTATION, {
+    email: email.toLowerCase(),
+    password,
+  });
   // console.log("signin",res);
   const token = (res as any).authenticateUserWithPassword.sessionToken;
   // console.log("token",token);
   localStorage.setItem('token', token);
-  return (res as any).data;
+  return res;
 }
 
 export default SignIn;

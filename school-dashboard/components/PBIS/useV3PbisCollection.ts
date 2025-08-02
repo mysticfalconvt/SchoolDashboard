@@ -1,7 +1,7 @@
-import { GraphQLClient } from 'graphql-request';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import { endpoint, prodEndpoint } from '../../config';
+import { GraphQLClient } from '../../lib/graphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 
 const shuffle = <T>(array: T[]): T[] => {
@@ -216,7 +216,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const createPbisCollectionDate = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(COUNT_CARDS_DATE_MUTATION, variables);
   };
@@ -224,7 +223,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateTA = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(
       UPDATE_TA_AVERAGE_CARDS_MUTATION,
@@ -235,7 +233,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateTAlevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(TA_LEVELED_UP_MUTATION, variables);
   };
@@ -243,7 +240,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentLevelInCollection = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(STUDENT_LEVELED_UP_MUTATION, variables);
   };
@@ -251,7 +247,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentIndividualLevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(
       UPDATE_STUDENT_LEVEL_MUTATION,
@@ -262,7 +257,6 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentRandomDrawingWinner = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-      { credentials: 'include', mode: 'cors' },
     );
     return await graphQLClient.request(
       STUDENT_RANDOM_DRAWING_WINNER_MUTATION,

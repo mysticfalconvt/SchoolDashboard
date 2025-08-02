@@ -105,7 +105,7 @@ describe('MyComponent', () => {
 
 ```typescript
 // Mock at the top of the test file
-jest.mock('graphql-request', () => ({
+jest.mock('../../lib/graphqlClient', () => ({
   GraphQLClient: jest.fn().mockImplementation(() => ({
     request: jest.fn(),
   })),

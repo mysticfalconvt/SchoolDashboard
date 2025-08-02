@@ -1,5 +1,5 @@
-import { GraphQLClient } from 'graphql-request';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { GraphQLClient } from '../../lib/graphqlClient';
 
 // This is a proxy to your actual GraphQL server
 // You'll need to update this URL to point to your actual GraphQL server

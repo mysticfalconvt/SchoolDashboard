@@ -9,14 +9,14 @@ export const useGqlMutation = <TData = any, TVariables = any>(
 ) => {
   const queryClient = useQueryClient();
 
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        credentials: 'include',
+        mode: 'cors',
+      },
+    },
   );
 
   const mutateFn = async (variables?: TVariables): Promise<TData> =>
