@@ -94,11 +94,26 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
       return [];
     }
 
+    // Debug: Log the first few characters to see what we're dealing with
+    console.warn(
+      'CREDENTIALS starts with:',
+      credentialsString.substring(0, 10),
+    );
+
     let credentials;
     try {
-      credentials = JSON.parse(credentialsString);
+      // Try to clean up the string if it has quotes around it
+      let cleanedString = credentialsString.trim();
+      if (cleanedString.startsWith("'") && cleanedString.endsWith("'")) {
+        cleanedString = cleanedString.slice(1, -1);
+      } else if (cleanedString.startsWith('"') && cleanedString.endsWith('"')) {
+        cleanedString = cleanedString.slice(1, -1);
+      }
+
+      credentials = JSON.parse(cleanedString);
     } catch (error) {
       console.warn('Failed to parse CREDENTIALS JSON:', error);
+      console.warn('Raw CREDENTIALS value:', credentialsString);
       return [];
     }
 
