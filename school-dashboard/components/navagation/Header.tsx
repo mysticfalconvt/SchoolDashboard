@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
@@ -19,10 +20,12 @@ const Header: React.FC = () => {
         <div className="flex flex-row items-center w-full px-2 py-2 relative md:static">
           {/* Mobile NCUJHS link with falcon icon */}
           <div className="flex md:hidden flex-1 items-center gap-2">
-            <img
+            <Image
               src="/falcon.svg"
               alt="Falcon"
-              className="h-7 w-7 md:hidden inline-block"
+              width={28}
+              height={28}
+              className="md:hidden inline-block"
             />
             <Link
               href="/"
@@ -37,10 +40,12 @@ const Header: React.FC = () => {
           >
             <Link href="/" className="block skew-x-[20deg]">
               <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
-                <img
+                <Image
                   src="/falcon.svg"
                   alt="Falcon"
-                  className="h-12 w-12 hidden md:inline-block"
+                  width={48}
+                  height={48}
+                  className="hidden md:inline-block"
                 />
                 <span className="flex flex-col items-start justify-center">
                   <span className="uppercase font-extrabold text-white text-2xl md:text-4xl leading-none tracking-wide">

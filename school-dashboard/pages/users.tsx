@@ -475,8 +475,8 @@ export const getStaticProps: GetStaticProps<UsersPageProps> = async (
 
   return {
     props: {
-      students,
-      teachers,
+      students: students || { students: [] },
+      teachers: teachers || { teachers: [] },
     }, // will be passed to the page component as props
     revalidate: 1200, // In seconds
   };

@@ -248,7 +248,7 @@ const AllTeacherCurrentWork: NextPage<AllTeacherCurrentWorkProps> = (props) => {
         ),
       },
     ];
-  }, [NUMBER_OF_BLOCKS]);
+  }, []);
 
   return (
     <div className="flex flex-col flex-wrap justify-around w-full">

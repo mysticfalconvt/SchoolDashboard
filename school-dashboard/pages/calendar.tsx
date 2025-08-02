@@ -180,10 +180,11 @@ export const getStaticProps: GetStaticProps<CalendarPageProps> = async (
     );
     const fetchAllCalendars = async () => graphQLClient.request(GET_CALENDARS);
     const initialCalendarDates = await fetchAllCalendars();
+    console.log('initialCalendarDates', initialCalendarDates);
     const initialGoogleCalendarEvents = await getCalendarData();
     return {
       props: {
-        initialCalendarDates: initialCalendarDates || [],
+        initialCalendarDates: initialCalendarDates?.calendars || [],
         initialGoogleCalendarEvents: initialGoogleCalendarEvents || [],
       }, // will be passed to the page component as props
       revalidate: 1200, // In seconds

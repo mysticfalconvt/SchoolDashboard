@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import Image from 'next/image';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
@@ -52,10 +53,12 @@ export default function PbisFalcon({ initialCount }: PbisFalconProps) {
           style={{ height: `${percentageFull}%` }}
         />
         {/* Falcon and text always on top */}
-        <img
+        <Image
           src="/falcon.svg"
           alt="falcon"
-          className="absolute top-2 left-1/2 -translate-x-1/2 w-[125px] h-[125px] z-10 pointer-events-none drop-shadow-[0_0_8px_white]"
+          width={125}
+          height={125}
+          className="absolute top-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none drop-shadow-[0_0_8px_white]"
         />
         <span className="absolute top-4 left-0 w-full text-white font-bold text-center text-lg z-20 drop-shadow">{`${percentageFull}%`}</span>
         <span

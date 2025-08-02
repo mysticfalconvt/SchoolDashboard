@@ -64,6 +64,12 @@ export class GraphQLClient {
         throw new Error(`GraphQL request failed: ${response.statusText}`);
       }
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Expected JSON response but got ${contentType}`);
+      }
+
       const result = await response.json();
 
       if (result.errors) {

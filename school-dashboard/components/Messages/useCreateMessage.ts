@@ -73,7 +73,7 @@ export default function useCreateMessage() {
         queryClient.refetchQueries('myMessages');
       }, 1000);
     }
-  }, [message, createMessageMutation, queryClient]);
+  }, [message, createMessageMutation, queryClient, me?.id]);
 
   return createMessage;
 }

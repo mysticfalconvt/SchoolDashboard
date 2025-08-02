@@ -70,7 +70,7 @@ const Calendars: React.FC<CalendarsProps> = ({
 
   const calendarsFilteredByUserType = useMemo(
     () =>
-      data?.calendars.filter((calendar: Calendar) => {
+      (data?.calendars || []).filter((calendar: Calendar) => {
         if (calendar.status === 'Both') return true;
         if (me?.isStaff && calendar.status === 'Teachers') return true;
         if (me?.isStudent && calendar.status === 'Students') return true;
@@ -78,7 +78,7 @@ const Calendars: React.FC<CalendarsProps> = ({
         if (teacherWithStudentEvents && calendar.status === 'Students')
           return true;
         return false;
-      }) || [],
+      }),
     [data, me, teacherWithStudentEvents],
   );
 
