@@ -250,7 +250,8 @@ const SpecialGroup: NextPage = () => {
     data?.teacher?.specialGroupStudents?.map(
       (student: SpecialGroupStudent) => student.callbackItems || null,
     ) || [];
-  const allTaCallbacksFlattened = [].concat(...allTaCallbacks) || [];
+  const allTaCallbacksFlattened =
+    [].concat(...allTaCallbacks.filter(Boolean)) || [];
 
   // console.log('callbacks', allTaCallbacksFlattened);
   const students = data?.teacher?.specialGroupStudents || [];

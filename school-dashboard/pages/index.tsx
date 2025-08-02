@@ -213,7 +213,7 @@ export default function Home(props: HomeProps) {
           )}
           {me &&
             isAllowed(me, 'isParent') &&
-            me.children.map((child) => (
+            me.children?.map((child) => (
               <div key={child.id}>
                 <ViewStudentPage student={child} />
               </div>

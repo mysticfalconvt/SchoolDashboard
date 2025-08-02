@@ -126,8 +126,8 @@ export default function WeeklyCalendar({
       return false;
     });
     const filteredCalendarsWithGoogle = [
-      ...filteredCalendars,
-      ...gcEvents,
+      ...(filteredCalendars || []),
+      ...(gcEvents || []),
     ].sort((a, b) => {
       const aDate = new Date(a.date);
       const bDate = new Date(b.date);

@@ -274,7 +274,8 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
     data?.taTeacher?.taStudents?.map(
       (student: TaStudent) => student.callbackItems || null,
     ) || [];
-  const allTaCallbacksFlattened = [].concat(...allTaCallbacks) || [];
+  const allTaCallbacksFlattened =
+    [].concat(...allTaCallbacks.filter(Boolean)) || [];
 
   const isAllowedPbisCardCounting =
     me?.id === data?.taTeacher?.id || me?.canManagePbis;

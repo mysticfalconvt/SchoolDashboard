@@ -59,6 +59,7 @@ export default function PbisFalcon({ initialCount }: PbisFalconProps) {
           width={125}
           height={125}
           className="absolute top-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none drop-shadow-[0_0_8px_white]"
+          priority
         />
         <span className="absolute top-4 left-0 w-full text-white font-bold text-center text-lg z-20 drop-shadow">{`${percentageFull}%`}</span>
         <span

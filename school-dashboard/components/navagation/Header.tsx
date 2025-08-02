@@ -46,6 +46,7 @@ const Header: React.FC = () => {
                   width={48}
                   height={48}
                   className="hidden md:inline-block"
+                  priority
                 />
                 <span className="flex flex-col items-start justify-center">
                   <span className="uppercase font-extrabold text-white text-2xl md:text-4xl leading-none tracking-wide">

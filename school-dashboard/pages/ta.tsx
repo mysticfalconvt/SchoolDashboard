@@ -252,7 +252,7 @@ const TA: React.FC = () => {
     data?.taTeacher?.taStudents?.map(
       (student: TaStudent) => student.callbackItems || null,
     ) || [];
-  const allTaCallbacksFlattened = [].concat(...allTaCallbacks);
+  const allTaCallbacksFlattened = [].concat(...allTaCallbacks.filter(Boolean));
 
   // console.log('callbacks', allTaCallbacksFlattened);
   const students = data?.taTeacher?.taStudents || [];
