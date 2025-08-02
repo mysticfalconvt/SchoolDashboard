@@ -68,6 +68,12 @@ const Calendar: NextPage<CalendarPageProps> = (props) => {
 
 const getCalendarData = async (): Promise<CalendarEvent[]> => {
   try {
+    // Check if Google APIs are available
+    if (typeof google === 'undefined') {
+      console.warn('Google APIs not available');
+      return [];
+    }
+
     const calendarId = process.env.CALENDAR_ID;
     if (!calendarId) {
       console.warn('CALENDAR_ID environment variable not set');
@@ -88,31 +94,58 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
       return [];
     }
 
-    const credentials = JSON.parse(credentialsString);
+    let credentials;
+    try {
+      credentials = JSON.parse(credentialsString);
+    } catch (error) {
+      console.warn('Failed to parse CREDENTIALS JSON:', error);
+      return [];
+    }
 
-    const jwt = new google.auth.JWT(
-      credentials.client_email,
-      undefined,
-      credentials.private_key,
-      scopes,
-    );
+    // Add retry logic for Google Calendar API
+    const fetchWithRetry = async (retries = 3, delay = 1000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const jwt = new google.auth.JWT(
+            credentials.client_email,
+            undefined,
+            credentials.private_key,
+            scopes,
+          );
 
-    const loginAuth = google.auth.fromJSON(credentials);
-    const calendar = await (google as any).calendar({
-      version: 'v3',
-      auth: loginAuth,
-    });
+          const loginAuth = google.auth.fromJSON(credentials);
+          const calendar = await (google as any).calendar({
+            version: 'v3',
+            auth: loginAuth,
+          });
 
-    const Calendar = await calendar.events.list({
-      auth: jwt,
-      calendarId: calendarId,
+          const Calendar = await calendar.events.list({
+            auth: jwt,
+            calendarId: calendarId,
+            timeMin: timeMin.toISOString(),
+            timeMax: timeMax.toISOString(),
+            singleEvents: true,
+            orderBy: 'startTime',
+          });
 
-      timeMin: timeMin.toISOString(),
-      timeMax: timeMax.toISOString(),
+          // Check if the response is valid
+          if (!Calendar || !Calendar.data) {
+            throw new Error('Invalid response from Google Calendar API');
+          }
 
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
+          return Calendar;
+        } catch (error) {
+          console.warn(`Google Calendar API attempt ${attempt} failed:`, error);
+          if (attempt === retries) {
+            throw error;
+          }
+          // Wait before retrying (exponential backoff)
+          await new Promise((resolve) => setTimeout(resolve, delay * attempt));
+        }
+      }
+    };
+
+    const Calendar = await fetchWithRetry();
 
     const rawEvents = Calendar.data.items || [];
 
@@ -179,6 +212,14 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
     return initialGoogleCalendarEvents;
   } catch (error) {
     console.warn('Error fetching Google Calendar data:', error);
+
+    // Log more details about the error
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      console.warn(
+        'JSON parsing error - likely received HTML instead of JSON from Google Calendar API',
+      );
+    }
+
     return [];
   }
 };
