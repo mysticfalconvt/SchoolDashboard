@@ -5,15 +5,19 @@
   "scripts": {
     "dev": "next dev -p 7777",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@apollo/client": "^3.10.3",
-    "@apollo/link-error": "^2.0.0-beta.3",
     "@ramonak/react-progress-bar": "^5.2.0",
-    "@sentry/nextjs": "^7.114.0",
+    "@sentry/nextjs": "^9.42.1",
     "@sentry/react": "^7.114.0",
-    "apollo-upload-client": "^18.0.1",
     "babel-core": "^7.0.0-bridge.0",
     "chart.js": "^4.4.2",
     "downshift": "^6",
@@ -22,8 +26,7 @@
     "graphql-request": "^7.0.1",
     "graphql-tag": "^2.12.6",
     "lodash.debounce": "^4.0.8",
-    "next": "^12",
-    "next-with-apollo": "^5.3.0",
+    "next": "^15.4.4",
     "prop-types": "^15.8.1",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",
@@ -39,6 +42,10 @@
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
     "@next/eslint-plugin-next": "^14.2.3",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "20.12.11",
     "@types/react": "18.3.2",
     "autoprefixer": "^10.4.19",
@@ -55,10 +62,13 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.2",
     "install": "0.13.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "npm": "10.7.0",
     "postcss": "^8.4.38",
     "prettier": "3.2.5",
-    "tailwindcss": "^3.4.3"
+    "tailwindcss": "^3.4.3",
+    "typescript": "5.8.3"
   },
   "eslintConfig": {
     "extends": [

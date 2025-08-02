@@ -1,0 +1,314 @@
+import gql from 'graphql-tag';
+import React, { useState } from 'react';
+import Loading from '../components/Loading';
+import GradientButton from '../components/styles/Button';
+import { useUser } from '../components/User';
+import isAllowed from '../lib/isAllowed';
+import { useGQLQuery } from '../lib/useGqlQuery';
+
+const PBIS_DATA_QUERY = gql`
+  query PBISDataQuery {
+    students: users(where: { isStudent: { equals: true } }) {
+      id
+      name
+      YearPbisCount: studentPbisCardsCount
+
+      block1Teacher {
+        id
+        name
+      }
+      block2Teacher {
+        id
+        name
+      }
+      block3Teacher {
+        id
+        name
+      }
+      block4Teacher {
+        id
+        name
+      }
+      block5Teacher {
+        id
+        name
+      }
+      block6Teacher {
+        id
+        name
+      }
+      block7Teacher {
+        id
+        name
+      }
+      block8Teacher {
+        id
+        name
+      }
+      block9Teacher {
+        id
+        name
+      }
+      block10Teacher {
+        id
+        name
+      }
+    }
+    teachers: users(where: { hasClasses: { equals: true } }) {
+      id
+      name
+    }
+  }
+`;
+
+interface BlockTeacher {
+  id: string;
+  name: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  YearPbisCount: number;
+  block1Teacher?: BlockTeacher;
+  block2Teacher?: BlockTeacher;
+  block3Teacher?: BlockTeacher;
+  block4Teacher?: BlockTeacher;
+  block5Teacher?: BlockTeacher;
+  block6Teacher?: BlockTeacher;
+  block7Teacher?: BlockTeacher;
+  block8Teacher?: BlockTeacher;
+  block9Teacher?: BlockTeacher;
+  block10Teacher?: BlockTeacher;
+}
+
+interface Teacher {
+  id: string;
+  name: string;
+}
+
+interface TeacherWithStudents extends Teacher {
+  students: Student[];
+  averageYearlyPbis: number;
+}
+
+const roundToOneDecimal = (number: number): number => {
+  return Math.round(number * 10) / 10;
+};
+
+const getTeacherListFromBlocksInStudents = (
+  students: Student[],
+  teachers: Teacher[],
+): Teacher[] => {
+  const teacherList: string[] = [];
+  students.forEach((student) => {
+    if (student.block1Teacher) {
+      // check if teacher is already in list
+      if (!teacherList.includes(student.block1Teacher.id)) {
+        teacherList.push(student.block1Teacher.id);
+      }
+    }
+    if (student.block2Teacher) {
+      if (!teacherList.includes(student.block2Teacher.id)) {
+        teacherList.push(student.block2Teacher.id);
+      }
+    }
+    if (student.block3Teacher) {
+      if (!teacherList.includes(student.block3Teacher.id)) {
+        teacherList.push(student.block3Teacher.id);
+      }
+    }
+    if (student.block4Teacher) {
+      if (!teacherList.includes(student.block4Teacher.id)) {
+        teacherList.push(student.block4Teacher.id);
+      }
+    }
+    if (student.block5Teacher) {
+      if (!teacherList.includes(student.block5Teacher.id)) {
+        teacherList.push(student.block5Teacher.id);
+      }
+    }
+    if (student.block6Teacher) {
+      if (!teacherList.includes(student.block6Teacher.id)) {
+        teacherList.push(student.block6Teacher.id);
+      }
+    }
+    if (student.block7Teacher) {
+      if (!teacherList.includes(student.block7Teacher.id)) {
+        teacherList.push(student.block7Teacher.id);
+      }
+    }
+    if (student.block8Teacher) {
+      if (!teacherList.includes(student.block8Teacher.id)) {
+        teacherList.push(student.block8Teacher.id);
+      }
+    }
+  });
+  const teacherListWithNames = teacherList.map((teacherId) => {
+    const teacher = teachers.find((teacher) => teacher.id === teacherId);
+    return {
+      id: teacher?.id || teacherId,
+      name: teacher?.name || 'error',
+    };
+  });
+  return teacherListWithNames;
+};
+
+const getStudentsWhoHaveTeacher = (
+  teacherId: string,
+  students: Student[],
+): Student[] => {
+  const studentsWithTeacher: Student[] = [];
+  students.forEach((student) => {
+    if (student.block1Teacher && student.block1Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block2Teacher && student.block2Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block3Teacher && student.block3Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block4Teacher && student.block4Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block5Teacher && student.block5Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block6Teacher && student.block6Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block7Teacher && student.block7Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block8Teacher && student.block8Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block9Teacher && student.block9Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+    if (student.block10Teacher && student.block10Teacher.id === teacherId) {
+      studentsWithTeacher.push(student);
+    }
+  });
+  return studentsWithTeacher;
+};
+
+export const getAverageYearlyPbis = (students: Student[]): number => {
+  const averageYearlyPbis = students.reduce((acc, student) => {
+    return acc + student.YearPbisCount;
+  }, 0);
+  return averageYearlyPbis / students.length;
+};
+
+const sortTeachersByAverageYearlyPbis = (
+  teachers: TeacherWithStudents[],
+): TeacherWithStudents[] => {
+  return teachers.sort((a, b) => {
+    // console.log(a.averageYearlyPbis, b.averageYearlyPbis);
+    return a.averageYearlyPbis - b.averageYearlyPbis;
+  });
+};
+
+// Actual component that renders the data
+const PbisDataTable: React.FC = () => {
+  const me = useUser();
+  const { data, isLoading } = useGQLQuery(
+    'pbisDataQuery',
+    PBIS_DATA_QUERY,
+    {},
+    {
+      enabled: !!me,
+      staleTime: 1000 * 60 * 3, // 3 minutes
+    },
+  );
+  const students = data?.students || [];
+  const teachers = data?.teachers || [];
+  const teachersWithClasses = getTeacherListFromBlocksInStudents(
+    students,
+    teachers,
+  );
+  const teachersWithTheirStudents = teachersWithClasses.map((teacher) => {
+    const teachersStudents = getStudentsWhoHaveTeacher(teacher.id, students);
+    const teachersStudentsAveragePbis = getAverageYearlyPbis(teachersStudents);
+    return {
+      ...teacher,
+      students: teachersStudents,
+      averageYearlyPbis: teachersStudentsAveragePbis,
+    };
+  });
+  const overallAverageYearlyPbis = getAverageYearlyPbis(students);
+
+  const [sortMethod, setSortMethod] = useState('alphabetical');
+  const [teachersToDisplay, setTeachersToDisplay] = useState<
+    TeacherWithStudents[]
+  >([]);
+  const teachersSortedByAverageYearlyPbis = sortTeachersByAverageYearlyPbis(
+    teachersWithTheirStudents,
+  );
+  const teachersSortedAlphabetically = teachersWithTheirStudents.sort(
+    (a, b) => {
+      return a.name.localeCompare(b.name);
+    },
+  );
+
+  const changeSortMethod = (sortMethod: string) => {
+    if (sortMethod === 'average') {
+      setTeachersToDisplay(teachersSortedAlphabetically);
+      setSortMethod('alphabetical');
+    }
+    if (sortMethod === 'alphabetical') {
+      setTeachersToDisplay(
+        sortTeachersByAverageYearlyPbis(teachersWithTheirStudents),
+      );
+      setSortMethod('average');
+    }
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
+  if (!me && isAllowed(me, 'canManagePbis')) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <h1>PBIS Data</h1>
+      <h2>
+        Overall Average Yearly PBIS:{' '}
+        {roundToOneDecimal(overallAverageYearlyPbis)}
+      </h2>
+      <GradientButton onClick={() => changeSortMethod(sortMethod)}>
+        Sort by {sortMethod === 'average' ? 'Alphabetical' : 'Average'}
+      </GradientButton>
+      <table>
+        <thead>
+          <tr>
+            <th>Teacher</th>
+            <th>Average Yearly PBIS</th>
+            <th>Students</th>
+          </tr>
+        </thead>
+        <tbody>
+          {teachersToDisplay.map((teacher) => (
+            <tr
+              key={teacher.id}
+              className={
+                teacher.averageYearlyPbis > overallAverageYearlyPbis
+                  ? 'text-green-500/60'
+                  : 'text-red-500/60'
+              }
+            >
+              <td>{teacher.name}</td>
+              <td>{roundToOneDecimal(teacher.averageYearlyPbis)}</td>
+              <td>{teacher.students.length}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default PbisDataTable;

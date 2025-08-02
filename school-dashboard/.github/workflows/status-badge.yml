@@ -1,0 +1,21 @@
+name: Status Badge
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types:
+      - completed
+
+jobs:
+  status-badge:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate status badge
+        run: |
+          echo "Tests workflow completed with status: ${{ github.event.workflow_run.conclusion }}"
+          echo "View details at: ${{ github.event.workflow_run.html_url }}"

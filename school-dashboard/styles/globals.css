@@ -80,6 +80,40 @@
     font-family: 'radnika_next', system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
+  /* Dark mode input styling */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 1px solid #404040 !important;
+    border-radius: 0.25rem;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #a0a0a0 !important;
+  }
+
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    background-color: #2a2a2a !important;
+    border-color: var(--red) !important;
+  }
+
+  .dark input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+  }
+
+  .dark select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+  }
+
   @media print {
     header, .hidePrint {
       display: none !important;
