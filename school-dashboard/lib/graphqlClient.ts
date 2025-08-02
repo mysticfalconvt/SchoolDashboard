@@ -25,20 +25,6 @@ export class GraphQLClient {
 
   private getAuthHeaders(): Record<string, string> {
     const headers = { ...this.headers };
-
-    // Add authentication token if available (only on client side)
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          headers['authorization'] = `Bearer ${token}`;
-        }
-      } catch (error) {
-        // Ignore localStorage errors during SSR
-        console.warn('Could not access localStorage during SSR:', error);
-      }
-    }
-
     return headers;
   }
 

@@ -216,6 +216,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const createPbisCollectionDate = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(COUNT_CARDS_DATE_MUTATION, variables);
   };
@@ -223,6 +229,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateTA = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(
       UPDATE_TA_AVERAGE_CARDS_MUTATION,
@@ -233,6 +245,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateTAlevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(TA_LEVELED_UP_MUTATION, variables);
   };
@@ -240,6 +258,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentLevelInCollection = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(STUDENT_LEVELED_UP_MUTATION, variables);
   };
@@ -247,6 +271,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentIndividualLevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(
       UPDATE_STUDENT_LEVEL_MUTATION,
@@ -257,6 +287,12 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   const updateStudentRandomDrawingWinner = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
       process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
     );
     return await graphQLClient.request(
       STUDENT_RANDOM_DRAWING_WINNER_MUTATION,
@@ -359,11 +395,15 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
         teacher.newCardsPerStudent = taTeamCurrentAveragePbisCardsPerStudent;
         const averageCardsRounded = Math.round(teacher.newCardsPerStudent);
 
-        await updateTA({
-          id: teacher.id,
-          averagePbisCardsPerStudent: averageCardsRounded,
-          taTeamPbisLevel: taTeamCurrentPbisLevel,
-        });
+        try {
+          await updateTA({
+            id: teacher.id,
+            averagePbisCardsPerStudent: averageCardsRounded,
+            taTeamPbisLevel: taTeamCurrentPbisLevel,
+          });
+        } catch (error) {
+          console.error('Error updating TA:', error);
+        }
 
         // Link TA to collection if we have the collection ID
         if (thisCollectionId && taTeamPbisLevelChange > 0) {

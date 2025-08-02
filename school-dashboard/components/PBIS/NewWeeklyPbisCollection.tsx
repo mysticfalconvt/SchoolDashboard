@@ -4,6 +4,7 @@ import useForm from '../../lib/useForm';
 import useRevalidatePage from '../../lib/useRevalidatePage';
 import GradientButton from '../styles/Button';
 import Form from '../styles/Form';
+import { useUser } from '../User';
 import useV3PbisCollection from './useV3PbisCollection';
 
 interface FormInputs {
@@ -16,8 +17,10 @@ export default function NewWeeklyPbisCollection() {
   const { inputs, handleChange, clearForm, resetForm } = useForm();
   const [running, setRunning] = React.useState(false);
   const router = useRouter();
+  const user = useUser();
   const { runCardCollection, data, setGetData, getData, loading } =
     useV3PbisCollection();
+
   useEffect(() => {
     console.log('running', running);
     if (!running) {
@@ -25,6 +28,37 @@ export default function NewWeeklyPbisCollection() {
     }
   }, [running]);
   // console.log(data);
+
+  // Check if user is authenticated and has PBIS permissions
+  if (!user) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-red-600 font-semibold mb-2">
+          You must be logged in to run PBIS collections.
+        </p>
+        <p className="text-gray-600">Please log in to access this feature.</p>
+      </div>
+    );
+  }
+
+  if (!user.canManagePbis && !user.isSuperAdmin) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-red-600 font-semibold mb-2">
+          You don't have permission to run PBIS collections.
+        </p>
+        <p className="text-gray-600">
+          Required permission: canManagePbis or isSuperAdmin. Contact an
+          administrator for access.
+        </p>
+        <p className="text-xs text-gray-500 mt-2">
+          Current permissions: canManagePbis={user.canManagePbis}, isStaff=
+          {user.isStaff}, isSuperAdmin={user.isSuperAdmin}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <GradientButton
@@ -36,6 +70,7 @@ export default function NewWeeklyPbisCollection() {
       >
         Run Weekly Pbis Collection
       </GradientButton>
+
       {showForm && (
         <>
           {/* Backdrop overlay */}
