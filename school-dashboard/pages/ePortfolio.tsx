@@ -168,17 +168,13 @@ export const getStaticProps: GetStaticProps<EPortfolioPageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchAllLinks = async (): Promise<{ links: Link[] }> =>
     graphQLClient.request(GET_ALL_PORTFOLIO_LINKS_QUERY);

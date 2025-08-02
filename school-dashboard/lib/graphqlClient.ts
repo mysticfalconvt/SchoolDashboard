@@ -12,15 +12,29 @@ export class GraphQLClient {
       'Content-Type': 'application/json',
       ...options.headers,
     };
-    
+
     // Extract fetch-specific options from headers
     const { credentials, mode, ...actualHeaders } = this.headers;
     this.headers = actualHeaders;
-    
+
     this.fetchOptions = {
       credentials: credentials as RequestCredentials,
       mode: mode as RequestMode,
     };
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    const headers = { ...this.headers };
+
+    // Add authentication token if available
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    return headers;
   }
 
   async request<T = any>(
@@ -32,7 +46,7 @@ export class GraphQLClient {
 
     const response = await fetch(this.url, {
       method: 'POST',
-      headers: this.headers,
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({
         query: queryString,
         variables,

@@ -189,17 +189,13 @@ export const getStaticProps: GetStaticProps<LinksPageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchAllLinks = async (): Promise<{ links: LinkData[] }> =>
     graphQLClient.request(GET_ALL_STATIC_LINKS_QUERY);

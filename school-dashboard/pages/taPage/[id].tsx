@@ -339,17 +339,13 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchData = async (): Promise<{ users: any[] }> =>
     graphQLClient.request(TA_TEACHER_LIST_QUERY);
@@ -371,17 +367,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<TaPageProps> = async ({
   params,
 }) => {
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchData = async () => {
     try {

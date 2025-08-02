@@ -265,17 +265,13 @@ export const getStaticProps: GetStaticProps<
 > = async (context) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchTeacherWork = async (): Promise<{ users: TeacherData[] }> =>
     graphQLClient.request(ALL_TEACHERS_QUERY);

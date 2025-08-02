@@ -98,17 +98,13 @@ const GET_SINGLE_CALENDAR_EVENT = gql`
 export const getServerSideProps: GetServerSideProps<
   CalendarEventPageProps
 > = async (context) => {
-  const headers = {
-    credentials: 'include' as const,
-    mode: 'cors' as const,
-    headers: {
-      authorization: `test auth for keystone`,
-    },
-  };
-
   const graphQLClient = new GraphQLClient(
     process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    headers,
+    {
+      headers: {
+        authorization: `test auth for keystone`,
+      },
+    },
   );
   const fetchThisCalendar = async (): Promise<{ calendar: CalendarEvent }> =>
     graphQLClient.request(GET_SINGLE_CALENDAR_EVENT, { id: context.query.id });
