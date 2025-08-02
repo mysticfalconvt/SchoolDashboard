@@ -451,9 +451,9 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
           const randomDrawingWinnerIds: string[] = [];
           // pick the winners
           for (let i = 0; i < weeklyWinnerCount; i++) {
-            const ticketsWithoutPreviousWinners = shuffle(
+            const ticketsWithoutPreviousWinners: string[] = shuffle(
               tickets.filter(
-                (ticket) => !randomDrawingWinnerIds.includes(ticket),
+                (ticket: string) => !randomDrawingWinnerIds.includes(ticket),
               ),
             );
             const winnerRandomNumber = Math.floor(
