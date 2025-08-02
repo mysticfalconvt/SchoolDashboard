@@ -26,11 +26,16 @@ export class GraphQLClient {
   private getAuthHeaders(): Record<string, string> {
     const headers = { ...this.headers };
 
-    // Add authentication token if available
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers['authorization'] = `Bearer ${token}`;
+    // Add authentication token if available (only on client side)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          headers['authorization'] = `Bearer ${token}`;
+        }
+      } catch (error) {
+        // Ignore localStorage errors during SSR
+        console.warn('Could not access localStorage during SSR:', error);
       }
     }
 
@@ -44,28 +49,54 @@ export class GraphQLClient {
     // Convert DocumentNode to string if needed
     const queryString = typeof query === 'string' ? query : print(query);
 
-    const response = await fetch(this.url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({
-        query: queryString,
-        variables,
-      }),
-      ...this.fetchOptions,
-    });
+    try {
+      const response = await fetch(this.url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          query: queryString,
+          variables,
+        }),
+        ...this.fetchOptions,
+      });
 
-    if (!response.ok) {
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`GraphQL request failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(
+          `GraphQL errors: ${result.errors.map((e: any) => e.message).join(', ')}`,
+        );
+      }
+
+      return result.data;
+    } catch (error) {
+      // During static generation, return empty data instead of throwing
+      if (typeof window === 'undefined') {
+        console.warn(
+          'GraphQL request failed during SSR, returning empty data:',
+          error,
+        );
+        // Return a more specific empty structure based on the query
+        if (queryString.includes('calendars')) {
+          return { calendars: [] } as T;
+        }
+        if (
+          queryString.includes('users') ||
+          queryString.includes('students') ||
+          queryString.includes('teachers')
+        ) {
+          return { users: [], students: [], teachers: [] } as T;
+        }
+        if (queryString.includes('pbisCardsCount')) {
+          return { pbisCardsCount: 0 } as T;
+        }
+        return {} as T;
+      }
+      throw error;
     }
-
-    const result = await response.json();
-
-    if (result.errors) {
-      throw new Error(
-        `GraphQL errors: ${result.errors.map((e: any) => e.message).join(', ')}`,
-      );
-    }
-
-    return result.data;
   }
 }

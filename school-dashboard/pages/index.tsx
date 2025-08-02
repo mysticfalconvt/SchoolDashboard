@@ -349,85 +349,99 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
 };
 
 export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
-  // console.log(context);
-  // fetch PBIS Page data from the server
-  // get dates for calendar
-  const today = new Date();
-  const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
+  try {
+    // console.log(context);
+    // fetch PBIS Page data from the server
+    // get dates for calendar
+    const today = new Date();
+    const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
-  const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
+    const graphQLClient = new GraphQLClient(
+      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          authorization: `test auth for keystone`,
+        },
       },
-    },
-  );
+    );
 
-  // Reusable fetch with retry logic
-  const fetchWithRetry = async (
-    fetchFn: () => Promise<any>,
-    retries = 3,
-    delay = 1000,
-  ) => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        return await fetchFn();
-      } catch (error) {
-        console.error(`Attempt ${attempt} failed:`, error);
-        if (attempt === retries) {
-          console.error('Failed to fetch after retries:', error);
-          return null; // Return null instead of an object with fetchError
+    // Reusable fetch with retry logic
+    const fetchWithRetry = async (
+      fetchFn: () => Promise<any>,
+      retries = 3,
+      delay = 1000,
+    ) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          return await fetchFn();
+        } catch (error) {
+          console.error(`Attempt ${attempt} failed:`, error);
+          if (attempt === retries) {
+            console.error('Failed to fetch after retries:', error);
+            return null; // Return null instead of an object with fetchError
+          }
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
-        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-    }
-  };
+    };
 
-  // Add a timeout to prevent hanging
-  const fetchWithTimeout = async (
-    fetchFn: () => Promise<any>,
-    timeout = 5000,
-  ) => {
-    return Promise.race([
-      fetchFn(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request timeout')), timeout),
-      ),
-    ]);
-  };
+    // Add a timeout to prevent hanging
+    const fetchWithTimeout = async (
+      fetchFn: () => Promise<any>,
+      timeout = 5000,
+    ) => {
+      return Promise.race([
+        fetchFn(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), timeout),
+        ),
+      ]);
+    };
 
-  const fetchTotalCards = () => graphQLClient.request(TOTAL_PBIS_CARDS);
-  const fetchHomePageLinks = () => graphQLClient.request(GET_HOMEPAGE_LINKS);
-  const fetchWeeklyCalendar = () =>
-    graphQLClient.request(GET_WEEK_CALENDARS, {
-      starting: lastSunday,
-      ending: nextSaturday,
-    });
-  const fetchAllUsersForSearch = () =>
-    graphQLClient.request(SEARCH_ALL_USERS_QUERY);
+    const fetchTotalCards = () => graphQLClient.request(TOTAL_PBIS_CARDS);
+    const fetchHomePageLinks = () => graphQLClient.request(GET_HOMEPAGE_LINKS);
+    const fetchWeeklyCalendar = () =>
+      graphQLClient.request(GET_WEEK_CALENDARS, {
+        starting: lastSunday,
+        ending: nextSaturday,
+      });
+    const fetchAllUsersForSearch = () =>
+      graphQLClient.request(SEARCH_ALL_USERS_QUERY);
 
-  const totalCards = await fetchWithRetry(() =>
-    fetchWithTimeout(fetchTotalCards),
-  );
-  const homePageLinks = await fetchWithRetry(() =>
-    fetchWithTimeout(fetchHomePageLinks),
-  );
-  const weeklyCalendar = await fetchWithRetry(() =>
-    fetchWithTimeout(fetchWeeklyCalendar),
-  );
-  const allUsersForSearch = await fetchWithRetry(() =>
-    fetchWithTimeout(fetchAllUsersForSearch),
-  );
-  const initialGoogleCalendarEvents = await getCalendarData();
-  return {
-    props: {
-      totalCards: totalCards?.pbisCardsCount ?? null,
-      homePageLinks: homePageLinks ?? null,
-      weeklyCalendar: weeklyCalendar ?? null,
-      allUsersForSearch: allUsersForSearch ?? null,
-      initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
-    }, // will be passed to the page component as props
-    revalidate: 60 * 60,
-  };
+    const totalCards = await fetchWithRetry(() =>
+      fetchWithTimeout(fetchTotalCards),
+    );
+    const homePageLinks = await fetchWithRetry(() =>
+      fetchWithTimeout(fetchHomePageLinks),
+    );
+    const weeklyCalendar = await fetchWithRetry(() =>
+      fetchWithTimeout(fetchWeeklyCalendar),
+    );
+    const allUsersForSearch = await fetchWithRetry(() =>
+      fetchWithTimeout(fetchAllUsersForSearch),
+    );
+    const initialGoogleCalendarEvents = await getCalendarData();
+    return {
+      props: {
+        totalCards: totalCards?.pbisCardsCount ?? null,
+        homePageLinks: homePageLinks ?? null,
+        weeklyCalendar: weeklyCalendar ?? null,
+        allUsersForSearch: allUsersForSearch ?? null,
+        initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
+      }, // will be passed to the page component as props
+      revalidate: 60 * 60,
+    };
+  } catch (error) {
+    console.warn('Error during static generation for index page:', error);
+    return {
+      props: {
+        totalCards: null,
+        homePageLinks: null,
+        weeklyCalendar: null,
+        allUsersForSearch: null,
+        initialGoogleCalendarEvents: { events: [] },
+      },
+      revalidate: 60 * 60,
+    };
+  }
 };

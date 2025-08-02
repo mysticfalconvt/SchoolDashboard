@@ -168,25 +168,36 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
 export const getStaticProps: GetStaticProps<CalendarPageProps> = async (
   context,
 ) => {
-  // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
+  try {
+    // fetch PBIS Page data from the server
+    const graphQLClient = new GraphQLClient(
+      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          authorization: `test auth for keystone`,
+        },
       },
-    },
-  );
-  const fetchAllCalendars = async () => graphQLClient.request(GET_CALENDARS);
-  const initialCalendarDates = await fetchAllCalendars();
-  const initialGoogleCalendarEvents = await getCalendarData();
-  return {
-    props: {
-      initialCalendarDates: initialCalendarDates || [],
-      initialGoogleCalendarEvents: initialGoogleCalendarEvents || [],
-    }, // will be passed to the page component as props
-    revalidate: 1200, // In seconds
-  };
+    );
+    const fetchAllCalendars = async () => graphQLClient.request(GET_CALENDARS);
+    const initialCalendarDates = await fetchAllCalendars();
+    const initialGoogleCalendarEvents = await getCalendarData();
+    return {
+      props: {
+        initialCalendarDates: initialCalendarDates || [],
+        initialGoogleCalendarEvents: initialGoogleCalendarEvents || [],
+      }, // will be passed to the page component as props
+      revalidate: 1200, // In seconds
+    };
+  } catch (error) {
+    console.warn('Error during static generation for calendar page:', error);
+    return {
+      props: {
+        initialCalendarDates: [],
+        initialGoogleCalendarEvents: [],
+      },
+      revalidate: 1200,
+    };
+  }
 };
 
 export default Calendar;
