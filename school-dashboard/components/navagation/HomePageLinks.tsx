@@ -69,7 +69,8 @@ export default function HomePageLinks({ me, initialData }: HomePageLinksProps) {
           <Link
             key={link.id}
             href={linkToUse}
-            className="bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] py-0.5 px-6 h-max rounded-full m-2 inline-block"
+            className="text-white py-0.5 px-6 h-max rounded-full m-2 inline-block shadow-lg hover:brightness-110 transition-all duration-200"
+            style={{ background: 'linear-gradient(to top right, #760D08, #38B6FF)' }}
           >
             {link.name}
           </Link>

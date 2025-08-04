@@ -86,7 +86,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
         size="lg"
       >
         <Form
-          className="w-full bg-transparent border-0 shadow-none p-0"
+          className="w-full border-0 shadow-none p-0"
           onSubmit={async (e) => {
             e.preventDefault();
             // Submit the inputfields to the backend:
@@ -104,12 +104,9 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
         >
           <DisplayError error={error as any} />
           <fieldset disabled={loading} aria-busy={loading}>
-            <div className="mb-4">
-              <label
-                htmlFor="name"
-                className="block text-white font-semibold mb-1"
-              >
-                Event Title
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="name">
+                <span className="label-text text-white font-semibold">Event Title</span>
               </label>
               <input
                 required
@@ -119,32 +116,43 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 placeholder="Event Title"
                 value={inputs.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="date"
-                className="block text-white font-semibold mb-1"
-              >
-                Date of Event
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="date">
+                <span className="label-text text-white font-semibold">Date of Event</span>
               </label>
-              <input
-                required
-                type="date"
-                id="date"
-                name="date"
-                value={inputs.date}
-                onChange={handleChange}
-                className="w-full p-2 rounded border"
-              />
+              <div className="relative">
+                <input
+                  required
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={inputs.date}
+                  onChange={handleChange}
+                  className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] pr-10"
+                  placeholder="Select date"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="description"
-                className="block text-white font-semibold mb-1"
-              >
-                Description
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="description">
+                <span className="label-text text-white font-semibold">Description</span>
               </label>
               <textarea
                 id="description"
@@ -153,34 +161,28 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 required
                 value={inputs.description}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="status"
-                className="block text-white font-semibold mb-1"
-              >
-                Who can see this event?
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="status">
+                <span className="label-text text-white font-semibold">Who can see this event?</span>
               </label>
               <select
                 id="status"
                 name="status"
                 value={inputs.status}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               >
                 <option value="Both">Students and Teachers</option>
                 <option value="Students">Students Only</option>
                 <option value="Teachers">Teachers Only</option>
               </select>
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="link"
-                className="block text-white font-semibold mb-1"
-              >
-                Link
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="link">
+                <span className="label-text text-white font-semibold">Link</span>
               </label>
               <input
                 type="text"
@@ -189,27 +191,28 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 placeholder="Input Link Here"
                 value={inputs.link}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="linkTitle"
-                className="block text-white font-semibold mb-1"
-              >
-                Link Title
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="linkTitle">
+                <span className="label-text text-white font-semibold">Link Title</span>
               </label>
               <input
                 type="text"
                 id="linkTitle"
                 name="linkTitle"
-                placeholder="Input Link Here"
+                placeholder="Link Title"
                 value={inputs.linkTitle}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <button type="submit" className="mt-6">
+            <button 
+              type="submit" 
+              className="mt-6 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200 border-none"
+              style={{ background: 'linear-gradient(135deg, #760D08, #38B6FF)' }}
+            >
               + Add A New Event
             </button>
           </fieldset>

@@ -43,7 +43,7 @@ export function DialogBackdrop({
 }: DialogBackdropProps) {
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${className}`}
+      className={`fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm ${className}`}
       onClick={onClick}
     />
   );
@@ -57,14 +57,16 @@ export function DialogHeader({
 }: DialogHeaderProps) {
   return (
     <div
-      className={`flex justify-between items-center p-4 border-b border-[var(--blue)] ${className}`}
+      className={`flex justify-between items-center px-6 py-3 border-b flex-shrink-0 ${className}`}
+      style={{ borderBottomColor: '#38B6FF' }}
     >
-      <h4 className="text-white text-xl font-semibold">{children}</h4>
+      <h4 className="text-white text-xl font-semibold flex-shrink-0">{children}</h4>
       {showCloseButton && onClose && (
         <button
           type="button"
           onClick={onClose}
-          className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+          className="rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 border-none w-10 h-10 text-white hover:brightness-110 ml-4 flex-shrink-0"
+          style={{ background: 'rgba(118, 13, 8, 0.8)' }}
           aria-label="Close"
         >
           ×
@@ -77,7 +79,7 @@ export function DialogHeader({
 export function DialogContent({
   children,
   className = '',
-  maxHeight = 'max-h-[80vh]',
+  maxHeight = 'max-h-[70vh]',
 }: DialogContentProps) {
   return (
     <div className={`p-6 ${maxHeight} overflow-y-auto ${className}`}>
@@ -107,12 +109,15 @@ export function Dialog({
         className={`relative transition-all duration-500 visible w-[min(75%,1000px)] ${className}`}
         style={{ maxWidth: '1000px' }}
       >
-        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full mx-auto">
+        <div 
+          className="modal-box border-[5px] border-base-300 rounded-xl shadow-2xl p-6 relative w-full mx-auto max-w-5xl"
+          style={{ background: 'linear-gradient(to top left, #760D08, #38B6FF)' }}
+        >
           {showCloseButton && (
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+              className="absolute top-2 right-2 text-white text-2xl font-bold bg-black/40 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center focus:outline-none border-none transition-all duration-200"
               aria-label="Close"
             >
               ×
@@ -129,7 +134,11 @@ export function Dialog({
     <>
       <DialogBackdrop onClick={closeOnBackdropClick ? onClose : undefined} />
       <div
-        className={`fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 ${sizeClass} h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl ${className}`}
+        className={`modal modal-open fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 ${sizeClass} max-h-[90vh] rounded-3xl overflow-hidden border-2 shadow-2xl ${className}`}
+        style={{ 
+          background: 'linear-gradient(to top right, #760D08, #38B6FF)',
+          borderColor: '#38B6FF'
+        }}
       >
         {title && (
           <DialogHeader onClose={onClose} showCloseButton={showCloseButton}>
@@ -164,7 +173,7 @@ export function FormDialog({
       showCloseButton={showCloseButton}
       closeOnBackdropClick={closeOnBackdropClick}
     >
-      <DialogContent>{children}</DialogContent>
+      <DialogContent className="pt-2 px-8">{children}</DialogContent>
     </Dialog>
   );
 }

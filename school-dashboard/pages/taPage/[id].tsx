@@ -269,13 +269,14 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
     { id: query.id },
   );
-  // get the callbacks from each student in the ta
-  const allTaCallbacks =
-    data?.taTeacher?.taStudents?.map(
-      (student: TaStudent) => student.callbackItems || null,
-    ) || [];
-  const allTaCallbacksFlattened =
-    [].concat(...allTaCallbacks.filter(Boolean)) || [];
+  // get the callbacks from each student in the ta - memoized to prevent infinite rerenders
+  const allTaCallbacksFlattened = useMemo(() => {
+    const allTaCallbacks =
+      data?.taTeacher?.taStudents?.map(
+        (student: TaStudent) => student.callbackItems || null,
+      ) || [];
+    return [].concat(...allTaCallbacks.filter(Boolean)) || [];
+  }, [data?.taTeacher?.taStudents]);
 
   const isAllowedPbisCardCounting =
     me?.id === data?.taTeacher?.id || me?.canManagePbis;
@@ -323,7 +324,7 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
       {students.length > 0 && (
         <>
           {isAllowedPbisCardCounting && (
-            <div style={{ display: 'flex' }}>
+            <div className="flex items-center gap-4 mb-6">
               <CountPhysicalCards taStudents={students} refetch={refetch} />
               <ChromebookCheck />
             </div>

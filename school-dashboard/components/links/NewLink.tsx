@@ -119,7 +119,7 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
         size="md"
       >
         <Form
-          className="w-full bg-transparent border-0 shadow-none p-0"
+          className="w-full border-0 shadow-none p-0"
           onSubmit={async (e) => {
             e.preventDefault();
             await createLink({
@@ -141,12 +141,9 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
         >
           <DisplayError error={error as any} />
           <fieldset disabled={loading} aria-busy={loading}>
-            <div className="mb-4">
-              <label
-                htmlFor="name"
-                className="block text-white font-semibold mb-1"
-              >
-                Link Title
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="name">
+                <span className="label-text text-white font-semibold">Link Title</span>
               </label>
               <input
                 required
@@ -156,15 +153,12 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
                 placeholder="Link Title"
                 value={inputs.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="link"
-                className="block text-white font-semibold mb-1"
-              >
-                Link
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="link">
+                <span className="label-text text-white font-semibold">Link</span>
               </label>
               <input
                 type="text"
@@ -173,15 +167,12 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
                 placeholder="Input Link Here"
                 value={inputs.link}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="description"
-                className="block text-white font-semibold mb-1"
-              >
-                Description
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="description">
+                <span className="label-text text-white font-semibold">Description</span>
               </label>
               <textarea
                 id="description"
@@ -190,13 +181,13 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
                 required
                 value={inputs.description}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
               />
             </div>
-            <div className="mt-4 mb-2 font-bold text-white">
-              Visibility Options
+            <div className="divider">
+              <span className="font-bold text-white text-lg">Visibility Options</span>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {[
                 { id: 'forTeachers', label: 'Visible to Teachers' },
                 { id: 'forStudents', label: 'Visible to Students' },
@@ -223,7 +214,11 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
                 </label>
               ))}
             </div>
-            <button type="submit" className="mt-6">
+            <button 
+              type="submit" 
+              className="mt-6 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200 border-none"
+              style={{ background: 'linear-gradient(135deg, #760D08, #38B6FF)' }}
+            >
               + Add A New Link
             </button>
           </fieldset>

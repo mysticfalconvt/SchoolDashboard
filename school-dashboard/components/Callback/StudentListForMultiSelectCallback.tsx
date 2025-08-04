@@ -129,24 +129,26 @@ export default function StudentList({
 
   return (
     <>
-      <SmallGradientButton
-        onClick={(e) => {
-          e.preventDefault();
-          setShowSingleClass(!showSingleClass);
-        }}
-      >
-        {showSingleClass
-          ? 'Show all classes'
-          : 'Sort all students alphabetically'}
-      </SmallGradientButton>
-      <SmallGradientButton
-        onClick={(e) => {
-          e.preventDefault();
-          setFirstNameSort(!firstNameSort);
-        }}
-      >
-        {firstNameSort ? 'Sort by last name' : 'Sort by first name'}
-      </SmallGradientButton>
+      <div className="flex gap-2 mb-4">
+        <SmallGradientButton
+          onClick={(e) => {
+            e.preventDefault();
+            setShowSingleClass(!showSingleClass);
+          }}
+        >
+          {showSingleClass
+            ? 'Show all classes'
+            : 'Sort all students alphabetically'}
+        </SmallGradientButton>
+        <SmallGradientButton
+          onClick={(e) => {
+            e.preventDefault();
+            setFirstNameSort(!firstNameSort);
+          }}
+        >
+          {firstNameSort ? 'Sort by last name' : 'Sort by first name'}
+        </SmallGradientButton>
+      </div>
       <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {showSingleClass ? (
           <>

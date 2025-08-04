@@ -15,7 +15,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="bg-gradient-to-tr from-[var(--blue)] to-[var(--red)]">
+      <header style={{ background: 'linear-gradient(to top right, #38B6FF, #760D08)' }}>
         {/* Mobile: NCUJHS left, hamburger right */}
         <div className="flex flex-row items-center w-full px-2 py-2 relative md:static">
           {/* Mobile NCUJHS link with falcon icon */}
@@ -36,7 +36,8 @@ const Header: React.FC = () => {
           </div>
           {/* Desktop skewed logo/title card */}
           <div
-            className={`bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] rounded-2xl mx-2 min-w-[220px] h-16 md:h-20 items-center justify-center skew-x-[-20deg] shadow-lg ${isFetching ? 'animate-pulse' : ''} hidden md:flex`}
+            className={`rounded-2xl mx-2 min-w-[220px] h-16 md:h-20 items-center justify-center skew-x-[-20deg] shadow-lg ${isFetching ? 'animate-pulse' : ''} hidden md:flex`}
+            style={{ background: 'linear-gradient(to top left, #38B6FF, #760D08)' }}
           >
             <Link href="/" className="block skew-x-[20deg]">
               <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
@@ -61,7 +62,7 @@ const Header: React.FC = () => {
           </div>
           {/* Hamburger for mobile (right) */}
           <button
-            className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30"
+            className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30 bg-transparent border-none"
             aria-label="Open menu"
             onClick={() => setMenuOpen((open) => !open)}
           >
@@ -74,9 +75,12 @@ const Header: React.FC = () => {
         </div>
         {/* Mobile dropdown menu - covers entire screen, always visible when open */}
         {menuOpen && (
-          <div className="fixed inset-0 bg-gradient-to-tr from-[var(--blue)] to-[var(--red)] shadow-lg z-[9999] animate-fade-in-down overflow-y-auto flex flex-col">
+          <div 
+            className="fixed inset-0 shadow-lg z-[9999] animate-fade-in-down overflow-y-auto flex flex-col"
+            style={{ background: 'linear-gradient(to top right, #38B6FF, #760D08)' }}
+          >
             <button
-              className="absolute top-4 right-4 text-white text-3xl focus:outline-none z-60"
+              className="absolute top-4 right-4 text-white text-3xl focus:outline-none z-60 bg-transparent border-none"
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}
             >
@@ -85,7 +89,8 @@ const Header: React.FC = () => {
             <div className="mt-16 flex flex-col items-center">
               <Link
                 href="/"
-                className="mb-4 text-white font-extrabold text-2xl tracking-wide px-4 py-2 rounded-lg bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] shadow hover:brightness-110"
+                className="mb-4 text-white font-extrabold text-2xl tracking-wide px-4 py-2 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200"
+                style={{ background: 'linear-gradient(to top left, #38B6FF, #760D08)' }}
                 onClick={() => setMenuOpen(false)}
               >
                 Home

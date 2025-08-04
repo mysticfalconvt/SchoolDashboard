@@ -1,5 +1,5 @@
 import DisplayError from '@/components/ErrorMessage';
-import Form, { FormGroup } from '@/components/styles/Form';
+import Form from '@/components/styles/Form';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
@@ -87,7 +87,7 @@ export default function CallbackEditor({
     <div>
       {/* <FormContainer visible={showForm}> */}
       <Form
-        className="visible"
+        className="w-full max-w-none bg-transparent border-0 shadow-none p-0"
         onSubmit={async (e) => {
           e.preventDefault();
           // Submit the input fields to the backend:
@@ -110,17 +110,24 @@ export default function CallbackEditor({
           // console.log(inputs);
         }}
       >
-        <h2>Edit Callback Assignment</h2>
-        <DisplayError error={error as any} />
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4">Edit Callback Assignment</h2>
+          <DisplayError error={error as any} />
+        </div>
         <fieldset disabled={loading} aria-busy={loading}>
-          <FormGroup>
-            <div>
-              <label htmlFor="studentName">Student Name</label>
-              <p>{callback.student.name}</p>
+          <div className="form-control w-full mb-4">
+            <label className="label" htmlFor="studentName">
+              <span className="label-text text-white font-semibold">Student Name</span>
+            </label>
+            <div className="p-3 bg-base-200 rounded-lg text-base-content font-medium">
+              {callback.student.name}
             </div>
-
-            <label htmlFor="title">
-              Assignment
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="form-control w-full">
+              <label className="label" htmlFor="title">
+                <span className="label-text text-white font-semibold">Assignment</span>
+              </label>
               <input
                 required
                 type="text"
@@ -129,10 +136,13 @@ export default function CallbackEditor({
                 placeholder="Title of Assignment"
                 value={inputs.title || ''}
                 onChange={handleChange}
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
-            </label>
-            <label htmlFor="dateAssigned">
-              Due Date
+            </div>
+            <div className="form-control w-full">
+              <label className="label" htmlFor="dateAssigned">
+                <span className="label-text text-white font-semibold">Due Date</span>
+              </label>
               <input
                 required
                 type="date"
@@ -140,11 +150,14 @@ export default function CallbackEditor({
                 name="dateAssigned"
                 value={inputs.dateAssigned}
                 onChange={handleChange}
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
+            </div>
+          </div>
+          <div className="form-control w-full mb-4">
+            <label className="label" htmlFor="description">
+              <span className="label-text text-white font-semibold">Description</span>
             </label>
-          </FormGroup>
-          <label htmlFor="description">
-            Description
             <textarea
               id="description"
               name="description"
@@ -153,19 +166,29 @@ export default function CallbackEditor({
               value={inputs.description}
               onChange={handleChange}
               rows={5}
+              className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
             />
-          </label>
-          <label htmlFor="link">
-            Link
+          </div>
+          <div className="form-control w-full mb-6">
+            <label className="label" htmlFor="link">
+              <span className="label-text text-white font-semibold">Link</span>
+            </label>
             <input
               id="link"
               name="link"
               placeholder="Link to website"
               value={inputs.link}
               onChange={handleChange}
+              className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
             />
-          </label>
-          <button type="submit">+ Publish</button>
+          </div>
+          <button 
+            type="submit" 
+            className="w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200 border-none"
+            style={{ background: 'linear-gradient(135deg, #760D08, #38B6FF)' }}
+          >
+            + Update Assignment
+          </button>
         </fieldset>
       </Form>
       {/* </FormContainer> */}

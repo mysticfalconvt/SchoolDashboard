@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import getDisplayName from '../../lib/displayName';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Table from '../Table';
@@ -95,7 +95,7 @@ interface StudentsByBlock {
   B10?: string[];
 }
 
-export default function CallbackTable({
+const CallbackTable = React.memo(function CallbackTable({
   callbacks,
   showClassBlock = false,
 }: CallbackTableProps) {
@@ -159,7 +159,11 @@ export default function CallbackTable({
   }, [data]);
 
   const callbacksMemo = useMemo(() => {
-    const callbackWithName = callbacks?.map((callback) => {
+    if (!callbacks) {
+      return [];
+    }
+    
+    const callbackWithName = callbacks.map((callback) => {
       const name = getDisplayName(callback.student as any);
       const student = { ...callback.student, name };
       // check which block student is in from studentsByBlock
@@ -171,7 +175,7 @@ export default function CallbackTable({
 
       return { ...callback, student, block };
     });
-    return callbackWithName?.sort((a, b) => {
+    const sorted = callbackWithName.sort((a, b) => {
       if (a.student.name < b.student.name) {
         return -1;
       }
@@ -180,9 +184,13 @@ export default function CallbackTable({
       }
       return 0;
     });
+    return sorted;
   }, [callbacks, studentsByBlock]);
-  const columns = useMemo(
-    () => [
+  // Create today's date once and memoize it
+  const todayString = useMemo(() => new Date().toLocaleDateString(), []);
+  
+  const columns = useMemo(() => {
+    return [
       {
         Header: 'Callback',
         columns: [
@@ -267,9 +275,8 @@ export default function CallbackTable({
             Header: 'Date Assigned',
             accessor: 'dateAssigned',
             Cell: ({ cell: { value } }: { cell: { value: string } }) => {
-              const today = new Date().toLocaleDateString();
               const displayDate = new Date(value).toLocaleDateString();
-              const isToday = today === displayDate;
+              const isToday = todayString === displayDate;
               return isToday ? `📆 Today 📆` : displayDate;
             },
           },
@@ -280,9 +287,8 @@ export default function CallbackTable({
               if (!value) {
                 return <>---</>;
               }
-              const today = new Date().toLocaleDateString();
               const displayDate = new Date(value).toLocaleDateString();
-              const isToday = today === displayDate;
+              const isToday = todayString === displayDate;
               return isToday ? `📆 Today 📆` : displayDate;
             },
           },
@@ -358,9 +364,8 @@ export default function CallbackTable({
           },
         ],
       },
-    ],
-    [me],
-  );
+    ];
+  }, [me, todayString]);
 
   return (
     <div>
@@ -376,4 +381,6 @@ export default function CallbackTable({
       />
     </div>
   );
-}
+});
+
+export default CallbackTable;

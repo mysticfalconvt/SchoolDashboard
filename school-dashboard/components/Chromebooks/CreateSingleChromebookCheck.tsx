@@ -71,7 +71,7 @@ export default function CreateSingleChromebookCheck() {
               <select
                 name="status"
                 id="status"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
                 onChange={(e) => {
                   setStatus(e.target.value);
                   // if (e.target.value !== "Other") {

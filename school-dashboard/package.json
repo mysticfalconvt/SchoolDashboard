@@ -49,6 +49,7 @@
     "@types/react": "18.3.2",
     "autoprefixer": "^10.4.19",
     "babel-eslint": "^10.1.0",
+    "daisyui": "^5.0.50",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.0",
     "eslint-config-next": "^14.2.3",

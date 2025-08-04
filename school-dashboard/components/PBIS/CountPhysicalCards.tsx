@@ -79,7 +79,6 @@ export default function CountPhysicalCards({
   return (
     <div>
       <GradientButton
-        style={{ marginTop: '10px' }}
         onClick={() => setShowForm(!showForm)}
       >
         Log TA Cards

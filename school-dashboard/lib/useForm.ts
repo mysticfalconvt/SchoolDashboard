@@ -33,11 +33,19 @@ export default function useForm(initial: FormInputs = {}) {
     }
     if (type === 'date') {
       // console.log(value);
-      const theDate = new Date(value);
-      theDate.setDate(theDate.getDate());
-      finalValue = theDate.toISOString().split('T')[0];
-      // value = new Date(value).toISOString();
-      // console.log(`new ${value}`);
+      if (value) {
+        const theDate = new Date(value);
+        // Check if the date is valid
+        if (!isNaN(theDate.getTime())) {
+          theDate.setDate(theDate.getDate());
+          finalValue = theDate.toISOString().split('T')[0];
+        } else {
+          finalValue = '';
+        }
+      } else {
+        finalValue = '';
+      }
+      // console.log(`new ${finalValue}`);
     }
     if (type === 'checkbox') {
       // console.log(`value: ${value}  checked: ${checked}`);

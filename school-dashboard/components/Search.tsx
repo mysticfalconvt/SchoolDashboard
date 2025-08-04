@@ -221,7 +221,7 @@ const Search: React.FC = () => {
       </div>
       <div
         {...getMenuProps()}
-        className="absolute w-full z-20 border border-[var(--lightGrey)] bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700"
+        className="absolute w-full z-30 border border-[var(--lightGrey)] bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700"
       >
         {isOpen &&
           items.map((item, index) => {

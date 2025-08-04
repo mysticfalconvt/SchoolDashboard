@@ -230,7 +230,8 @@ export default function CallbackCardMessages({
                       messageFromStudent: '',
                       messageFromStudentDate: todaysDate,
                     });
-                    await queryClient.refetchQueries({});
+                    queryClient.invalidateQueries(['myStudentCallbacks']);
+                    queryClient.invalidateQueries(['allCallbacks']);
                     toast.success(
                       `Updated Callback Message for ${callback.student.name}`,
                     );

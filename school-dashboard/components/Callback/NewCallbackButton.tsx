@@ -112,7 +112,7 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
         size="xl"
       >
         <Form
-          className="w-full bg-transparent border-0 shadow-none p-0"
+          className="w-full max-w-none bg-transparent border-0 shadow-none p-0"
           onSubmit={async (e) => {
             e.preventDefault();
             await createCallback({
@@ -127,12 +127,9 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
         >
           <DisplayError error={error as any} />
           <fieldset disabled={loading} aria-busy={loading}>
-            <div className="mb-4">
-              <label
-                htmlFor="studentName"
-                className="block text-white font-semibold mb-1"
-              >
-                Student Name
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="studentName">
+                <span className="label-text text-white font-semibold">Student Name</span>
               </label>
               <SearchForUserName
                 name="studentName"
@@ -141,12 +138,9 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
                 userType="isStudent"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="title"
-                className="block text-white font-semibold mb-1"
-              >
-                Assignment
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="title">
+                <span className="label-text text-white font-semibold">Assignment</span>
               </label>
               <input
                 required
@@ -156,15 +150,12 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
                 placeholder="Title of Assignment"
                 value={inputs.title || ''}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="dateAssigned"
-                className="block text-white font-semibold mb-1"
-              >
-                Due Date
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="dateAssigned">
+                <span className="label-text text-white font-semibold">Due Date</span>
               </label>
               <input
                 required
@@ -173,15 +164,12 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
                 name="dateAssigned"
                 value={inputs.dateAssigned}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="description"
-                className="block text-white font-semibold mb-1"
-              >
-                Description
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="description">
+                <span className="label-text text-white font-semibold">Description</span>
               </label>
               <textarea
                 id="description"
@@ -191,15 +179,12 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
                 value={inputs.description}
                 onChange={handleChange}
                 rows={5}
-                className="w-full p-2 rounded border"
+                className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="link"
-                className="block text-white font-semibold mb-1"
-              >
-                Link
+            <div className="form-control w-full mb-4">
+              <label className="label" htmlFor="link">
+                <span className="label-text text-white font-semibold">Link</span>
               </label>
               <input
                 id="link"
@@ -207,10 +192,14 @@ export default function NewCallback({ refetch }: NewCallbackProps) {
                 placeholder="Link to website"
                 value={inputs.link}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
-            <button type="submit" className="mt-6">
+            <button 
+              type="submit" 
+              className="mt-6 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200 border-none"
+              style={{ background: 'linear-gradient(135deg, #760D08, #38B6FF)' }}
+            >
               + Publish
             </button>
           </fieldset>

@@ -18,12 +18,14 @@ export default function Page({ children }: PageProps) {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
 
-    // Update document class for Tailwind dark mode
+    // Update document class for Tailwind dark mode and DaisyUI theme
     if (typeof document !== 'undefined') {
       if (newTheme === 'dark') {
         document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'ncujhs-dark');
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'ncujhs-light');
       }
     }
   };
@@ -34,12 +36,17 @@ export default function Page({ children }: PageProps) {
       const localTheme = localStorage.getItem('theme');
       if (localTheme && (localTheme === 'light' || localTheme === 'dark')) {
         setTheme(localTheme);
-        // Set initial document class
+        // Set initial document class and DaisyUI theme
         if (localTheme === 'dark') {
           document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'ncujhs-dark');
         } else {
           document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'ncujhs-light');
         }
+      } else {
+        // Default to light mode
+        document.documentElement.setAttribute('data-theme', 'ncujhs-light');
       }
     }
   }, []);
@@ -54,21 +61,52 @@ export default function Page({ children }: PageProps) {
       <Header />
       <ThemeSwitcher theme={theme} setTheme={setLocalTheme} />
       <Toaster
+        position="top-right"
         toastOptions={{
+          className: 'toast-custom',
           style: {
-            backgroundColor: 'var(--blueTrans)',
-            border: `1px solid var(--red)`,
-            padding: '.5rem',
-            color: 'var(--textColor)',
-            fontWeight: 'lighter',
-            letterSpacing: '1px',
+            background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+            border: '2px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            color: '#ffffff',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(118, 13, 8, 0.3)',
+            backdropFilter: 'blur(8px)',
+            maxWidth: '400px',
+            fontSize: '14px',
+            fontFamily: 'radnika_next, system-ui, sans-serif',
           },
           success: {
-            duration: 3000,
-            icon: '👍',
+            duration: 4000,
+            icon: '✅',
+            style: {
+              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              border: '2px solid rgba(56, 182, 255, 0.4)',
+            },
             ariaProps: {
               role: 'status',
               'aria-live': 'polite',
+            },
+          },
+          error: {
+            duration: 5000,
+            icon: '❌',
+            style: {
+              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              border: '2px solid rgba(118, 13, 8, 0.4)',
+            },
+            ariaProps: {
+              role: 'alert',
+              'aria-live': 'assertive',
+            },
+          },
+          loading: {
+            icon: '⏳',
+            style: {
+              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              border: '2px solid rgba(56, 182, 255, 0.3)',
             },
           },
         }}
@@ -76,15 +114,23 @@ export default function Page({ children }: PageProps) {
         {(t) => (
           <ToastBar toast={t}>
             {({ icon, message }) => (
-              <>
-                {icon}
-                {message}
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-shrink-0 text-lg">
+                  {icon}
+                </div>
+                <div className="flex-1 text-white font-medium">
+                  {message}
+                </div>
                 {t.type !== 'loading' && (
-                  <SmallGradientButton onClick={() => toast.dismiss(t.id)}>
-                    &times;
-                  </SmallGradientButton>
+                  <button
+                    onClick={() => toast.dismiss(t.id)}
+                    className="flex-shrink-0 ml-2 text-white/80 hover:text-white text-lg font-bold transition-all duration-200 hover:scale-110 focus:outline-none w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"
+                    aria-label="Close notification"
+                  >
+                    ×
+                  </button>
                 )}
-              </>
+              </div>
             )}
           </ToastBar>
         )}

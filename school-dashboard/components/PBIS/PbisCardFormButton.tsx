@@ -72,18 +72,20 @@ function CardForm({ visible, hide }: CardFormProps) {
     return <p>{error.message}</p>;
   }
   return (
-    <div
-      className={`fixed inset-0 z-[1000] flex items-center justify-center ${visible ? '' : 'pointer-events-none'}`}
-    >
-      <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-md">
+    <div className={`modal ${visible ? 'modal-open' : ''}`}>
+      <div className="modal-backdrop" onClick={() => hide(false)}></div>
+      <div 
+        className="modal-box relative max-w-md w-full rounded-xl shadow-2xl p-6"
+        style={{ background: 'linear-gradient(to top left, #760D08, #38B6FF)' }}
+      >
         {hide && (
           <button
             type="button"
             onClick={() => hide(false)}
-            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white hover:bg-white/20 border-none z-10"
             aria-label="Close"
           >
-            ×
+            ✕
           </button>
         )}
         <Form className="w-full bg-transparent border-0 shadow-none p-0">
@@ -96,60 +98,64 @@ function CardForm({ visible, hide }: CardFormProps) {
             updateUser={setStudentCardIsFor}
             userType="isStudent"
           />
-          <label
-            htmlFor="message"
-            className="flex flex-col gap-1 text-white font-semibold"
-          >
-            <span>Message</span>
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text text-white font-semibold text-lg">Message</span>
+            </label>
             <textarea
               id="message"
               name="message"
               placeholder="Student Message"
               value={inputs.message}
               onChange={handleChange}
-              className="rounded p-2 text-black resize-none min-h-[3rem]"
+              className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-[5rem]"
             />
-          </label>
-          <div className="flex flex-wrap gap-4 justify-between text-white font-semibold w-full">
-            <label
-              htmlFor="respect"
-              className="flex items-center gap-1 whitespace-nowrap"
-            >
-              <input
-                type="radio"
-                name="category"
-                id="respect"
-                value="respect"
-                onChange={handleChange}
-              />
-              Respect
-            </label>
-            <label
-              htmlFor="responsibility"
-              className="flex items-center gap-1 whitespace-nowrap"
-            >
-              <input
-                type="radio"
-                name="category"
-                id="responsibility"
-                value="responsibility"
-                onChange={handleChange}
-              />
-              Responsibility
-            </label>
-            <label
-              htmlFor="perseverance"
-              className="flex items-center gap-1 whitespace-nowrap"
-            >
-              <input
-                type="radio"
-                name="category"
-                id="perseverance"
-                value="perseverance"
-                onChange={handleChange}
-              />
-              Perseverance
-            </label>
+          </div>
+          <div className="form-control w-full">
+            <div className="flex flex-wrap gap-4 justify-center text-white font-semibold w-full mt-4">
+              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                <input
+                  type="radio"
+                  name="category"
+                  value="respect"
+                  onChange={handleChange}
+                  className="radio radio-sm"
+                  style={{ 
+                    accentColor: '#760D08',
+                    borderColor: '#760D08'
+                  }}
+                />
+                <span className="label-text text-white font-semibold">Respect</span>
+              </label>
+              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                <input
+                  type="radio"
+                  name="category"
+                  value="responsibility"
+                  onChange={handleChange}
+                  className="radio radio-sm"
+                  style={{ 
+                    accentColor: '#760D08',
+                    borderColor: '#760D08'
+                  }}
+                />
+                <span className="label-text text-white font-semibold">Responsibility</span>
+              </label>
+              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                <input
+                  type="radio"
+                  name="category"
+                  value="perseverance"
+                  onChange={handleChange}
+                  className="radio radio-sm"
+                  style={{ 
+                    accentColor: '#760D08',
+                    borderColor: '#760D08'
+                  }}
+                />
+                <span className="label-text text-white font-semibold">Perseverance</span>
+              </label>
+            </div>
           </div>
           <GradientButton
             type="submit"

@@ -34,14 +34,17 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
     return <MagicLinkSignIn />;
   }
 
-  // Helper to render a nav link in a skewed card
+  // Helper to render a nav link in a skewed card using exact brand colors
   const NavCard: React.FC<NavCardProps> = ({ href, children }) => (
     <div
       className={
         mobile
-          ? 'bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] rounded-lg my-2 w-full flex items-center justify-center skew-x-[-20deg] shadow transition-transform duration-200 hover:brightness-110 hover:shadow-lg'
-          : 'bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] rounded-lg mx-1 min-w-[90px] h-10 flex items-center justify-center skew-x-[-20deg] shadow transition-transform duration-200 hover:brightness-110 hover:shadow-lg'
+          ? 'rounded-lg my-2 w-full flex items-center justify-center skew-x-[-20deg] shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl'
+          : 'rounded-lg mx-1 min-w-[90px] h-10 flex items-center justify-center skew-x-[-20deg] shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl'
       }
+      style={{
+        background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+      }}
     >
       <Link
         href={href}
@@ -84,10 +87,13 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           <div className="flex items-center justify-center my-2">
             <Link
               href="/superUserSettings"
-              className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+              }}
               aria-label="Super User Settings"
             >
-              <span className="skew-x-[20deg] w-full text-center text-xl">
+              <span className="skew-x-[20deg] w-full text-center text-xl text-white">
                 ⚙️
               </span>
             </Link>
@@ -133,10 +139,13 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           <div className="flex items-center justify-center my-2">
             <Link
               href="/superUserSettings"
-              className="flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg w-10 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none"
+              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+              }}
               aria-label="Super User Settings"
             >
-              <span className="skew-x-[20deg] w-full text-center text-xl">
+              <span className="skew-x-[20deg] w-full text-center text-xl text-white">
                 ⚙️
               </span>
             </Link>

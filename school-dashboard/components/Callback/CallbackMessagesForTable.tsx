@@ -1,7 +1,8 @@
 import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
+import { useQueryClient } from 'react-query';
 import { UPDATE_CALLBACK_MESSAGES_MUTATION } from './CallbackCardMessages';
 
 interface Teacher {
@@ -27,14 +28,14 @@ interface CallbackMessagesForTableProps {
   callbackItem: CallbackItem;
 }
 
-export default function CallbackMessagesForTable({
+const CallbackMessagesForTable = React.memo(function CallbackMessagesForTable({
   callbackItem,
 }: CallbackMessagesForTableProps) {
-  // console.log(callbackItem)
   const me = useUser();
+  const queryClient = useQueryClient();
   const isTeacher = me.id === callbackItem.teacher.id;
   const isStudent = me.id === callbackItem.student.id;
-  const currentDate = new Date().toLocaleDateString();
+  const currentDate = useMemo(() => new Date().toLocaleDateString(), []);
   const [teacherMessage, setTeacherMessage] = useState(
     callbackItem.messageFromTeacher || '',
   );
@@ -51,14 +52,24 @@ export default function CallbackMessagesForTable({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateCallback({
-      id: callbackItem.id,
-      messageFromTeacher: teacherMessage,
-      messageFromTeacherDate: teacherMessageDate,
-      messageFromStudent: studentMessage,
-      messageFromStudentDate: studentMessageDate,
-    });
-    toast.success(`Updated Callback Message for ${callbackItem.student.name}`);
+    try {
+      await updateCallback({
+        id: callbackItem.id,
+        messageFromTeacher: teacherMessage,
+        messageFromTeacherDate: teacherMessageDate,
+        messageFromStudent: studentMessage,
+        messageFromStudentDate: studentMessageDate,
+      });
+      
+      // Invalidate specific queries to trigger refetch - avoid refetching ALL queries
+      queryClient.invalidateQueries(['taInfo']);
+      queryClient.invalidateQueries(['allCallbacks']);
+      
+      toast.success(`Updated Callback Message for ${callbackItem.student.name}`);
+    } catch (error) {
+      toast.error('Failed to update message');
+      console.error(error);
+    }
   };
 
   const submitOnEnter = (e: React.KeyboardEvent) => {
@@ -125,4 +136,6 @@ export default function CallbackMessagesForTable({
       </div>
     </div>
   );
-}
+});
+
+export default CallbackMessagesForTable;
