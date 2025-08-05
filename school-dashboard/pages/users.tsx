@@ -388,14 +388,15 @@ const Users: NextPage<UsersPageProps> = (props) => {
     );
   }, [teachers]);
 
-  const hiddenColumns = callbackDisabled
-    ? [
-        'callbackCount',
-        'totalCallback',
-        'callbackItemsCount',
-        'averageTimeToCompleteCallback',
-      ]
-    : [];
+  const hiddenColumns =
+    callbackDisabled || !me?.canSeeAllCallback
+      ? [
+          'callbackCount',
+          'totalCallback',
+          'callbackItemsCount',
+          'averageTimeToCompleteCallback',
+        ]
+      : [];
 
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;
