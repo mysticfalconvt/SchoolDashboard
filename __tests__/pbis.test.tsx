@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockUser } from '../../__tests__/utils/test-utils';
-import PbisPage from '../pbis';
+import { renderWithProviders, mockUser } from './utils/test-utils';
+import PbisPage from '../pages/pbis';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -17,23 +17,23 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock dependencies
-jest.mock('../../components/User', () => ({
+jest.mock('../components/User', () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('../../lib/useGqlQuery', () => ({
+jest.mock('../lib/useGqlQuery', () => ({
   useGQLQuery: jest.fn(),
 }));
 
-jest.mock('../../lib/isAllowed', () => jest.fn());
+jest.mock('../lib/isAllowed', () => jest.fn());
 
-jest.mock('../../config', () => ({
-  ...jest.requireActual('../../config'),
+jest.mock('../config', () => ({
+  ...jest.requireActual('../config'),
   ADMIN_ID: 'admin',
 }));
 
 // Mock chart components
-jest.mock('../../components/Chart/DonutChart', () => {
+jest.mock('../components/Chart/DonutChart', () => {
   return function MockDoughnutChart({ title, chartData }: any) {
     return (
       <div data-testid="doughnut-chart">
@@ -44,7 +44,7 @@ jest.mock('../../components/Chart/DonutChart', () => {
   };
 });
 
-jest.mock('../../components/PBIS/DisplayPbisCollectionData', () => {
+jest.mock('../components/PBIS/DisplayPbisCollectionData', () => {
   return function MockDisplayPbisCollectionData({ collectionData }: any) {
     return (
       <div data-testid="pbis-collection-data">
@@ -54,7 +54,7 @@ jest.mock('../../components/PBIS/DisplayPbisCollectionData', () => {
   };
 });
 
-jest.mock('../../components/PBIS/PbisCardChart', () => {
+jest.mock('../components/PBIS/PbisCardChart', () => {
   return function MockPbisCardChart({ cardCounts }: any) {
     return (
       <div data-testid="pbis-card-chart">
@@ -64,7 +64,7 @@ jest.mock('../../components/PBIS/PbisCardChart', () => {
   };
 });
 
-jest.mock('../../components/PBIS/PbisFalcon', () => {
+jest.mock('../components/PBIS/PbisFalcon', () => {
   return function MockPbisFalcon({ initialCount }: any) {
     return (
       <div data-testid="pbis-falcon">
@@ -74,9 +74,9 @@ jest.mock('../../components/PBIS/PbisFalcon', () => {
   };
 });
 
-const { useUser } = require('../../components/User');
-const { useGQLQuery } = require('../../lib/useGqlQuery');
-const isAllowed = require('../../lib/isAllowed');
+const { useUser } = require('../components/User');
+const { useGQLQuery } = require('../lib/useGqlQuery');
+const isAllowed = require('../lib/isAllowed');
 
 describe('PbisPage', () => {
   const mockPbisPageProps = {

@@ -1,6 +1,6 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockUser, mockCalendarEvent } from '../../__tests__/utils/test-utils';
-import CalendarPage from '../calendar';
+import { renderWithProviders, mockUser, mockCalendarEvent } from './utils/test-utils';
+import CalendarPage from '../pages/calendar';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -16,18 +16,18 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock dependencies
-jest.mock('../../components/User', () => ({
+jest.mock('../components/User', () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('../../lib/useGqlQuery', () => ({
+jest.mock('../lib/useGqlQuery', () => ({
   useGQLQuery: jest.fn(),
 }));
 
-jest.mock('../../lib/isAllowed', () => jest.fn());
+jest.mock('../lib/isAllowed', () => jest.fn());
 
 // Mock calendar components
-jest.mock('../../components/calendars/NewCalendar', () => {
+jest.mock('../components/calendars/NewCalendar', () => {
   return function MockNewCalendar({ refetchCalendars, hidden }: any) {
     if (hidden) return null;
     return (
@@ -40,7 +40,7 @@ jest.mock('../../components/calendars/NewCalendar', () => {
   };
 });
 
-jest.mock('../../components/calendars/Calendars', () => {
+jest.mock('../components/calendars/Calendars', () => {
   return function MockCalendars({ dates, initialData, googleCalendarEvents }: any) {
     const events = initialData?.calendarEvents || [];
     return (
@@ -58,9 +58,9 @@ jest.mock('../../components/calendars/Calendars', () => {
   };
 });
 
-const { useUser } = require('../../components/User');
-const { useGQLQuery } = require('../../lib/useGqlQuery');
-const isAllowed = require('../../lib/isAllowed');
+const { useUser } = require('../components/User');
+const { useGQLQuery } = require('../lib/useGqlQuery');
+const isAllowed = require('../lib/isAllowed');
 
 describe('CalendarPage', () => {
   const mockEvents = [

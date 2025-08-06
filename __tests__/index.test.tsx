@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockUser } from '../../__tests__/utils/test-utils';
-import HomePage from '../index';
+import { renderWithProviders, mockUser } from './utils/test-utils';
+import HomePage from '../pages/index';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -16,58 +16,58 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock the components to avoid complex dependencies
-jest.mock('../../components/User', () => ({
+jest.mock('../components/User', () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('../../lib/useGqlQuery', () => ({
+jest.mock('../lib/useGqlQuery', () => ({
   useGQLQuery: jest.fn(),
 }));
 
-jest.mock('../../components/calendars/WeeklyCalendar', () => {
+jest.mock('../components/calendars/WeeklyCalendar', () => {
   return function MockWeeklyCalendar() {
     return <div data-testid="weekly-calendar">Weekly Calendar</div>;
   };
 });
 
-jest.mock('../../components/PBIS/DisplayPbisCardsWidget', () => {
+jest.mock('../components/PBIS/DisplayPbisCardsWidget', () => {
   return function MockDisplayPbisCardWidget() {
     return <div data-testid="pbis-card-widget">PBIS Card Widget</div>;
   };
 });
 
-jest.mock('../../components/navagation/HomePageLinks', () => {
+jest.mock('../components/navagation/HomePageLinks', () => {
   return function MockHomePageLinks() {
     return <div data-testid="homepage-links">Homepage Links</div>;
   };
 });
 
-jest.mock('../../components/Callback/StudentCallbacks', () => {
+jest.mock('../components/Callback/StudentCallbacks', () => {
   return function MockStudentCallbacks() {
     return <div data-testid="student-callbacks">Student Callbacks</div>;
   };
 });
 
-jest.mock('../../components/Callback/TaCallback', () => {
+jest.mock('../components/Callback/TaCallback', () => {
   return function MockTaCallbacks() {
     return <div data-testid="ta-callbacks">TA Callbacks</div>;
   };
 });
 
-jest.mock('../../components/PBIS/PbisCardFormButton', () => {
+jest.mock('../components/PBIS/PbisCardFormButton', () => {
   return function MockPbisCardFormButton() {
     return <div data-testid="pbis-form-button">PBIS Form Button</div>;
   };
 });
 
-jest.mock('../../components/users/ViewStudentPage', () => {
+jest.mock('../components/users/ViewStudentPage', () => {
   return function MockViewStudentPage() {
     return <div data-testid="student-page">Student Page</div>;
   };
 });
 
-const { useUser } = require('../../components/User');
-const { useGQLQuery } = require('../../lib/useGqlQuery');
+const { useUser } = require('../components/User');
+const { useGQLQuery } = require('../lib/useGqlQuery');
 
 describe('HomePage', () => {
   const mockProps = {

@@ -1,6 +1,6 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockUser } from '../../__tests__/utils/test-utils';
-import UsersPage from '../users';
+import { renderWithProviders, mockUser } from './utils/test-utils';
+import UsersPage from '../pages/users';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -16,15 +16,15 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock dependencies
-jest.mock('../../components/User', () => ({
+jest.mock('../components/User', () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('../../lib/useGqlQuery', () => ({
+jest.mock('../lib/useGqlQuery', () => ({
   useGQLQuery: jest.fn(),
 }));
 
-jest.mock('../../components/Table', () => {
+jest.mock('../components/Table', () => {
   return function MockTable({ data, columns, searchColumn }: any) {
     return (
       <div data-testid="users-table">
@@ -41,11 +41,11 @@ jest.mock('../../components/Table', () => {
   };
 });
 
-jest.mock('../../lib/isAllowed', () => jest.fn());
+jest.mock('../lib/isAllowed', () => jest.fn());
 
-const { useUser } = require('../../components/User');
-const { useGQLQuery } = require('../../lib/useGqlQuery');
-const isAllowed = require('../../lib/isAllowed');
+const { useUser } = require('../components/User');
+const { useGQLQuery } = require('../lib/useGqlQuery');
+const isAllowed = require('../lib/isAllowed');
 
 describe('UsersPage', () => {
   const mockStudents = [
