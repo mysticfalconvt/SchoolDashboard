@@ -36,3 +36,6 @@ yarn-error.log*
 
 # Sentry Config File
 .sentryclirc
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
