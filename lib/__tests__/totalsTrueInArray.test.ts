@@ -80,7 +80,10 @@ describe('totalsTrueInArray', () => {
       { prop1: false, prop2: 0, prop3: '', prop4: null },
     ];
 
-    const result = totalsTrueInArray(items, data);
+    const result = totalsTrueInArray(
+      items,
+      data as unknown as Record<string, boolean>[],
+    );
 
     expect(result).toEqual([
       { item: 'prop1', totals: 1 }, // only true counts
@@ -116,7 +119,7 @@ describe('totalsTrueInArray', () => {
     const result = totalsTrueInArray(items, data);
 
     // Should maintain the order from items array
-    expect(result.map(r => r.item)).toEqual(['zebra', 'alpha', 'beta']);
+    expect(result.map((r) => r.item)).toEqual(['zebra', 'alpha', 'beta']);
     expect(result).toEqual([
       { item: 'zebra', totals: 1 },
       { item: 'alpha', totals: 1 },
@@ -186,7 +189,10 @@ describe('totalsTrueInArray', () => {
       { boolProp: true, stringProp: false, numberProp: 0 },
     ];
 
-    const result = totalsTrueInArray(items, data);
+    const result = totalsTrueInArray(
+      items,
+      data as unknown as Record<string, boolean>[],
+    );
 
     expect(result).toEqual([
       { item: 'boolProp', totals: 2 },
@@ -201,9 +207,7 @@ describe('totalsTrueInArray', () => {
 
     const result = totalsTrueInArray(items, data);
 
-    expect(result).toEqual([
-      { item: 'isEnabled', totals: 1 },
-    ]);
+    expect(result).toEqual([{ item: 'isEnabled', totals: 1 }]);
   });
 
   it('handles boolean false values correctly', () => {
@@ -217,32 +221,33 @@ describe('totalsTrueInArray', () => {
 
     const result = totalsTrueInArray(items, data);
 
-    expect(result).toEqual([
-      { item: 'isActive', totals: 1 },
-    ]);
+    expect(result).toEqual([{ item: 'isActive', totals: 1 }]);
   });
 
   it('handles data objects with additional unrelated properties', () => {
     const items = ['isPublic', 'isActive'];
     const data = [
-      { 
-        isPublic: true, 
+      {
+        isPublic: true,
         isActive: false,
         name: 'Item 1',
         createdAt: '2023-01-01',
         tags: ['tag1', 'tag2'],
-        metadata: { version: 1 }
+        metadata: { version: 1 },
       },
-      { 
-        isPublic: false, 
+      {
+        isPublic: false,
         isActive: true,
         name: 'Item 2',
         createdAt: '2023-01-02',
-        priority: 'high'
+        priority: 'high',
       },
     ];
 
-    const result = totalsTrueInArray(items, data);
+    const result = totalsTrueInArray(
+      items,
+      data as unknown as Record<string, boolean>[],
+    );
 
     expect(result).toEqual([
       { item: 'isPublic', totals: 1 },

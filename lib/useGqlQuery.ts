@@ -27,7 +27,10 @@ export const useGQLQuery = <TData = any>(
   // console.log(document)
   // const fetchData = async () => await request(endpoint, query, variables);
 
-  return useQuery<TData, Error, TData>(key, fetchData, config);
+  // Include variables in the query key so React Query knows when to refetch
+  const queryKey = variables ? [key, variables] : [key];
+
+  return useQuery<TData, Error, TData>(queryKey, fetchData, config);
 };
 
 export const useAsyncGQLQuery = <TData = any>(query: DocumentNode) => {

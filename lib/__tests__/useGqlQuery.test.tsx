@@ -1,8 +1,8 @@
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import gql from 'graphql-tag';
-import { useGQLQuery, useAsyncGQLQuery } from '../useGqlQuery';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { useAsyncGQLQuery, useGQLQuery } from '../useGqlQuery';
 
 // Mock fetch globally since the GraphQL client uses it
 const mockFetch = jest.fn();
@@ -25,7 +25,7 @@ describe('useGqlQuery', () => {
         },
       },
     });
-    
+
     mockFetch.mockClear();
     mockFetch.mockReset();
   });
@@ -62,7 +62,7 @@ describe('useGqlQuery', () => {
 
     const { result } = renderHook(
       () => useGQLQuery('test-users', testQuery, { limit: 10 }),
-      { wrapper }
+      { wrapper },
     );
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('useGqlQuery', () => {
 
   it('handles query without variables', async () => {
     const mockData = { users: [] };
-    
+
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({ data: mockData }),
@@ -87,7 +87,7 @@ describe('useGqlQuery', () => {
 
     const { result } = renderHook(
       () => useGQLQuery('test-users-no-vars', testQuery),
-      { wrapper }
+      { wrapper },
     );
 
     await waitFor(() => {
@@ -103,7 +103,7 @@ describe('useGqlQuery', () => {
 
     const { result } = renderHook(
       () => useGQLQuery('test-users-error', testQuery),
-      { wrapper }
+      { wrapper },
     );
 
     await waitFor(() => {
@@ -126,11 +126,12 @@ describe('useGqlQuery', () => {
     });
 
     const { result } = renderHook(
-      () => useGQLQuery('test-config', testQuery, undefined, {
-        enabled: false,
-        staleTime: 5000,
-      }),
-      { wrapper }
+      () =>
+        useGQLQuery('test-config', testQuery, undefined, {
+          enabled: false,
+          staleTime: 5000,
+        }),
+      { wrapper },
     );
 
     // Query should not execute because enabled: false
@@ -140,7 +141,12 @@ describe('useGqlQuery', () => {
 
   it('refetches data when variables change', async () => {
     const mockData1 = { users: [{ id: '1', name: 'John' }] };
-    const mockData2 = { users: [{ id: '1', name: 'John' }, { id: '2', name: 'Jane' }] };
+    const mockData2 = {
+      users: [
+        { id: '1', name: 'John' },
+        { id: '2', name: 'Jane' },
+      ],
+    };
 
     mockFetch
       .mockResolvedValueOnce({
@@ -155,11 +161,12 @@ describe('useGqlQuery', () => {
       });
 
     const { result, rerender } = renderHook(
-      ({ limit }: { limit: number }) => useGQLQuery(['test-refetch', { limit }], testQuery, { limit }),
+      ({ limit }: { limit: number }) =>
+        useGQLQuery('test-refetch', testQuery, { limit }),
       {
         wrapper,
         initialProps: { limit: 1 },
-      }
+      },
     );
 
     await waitFor(() => {
@@ -208,7 +215,7 @@ describe('useAsyncGQLQuery', () => {
     expect(typeof fetchUser).toBe('function');
 
     const data = await fetchUser({ id: '1' });
-    
+
     expect(data).toEqual(mockData);
   });
 
@@ -220,11 +227,19 @@ describe('useAsyncGQLQuery', () => {
       headers: { get: () => 'application/json' },
     });
 
-    const { result } = renderHook(() => useAsyncGQLQuery(gql`query { users { id } }`));
+    const { result } = renderHook(() =>
+      useAsyncGQLQuery(gql`
+        query {
+          users {
+            id
+          }
+        }
+      `),
+    );
 
     const fetchData = result.current;
     const data = await fetchData();
-    
+
     expect(data).toEqual(mockData);
   });
 
@@ -235,14 +250,14 @@ describe('useAsyncGQLQuery', () => {
     const { result } = renderHook(() => useAsyncGQLQuery(testQuery));
 
     const fetchUser = result.current;
-    
+
     await expect(fetchUser({ id: '1' })).rejects.toThrow('Network error');
   });
 
   it('can be called multiple times with different variables', async () => {
     const mockData1 = { user: { id: '1', name: 'John' } };
     const mockData2 = { user: { id: '2', name: 'Jane' } };
-    
+
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
@@ -258,10 +273,10 @@ describe('useAsyncGQLQuery', () => {
     const { result } = renderHook(() => useAsyncGQLQuery(testQuery));
 
     const fetchUser = result.current;
-    
+
     const result1 = await fetchUser({ id: '1' });
     const result2 = await fetchUser({ id: '2' });
-    
+
     expect(result1).toEqual(mockData1);
     expect(result2).toEqual(mockData2);
     expect(mockFetch).toHaveBeenCalledTimes(2);

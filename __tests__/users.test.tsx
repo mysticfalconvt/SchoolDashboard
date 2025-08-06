@@ -1,6 +1,6 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockUser } from './utils/test-utils';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import UsersPage from '../pages/users';
+import { mockUser, renderWithProviders } from './utils/test-utils';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -33,7 +33,9 @@ jest.mock('../components/Table', () => {
         {data?.map((item: any, index: number) => (
           <div key={item.id || index} data-testid={`user-row-${index}`}>
             <span data-testid={`user-name-${index}`}>{item.name}</span>
-            <span data-testid={`user-pbis-${index}`}>{item.YearPbisCount || 0}</span>
+            <span data-testid={`user-pbis-${index}`}>
+              {item.YearPbisCount || 0}
+            </span>
           </div>
         ))}
       </div>
@@ -80,7 +82,9 @@ describe('UsersPage', () => {
       hasTA: true,
       callbackCount: 5,
       virtualCards: 45,
-      physicalCards: 15,
+      averageTimeToCompleteCallback: 1.5,
+      callbackAssignedCount: 2,
+      totalCallback: 5,
       YearPbisCount: 200,
     },
     {
@@ -89,14 +93,16 @@ describe('UsersPage', () => {
       hasTA: false,
       callbackCount: 3,
       virtualCards: 30,
-      physicalCards: 10,
+      averageTimeToCompleteCallback: 2.0,
+      callbackAssignedCount: 1,
+      totalCallback: 3,
       YearPbisCount: 150,
     },
   ];
 
   const mockProps = {
-    studentsData: { students: mockStudents },
-    teachersData: { teachers: mockTeachers },
+    students: { students: mockStudents },
+    teachers: { teachers: mockTeachers },
   };
 
   beforeEach(() => {

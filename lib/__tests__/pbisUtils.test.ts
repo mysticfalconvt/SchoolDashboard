@@ -1,5 +1,5 @@
-import { UPDATE_PBIS } from '../pbisUtils';
 import { print } from 'graphql';
+import { UPDATE_PBIS } from '../pbisUtils';
 
 describe('pbisUtils', () => {
   describe('UPDATE_PBIS mutation', () => {
@@ -10,7 +10,7 @@ describe('pbisUtils', () => {
 
     it('contains the correct mutation structure', () => {
       const mutationString = print(UPDATE_PBIS);
-      
+
       expect(mutationString).toContain('mutation UPDATE_PBIS');
       expect(mutationString).toContain('$userId: ID!');
       expect(mutationString).toContain('recalculatePBIS(userId: $userId)');
@@ -19,31 +19,36 @@ describe('pbisUtils', () => {
 
     it('has the correct operation name', () => {
       expect(UPDATE_PBIS.definitions[0]).toHaveProperty('name');
-      expect(UPDATE_PBIS.definitions[0].name?.value).toBe('UPDATE_PBIS');
+      expect((UPDATE_PBIS.definitions[0] as any).name?.value).toBe(
+        'UPDATE_PBIS',
+      );
     });
 
     it('requires userId parameter', () => {
       const mutationString = print(UPDATE_PBIS);
-      
+
       // Should have userId as a required parameter
       expect(mutationString).toContain('$userId: ID!');
     });
 
     it('calls recalculatePBIS operation', () => {
       const mutationString = print(UPDATE_PBIS);
-      
+
       expect(mutationString).toContain('recalculatePBIS');
       expect(mutationString).toContain('userId: $userId');
     });
 
     it('returns id field', () => {
       const mutationString = print(UPDATE_PBIS);
-      
+
       expect(mutationString).toContain('{\n    id\n  }');
     });
 
     it('is a mutation operation (not query or subscription)', () => {
-      expect(UPDATE_PBIS.definitions[0]).toHaveProperty('operation', 'mutation');
+      expect(UPDATE_PBIS.definitions[0]).toHaveProperty(
+        'operation',
+        'mutation',
+      );
     });
 
     it('formatted mutation string matches expected structure', () => {
@@ -53,18 +58,18 @@ describe('pbisUtils', () => {
     id
   }
 }`;
-      
+
       expect(mutationString.replace(/\s+/g, ' ').trim()).toBe(
-        expectedStructure.replace(/\s+/g, ' ').trim()
+        expectedStructure.replace(/\s+/g, ' ').trim(),
       );
     });
 
     it('can be used with GraphQL client', () => {
       // This test ensures the mutation is properly structured for use
       const mockVariables = { userId: '123' };
-      
+
       expect(() => print(UPDATE_PBIS)).not.toThrow();
-      
+
       // Verify the mutation would work with variables
       const mutationString = print(UPDATE_PBIS);
       expect(mutationString).toBeTruthy();
@@ -80,11 +85,11 @@ describe('pbisUtils', () => {
 
     it('has valid variable definitions', () => {
       const definition = UPDATE_PBIS.definitions[0] as any;
-      
+
       expect(definition).toHaveProperty('variableDefinitions');
       expect(Array.isArray(definition.variableDefinitions)).toBe(true);
       expect(definition.variableDefinitions).toHaveLength(1);
-      
+
       const variableDefinition = definition.variableDefinitions[0];
       expect(variableDefinition.variable.name.value).toBe('userId');
       expect(variableDefinition.type.kind).toBe('NonNullType');
@@ -92,12 +97,12 @@ describe('pbisUtils', () => {
 
     it('has valid selection set', () => {
       const definition = UPDATE_PBIS.definitions[0] as any;
-      
+
       expect(definition).toHaveProperty('selectionSet');
       expect(definition.selectionSet).toHaveProperty('selections');
       expect(Array.isArray(definition.selectionSet.selections)).toBe(true);
       expect(definition.selectionSet.selections).toHaveLength(1);
-      
+
       const mutation = definition.selectionSet.selections[0];
       expect(mutation.name.value).toBe('recalculatePBIS');
     });
