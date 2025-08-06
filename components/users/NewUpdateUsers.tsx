@@ -45,11 +45,12 @@ export default function NewUpdateUsers() {
     },
   );
 
-  const [upateUsersFromJson, { loading, error, data }] =
+  const [updateUsersFromJson, { loading, error, data }] =
     useGqlMutation(UPDATE_USER_MUTATION);
   const [resultOfUpdate, setResultOfUpdate] = useState<UpdateResult[] | null>(
     null,
   );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const unUpdatedUsers = React.useMemo(() => {
     const updatedUsersByName: Record<string, UpdateResult> = {};
@@ -80,6 +81,7 @@ export default function NewUpdateUsers() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setShowForm(false)}
+            data-testid="backdrop"
           />
 
           {/* Modal */}
@@ -101,14 +103,92 @@ export default function NewUpdateUsers() {
                 className="w-full bg-transparent border-0 shadow-none p-0"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  // Submit the inputfields to the backend:
-                  await upateUsersFromJson({
-                    studentScheduleData: inputs.userData,
-                  });
-                  setResultOfUpdate(
-                    JSON.parse(data?.updateStudentSchedules || '[]'),
-                  );
-                  setShowForm(false);
+                  setIsProcessing(true);
+
+                  try {
+                    const parsedData = JSON.parse(inputs.userData || '[]');
+
+                    if (parsedData.length > 1) {
+                      // Split into 2 chunks
+                      const midPoint = Math.ceil(parsedData.length / 2);
+                      const chunk1 = parsedData.slice(0, midPoint);
+                      const chunk2 = parsedData.slice(midPoint);
+
+                      // Process chunks sequentially
+
+                      // Process first chunk
+                      const result1 = await new Promise<UpdateResult[]>(
+                        (resolve) => {
+                          updateUsersFromJson(
+                            {
+                              studentScheduleData: JSON.stringify(chunk1),
+                            },
+                            {
+                              onSuccess: (data) => {
+                                resolve(
+                                  JSON.parse(
+                                    data.updateStudentSchedules || '[]',
+                                  ),
+                                );
+                              },
+                            },
+                          );
+                        },
+                      );
+
+                      // Process second chunk
+                      const result2 = await new Promise<UpdateResult[]>(
+                        (resolve) => {
+                          updateUsersFromJson(
+                            {
+                              studentScheduleData: JSON.stringify(chunk2),
+                            },
+                            {
+                              onSuccess: (data) => {
+                                resolve(
+                                  JSON.parse(
+                                    data.updateStudentSchedules || '[]',
+                                  ),
+                                );
+                              },
+                            },
+                          );
+                        },
+                      );
+
+                      // Combine results
+                      const combinedResults = [...result1, ...result2];
+                      setResultOfUpdate(combinedResults);
+                    } else {
+                      // Single item or empty, process normally
+                      const result = await new Promise<UpdateResult[]>(
+                        (resolve) => {
+                          updateUsersFromJson(
+                            {
+                              studentScheduleData: inputs.userData,
+                            },
+                            {
+                              onSuccess: (data) => {
+                                resolve(
+                                  JSON.parse(
+                                    data.updateStudentSchedules || '[]',
+                                  ),
+                                );
+                              },
+                            },
+                          );
+                        },
+                      );
+
+                      setResultOfUpdate(result);
+                    }
+
+                    setShowForm(false);
+                  } catch (err) {
+                    console.error('Error processing update:', err);
+                  } finally {
+                    setIsProcessing(false);
+                  }
                 }}
               >
                 <h1 className="text-white text-lg font-semibold mb-4">
@@ -116,8 +196,8 @@ export default function NewUpdateUsers() {
                 </h1>
                 <DisplayError error={error as any} />
                 <fieldset
-                  disabled={loading}
-                  aria-busy={loading}
+                  disabled={loading || isProcessing}
+                  aria-busy={loading || isProcessing}
                   className="border-0 p-0"
                 >
                   <label
