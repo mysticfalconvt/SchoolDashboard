@@ -1,9 +1,9 @@
-import React from 'react';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import gql from 'graphql-tag';
-import { useGqlMutation } from '../useGqlMutation';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { GraphQLClient } from '../graphqlClient';
+import { useGqlMutation } from '../useGqlMutation';
 
 // Mock the GraphQLClient
 jest.mock('../graphqlClient', () => ({
@@ -18,7 +18,9 @@ jest.mock('../../config', () => ({
   prodEndpoint: 'https://api.example.com/graphql',
 }));
 
-const MockedGraphQLClient = GraphQLClient as jest.MockedClass<typeof GraphQLClient>;
+const MockedGraphQLClient = GraphQLClient as jest.MockedClass<
+  typeof GraphQLClient
+>;
 
 describe('useGqlMutation', () => {
   let queryClient: QueryClient;
@@ -36,11 +38,14 @@ describe('useGqlMutation', () => {
         },
       },
     });
-    
+
     mockRequest = jest.fn();
-    MockedGraphQLClient.mockImplementation(() => ({
-      request: mockRequest,
-    }) as any);
+    MockedGraphQLClient.mockImplementation(
+      () =>
+        ({
+          request: mockRequest,
+        }) as any,
+    );
 
     // Spy on queryClient methods
     jest.spyOn(queryClient, 'invalidateQueries');
@@ -61,10 +66,9 @@ describe('useGqlMutation', () => {
   `;
 
   it('returns Apollo-style mutation result', () => {
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate, mutationResult] = result.current;
 
@@ -87,10 +91,9 @@ describe('useGqlMutation', () => {
 
     mockRequest.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
@@ -118,10 +121,9 @@ describe('useGqlMutation', () => {
     const mockError = new Error('Validation failed');
     mockRequest.mockRejectedValue(mockError);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
@@ -146,10 +148,9 @@ describe('useGqlMutation', () => {
 
     mockRequest.mockReturnValue(controlledPromise);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
@@ -179,10 +180,9 @@ describe('useGqlMutation', () => {
     const mockResponse = { createUser: { id: '1', name: 'John' } };
     mockRequest.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
@@ -201,10 +201,9 @@ describe('useGqlMutation', () => {
     const mockError = new Error('Mutation failed');
     mockRequest.mockRejectedValue(mockError);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
@@ -223,7 +222,7 @@ describe('useGqlMutation', () => {
     const originalEnv = process.env.NODE_ENV;
 
     // Development environment
-    process.env.NODE_ENV = 'development';
+    (process.env as any).NODE_ENV = 'development';
     renderHook(() => useGqlMutation(createUserMutation), { wrapper });
 
     expect(MockedGraphQLClient).toHaveBeenCalledWith(
@@ -233,19 +232,19 @@ describe('useGqlMutation', () => {
           credentials: 'include',
           mode: 'cors',
         },
-      })
+      }),
     );
 
     // Production environment
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     renderHook(() => useGqlMutation(createUserMutation), { wrapper });
 
     expect(MockedGraphQLClient).toHaveBeenCalledWith(
       'https://api.example.com/graphql',
-      expect.any(Object)
+      expect.any(Object),
     );
 
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV = originalEnv;
   });
 
   it('accepts custom mutation options', async () => {
@@ -256,11 +255,12 @@ describe('useGqlMutation', () => {
     mockRequest.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(
-      () => useGqlMutation(createUserMutation, {
-        onSuccess: onSuccessSpy,
-        onError: onErrorSpy,
-      }),
-      { wrapper }
+      () =>
+        useGqlMutation(createUserMutation, {
+          onSuccess: onSuccessSpy,
+          onError: onErrorSpy,
+        }),
+      { wrapper },
     );
 
     const [mutate] = result.current;
@@ -273,7 +273,11 @@ describe('useGqlMutation', () => {
       expect(result.current[1].data).toEqual(mockResponse);
     });
 
-    expect(onSuccessSpy).toHaveBeenCalledWith(mockResponse, { input: { name: 'John' } }, undefined);
+    expect(onSuccessSpy).toHaveBeenCalledWith(
+      mockResponse,
+      { input: { name: 'John' } },
+      undefined,
+    );
     expect(onErrorSpy).not.toHaveBeenCalled();
   });
 
@@ -285,11 +289,12 @@ describe('useGqlMutation', () => {
     mockRequest.mockRejectedValue(mockError);
 
     const { result } = renderHook(
-      () => useGqlMutation(createUserMutation, {
-        onSuccess: onSuccessSpy,
-        onError: onErrorSpy,
-      }),
-      { wrapper }
+      () =>
+        useGqlMutation(createUserMutation, {
+          onSuccess: onSuccessSpy,
+          onError: onErrorSpy,
+        }),
+      { wrapper },
     );
 
     const [mutate] = result.current;
@@ -302,7 +307,11 @@ describe('useGqlMutation', () => {
       expect(result.current[1].error).toEqual(mockError);
     });
 
-    expect(onErrorSpy).toHaveBeenCalledWith(mockError, { input: { name: 'John' } }, undefined);
+    expect(onErrorSpy).toHaveBeenCalledWith(
+      mockError,
+      { input: { name: 'John' } },
+      undefined,
+    );
     expect(onSuccessSpy).not.toHaveBeenCalled();
   });
 
@@ -316,22 +325,21 @@ describe('useGqlMutation', () => {
     const mockResponse = { refreshCache: true };
     mockRequest.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGqlMutation(simpleMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(simpleMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 
     await act(async () => {
-      mutate();
+      mutate({});
     });
 
     await waitFor(() => {
       expect(result.current[1].data).toEqual(mockResponse);
     });
 
-    expect(mockRequest).toHaveBeenCalledWith(simpleMutation, undefined);
+    expect(mockRequest).toHaveBeenCalledWith(simpleMutation, {});
   });
 
   describe('with TypeScript types', () => {
@@ -360,8 +368,11 @@ describe('useGqlMutation', () => {
       mockRequest.mockResolvedValue(mockResponse);
 
       const { result } = renderHook(
-        () => useGqlMutation<CreateUserResponse, { input: CreateUserInput }>(createUserMutation),
-        { wrapper }
+        () =>
+          useGqlMutation<CreateUserResponse, { input: CreateUserInput }>(
+            createUserMutation,
+          ),
+        { wrapper },
       );
 
       const [mutate] = result.current;
@@ -377,17 +388,18 @@ describe('useGqlMutation', () => {
   });
 
   it('creates new GraphQL client instance for each hook call', () => {
-    const { rerender } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { rerender } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const initialCallCount = MockedGraphQLClient.mock.calls.length;
 
     rerender();
 
     // New client should be created for each hook call (not singleton like query)
-    expect(MockedGraphQLClient.mock.calls.length).toBeGreaterThan(initialCallCount);
+    expect(MockedGraphQLClient.mock.calls.length).toBeGreaterThan(
+      initialCallCount,
+    );
   });
 
   it('handles concurrent mutations correctly', async () => {
@@ -398,10 +410,9 @@ describe('useGqlMutation', () => {
       .mockResolvedValueOnce(mockResponse1)
       .mockResolvedValueOnce(mockResponse2);
 
-    const { result } = renderHook(
-      () => useGqlMutation(createUserMutation),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
+      wrapper,
+    });
 
     const [mutate] = result.current;
 

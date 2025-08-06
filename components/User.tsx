@@ -113,6 +113,12 @@ export interface User {
   canSeeStudentEvents?: boolean;
   canSeeOwnCallback?: boolean;
   canSeeAllCallback?: boolean;
+  canViewCallbacks?: boolean;
+  canManageCallbacks?: boolean;
+  canViewDiscipline?: boolean;
+  canSeeAllLinks?: boolean;
+  canViewUsers?: boolean;
+  canEditUsers?: boolean;
   canManagePbis?: boolean;
   canHaveSpecialGroups?: boolean;
   hasTA?: boolean;
@@ -162,10 +168,13 @@ export function useUser(): User | undefined {
     },
   );
 
+  // Extract the complex expression to avoid dependency array issues
+  const pbisCollectionDates = pbisDates?.pbisCollectionDates;
+
   // Memoize the date calculation to prevent infinite rerenders
   const latestCollectionDateOr2YearsAgo = useMemo(() => {
-    return pbisDates?.pbisCollectionDates?.[0]?.collectionDate || TWO_YEARS_AGO;
-  }, [pbisDates?.pbisCollectionDates?.[0]?.collectionDate]);
+    return pbisCollectionDates?.[0]?.collectionDate || TWO_YEARS_AGO;
+  }, [pbisCollectionDates]);
 
   // Memoize the date object creation to prevent query from re-running constantly
   const queryDate = useMemo(() => {
