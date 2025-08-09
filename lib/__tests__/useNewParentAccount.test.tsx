@@ -1,20 +1,26 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useNewParentAccount } from '../useNewParentAccount';
+import type { User } from '../../components/User';
 import { useGqlMutation } from '../useGqlMutation';
 import { useAsyncGQLQuery } from '../useGqlQuery';
+import { useNewParentAccount } from '../useNewParentAccount';
 import useSendEmail from '../useSendEmail';
-import type { User } from '../../components/User';
 
 // Mock all dependencies
 jest.mock('../useGqlMutation');
 jest.mock('../useGqlQuery');
 jest.mock('../useSendEmail');
 
-const mockUseGqlMutation = useGqlMutation as jest.MockedFunction<typeof useGqlMutation>;
-const mockUseAsyncGQLQuery = useAsyncGQLQuery as jest.MockedFunction<typeof useAsyncGQLQuery>;
-const mockUseSendEmail = useSendEmail as jest.MockedFunction<typeof useSendEmail>;
+const mockUseGqlMutation = useGqlMutation as jest.MockedFunction<
+  typeof useGqlMutation
+>;
+const mockUseAsyncGQLQuery = useAsyncGQLQuery as jest.MockedFunction<
+  typeof useAsyncGQLQuery
+>;
+const mockUseSendEmail = useSendEmail as jest.MockedFunction<
+  typeof useSendEmail
+>;
 
 describe('useNewParentAccount', () => {
   let queryClient: QueryClient;
@@ -67,10 +73,34 @@ describe('useNewParentAccount', () => {
 
     // Mock implementation for useGqlMutation - it's called twice in the hook
     mockUseGqlMutation
-      .mockReturnValueOnce([mockCreateNewUser, { data: null, loading: false, error: null }])
-      .mockReturnValueOnce([mockUpdateStudentWithExistingParent, { data: null, loading: false, error: null }])
-      .mockReturnValue([mockCreateNewUser, { data: null, loading: false, error: null }]); // fallback
-    
+      .mockReturnValueOnce([
+        mockCreateNewUser,
+        {
+          data: null,
+          loading: false,
+          error: null,
+          mutateAsync: mockCreateNewUser,
+        },
+      ])
+      .mockReturnValueOnce([
+        mockUpdateStudentWithExistingParent,
+        {
+          data: null,
+          loading: false,
+          error: null,
+          mutateAsync: mockUpdateStudentWithExistingParent,
+        },
+      ])
+      .mockReturnValue([
+        mockCreateNewUser,
+        {
+          data: null,
+          loading: false,
+          error: null,
+          mutateAsync: mockCreateNewUser,
+        },
+      ]); // fallback
+
     // Mock implementation for useAsyncGQLQuery - it's called twice in the hook
     mockUseAsyncGQLQuery
       .mockReturnValueOnce(mockGetStudentData)
@@ -99,13 +129,11 @@ describe('useNewParentAccount', () => {
 
   it('prevents creating parent account when parent email already exists for student', async () => {
     const existingParentEmail = 'existing.parent@example.com';
-    
+
     mockGetStudentData.mockResolvedValue({
       user: {
         id: 'student-1',
-        parent: [
-          { id: 'parent-1', email: existingParentEmail },
-        ],
+        parent: [{ id: 'parent-1', email: existingParentEmail }],
       },
     });
 
@@ -121,7 +149,9 @@ describe('useNewParentAccount', () => {
       });
     });
 
-    expect(createResult.result).toBe('This Parent already exists!! No Account Created');
+    expect(createResult.result).toBe(
+      'This Parent already exists!! No Account Created',
+    );
     expect(mockCreateNewUser).not.toHaveBeenCalled();
     expect(mockUpdateStudentWithExistingParent).not.toHaveBeenCalled();
     expect(result.current[1]).toBe(false); // Should not be creating anymore
@@ -129,7 +159,7 @@ describe('useNewParentAccount', () => {
 
   it('connects student to existing parent account when parent exists elsewhere', async () => {
     const existingParentEmail = 'existing.parent@example.com';
-    
+
     mockGetStudentData.mockResolvedValue({
       user: {
         id: 'student-1',
@@ -164,7 +194,9 @@ describe('useNewParentAccount', () => {
       });
     });
 
-    expect(createResult.result).toBe('parent already existed.  Connected to this student account');
+    expect(createResult.result).toBe(
+      'parent already existed.  Connected to this student account',
+    );
     expect(mockUpdateStudentWithExistingParent).toHaveBeenCalledWith({
       id: 'student-1',
       parent: { connect: { id: 'existing-parent-1' } },
@@ -174,7 +206,7 @@ describe('useNewParentAccount', () => {
 
   it('creates new parent account and sends email when parent does not exist', async () => {
     const newParentEmail = 'new.parent@example.com';
-    
+
     mockGetStudentData.mockResolvedValue({
       user: {
         id: 'student-1',
@@ -206,7 +238,9 @@ describe('useNewParentAccount', () => {
       });
     });
 
-    expect(createResult.result).toBe(`New Parent Account Created for ${newParentEmail}. Email with login sent to ${newParentEmail}`);
+    expect(createResult.result).toBe(
+      `New Parent Account Created for ${newParentEmail}. Email with login sent to ${newParentEmail}`,
+    );
     expect(createResult.email).toEqual({ success: true });
 
     expect(mockCreateNewUser).toHaveBeenCalledWith({
@@ -289,7 +323,10 @@ describe('useNewParentAccount', () => {
     // Resolve the student data
     act(() => {
       resolveStudentData!({
-        user: { id: 'student-1', parent: [{ id: 'existing', email: 'existing@test.com' }] },
+        user: {
+          id: 'student-1',
+          parent: [{ id: 'existing', email: 'existing@test.com' }],
+        },
       });
     });
 
@@ -340,7 +377,7 @@ describe('useNewParentAccount', () => {
     // For this test, we need to set up the mocks to handle both scenarios
     // Scenario 1: Parent already exists for student (should return early)
     // Scenario 2: Parent doesn't exist for student, needs to check external parents and create new one
-    
+
     mockGetStudentData.mockResolvedValue({
       user: {
         id: 'student-1',
@@ -367,7 +404,9 @@ describe('useNewParentAccount', () => {
       });
     });
 
-    expect(createResult.result).toBe('This Parent already exists!! No Account Created');
+    expect(createResult.result).toBe(
+      'This Parent already exists!! No Account Created',
+    );
 
     // Try to add new parent (this will call getParentData and should get { users: [] })
     await act(async () => {
@@ -480,14 +519,14 @@ describe('useNewParentAccount', () => {
             parentName: 'Test Parent',
             student: mockStudent,
             teacher: mockTeacher,
-          })
+          }),
         ).rejects.toThrow();
       });
     });
 
     it('handles special characters in email addresses', async () => {
       const specialEmail = 'parent+test@example-school.edu';
-      
+
       mockGetStudentData.mockResolvedValue({
         user: { id: 'student-1', parent: [] },
       });
@@ -508,11 +547,13 @@ describe('useNewParentAccount', () => {
         });
       });
 
-      expect(createResult.result).toContain(`New Parent Account Created for ${specialEmail}`);
+      expect(createResult.result).toContain(
+        `New Parent Account Created for ${specialEmail}`,
+      );
       expect(mockCreateNewUser).toHaveBeenCalledWith(
         expect.objectContaining({
           email: specialEmail,
-        })
+        }),
       );
     });
   });
@@ -522,28 +563,36 @@ describe('useNewParentAccount', () => {
       renderHook(() => useNewParentAccount(), { wrapper });
 
       expect(mockUseGqlMutation).toHaveBeenCalledTimes(2);
-      
+
       // Check that it uses the signup mutation
       const firstMutationCall = mockUseGqlMutation.mock.calls[0][0];
-      expect((firstMutationCall.definitions[0] as any).name?.value).toBe('SIGNUP_NEW_PARENT_MUTATION');
-      
+      expect((firstMutationCall.definitions[0] as any).name?.value).toBe(
+        'SIGNUP_NEW_PARENT_MUTATION',
+      );
+
       // Check that it uses the update mutation
       const secondMutationCall = mockUseGqlMutation.mock.calls[1][0];
-      expect((secondMutationCall.definitions[0] as any).name?.value).toBe('UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION');
+      expect((secondMutationCall.definitions[0] as any).name?.value).toBe(
+        'UPDATE_STUDENT_WITH_EXISTING_PARENT_MUTATION',
+      );
     });
 
     it('uses correct GraphQL queries', () => {
       renderHook(() => useNewParentAccount(), { wrapper });
 
       expect(mockUseAsyncGQLQuery).toHaveBeenCalledTimes(2);
-      
+
       // Check that it uses the student info query
       const firstQueryCall = mockUseAsyncGQLQuery.mock.calls[0][0];
-      expect((firstQueryCall.definitions[0] as any).name?.value).toBe('STUDENT_INFO_QUERY');
-      
+      expect((firstQueryCall.definitions[0] as any).name?.value).toBe(
+        'STUDENT_INFO_QUERY',
+      );
+
       // Check that it uses the parent info query
       const secondQueryCall = mockUseAsyncGQLQuery.mock.calls[1][0];
-      expect((secondQueryCall.definitions[0] as any).name?.value).toBe('PARENT_INFO_QUERY');
+      expect((secondQueryCall.definitions[0] as any).name?.value).toBe(
+        'PARENT_INFO_QUERY',
+      );
     });
   });
 });
