@@ -97,6 +97,7 @@ const PbisWeeklyReading: React.FC = () => {
   const randomDrawingWinners = lastCollection.randomDrawingWinners || [];
   const hasTaTeamsAtNewLevels = tasAtNewLevels.length > 0;
   const hasPersonalLevelWinners = personalLevelWinners.length > 0;
+  const hasRandomDrawingWinners = randomDrawingWinners.length > 0;
   const todaysDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -112,20 +113,26 @@ const PbisWeeklyReading: React.FC = () => {
         work. Continue to demonstrate our Habits: Respect, Responsibility, and
         Perseverance.
       </p>
-      <h3 className="text-3xl mb-4">
-        <span className="text-4xl font-bold">Congratulations</span> to the
-        following Random Drawing Winners! Please report to the Bus Lobby to
-        claim your reward.
-      </h3>
-      <ul className="text-2xl mb-4">
-        {randomDrawingWinners.map((winner) => (
-          <li key={winner.id}>{capitalizeFirstLetter(winner?.student.name)}</li>
-        ))}
-      </ul>
+      {hasRandomDrawingWinners ? (
+        <>
+          <h3 className="text-3xl mb-4">
+            <span className="text-4xl font-bold">Congratulations</span> to the
+            following Random Drawing Winners! Please report to the Bus Lobby to
+            claim your reward.
+          </h3>
+          <ul className="text-2xl mb-4">
+            {randomDrawingWinners.map((winner) => (
+              <li key={winner.id}>
+                {capitalizeFirstLetter(winner?.student.name)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
       {hasPersonalLevelWinners && (
         <h3 className="text-3xl mb-4">
-          The following students have Leveled-Up. Please report to the BUS LOBBY
-          to claim your earnings.
+          Congratulations to the following Leveled-Up winners. Please report to
+          the BUS LOBBY to claim your earnings.
         </h3>
       )}
       <ul className="text-2xl mb-4">
@@ -137,7 +144,7 @@ const PbisWeeklyReading: React.FC = () => {
       </ul>
       {hasTaTeamsAtNewLevels && (
         <h3 className="text-3xl mb-4">
-          The following TA Teams have completed their Bingo Box. You will be
+          The following TA Teams have completed their BINGO Box. You will be
           notified when you should receive your celebration.
         </h3>
       )}

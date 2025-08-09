@@ -1,6 +1,10 @@
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import { endpoint, prodEndpoint } from '../../config';
+import {
+  endpoint,
+  PBIS_STUDENT_RANDOM_DRAWING_WINNERS,
+  prodEndpoint,
+} from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 
@@ -461,8 +465,8 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
         }
       }
 
-      // Random drawing winners if we have the collection ID
-      if (thisCollectionId) {
+      // Random drawing winners if enabled and we have the collection ID
+      if (PBIS_STUDENT_RANDOM_DRAWING_WINNERS && thisCollectionId) {
         try {
           const arrayOfStudentsWithNewCardsNotPreviousWinners =
             arrayOfStudentsWithNewCards.filter(
