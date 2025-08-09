@@ -40,16 +40,16 @@ export const parseCSV = (csvText: string): CSVRow[] => {
   if (lines.length === 0) {
     return [];
   }
-  
+
   // More sophisticated CSV parsing to handle quotes and commas within fields
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         if (!inQuotes) {
           // Starting quote
@@ -72,12 +72,12 @@ export const parseCSV = (csvText: string): CSVRow[] => {
     result.push(current.trim());
     return result;
   };
-  
+
   const headerLine = parseCSVLine(lines[0]);
-  
-  return lines.slice(1).map(line => {
+
+  return lines.slice(1).map((line) => {
     const values = parseCSVLine(line);
-    
+
     // Handle the specific CSV format with duplicate "Email" columns
     const row: any = {
       Last_Name: values[0] || '',
@@ -85,9 +85,9 @@ export const parseCSV = (csvText: string): CSVRow[] => {
       'Contact 1': values[2] || '',
       'Contact 1 Email': values[3] || '',
       'Contact 2': values[4] || '',
-      'Contact 2 Email': values[5] || ''
+      'Contact 2 Email': values[5] || '',
     };
-    
+
     return row as CSVRow;
   });
 };
@@ -96,109 +96,143 @@ export const findStudentByNameAndEmail = (
   firstName: string,
   lastName: string,
   students: Student[],
-  email?: string
+  email?: string,
 ): Student | null => {
   if (!students || students.length === 0) {
     return null;
   }
-  
+
   const cleanFirstName = firstName.toLowerCase().trim();
   const cleanLastName = lastName.toLowerCase().trim();
   const fullName = `${cleanFirstName} ${cleanLastName}`;
   const reverseName = `${cleanLastName} ${cleanFirstName}`;
-  
+
+  // Support common nickname <-> formal name equivalence
+  const nicknameMap: Record<string, string[]> = {
+    robert: ['bob', 'rob', 'bobby', 'robbie'],
+    elizabeth: ['liz', 'beth', 'eliza', 'lizzie', 'betty', 'liza'],
+  };
+
+  const expandNameVariants = (name: string): string[] => {
+    const variants = new Set<string>([name]);
+    // If name is a formal first name, add nicknames
+    if (nicknameMap[name]) {
+      nicknameMap[name].forEach((n) => variants.add(n));
+    }
+    // If name matches any nickname, add the corresponding formal name
+    for (const [formal, nicknames] of Object.entries(nicknameMap)) {
+      if (nicknames.includes(name)) {
+        variants.add(formal);
+      }
+    }
+    return Array.from(variants);
+  };
+
+  const firstNameVariants = expandNameVariants(cleanFirstName);
+
   // Create possible email patterns for email-based matching
   const possibleEmailPrefixes = [
-    `${cleanFirstName}.${cleanLastName}`,
-    `${cleanFirstName}${cleanLastName}`,
+    ...firstNameVariants.map((fn) => `${fn}.${cleanLastName}`),
+    ...firstNameVariants.map((fn) => `${fn}${cleanLastName}`),
     `${cleanLastName}.${cleanFirstName}`,
     `${cleanLastName}${cleanFirstName}`,
-    cleanFirstName,
-    cleanLastName
+    ...firstNameVariants,
+    cleanLastName,
   ];
-  
-  return students.find((student: Student) => {
-    const studentName = student.name.toLowerCase().trim();
-    const studentEmail = student.email.toLowerCase().trim();
-    const studentNameParts = studentName.split(/\s+/);
-    
-    // EMAIL-BASED MATCHING (High Priority)
-    // Check if student email starts with any of the possible name combinations
-    const emailMatch = possibleEmailPrefixes.some(prefix => 
-      studentEmail.startsWith(`${prefix}@`)
-    );
-    
-    // NAME-BASED MATCHING with enhanced logic
-    const nameMatch = 
-      // Exact matches (both orders)
-      studentName === fullName || 
-      studentName === reverseName ||
-      
-      // Contains matches (both orders)
-      studentName.includes(fullName) || 
-      studentName.includes(reverseName) ||
-      fullName.includes(studentName) ||
-      reverseName.includes(studentName) ||
-      
-      // Individual name part matches (for cases like "test student1" vs "student1 test")
-      (studentName.includes(cleanFirstName) && studentName.includes(cleanLastName)) ||
-      
-      // Enhanced name matching for middle names and variations
-      checkNameVariations(cleanFirstName, cleanLastName, studentNameParts) ||
-      
-      // Partial matches for similar names
-      checkPartialNameMatches(cleanFirstName, cleanLastName, studentNameParts);
-    
-    // If specific email provided, require email match
-    if (email && email.trim() !== '') {
-      return nameMatch && studentEmail === email.toLowerCase().trim();
-    }
-    
-    // Prioritize email matches, then name matches
-    return emailMatch || nameMatch;
-  }) || null;
+
+  return (
+    students.find((student: Student) => {
+      const studentName = student.name.toLowerCase().trim();
+      const studentEmail = student.email.toLowerCase().trim();
+      const studentNameParts = studentName.split(/\s+/);
+
+      // EMAIL-BASED MATCHING (High Priority)
+      // Check if student email starts with any of the possible name combinations
+      const emailMatch = possibleEmailPrefixes.some((prefix) =>
+        studentEmail.startsWith(`${prefix}@`),
+      );
+
+      // NAME-BASED MATCHING with enhanced logic
+      const nameMatch =
+        // Exact matches (both orders)
+        studentName === fullName ||
+        studentName === reverseName ||
+        // Contains matches (both orders)
+        studentName.includes(fullName) ||
+        studentName.includes(reverseName) ||
+        fullName.includes(studentName) ||
+        reverseName.includes(studentName) ||
+        // Individual name part matches (for cases like "test student1" vs "student1 test")
+        (firstNameVariants.some((v) => studentName.includes(v)) &&
+          studentName.includes(cleanLastName)) ||
+        // Enhanced name matching for middle names and variations
+        checkNameVariations(
+          firstNameVariants,
+          cleanLastName,
+          studentNameParts,
+        ) ||
+        // Partial matches for similar names
+        checkPartialNameMatches(
+          firstNameVariants,
+          cleanLastName,
+          studentNameParts,
+        );
+
+      // If specific email provided, require email match
+      if (email && email.trim() !== '') {
+        return nameMatch && studentEmail === email.toLowerCase().trim();
+      }
+
+      // Prioritize email matches, then name matches
+      return emailMatch || nameMatch;
+    }) || null
+  );
 };
 
 // Helper function to check name variations including middle names
 const checkNameVariations = (
-  csvFirst: string,
+  csvFirstVariants: string[],
   csvLast: string,
-  studentNameParts: string[]
+  studentNameParts: string[],
 ): boolean => {
   if (studentNameParts.length < 2) return false;
-  
+
   const studentFirst = studentNameParts[0];
   const studentLast = studentNameParts[studentNameParts.length - 1];
-  
+
   // Check if first and last names match (ignoring middle names)
-  const firstLastMatch = 
-    (studentFirst === csvFirst && studentLast === csvLast) ||
-    (studentFirst === csvLast && studentLast === csvFirst);
-  
+  const firstLastMatch =
+    (csvFirstVariants.some((v) => v === studentFirst) &&
+      studentLast === csvLast) ||
+    (studentFirst === csvLast &&
+      csvFirstVariants.some((v) => v === studentLast));
+
   // Check if CSV names appear anywhere in the student name parts
-  const csvFirstInParts = studentNameParts.includes(csvFirst);
+  const csvFirstInParts = studentNameParts.some((p) =>
+    csvFirstVariants.includes(p),
+  );
   const csvLastInParts = studentNameParts.includes(csvLast);
-  
+
   return firstLastMatch || (csvFirstInParts && csvLastInParts);
 };
 
 // Helper function for partial name matching (handles typos and variations)
 const checkPartialNameMatches = (
-  csvFirst: string,
+  csvFirstVariants: string[],
   csvLast: string,
-  studentNameParts: string[]
+  studentNameParts: string[],
 ): boolean => {
   if (studentNameParts.length === 0) return false;
-  
+
   // Check if any student name part starts with CSV names (for nicknames/short forms)
-  const firstPartialMatch = studentNameParts.some(part => 
-    part.startsWith(csvFirst) || csvFirst.startsWith(part)
+  const firstPartialMatch = studentNameParts.some((part) =>
+    csvFirstVariants.some((v) => part.startsWith(v) || v.startsWith(part)),
   );
-  
-  const lastPartialMatch = studentNameParts.some(part => 
-    part.startsWith(csvLast) || csvLast.startsWith(part)
+
+  const lastPartialMatch = studentNameParts.some(
+    (part) => part.startsWith(csvLast) || csvLast.startsWith(part),
   );
-  
+
   // Require both first and last to have some match
   return firstPartialMatch && lastPartialMatch;
 };
@@ -206,17 +240,22 @@ const checkPartialNameMatches = (
 export const checkParentExists = (
   email: string,
   studentId: string,
-  parents: Parent[]
+  parents: Parent[],
 ): Parent | null => {
   if (!parents || parents.length === 0 || !email.trim()) {
     return null;
   }
-  
-  return parents.find((parent: Parent) => {
-    const emailMatch = parent.email.toLowerCase().trim() === email.toLowerCase().trim();
-    const hasStudent = parent.children.some((child) => child.id === studentId);
-    return emailMatch && hasStudent;
-  }) || null;
+
+  return (
+    parents.find((parent: Parent) => {
+      const emailMatch =
+        parent.email.toLowerCase().trim() === email.toLowerCase().trim();
+      const hasStudent = parent.children.some(
+        (child) => child.id === studentId,
+      );
+      return emailMatch && hasStudent;
+    }) || null
+  );
 };
 
 export const validateContactInfo = (name: string, email: string): boolean => {
@@ -226,7 +265,7 @@ export const validateContactInfo = (name: string, email: string): boolean => {
 export const createProcessingResult = (
   firstName: string,
   lastName: string,
-  student: Student | null
+  student: Student | null,
 ): ProcessingResult => {
   return {
     studentName: `${firstName} ${lastName}`,
@@ -236,23 +275,27 @@ export const createProcessingResult = (
     contact1Existed: false,
     contact2Created: false,
     contact2Existed: false,
-    errors: student ? [] : ['Student not found']
+    errors: student ? [] : ['Student not found'],
   };
 };
 
 export const generateSummaryStats = (results: ProcessingResult[]) => {
   const stats = {
     totalProcessed: results.length,
-    studentsFound: results.filter(r => r.studentFound).length,
-    studentsNotFound: results.filter(r => !r.studentFound).length,
-    parentsCreated: results.reduce((sum, r) => 
-      sum + (r.contact1Created ? 1 : 0) + (r.contact2Created ? 1 : 0), 0
+    studentsFound: results.filter((r) => r.studentFound).length,
+    studentsNotFound: results.filter((r) => !r.studentFound).length,
+    parentsCreated: results.reduce(
+      (sum, r) =>
+        sum + (r.contact1Created ? 1 : 0) + (r.contact2Created ? 1 : 0),
+      0,
     ),
-    parentsExisted: results.reduce((sum, r) => 
-      sum + (r.contact1Existed ? 1 : 0) + (r.contact2Existed ? 1 : 0), 0
+    parentsExisted: results.reduce(
+      (sum, r) =>
+        sum + (r.contact1Existed ? 1 : 0) + (r.contact2Existed ? 1 : 0),
+      0,
     ),
-    totalErrors: results.reduce((sum, r) => sum + r.errors.length, 0)
+    totalErrors: results.reduce((sum, r) => sum + r.errors.length, 0),
   };
-  
+
   return stats;
 };

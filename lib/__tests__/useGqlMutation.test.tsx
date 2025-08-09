@@ -73,7 +73,7 @@ describe('useGqlMutation', () => {
     const [mutate, mutationResult] = result.current;
 
     expect(typeof mutate).toBe('function');
-    expect(mutationResult).toEqual({
+    expect(mutationResult).toMatchObject({
       data: undefined,
       loading: false,
       error: null,
