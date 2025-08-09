@@ -13,3 +13,9 @@ export const NUMBER_OF_BLOCKS: number = Number(
   process.env.NEXT_PUBLIC_NUMBER_OF_BLOCKS || 5,
 );
 export const ADMIN_ID: string | undefined = process.env.NEXT_PUBLIC_ADMIN_ID;
+
+// Optional feature flag: enabled when env exists (either NEXT_PUBLIC_ or server env), disabled otherwise
+export const PBIS_STUDENT_RANDOM_DRAWING_WINNERS: boolean = Boolean(
+  process.env.NEXT_PUBLIC_PBIS_STUDENT_RANDOM_DRAWING_WINNERS ??
+    process.env.PBIS_STUDENT_RANDOM_DRAWING_WINNERS,
+);

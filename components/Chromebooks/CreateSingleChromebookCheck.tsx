@@ -9,7 +9,6 @@ import { useState } from 'react';
 import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
   CREATE_QUICK_PBIS,
-  ChromeBookCheckMessageOptions,
   chromebookEmails,
   goodCheckMessages,
 } from './ChromebookCheck';
@@ -40,7 +39,9 @@ export default function CreateSingleChromebookCheck() {
   const [message, setMessage] = useState('');
   const [studentFor, setStudentCheckIsFor] = useState<StudentUser | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<'Everything good' | 'Something wrong'>(
+    'Everything good',
+  );
   const { sendEmail, emailLoading } = useSendEmail();
 
   const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
@@ -67,48 +68,51 @@ export default function CreateSingleChromebookCheck() {
               userType="isStudent"
             />
             <label htmlFor="status" key={`status-chromebook-single`}>
-              Status:{' '}
-              <select
-                name="status"
-                id="status"
-                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
-                onChange={(e) => {
-                  setStatus(e.target.value);
-                  // if (e.target.value !== "Other") {
-                  //   setMessage("");
-                  // }
-                }}
-              >
-                {ChromeBookCheckMessageOptions.map((option) => (
-                  <option key={`option-${option}`} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              Status
             </label>
-            <label htmlFor="message">Message</label>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={status === 'Everything good'}
+                onChange={(e) => {
+                  const isGood = e.target.checked;
+                  setStatus(isGood ? 'Everything good' : 'Something wrong');
+                  if (isGood) setMessage('');
+                }}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-medium text-white">
+                {status === 'Everything good'
+                  ? 'Everything good'
+                  : 'Something wrong'}
+              </span>
+            </label>
+            <label htmlFor="message">Details</label>
             <input
               id="message"
               name="message"
-              // disabled={status !== "Other"}
+              disabled={status === 'Everything good'}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="border-2 border-gray-400 rounded-md text-gray-800"
+              placeholder={
+                status === 'Everything good'
+                  ? 'No issues to report'
+                  : 'Describe the issue...'
+              }
             />
           </div>
           <GradientButton
             disabled={
-              !studentFor?.userId || !status || (status === 'Other' && !message)
+              !studentFor?.userId ||
+              !status ||
+              (status === 'Something wrong' && !message)
             }
             onClick={async () => {
-              // message gets status if status is not other.  Otherwise, message is message
-              // if the teacher is the teacher of the assignment, then the message is just the message
-              // if the teacher is not the teacher of the assignment, then the message is the message + teacher name
-
-              let messageToSend = message;
-              if (status !== 'Other') {
-                messageToSend = `${status} - ${message} - ${me.name}`;
-              }
+              // Persist 'Everything good' for green checks, otherwise only the custom message
+              const messageToSend =
+                status === 'Everything good' ? 'Everything good' : message;
 
               await createChromebookCheck({
                 chromebookCheck: {
@@ -121,7 +125,7 @@ export default function CreateSingleChromebookCheck() {
               const isGoodCheck = goodCheckMessages.some((goodMessage) =>
                 messageToSend.startsWith(goodMessage),
               );
-              if (goodCheckMessages.includes(messageToSend) && isGoodCheck) {
+              if (isGoodCheck) {
                 await createCard({
                   teacher: me?.id,
                   student: studentFor?.userId,
@@ -148,9 +152,7 @@ export default function CreateSingleChromebookCheck() {
                  `,
                   };
                   await sendEmail({
-                    variables: {
-                      emailData: emailToSend,
-                    },
+                    emailData: emailToSend,
                   });
                 });
               }
