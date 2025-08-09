@@ -1,5 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { renderWithProviders } from '../../../__tests__/utils/test-utils';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import useV3PbisCollection from '../useV3PbisCollection';
 
 // Mock the dependencies
@@ -16,6 +15,15 @@ jest.mock('../../../lib/graphqlClient', () => ({
 const { useGQLQuery } = require('../../../lib/useGqlQuery');
 const { GraphQLClient } = require('../../../lib/graphqlClient');
 
+// Always enable random drawing winners for tests in this file
+jest.mock('../../../config', () => {
+  const original = jest.requireActual('../../../config');
+  return {
+    ...original,
+    PBIS_STUDENT_RANDOM_DRAWING_WINNERS: true,
+  };
+});
+
 describe('useV3PbisCollection', () => {
   const mockPbisDates = {
     pbisCollectionDates: [
@@ -24,16 +32,16 @@ describe('useV3PbisCollection', () => {
         collectionDate: '2024-01-15T00:00:00.000Z',
       },
       {
-        id: 'date-2', 
+        id: 'date-2',
         collectionDate: '2024-01-08T00:00:00.000Z',
         randomDrawingWinners: [
           {
             id: 'winner-1',
-            student: { id: 'student-1', name: 'Previous Winner' }
-          }
-        ]
-      }
-    ]
+            student: { id: 'student-1', name: 'Previous Winner' },
+          },
+        ],
+      },
+    ],
   };
 
   const mockPbisCollectionData = {
@@ -55,13 +63,13 @@ describe('useV3PbisCollection', () => {
             individualPbisLevel: 3,
           },
           {
-            id: 'student-2', 
+            id: 'student-2',
             name: 'Jane Smith',
             studentPbisCardsCount: 10,
             totalPBISCards: 55,
             individualPbisLevel: 2,
-          }
-        ]
+          },
+        ],
       },
       {
         id: 'teacher-2',
@@ -76,10 +84,10 @@ describe('useV3PbisCollection', () => {
             studentPbisCardsCount: 8,
             totalPBISCards: 30,
             individualPbisLevel: 1,
-          }
-        ]
-      }
-    ]
+          },
+        ],
+      },
+    ],
   };
 
   const mockGraphQLClient = {
@@ -89,7 +97,7 @@ describe('useV3PbisCollection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     GraphQLClient.mockReturnValue(mockGraphQLClient);
-    
+
     // Mock the useGQLQuery calls
     useGQLQuery.mockImplementation((key: string) => {
       if (key === 'pbisDates') {
@@ -157,8 +165,9 @@ describe('useV3PbisCollection', () => {
 
   it('handles successful card collection run', async () => {
     mockGraphQLClient.request
-      .mockResolvedValueOnce({ // createPbisCollectionDate
-        createPbisCollectionDate: { id: 'new-collection-123' }
+      .mockResolvedValueOnce({
+        // createPbisCollectionDate
+        createPbisCollectionDate: { id: 'new-collection-123' },
       })
       .mockResolvedValue({ id: 'success' }); // All other mutations
 
@@ -197,7 +206,7 @@ describe('useV3PbisCollection', () => {
         id: 'teacher-1',
         averagePbisCardsPerStudent: expect.any(Number),
         taTeamPbisLevel: expect.any(Number),
-      })
+      }),
     );
   });
 
@@ -217,10 +226,10 @@ describe('useV3PbisCollection', () => {
               studentPbisCardsCount: 20,
               totalPBISCards: 120, // Should trigger level up
               individualPbisLevel: 1, // Current level
-            }
-          ]
-        }
-      ]
+            },
+          ],
+        },
+      ],
     };
 
     useGQLQuery.mockImplementation((key: string) => {
@@ -248,7 +257,7 @@ describe('useV3PbisCollection', () => {
       expect.any(Object), // STUDENT_LEVELED_UP_MUTATION
       expect.objectContaining({
         studentId: 'student-level-up',
-      })
+      }),
     );
 
     expect(mockGraphQLClient.request).toHaveBeenCalledWith(
@@ -256,14 +265,15 @@ describe('useV3PbisCollection', () => {
       expect.objectContaining({
         id: 'student-level-up',
         individualPbisLevel: expect.any(Number),
-      })
+      }),
     );
   });
 
   it('creates random drawing winners correctly', async () => {
     mockGraphQLClient.request
-      .mockResolvedValueOnce({ // createPbisCollectionDate
-        createPbisCollectionDate: { id: 'new-collection-123' }
+      .mockResolvedValueOnce({
+        // createPbisCollectionDate
+        createPbisCollectionDate: { id: 'new-collection-123' },
       })
       .mockResolvedValue({ id: 'success' }); // All other mutations
 
@@ -280,9 +290,12 @@ describe('useV3PbisCollection', () => {
     // Should call random drawing winner mutations
     // The number of calls depends on how many winners are selected (up to 10)
     const randomDrawingCalls = mockGraphQLClient.request.mock.calls.filter(
-      call => call[0].loc?.source?.body?.includes('STUDENT_RANDOM_DRAWING_WINNER_MUTATION')
+      (call) =>
+        call[0].loc?.source?.body?.includes(
+          'STUDENT_RANDOM_DRAWING_WINNER_MUTATION',
+        ),
     );
-    
+
     expect(randomDrawingCalls.length).toBeGreaterThan(0);
     expect(randomDrawingCalls.length).toBeLessThanOrEqual(10);
   });
@@ -290,7 +303,7 @@ describe('useV3PbisCollection', () => {
   it('excludes previous winners from random drawing', async () => {
     mockGraphQLClient.request
       .mockResolvedValueOnce({
-        createPbisCollectionDate: { id: 'new-collection-123' }
+        createPbisCollectionDate: { id: 'new-collection-123' },
       })
       .mockResolvedValue({ id: 'success' });
 
@@ -306,11 +319,14 @@ describe('useV3PbisCollection', () => {
 
     // Previous winner (student-1) should be excluded from random drawing
     const randomDrawingCalls = mockGraphQLClient.request.mock.calls.filter(
-      call => call[0].loc?.source?.body?.includes('STUDENT_RANDOM_DRAWING_WINNER_MUTATION')
+      (call) =>
+        call[0].loc?.source?.body?.includes(
+          'STUDENT_RANDOM_DRAWING_WINNER_MUTATION',
+        ),
     );
 
     // Check that student-1 (previous winner) is not selected
-    const winnerIds = randomDrawingCalls.map(call => call[1].studentId);
+    const winnerIds = randomDrawingCalls.map((call) => call[1].studentId);
     expect(winnerIds).not.toContain('student-1');
   });
 
@@ -352,13 +368,13 @@ describe('useV3PbisCollection', () => {
     });
 
     expect(collectionResult!).toBe('it Worked');
-    
+
     // Should still call TA update mutations even without collection ID
     expect(mockGraphQLClient.request).toHaveBeenCalledWith(
       expect.any(Object), // UPDATE_TA_AVERAGE_CARDS_MUTATION
       expect.objectContaining({
         id: 'teacher-1',
-      })
+      }),
     );
   });
 
@@ -391,8 +407,11 @@ describe('useV3PbisCollection', () => {
   });
 
   it('sets loading state during collection run', async () => {
-    mockGraphQLClient.request.mockImplementation(() => 
-      new Promise(resolve => setTimeout(() => resolve({ id: 'success' }), 100))
+    mockGraphQLClient.request.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ id: 'success' }), 100),
+        ),
     );
 
     const { result } = renderHook(() => useV3PbisCollection());
@@ -431,14 +450,14 @@ describe('useV3PbisCollection', () => {
             },
             {
               id: 'student-level-1',
-              name: 'Level 1 Student', 
+              name: 'Level 1 Student',
               studentPbisCardsCount: 10,
               totalPBISCards: 30, // Above first threshold (25)
               individualPbisLevel: 0,
-            }
-          ]
-        }
-      ]
+            },
+          ],
+        },
+      ],
     };
 
     useGQLQuery.mockImplementation((key: string) => {
@@ -464,8 +483,8 @@ describe('useV3PbisCollection', () => {
     });
 
     // Only student-level-1 should level up
-    const levelUpCalls = mockGraphQLClient.request.mock.calls.filter(
-      call => call[0].loc?.source?.body?.includes('UPDATE_STUDENT_LEVEL_MUTATION')
+    const levelUpCalls = mockGraphQLClient.request.mock.calls.filter((call) =>
+      call[0].loc?.source?.body?.includes('UPDATE_STUDENT_LEVEL_MUTATION'),
     );
 
     expect(levelUpCalls).toHaveLength(1);
