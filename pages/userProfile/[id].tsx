@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 import { GetServerSideProps, NextPage } from 'next';
+import { useMemo } from 'react';
 import Loading from '../../components/Loading';
 import { useUser } from '../../components/User';
 import EditStudent from '../../components/users/EditStudent';
@@ -126,10 +127,14 @@ interface UserProfilePageProps {
 const UserProfile: NextPage<UserProfilePageProps> = ({ query }) => {
   // console.log('query', query);
   const me = useUser();
+  
+  // Memoize variables to prevent infinite re-renders
+  const variables = useMemo(() => ({ id: query.id }), [query.id]);
+  
   const { data, isLoading, error } = useGQLQuery(
     `SingleUser-${query.id}`,
     GET_SINGLE_USER,
-    { id: query.id },
+    variables,
   );
   if (isLoading || !me) return <Loading />;
   if (error) return <p>{error.message}</p>;
