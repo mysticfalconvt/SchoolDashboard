@@ -12,6 +12,7 @@ const PBIS_READING_QUERY = gql`
     ) {
       id
       collectionDate
+      collectedCards
       taNewLevelWinners {
         id
         name
@@ -76,6 +77,7 @@ interface RandomDrawingWinner {
 interface PbisCollection {
   id: string;
   collectionDate: string;
+  collectedCards?: string;
   taNewLevelWinners: TaNewLevelWinner[];
   personalLevelWinners: PersonalLevelWinner[];
   staffRandomWinners: StaffRandomWinner[];
@@ -91,6 +93,9 @@ const PbisWeeklyReading: React.FC = () => {
   );
   if (isLoading) return <Loading />;
   const lastCollection = data?.lastCollection?.[0] as PbisCollection;
+  const previousCollection = data?.lastCollection?.[1] as
+    | PbisCollection
+    | undefined;
   if (!lastCollection) return <p>No data</p>;
   const tasAtNewLevels = lastCollection?.taNewLevelWinners || [];
   const personalLevelWinners = lastCollection.personalLevelWinners || [];
@@ -105,6 +110,13 @@ const PbisWeeklyReading: React.FC = () => {
     day: 'numeric',
   });
   const totalCards = data?.totalCards;
+  // Determine if we crossed a 10,000-card boundary since the previous collection
+  const currentTotal = parseInt(lastCollection?.collectedCards || '', 10);
+  const previousTotal = parseInt(previousCollection?.collectedCards || '', 10);
+  const leveledUpSchoolwide =
+    Number.isFinite(currentTotal) && Number.isFinite(previousTotal)
+      ? Math.floor(previousTotal / 10000) < Math.floor(currentTotal / 10000)
+      : false;
   return (
     <div className="max-w-screen-2xl mx-auto">
       <h3 className="text-3xl mb-4">In PBIS News,</h3>
@@ -113,6 +125,11 @@ const PbisWeeklyReading: React.FC = () => {
         work. Continue to demonstrate our Habits: Respect, Responsibility, and
         Perseverance.
       </p>
+      {leveledUpSchoolwide ? (
+        <p className="text-2xl mb-6 font-semibold">
+          We went up a schoolwide PBIS level.
+        </p>
+      ) : null}
       {hasRandomDrawingWinners ? (
         <>
           <h3 className="text-3xl mb-4">
