@@ -7,6 +7,7 @@ import NewStudent from '../components/users/CreateNewStudent';
 import NewEvents from '../components/users/NewEvents';
 import NewStaff from '../components/users/NewStaff';
 import NewUpdateUsers from '../components/users/NewUpdateUsers';
+import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import isAllowed from '../lib/isAllowed';
 
 const SuperUserSettings: NextPage = () => {
@@ -24,6 +25,7 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <NewStudent />}
       {isAllowed(me, 'isSuperAdmin') && <NewUpdateUsers />}
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />}
+      {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromCSV />}
       {isAllowed(me, 'isSuperAdmin') && <NewEvents />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, 'canManagePbis') && <NewWeeklyPbisCollection />}
