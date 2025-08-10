@@ -10,6 +10,7 @@ interface DialogProps {
   className?: string;
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
+  maxHeight?: string;
 }
 
 interface DialogHeaderProps {
@@ -57,10 +58,12 @@ export function DialogHeader({
 }: DialogHeaderProps) {
   return (
     <div
-      className={`flex justify-between items-center px-6 py-3 border-b flex-shrink-0 ${className}`}
+      className={`flex justify-between items-center px-4 py-2 border-b flex-shrink-0 ${className}`}
       style={{ borderBottomColor: '#38B6FF' }}
     >
-      <h4 className="text-white text-xl font-semibold flex-shrink-0">{children}</h4>
+      <h4 className="text-white text-xl font-semibold flex-shrink-0">
+        {children}
+      </h4>
       {showCloseButton && onClose && (
         <button
           type="button"
@@ -98,6 +101,7 @@ export function Dialog({
   className = '',
   showCloseButton = true,
   closeOnBackdropClick = true,
+  maxHeight,
 }: DialogProps) {
   if (!isOpen) return null;
 
@@ -109,9 +113,11 @@ export function Dialog({
         className={`relative transition-all duration-500 visible w-[min(75%,1000px)] ${className}`}
         style={{ maxWidth: '1000px' }}
       >
-        <div 
+        <div
           className="modal-box border-[5px] border-base-300 rounded-xl shadow-2xl p-6 relative w-full mx-auto max-w-5xl"
-          style={{ background: 'linear-gradient(to top left, #760D08, #38B6FF)' }}
+          style={{
+            background: 'linear-gradient(to top left, #760D08, #38B6FF)',
+          }}
         >
           {showCloseButton && (
             <button
@@ -134,10 +140,12 @@ export function Dialog({
     <>
       <DialogBackdrop onClick={closeOnBackdropClick ? onClose : undefined} />
       <div
-        className={`modal modal-open fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 ${sizeClass} max-h-[90vh] rounded-3xl overflow-hidden border-2 shadow-2xl ${className}`}
-        style={{ 
+        className={`modal modal-open fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 ${sizeClass} rounded-3xl overflow-hidden border-2 shadow-2xl ${className}`}
+        style={{
           background: 'linear-gradient(to top right, #760D08, #38B6FF)',
-          borderColor: '#38B6FF'
+          borderColor: '#38B6FF',
+          maxHeight: maxHeight || '90vh',
+          height: 'fit-content',
         }}
       >
         {title && (

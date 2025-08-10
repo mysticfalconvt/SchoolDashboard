@@ -1,7 +1,11 @@
 import useSendEmail from '@/components/../lib/useSendEmail';
 import GradientButton from '@/components/styles/Button';
-import { FormDialog } from '@/components/styles/Dialog';
+import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
+import {
+  sendChromebookCheckEmails,
+  type Student,
+} from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
@@ -52,6 +56,12 @@ export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
       taStudents {
         id
         name
+        email
+        parent {
+          id
+          name
+          email
+        }
       }
     }
   }
@@ -63,16 +73,7 @@ export const ChromeBookCheckMessageOptions = [
   'Something wrong',
 ];
 export const goodCheckMessages = ['Everything good'];
-export const chromebookEmails = [
-  'robert.boskind@ncsuvt.org',
-  'Joyce.Lantagne@ncsuvt.org',
-  'katlynn.cochran@ncsuvt.org',
-];
-
-interface Student {
-  id: string;
-  name: string;
-}
+// Note: chromebookEmails and formatParentName are now imported from chromebookEmailUtils
 
 interface User {
   id: string;
@@ -88,12 +89,7 @@ interface StudentCheckData {
   };
 }
 
-interface EmailData {
-  toAddress: string;
-  fromAddress: string;
-  subject: string;
-  body: string;
-}
+// Note: EmailData interface is now imported from chromebookEmailUtils
 
 interface MultiStudentCheckFormProps {
   students: Student[];
@@ -108,6 +104,8 @@ function MultiStudentCheckForm({
   const queryClient = useQueryClient();
   const [studentData, setStudentData] = useState<StudentCheckData>({});
   const [isSubmittingAll, setIsSubmittingAll] = useState(false);
+  const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
+  const [isSendingEmails, setIsSendingEmails] = useState(false);
   const [createChromebookCheck] = useGqlMutation(
     CREATE_CHROMEBOOK_CHECK_MUTATION,
   );
@@ -166,18 +164,26 @@ function MultiStudentCheckForm({
       }
 
       if (me?.id && !goodCheckMessages.includes(data.message)) {
-        chromebookEmails.forEach(async (email) => {
-          const emailToSend: EmailData = {
-            toAddress: email,
-            fromAddress: me.email,
-            subject: `New Chromebook Check for ${student?.name}`,
-            body: `
-        <p>There is a new Chromebook check for ${student?.name} at NCUJHS.TECH created by ${me.name}. </p>
-        <p>${data.customMessage}</p>
-         `,
-          };
-          await sendEmail({ emailData: emailToSend });
-        });
+        setIsSendingEmails(true);
+        setEmailProgress({ sent: 0, total: 0 });
+
+        try {
+          await sendChromebookCheckEmails({
+            student,
+            teacherName: me.name,
+            teacherEmail: me.email,
+            issueDetails: data.customMessage,
+            sendEmail,
+            onProgress: setEmailProgress,
+          });
+        } finally {
+          setIsSendingEmails(false);
+          setEmailProgress({ sent: 0, total: 0 });
+          // Auto-close the form after emails are sent
+          setTimeout(() => {
+            onComplete();
+          }, 1000);
+        }
       }
 
       toast.success(`Chromebook check submitted for ${student.name}`);
@@ -239,18 +245,25 @@ function MultiStudentCheckForm({
         }
 
         if (me?.id && existing.message !== 'Everything good') {
-          for (const email of chromebookEmails) {
-            const emailToSend: EmailData = {
-              toAddress: email,
-              fromAddress: me.email,
-              subject: `New Chromebook Check for ${student?.name}`,
-              body: `
-        <p>There is a new Chromebook check for ${student?.name} at NCUJHS.TECH created by ${me.name}. </p>
-        <p>${existing.customMessage}</p>
-         `,
-            };
-            // eslint-disable-next-line no-await-in-loop
-            await sendEmail({ emailData: emailToSend });
+          setIsSendingEmails(true);
+          setEmailProgress({ sent: 0, total: 0 });
+
+          try {
+            await sendChromebookCheckEmails({
+              student,
+              teacherName: me.name,
+              teacherEmail: me.email,
+              issueDetails: existing.customMessage,
+              sendEmail,
+              onProgress: setEmailProgress,
+            });
+          } finally {
+            setIsSendingEmails(false);
+            setEmailProgress({ sent: 0, total: 0 });
+            // Auto-close the form after emails are sent
+            setTimeout(() => {
+              onComplete();
+            }, 1000);
           }
         }
 
@@ -281,16 +294,14 @@ function MultiStudentCheckForm({
 
   return (
     <div className="space-y-4">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          Chromebook Checks
-        </h2>
-        <p className="text-white/80">
+      <div className="mb-2">
+        <h2 className="text-lg font-bold text-white mb-1">Chromebook Checks</h2>
+        <p className="text-white/80 text-sm">
           Submit chromebook checks for your TA students
         </p>
       </div>
 
-      <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+      <div className="space-y-4">
         {students.map((student) => {
           const baseDefaults = {
             message: 'Everything good',
@@ -376,18 +387,24 @@ function MultiStudentCheckForm({
                     onClick={() => handleStudentSubmit(student)}
                     disabled={
                       data.isSubmitting ||
+                      isSendingEmails ||
                       !data.message ||
                       (data.message === 'Something wrong' &&
                         !data.customMessage)
                     }
                     className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
                     style={{
-                      background: data.isSubmitting
-                        ? '#666'
-                        : 'linear-gradient(135deg, #760D08, #38B6FF)',
+                      background:
+                        data.isSubmitting || isSendingEmails
+                          ? '#666'
+                          : 'linear-gradient(135deg, #760D08, #38B6FF)',
                     }}
                   >
-                    {data.isSubmitting ? 'Submitting...' : 'Submit'}
+                    {data.isSubmitting
+                      ? 'Submitting...'
+                      : isSendingEmails
+                        ? 'Sending Emails...'
+                        : 'Submit'}
                   </button>
                 </div>
               </div>
@@ -396,24 +413,50 @@ function MultiStudentCheckForm({
         })}
       </div>
 
+      {isSendingEmails && (
+        <div className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg">
+          <div className="text-white text-center mb-2">
+            Sending emails... {emailProgress.sent} / {emailProgress.total}{' '}
+            emails sent
+          </div>
+          <div className="w-full bg-gray-600 rounded-full h-2">
+            <div
+              className="bg-green-500 h-2 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  emailProgress.total > 0
+                    ? `${(emailProgress.sent / emailProgress.total) * 100}%`
+                    : '0%',
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
         <button
           type="button"
           onClick={handleSubmitAll}
-          disabled={isSubmittingAll}
+          disabled={isSubmittingAll || isSendingEmails}
           className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
           style={{
-            background: isSubmittingAll
-              ? '#666'
-              : 'linear-gradient(135deg, #760D08, #38B6FF)',
+            background:
+              isSubmittingAll || isSendingEmails
+                ? '#666'
+                : 'linear-gradient(135deg, #760D08, #38B6FF)',
           }}
         >
-          {isSubmittingAll ? 'Submitting...' : 'Submit All'}
+          {isSubmittingAll
+            ? 'Submitting...'
+            : isSendingEmails
+              ? 'Sending Emails...'
+              : 'Submit All'}
         </button>
         <button
           type="button"
           onClick={onComplete}
-          className="btn btn-outline text-white border-white/30 hover:bg-white/10"
+          disabled={isSendingEmails}
+          className="btn btn-outline text-white border-white/30 hover:bg-white/10 disabled:opacity-50"
         >
           Close
         </button>
@@ -446,17 +489,21 @@ export default function ChromebookCheck() {
         </GradientButton>
       ) : null}
 
-      <FormDialog
+      <Dialog
         isOpen={showForm}
         onClose={() => setShowForm(false)}
         title="TA Chromebook Checks"
+        variant="modal"
         size="xl"
+        maxHeight="60vh"
       >
-        <MultiStudentCheckForm
-          students={students}
-          onComplete={handleFormComplete}
-        />
-      </FormDialog>
+        <DialogContent maxHeight="max-h-[50vh]" className="p-3">
+          <MultiStudentCheckForm
+            students={students}
+            onComplete={handleFormComplete}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

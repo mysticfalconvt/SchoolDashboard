@@ -4,14 +4,34 @@ import GradientButton, {
   SmallGradientButton,
 } from '@/components/styles/Button';
 import { useUser } from '@/components/User';
+import {
+  sendChromebookCheckEmails,
+  type StudentDetails,
+} from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
+import gql from 'graphql-tag';
 import { useState } from 'react';
 import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
   CREATE_QUICK_PBIS,
-  chromebookEmails,
   goodCheckMessages,
 } from './ChromebookCheck';
+
+const GET_STUDENT_DETAILS_QUERY = gql`
+  query GET_STUDENT_DETAILS_QUERY($id: ID!) {
+    user(where: { id: $id }) {
+      id
+      name
+      email
+      parent {
+        id
+        name
+        email
+      }
+    }
+  }
+`;
 
 interface StudentUser {
   userId: string;
@@ -22,13 +42,6 @@ interface User {
   id: string;
   name: string;
   email: string;
-}
-
-interface EmailData {
-  toAddress: string;
-  fromAddress: string;
-  subject: string;
-  body: string;
 }
 
 export default function CreateSingleChromebookCheck() {
@@ -42,9 +55,19 @@ export default function CreateSingleChromebookCheck() {
   const [status, setStatus] = useState<'Everything good' | 'Something wrong'>(
     'Everything good',
   );
+  const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
+  const [isSendingEmails, setIsSendingEmails] = useState(false);
   const { sendEmail, emailLoading } = useSendEmail();
 
   const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
+
+  // Fetch student details when a student is selected
+  const { data: studentDetails } = useGQLQuery(
+    `studentDetails-${studentFor?.userId}`,
+    GET_STUDENT_DETAILS_QUERY,
+    { id: studentFor?.userId },
+    { enabled: !!studentFor?.userId },
+  );
   return (
     <>
       <GradientButton onClick={() => setShowForm(!showForm)}>
@@ -54,9 +77,10 @@ export default function CreateSingleChromebookCheck() {
         <div className="absolute top-1/3  w-3/4 p-4 flex text-white flex-col rounded-xl gap-2 items-center bg-slate-600 z-50 ">
           <SmallGradientButton
             className="self-end m-2"
+            disabled={isSendingEmails}
             onClick={() => setShowForm(!showForm)}
           >
-            Cancel
+            {isSendingEmails ? 'Sending...' : 'Cancel'}
           </SmallGradientButton>
           <h2 className="text-center text-2xl">Create Chromebook Check</h2>
           <div className="flex flex-col gap-2 w-3/4 items-stretch m-auto">
@@ -103,11 +127,33 @@ export default function CreateSingleChromebookCheck() {
               }
             />
           </div>
+
+          {isSendingEmails && (
+            <div className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg">
+              <div className="text-white text-center mb-2">
+                Sending emails... {emailProgress.sent} / {emailProgress.total}{' '}
+                emails sent
+              </div>
+              <div className="w-full bg-gray-600 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width:
+                      emailProgress.total > 0
+                        ? `${(emailProgress.sent / emailProgress.total) * 100}%`
+                        : '0%',
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
+
           <GradientButton
             disabled={
               !studentFor?.userId ||
               !status ||
-              (status === 'Something wrong' && !message)
+              (status === 'Something wrong' && !message) ||
+              isSendingEmails
             }
             onClick={async () => {
               // Persist 'Everything good' for green checks, otherwise only the custom message
@@ -141,26 +187,41 @@ export default function CreateSingleChromebookCheck() {
               }
 
               if (me?.id && !isGoodCheck) {
-                chromebookEmails.forEach(async (email) => {
-                  const emailToSend: EmailData = {
-                    toAddress: email,
-                    fromAddress: me?.email,
-                    subject: `New Chromebook Check for ${studentFor?.userName}`,
-                    body: `
-                <p>There is a new Chromebook check for ${studentFor?.userName} at NCUJHS.TECH created by ${me.name}. </p>
-                <p>${messageToSend}</p>
-                 `,
-                  };
-                  await sendEmail({
-                    emailData: emailToSend,
-                  });
-                });
+                const student = studentDetails?.user as StudentDetails;
+
+                if (student) {
+                  setIsSendingEmails(true);
+                  setEmailProgress({ sent: 0, total: 0 });
+
+                  try {
+                    await sendChromebookCheckEmails({
+                      student,
+                      teacherName: me.name,
+                      teacherEmail: me.email,
+                      issueDetails: messageToSend,
+                      sendEmail,
+                      onProgress: setEmailProgress,
+                    });
+                  } finally {
+                    setIsSendingEmails(false);
+                    setEmailProgress({ sent: 0, total: 0 });
+                    // Auto-close the form after emails are sent
+                    setTimeout(() => {
+                      setMessage('');
+                      setShowForm(false);
+                    }, 1000);
+                  }
+                } else {
+                  setMessage('');
+                  setShowForm(false);
+                }
+              } else {
+                setMessage('');
+                setShowForm(false);
               }
-              setMessage('');
-              setShowForm(false);
             }}
           >
-            Create Chromebook Check
+            {isSendingEmails ? 'Sending Emails...' : 'Create Chromebook Check'}
           </GradientButton>
         </div>
       )}
