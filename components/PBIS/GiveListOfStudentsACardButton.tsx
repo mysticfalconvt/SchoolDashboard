@@ -27,6 +27,8 @@ const CREATE_CLASS_PBIS_CARD = gql`
 
 interface Student {
   id: string;
+  name?: string;
+  preferredName?: string;
 }
 
 interface Teacher {
@@ -68,6 +70,9 @@ interface FormProps {
   setDisplayForm: (show: boolean) => void;
   title: string;
   loading: boolean;
+  students: Student[];
+  selectedStudentIds: string[];
+  setSelectedStudentIds: (ids: string[]) => void;
 }
 
 const Form = ({
@@ -77,7 +82,17 @@ const Form = ({
   setDisplayForm,
   title,
   loading,
+  students,
+  selectedStudentIds,
+  setSelectedStudentIds,
 }: FormProps) => {
+  const toggleStudent = (id: string) => {
+    if (selectedStudentIds.includes(id)) {
+      setSelectedStudentIds(selectedStudentIds.filter((sid) => sid !== id));
+    } else {
+      setSelectedStudentIds([...selectedStudentIds, id]);
+    }
+  };
   return (
     <>
       {/* Backdrop overlay */}
@@ -125,10 +140,38 @@ const Form = ({
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
+              <div className="mb-4">
+                <p className="block text-white font-semibold mb-2">Students</p>
+                <div className="max-h-64 overflow-y-auto rounded bg-white/10 p-2">
+                  {students.map((student) => {
+                    const displayName =
+                      student.preferredName || student.name || student.id;
+                    const checked = selectedStudentIds.includes(student.id);
+                    return (
+                      <label
+                        key={student.id}
+                        className="flex items-center gap-2 py-1 text-white"
+                      >
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          checked={checked}
+                          onChange={() => toggleStudent(student.id)}
+                        />
+                        <span>{displayName}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="flex gap-2 mt-6">
-                <button type="submit" className="flex-1">
+                <SmallGradientButton
+                  type="submit"
+                  className="flex-1"
+                  disabled={loading || selectedStudentIds.length === 0}
+                >
                   Give a card to {title}
-                </button>
+                </SmallGradientButton>
                 <button
                   type="button"
                   onClick={() => setDisplayForm(false)}
@@ -161,12 +204,15 @@ export default function GiveListOfStudentsACardButton({
   const [message, setMessage] = React.useState(
     `${me.name} gave a card to the entire class`,
   );
+  const [selectedStudentIds, setSelectedStudentIds] = React.useState<string[]>(
+    [],
+  );
   const [createCard, { data, loading, error }] = useGqlMutation(
     CREATE_CLASS_PBIS_CARD,
   );
 
   const handleCreateCards = React.useCallback(async () => {
-    const listOfStudentIds = students.map((student) => student.id);
+    const listOfStudentIds = selectedStudentIds;
 
     setIsLoading(true);
     const cardsToCreate = await createCardsFromListOfStudents({
@@ -184,12 +230,16 @@ export default function GiveListOfStudentsACardButton({
     setIsLoading(false);
     setDisplayForm(false);
     setMessage(`${me.name} gave a card to the entire class`);
-  }, [students, me, message, queryClient, createCard]);
+    setSelectedStudentIds([]);
+  }, [selectedStudentIds, me, message, queryClient, createCard]);
   return (
     <>
       <SmallGradientButton
         disabled={isLoading || students.length === 0}
-        onClick={() => setDisplayForm(true)}
+        onClick={() => {
+          setSelectedStudentIds(students.map((s) => s.id));
+          setDisplayForm(true);
+        }}
       >
         {title}
       </SmallGradientButton>
@@ -201,6 +251,9 @@ export default function GiveListOfStudentsACardButton({
           setDisplayForm={setDisplayForm}
           title={title}
           loading={isLoading}
+          students={students}
+          selectedStudentIds={selectedStudentIds}
+          setSelectedStudentIds={setSelectedStudentIds}
         />
       )}
     </>

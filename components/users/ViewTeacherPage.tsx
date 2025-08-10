@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import { useMemo } from 'react';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import AssignmentViewCards from '../Assignments/AssignmentViewCards';
 import CallbackCards from '../Callback/CallbackCards';
@@ -338,13 +339,17 @@ interface ViewTeacherPageProps {
 
 export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
   const me = useUser();
+  
+  // Memoize variables to prevent infinite re-renders
+  const variables = useMemo(() => ({
+    id: teacher.id,
+    date: new Date(me?.lastCollection || new Date()),
+  }), [teacher.id, me?.lastCollection]);
+  
   const { data, isLoading, error } = useGQLQuery(
     `SingleTeacher-${teacher.id}`,
     GET_SINGLE_TEACHER,
-    {
-      id: teacher.id,
-      date: new Date(me?.lastCollection || new Date()),
-    },
+    variables,
     {
       enabled: teacher?.id !== '',
     },

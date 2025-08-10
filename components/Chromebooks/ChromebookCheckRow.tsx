@@ -1,4 +1,4 @@
-import { ChromeBookCheckMessageOptions } from './ChromebookCheck';
+// Two-state model: green when 'Everything good', otherwise red. Keep basic legacy support.
 
 interface Teacher {
   id: string;
@@ -30,13 +30,10 @@ interface ChromebookCheckRowProps {
 }
 
 const getColorFromMessage = (message: string): string => {
-  if (message.startsWith(ChromeBookCheckMessageOptions[1])) return 'green';
-  if (message.startsWith(ChromeBookCheckMessageOptions[2])) return 'green';
-  if (message.startsWith(ChromeBookCheckMessageOptions[3])) return 'yellow';
-  if (message.startsWith(ChromeBookCheckMessageOptions[4])) return 'red';
-  if (message.startsWith(ChromeBookCheckMessageOptions[5])) return 'red';
-  if (message.startsWith(ChromeBookCheckMessageOptions[6])) return 'red';
-  return 'blue';
+  if (message === 'Everything good') return 'green';
+  if (message.startsWith('As Issued')) return 'green';
+  if (message.startsWith('Same as previous week')) return 'green';
+  return 'red';
 };
 
 export default function ChromebookCheckRow({

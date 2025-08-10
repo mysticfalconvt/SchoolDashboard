@@ -37,6 +37,7 @@ export const useGqlMutation = <TData = any, TVariables = any>(
       data: mutationResult.data,
       loading: mutationResult.isLoading,
       error: mutationResult.error,
+      mutateAsync: mutationResult.mutateAsync,
     },
   ] as const;
 };

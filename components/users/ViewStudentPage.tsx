@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import { useMemo } from 'react';
 import { callbackDisabled } from '../../config';
 import getDisplayName from '../../lib/displayName';
 import { capitalizeFirstLetter } from '../../lib/nameUtils';
@@ -269,10 +270,16 @@ interface ViewStudentPageProps {
 }
 
 export default function ViewStudentPage({ student }: ViewStudentPageProps) {
+  // Memoize variables to prevent infinite re-renders
+  const variables = useMemo(() => ({
+    id: student.id,
+    date: new Date(),
+  }), [student.id]);
+  
   const { data, isLoading, error } = useGQLQuery(
     `SingleStudent-${student.id}`,
     GET_SINGLE_TEACHER,
-    { id: student.id, date: new Date() },
+    variables,
     {
       enabled: !!student?.id,
     },

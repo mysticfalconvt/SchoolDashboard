@@ -12,6 +12,7 @@ const PBIS_READING_QUERY = gql`
     ) {
       id
       collectionDate
+      collectedCards
       taNewLevelWinners {
         id
         name
@@ -76,6 +77,7 @@ interface RandomDrawingWinner {
 interface PbisCollection {
   id: string;
   collectionDate: string;
+  collectedCards?: string;
   taNewLevelWinners: TaNewLevelWinner[];
   personalLevelWinners: PersonalLevelWinner[];
   staffRandomWinners: StaffRandomWinner[];
@@ -91,12 +93,16 @@ const PbisWeeklyReading: React.FC = () => {
   );
   if (isLoading) return <Loading />;
   const lastCollection = data?.lastCollection?.[0] as PbisCollection;
+  const previousCollection = data?.lastCollection?.[1] as
+    | PbisCollection
+    | undefined;
   if (!lastCollection) return <p>No data</p>;
   const tasAtNewLevels = lastCollection?.taNewLevelWinners || [];
   const personalLevelWinners = lastCollection.personalLevelWinners || [];
   const randomDrawingWinners = lastCollection.randomDrawingWinners || [];
   const hasTaTeamsAtNewLevels = tasAtNewLevels.length > 0;
   const hasPersonalLevelWinners = personalLevelWinners.length > 0;
+  const hasRandomDrawingWinners = randomDrawingWinners.length > 0;
   const todaysDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -104,6 +110,13 @@ const PbisWeeklyReading: React.FC = () => {
     day: 'numeric',
   });
   const totalCards = data?.totalCards;
+  // Determine if we crossed a 10,000-card boundary since the previous collection
+  const currentTotal = parseInt(lastCollection?.collectedCards || '', 10);
+  const previousTotal = parseInt(previousCollection?.collectedCards || '', 10);
+  const leveledUpSchoolwide =
+    Number.isFinite(currentTotal) && Number.isFinite(previousTotal)
+      ? Math.floor(previousTotal / 10000) < Math.floor(currentTotal / 10000)
+      : false;
   return (
     <div className="max-w-screen-2xl mx-auto">
       <h3 className="text-3xl mb-4">In PBIS News,</h3>
@@ -112,20 +125,31 @@ const PbisWeeklyReading: React.FC = () => {
         work. Continue to demonstrate our Habits: Respect, Responsibility, and
         Perseverance.
       </p>
-      <h3 className="text-3xl mb-4">
-        <span className="text-4xl font-bold">Congratulations</span> to the
-        following Random Drawing Winners! Please report to the Bus Lobby to
-        claim your reward.
-      </h3>
-      <ul className="text-2xl mb-4">
-        {randomDrawingWinners.map((winner) => (
-          <li key={winner.id}>{capitalizeFirstLetter(winner?.student.name)}</li>
-        ))}
-      </ul>
+      {leveledUpSchoolwide ? (
+        <p className="text-2xl mb-6 font-semibold">
+          We went up a schoolwide PBIS level.
+        </p>
+      ) : null}
+      {hasRandomDrawingWinners ? (
+        <>
+          <h3 className="text-3xl mb-4">
+            <span className="text-4xl font-bold">Congratulations</span> to the
+            following Random Drawing Winners! Please report to the Bus Lobby to
+            claim your reward.
+          </h3>
+          <ul className="text-2xl mb-4">
+            {randomDrawingWinners.map((winner) => (
+              <li key={winner.id}>
+                {capitalizeFirstLetter(winner?.student.name)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
       {hasPersonalLevelWinners && (
         <h3 className="text-3xl mb-4">
-          The following students have Leveled-Up. Please report to the BUS LOBBY
-          to claim your earnings.
+          Congratulations to the following Leveled-Up winners. Please report to
+          the BUS LOBBY to claim your earnings.
         </h3>
       )}
       <ul className="text-2xl mb-4">
@@ -137,7 +161,7 @@ const PbisWeeklyReading: React.FC = () => {
       </ul>
       {hasTaTeamsAtNewLevels && (
         <h3 className="text-3xl mb-4">
-          The following TA Teams have completed their Bingo Box. You will be
+          The following TA Teams have completed their BINGO Box. You will be
           notified when you should receive your celebration.
         </h3>
       )}

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { ChromeBookCheckMessageOptions } from './ChromebookCheck';
 import ChromebookCheckRow from './ChromebookCheckRow';
 import TeacherChromebookData from './TeacherChromebookData';
 
@@ -34,37 +33,13 @@ interface ChromebookChecksDataProps {
 }
 
 const getColorFromMessage = (message: string): string => {
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[1]) ||
-    message === ChromeBookCheckMessageOptions[1]
-  )
-    return 'green';
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[2]) ||
-    message === ChromeBookCheckMessageOptions[2]
-  )
-    return 'green';
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[3]) ||
-    message === ChromeBookCheckMessageOptions[3]
-  )
-    return 'yellow';
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[4]) ||
-    message === ChromeBookCheckMessageOptions[4]
-  )
-    return 'red';
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[5]) ||
-    message === ChromeBookCheckMessageOptions[5]
-  )
-    return 'red';
-  if (
-    message.startsWith(ChromeBookCheckMessageOptions[6]) ||
-    message === ChromeBookCheckMessageOptions[6]
-  )
-    return 'red';
-  return 'blue';
+  // New model
+  if (message === 'Everything good') return 'green';
+  // Backwards compatibility with legacy "good" values
+  if (message.startsWith('As Issued')) return 'green';
+  if (message.startsWith('Same as previous week')) return 'green';
+  // All other messages indicate an issue
+  return 'red';
 };
 
 const ChromebookMessageLegend = () => {
@@ -72,94 +47,35 @@ const ChromebookMessageLegend = () => {
     <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
       <div
         style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[1],
-          ),
-          width: '100px',
-          height: '100px',
+          backgroundColor: getColorFromMessage('Everything good'),
+          width: '140px',
+          height: '60px',
           textAlign: 'center',
           borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 600,
         }}
       >
-        {ChromeBookCheckMessageOptions[1]}
+        Everything good
       </div>
       <div
         style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[2],
-          ),
-          width: '100px',
-          height: '100px',
+          backgroundColor: getColorFromMessage('Something wrong'),
+          width: '140px',
+          height: '60px',
           textAlign: 'center',
           borderRadius: '5px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 600,
         }}
       >
-        {ChromeBookCheckMessageOptions[2]}
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[3],
-          ),
-          width: '100px',
-          height: '100px',
-          textAlign: 'center',
-          borderRadius: '5px',
-        }}
-      >
-        {ChromeBookCheckMessageOptions[3]}
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[4],
-          ),
-          width: '100px',
-          height: '100px',
-          textAlign: 'center',
-          borderRadius: '5px',
-        }}
-      >
-        {ChromeBookCheckMessageOptions[4]}
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[5],
-          ),
-          width: '100px',
-          height: '100px',
-          textAlign: 'center',
-          borderRadius: '5px',
-        }}
-      >
-        {ChromeBookCheckMessageOptions[5]}
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[6],
-          ),
-          width: '100px',
-          height: '100px',
-          textAlign: 'center',
-          borderRadius: '5px',
-        }}
-      >
-        {ChromeBookCheckMessageOptions[6]}
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage(
-            ChromeBookCheckMessageOptions[7],
-          ),
-          width: '100px',
-          height: '100px',
-          textAlign: 'center',
-          borderRadius: '5px',
-        }}
-      >
-        {ChromeBookCheckMessageOptions[7]}
+        Something wrong
       </div>
     </div>
   );
