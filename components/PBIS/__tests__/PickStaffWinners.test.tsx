@@ -107,8 +107,14 @@ describe('PickStaffWinners', () => {
       expect(screen.getByText(/Jane Coach/)).toBeInTheDocument();
       expect(screen.getByText(/Bob Principal/)).toBeInTheDocument();
 
-      // Should NOT show previous winner (staff1)
-      expect(screen.queryByText(/John Teacher/)).not.toBeInTheDocument();
+      // Should NOT show previous winner (staff1) in the available staff list
+      // Note: John Teacher will appear in the warning message, but not in the available staff list
+      const availableStaffSection = screen
+        .getByText('Available Staff (Not Previously Won):')
+        .closest('div');
+      expect(availableStaffSection).not.toContainElement(
+        screen.queryByText(/John Teacher/),
+      );
     });
   });
 
@@ -134,6 +140,32 @@ describe('PickStaffWinners', () => {
       expect(
         screen.queryByText('Pick Random Staff Winners'),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays warning when there are existing staff winners', async () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByText('Pick Staff winners'));
+
+    await waitFor(() => {
+      // Should show warning about existing winners
+      expect(
+        screen.getByText('⚠️ Warning: Staff winners already selected'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /There are already staff winners selected for the latest PBIS collection/,
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/not replace them/)).toBeInTheDocument();
+
+      // Should show existing winner in the warning
+      expect(screen.getByText(/John Teacher/)).toBeInTheDocument();
+      expect(screen.getByText(/john@school.edu/)).toBeInTheDocument();
+
+      // Should show updated button text
+      expect(screen.getByText('Add More Staff Winners')).toBeInTheDocument();
     });
   });
 });

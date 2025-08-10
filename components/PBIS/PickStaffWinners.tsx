@@ -111,6 +111,27 @@ export default function PickStaffWinners() {
     return allStaff.filter((staff) => !allPreviousWinners.includes(staff.id));
   }, [data?.staff, data?.pbisCollectionDates, showForm]);
 
+  // Check if there are already staff winners in the latest collection
+  const hasExistingWinners = useMemo(() => {
+    if (!data?.pbisCollectionDates?.[0]) {
+      return false;
+    }
+    const latestCollection = data.pbisCollectionDates[0];
+    return (
+      latestCollection.staffRandomWinners &&
+      latestCollection.staffRandomWinners.length > 0
+    );
+  }, [data?.pbisCollectionDates]);
+
+  // Get existing winners for display
+  const existingWinners = useMemo(() => {
+    if (!data?.pbisCollectionDates?.[0]) {
+      return [];
+    }
+    const latestCollection = data.pbisCollectionDates[0];
+    return latestCollection.staffRandomWinners || [];
+  }, [data?.pbisCollectionDates]);
+
   const pickRandomStaff = (numberOfWinners: number) => {
     const shuffled = [...availableStaff].sort(() => 0.5 - Math.random());
     const winners = shuffled.slice(
@@ -270,6 +291,59 @@ export default function PickStaffWinners() {
                     <h1 className="text-white text-lg font-semibold mb-4">
                       Pick Random Staff Winners for Latest PBIS Collection
                     </h1>
+
+                    {hasExistingWinners && (
+                      <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0">
+                            <svg
+                              className="h-5 w-5 text-yellow-400"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-yellow-200">
+                              ⚠️ Warning: Staff winners already selected
+                            </h3>
+                            <div className="mt-2 text-sm text-yellow-100">
+                              <p className="mb-2">
+                                There are already staff winners selected for the
+                                latest PBIS collection. Picking new winners will{' '}
+                                <strong>add to</strong> the existing winners,
+                                not replace them.
+                              </p>
+                              {existingWinners.length > 0 && (
+                                <div>
+                                  <p className="font-semibold mb-1">
+                                    Current winners:
+                                  </p>
+                                  <div className="space-y-1">
+                                    {existingWinners.map(
+                                      (winner: PreviousWinner) => (
+                                        <div
+                                          key={winner.id}
+                                          className="text-yellow-100 text-sm"
+                                        >
+                                          • {winner.name} (
+                                          {winner.email || 'No email'})
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <fieldset
                       disabled={running || availableStaff.length === 0}
                       aria-busy={running}
@@ -296,13 +370,19 @@ export default function PickStaffWinners() {
                         htmlFor="confirmation"
                         className="block text-white font-semibold mb-1 mt-4"
                       >
-                        Do You Really Want To Pick Staff Winners?
+                        {hasExistingWinners
+                          ? 'Do You Really Want To Add More Staff Winners? (This will add to existing winners)'
+                          : 'Do You Really Want To Pick Staff Winners?'}
                         <input
                           required
                           type="text"
                           id="confirmation"
                           name="confirmation"
-                          placeholder="Type 'yes' to confirm"
+                          placeholder={
+                            hasExistingWinners
+                              ? "Type 'yes' to add more winners"
+                              : "Type 'yes' to confirm"
+                          }
                           value={inputs.confirmation || ''}
                           onChange={handleChange}
                           className="w-full p-2 rounded border mt-2"
@@ -314,7 +394,11 @@ export default function PickStaffWinners() {
                         className="mt-6"
                         disabled={availableStaff.length === 0}
                       >
-                        {running ? 'Picking Winners...' : 'Pick Staff Winners'}
+                        {running
+                          ? 'Picking Winners...'
+                          : hasExistingWinners
+                            ? 'Add More Staff Winners'
+                            : 'Pick Staff Winners'}
                       </button>
                     </fieldset>
                   </Form>
