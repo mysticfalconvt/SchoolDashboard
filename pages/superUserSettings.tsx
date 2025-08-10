@@ -1,13 +1,15 @@
 import type { NextPage } from 'next';
 import NewWeeklyPbisCollection from '../components/PBIS/NewWeeklyPbisCollection';
+import PickStaffWinners from '../components/PBIS/PickStaffWinners';
+import SendPbisWinnerEmails from '../components/PBIS/SendPbisWinnerEmails';
 // import StudentFocusTable from '../components/StudentFocusTable';
 import { useUser } from '../components/User';
 import GradientButton from '../components/styles/Button';
 import NewStudent from '../components/users/CreateNewStudent';
+import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import NewEvents from '../components/users/NewEvents';
 import NewStaff from '../components/users/NewStaff';
 import NewUpdateUsers from '../components/users/NewUpdateUsers';
-import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import isAllowed from '../lib/isAllowed';
 
 const SuperUserSettings: NextPage = () => {
@@ -29,6 +31,8 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <NewEvents />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, 'canManagePbis') && <NewWeeklyPbisCollection />}
+      {isAllowed(me, 'canManagePbis') && <PickStaffWinners />}
+      {isAllowed(me, 'canManagePbis') && <SendPbisWinnerEmails />}
       {/* {isAllowed(me, "isSuperAdmin") && <CreateChromebookAssignments />} */}
       {/* {isAllowed(me, "isSuperAdmin") && <TransferData />} */}
     </div>
