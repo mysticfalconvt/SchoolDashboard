@@ -43,7 +43,10 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
       <h3 className="m-2">Current Class Assignments</h3>
-      <div className="grid grid-cols-1 md:grid-cols-10">
+      <div
+        className="grid grid-cols-1 md:grid-cols-[repeat(var(--num-blocks),minmax(0,1fr))]"
+        style={{ '--num-blocks': NUMBER_OF_BLOCKS } as React.CSSProperties}
+      >
         {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
           const num = i + 1;
           const blockTeacher = student[

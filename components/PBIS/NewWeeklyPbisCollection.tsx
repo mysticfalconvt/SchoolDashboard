@@ -1,11 +1,12 @@
 import { useRouter } from 'next/dist/client/router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useForm from '../../lib/useForm';
 import useRevalidatePage from '../../lib/useRevalidatePage';
 import GradientButton from '../styles/Button';
 import Form from '../styles/Form';
 import { useUser } from '../User';
 import useV3PbisCollection from './useV3PbisCollection';
+import { usePbisCalculations } from './usePbisCalculations';
 
 interface FormInputs {
   confirmation: string;
@@ -16,10 +17,12 @@ export default function NewWeeklyPbisCollection() {
   const [showForm, setShowForm] = React.useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm();
   const [running, setRunning] = React.useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const router = useRouter();
   const user = useUser();
   const { runCardCollection, data, setGetData, getData, loading } =
     useV3PbisCollection();
+  const calculatedResults = usePbisCalculations(data);
 
   useEffect(() => {
     console.log('running', running);
@@ -65,6 +68,7 @@ export default function NewWeeklyPbisCollection() {
         style={{ marginTop: '10px' }}
         onClick={() => {
           setShowForm(!showForm);
+          setShowPreview(false);
           setGetData(!getData);
         }}
       >
@@ -94,6 +98,130 @@ export default function NewWeeklyPbisCollection() {
               </button>
             </div>
             <div className="p-6 max-h-[80vh] overflow-y-auto">
+              {/* Warning for recent collection */}
+              {calculatedResults.hasRecentCollection && (
+                <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-yellow-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-200">
+                        ⚠️ Warning: Recent collection detected
+                      </h3>
+                      <div className="mt-2 text-sm text-yellow-100">
+                        <p>
+                          A PBIS collection was run {calculatedResults.daysSinceLastCollection} day{calculatedResults.daysSinceLastCollection !== 1 ? 's' : ''} ago. 
+                          PBIS collections are typically run weekly. Are you sure you want to proceed?
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Results Button */}
+              {data && !showPreview && (
+                <div className="mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Preview Collection Results
+                  </button>
+                </div>
+              )}
+
+              {/* Preview Results Section */}
+              {showPreview && (
+                <div className="mb-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-white text-lg font-semibold">
+                      Collection Preview
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(false)}
+                      className="text-white hover:text-gray-300"
+                    >
+                      Hide Preview
+                    </button>
+                  </div>
+
+                  {/* Total Cards */}
+                  <div className="bg-white bg-opacity-10 p-3 rounded">
+                    <h4 className="text-white font-semibold mb-2">📊 Collection Summary</h4>
+                    <p className="text-white text-sm">
+                      Total cards to be collected: <strong>{calculatedResults.totalCards}</strong>
+                    </p>
+                  </div>
+
+                  {/* TA Team Level Changes */}
+                  {calculatedResults.taTeachersWithChanges.length > 0 && (
+                    <div className="bg-green-600 bg-opacity-20 p-3 rounded">
+                      <h4 className="text-white font-semibold mb-2">🎉 TA Teams Leveling Up ({calculatedResults.taTeachersWithChanges.length})</h4>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {calculatedResults.taTeachersWithChanges.map((teacher) => (
+                          <div key={teacher.id} className="text-white text-sm">
+                            <strong>{teacher.name}</strong> - Level {teacher.taTeamPbisLevel} → {teacher.taTeamPbisLevel + teacher.taTeamPbisLevelChange} 
+                            ({Math.round(teacher.newCardsPerStudent)} avg cards/student)
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Students Leveling Up */}
+                  {calculatedResults.studentsLevelingUp.length > 0 && (
+                    <div className="bg-purple-600 bg-opacity-20 p-3 rounded">
+                      <h4 className="text-white font-semibold mb-2">⭐ Students Leveling Up ({calculatedResults.studentsLevelingUp.length})</h4>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {calculatedResults.studentsLevelingUp.map((student) => (
+                          <div key={student.id} className="text-white text-sm">
+                            <strong>{student.name}</strong> - Level {student.individualPbisLevel} → {student.newLevel} 
+                            ({student.totalPBISCards} total cards)
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Random Drawing Winners */}
+                  {calculatedResults.randomDrawingWinners.length > 0 && (
+                    <div className="bg-yellow-600 bg-opacity-20 p-3 rounded">
+                      <h4 className="text-white font-semibold mb-2">🎲 Random Drawing Winners ({calculatedResults.randomDrawingWinners.length})</h4>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {calculatedResults.randomDrawingWinners.map((winner, index) => (
+                          <div key={`${winner.id}-${index}`} className="text-white text-sm">
+                            <strong>{winner.name}</strong> - {winner.ticketCount} ticket{winner.ticketCount !== 1 ? 's' : ''}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No Changes Message */}
+                  {calculatedResults.taTeachersWithChanges.length === 0 && 
+                   calculatedResults.studentsLevelingUp.length === 0 && 
+                   calculatedResults.randomDrawingWinners.length === 0 && (
+                    <div className="bg-gray-600 bg-opacity-20 p-3 rounded">
+                      <p className="text-white text-sm">No level changes or winners will be generated from this collection.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <Form
                 className="w-full bg-transparent border-0 shadow-none p-0"
                 onSubmit={async (e) => {
