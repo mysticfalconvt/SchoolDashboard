@@ -1,9 +1,11 @@
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { ToastBar, Toaster, toast } from 'react-hot-toast';
+import SignInDialog from './loginComponents/SignInDialog';
 import Header from './navagation/Header';
-import { SmallGradientButton } from './styles/Button';
 import ThemeSwitcher from './styles/ThemeSwitcher';
+import { useUser } from './User';
 
 interface PageProps {
   children: React.ReactNode;
@@ -12,6 +14,11 @@ interface PageProps {
 export default function Page({ children }: PageProps) {
   // get theme from local storage
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const me = useUser();
+  const router = useRouter();
+
+  // Check if we're on the loginLink page
+  const isLoginLinkPage = router.pathname === '/loginLink';
 
   // set theme to local storage and update document class
   const setLocalTheme = (newTheme: 'light' | 'dark') => {
@@ -60,19 +67,25 @@ export default function Page({ children }: PageProps) {
       </Head>
       <Header />
       <ThemeSwitcher theme={theme} setTheme={setLocalTheme} />
+
+      {/* Show SignInDialog when user is not authenticated, but not on loginLink page */}
+      {!isLoginLinkPage && <SignInDialog isOpen={!me} />}
+
       <Toaster
         position="top-right"
         toastOptions={{
           className: 'toast-custom',
           style: {
-            background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+            background:
+              'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
             border: '2px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '12px',
             padding: '12px 16px',
             color: '#ffffff',
             fontWeight: '500',
             letterSpacing: '0.5px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(118, 13, 8, 0.3)',
+            boxShadow:
+              '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(118, 13, 8, 0.3)',
             backdropFilter: 'blur(8px)',
             maxWidth: '400px',
             fontSize: '14px',
@@ -82,7 +95,8 @@ export default function Page({ children }: PageProps) {
             duration: 4000,
             icon: '✅',
             style: {
-              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              background:
+                'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
               border: '2px solid rgba(56, 182, 255, 0.4)',
             },
             ariaProps: {
@@ -94,7 +108,8 @@ export default function Page({ children }: PageProps) {
             duration: 5000,
             icon: '❌',
             style: {
-              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              background:
+                'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
               border: '2px solid rgba(118, 13, 8, 0.4)',
             },
             ariaProps: {
@@ -105,7 +120,8 @@ export default function Page({ children }: PageProps) {
           loading: {
             icon: '⏳',
             style: {
-              background: 'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
+              background:
+                'linear-gradient(135deg, rgba(118, 13, 8, 0.95), rgba(56, 182, 255, 0.95))',
               border: '2px solid rgba(56, 182, 255, 0.3)',
             },
           },
@@ -115,12 +131,8 @@ export default function Page({ children }: PageProps) {
           <ToastBar toast={t}>
             {({ icon, message }) => (
               <div className="flex items-center gap-3 w-full">
-                <div className="flex-shrink-0 text-lg">
-                  {icon}
-                </div>
-                <div className="flex-1 text-white font-medium">
-                  {message}
-                </div>
+                <div className="flex-shrink-0 text-lg">{icon}</div>
+                <div className="flex-1 text-white font-medium">{message}</div>
                 {t.type !== 'loading' && (
                   <button
                     onClick={() => toast.dismiss(t.id)}
@@ -135,7 +147,11 @@ export default function Page({ children }: PageProps) {
           </ToastBar>
         )}
       </Toaster>
-      <div className="max-w-[var(--maxWidth)] mx-auto p-8">{children}</div>
+
+      {/* Show main content if user is authenticated OR if we're on loginLink page */}
+      {(me || isLoginLinkPage) && (
+        <div className="max-w-[var(--maxWidth)] mx-auto p-8">{children}</div>
+      )}
     </div>
   );
 }

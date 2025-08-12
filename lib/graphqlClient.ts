@@ -25,6 +25,15 @@ export class GraphQLClient {
 
   private getAuthHeaders(): Record<string, string> {
     const headers = { ...this.headers };
+
+    // Add authorization header if token exists in localStorage
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
     return headers;
   }
 
@@ -47,6 +56,10 @@ export class GraphQLClient {
       });
 
       if (!response.ok) {
+        // If we get a 401 Unauthorized, clear the token
+        if (response.status === 401 && typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
         throw new Error(`GraphQL request failed: ${response.statusText}`);
       }
 
@@ -59,6 +72,18 @@ export class GraphQLClient {
       const result = await response.json();
 
       if (result.errors) {
+        // Check if any error indicates authentication failure
+        const authError = result.errors.find(
+          (error: any) =>
+            error.message?.includes('authentication') ||
+            error.message?.includes('unauthorized') ||
+            error.message?.includes('not authenticated'),
+        );
+
+        if (authError && typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
+
         throw new Error(
           `GraphQL errors: ${result.errors.map((e: any) => e.message).join(', ')}`,
         );

@@ -22,10 +22,28 @@ const SignOut: React.FC = () => {
     <GradientButton
       type="button"
       onClick={async () => {
-        await signout({});
-        queryClient.refetchQueries();
-        queryClient.removeQueries();
-        queryClient.clear();
+        try {
+          // Clear the token from localStorage first
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
+
+          // Clear all queries before calling endSession
+          queryClient.clear();
+
+          // Call the endSession mutation
+          await signout({});
+
+          // Force a page reload to ensure clean state
+          window.location.href = '/';
+        } catch (error) {
+          console.error('Error during sign out:', error);
+          // Even if there's an error, clear everything and redirect
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+          }
+        }
       }}
     >
       Sign Out
