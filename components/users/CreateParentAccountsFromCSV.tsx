@@ -61,6 +61,23 @@ const CREATE_PARENT_MUTATION = gql`
   }
 `;
 
+const UPDATE_PARENT_ADD_CHILD_MUTATION = gql`
+  mutation UPDATE_PARENT_ADD_CHILD_MUTATION($parentId: ID!, $studentId: ID!) {
+    updateUser(
+      where: { id: $parentId }
+      data: { children: { connect: { id: $studentId } } }
+    ) {
+      id
+      name
+      email
+      children {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export default function CreateParentAccountsFromCSV() {
   const [showForm, setShowForm] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -80,6 +97,7 @@ export default function CreateParentAccountsFromCSV() {
     studentsNotFound: 0,
     contactsToCreate: 0,
     contactsAlreadyExist: 0,
+    contactsToUpdate: 0,
   });
   const [fileProblems, setFileProblems] = useState<{
     studentsNotFound: string[];
@@ -110,6 +128,15 @@ export default function CreateParentAccountsFromCSV() {
     { loading: creatingParent, error, mutateAsync: createParentAsync },
   ] = useGqlMutation(CREATE_PARENT_MUTATION);
 
+  const [
+    updateParentMutate,
+    {
+      loading: updatingParent,
+      error: updateError,
+      mutateAsync: updateParentAsync,
+    },
+  ] = useGqlMutation(UPDATE_PARENT_ADD_CHILD_MUTATION);
+
   const calculateFileStats = (
     csvRows: any[],
     students: any[],
@@ -119,6 +146,7 @@ export default function CreateParentAccountsFromCSV() {
     let studentsNotFound = 0;
     let contactsToCreate = 0;
     let contactsAlreadyExist = 0;
+    let contactsToUpdate = 0;
 
     const problems = {
       studentsNotFound: [] as string[],
@@ -146,7 +174,17 @@ export default function CreateParentAccountsFromCSV() {
           if (existingParent1) {
             contactsAlreadyExist++;
           } else {
-            contactsToCreate++;
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 1 Email'].toLowerCase(),
+            );
+            if (existingParentByEmail) {
+              contactsToUpdate++;
+            } else {
+              contactsToCreate++;
+            }
           }
         } else if (row['Contact 1'] || row['Contact 1 Email']) {
           // Invalid contact info
@@ -165,7 +203,17 @@ export default function CreateParentAccountsFromCSV() {
           if (existingParent2) {
             contactsAlreadyExist++;
           } else {
-            contactsToCreate++;
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 2 Email'].toLowerCase(),
+            );
+            if (existingParentByEmail) {
+              contactsToUpdate++;
+            } else {
+              contactsToCreate++;
+            }
           }
         } else if (row['Contact 2'] || row['Contact 2 Email']) {
           // Invalid contact info
@@ -185,6 +233,7 @@ export default function CreateParentAccountsFromCSV() {
       studentsNotFound,
       contactsToCreate,
       contactsAlreadyExist,
+      contactsToUpdate,
       problems,
     };
   };
@@ -237,7 +286,19 @@ export default function CreateParentAccountsFromCSV() {
             student?.id || '',
             parentsData.parents,
           );
-          result.contact1Existed = !!existingParent1;
+          if (existingParent1) {
+            result.contact1Existed = true;
+          } else {
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parentsData.parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 1 Email'].toLowerCase(),
+            );
+            if (existingParentByEmail) {
+              result.contact1Updated = true;
+            }
+          }
         }
 
         if (validateContactInfo(row['Contact 2'], row['Contact 2 Email'])) {
@@ -249,7 +310,19 @@ export default function CreateParentAccountsFromCSV() {
             student?.id || '',
             parentsData.parents,
           );
-          result.contact2Existed = !!existingParent2;
+          if (existingParent2) {
+            result.contact2Existed = true;
+          } else {
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parentsData.parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 2 Email'].toLowerCase(),
+            );
+            if (existingParentByEmail) {
+              result.contact2Updated = true;
+            }
+          }
         }
 
         preview.push(result);
@@ -301,12 +374,19 @@ export default function CreateParentAccountsFromCSV() {
           continue;
         }
 
-        // Prepare a unified creator that works with either mutateAsync or mutate
+        // Prepare unified creators that work with either mutateAsync or mutate
         const executeCreateParent =
           createParentAsync ??
           (async (variables: any) => {
             // Intentionally do not pass callbacks so tests' mock signature stays single-arg
             createParentMutate(variables as any);
+          });
+
+        const executeUpdateParent =
+          updateParentAsync ??
+          (async (variables: any) => {
+            // Intentionally do not pass callbacks so tests' mock signature stays single-arg
+            updateParentMutate(variables as any);
           });
 
         // Process Contact 1
@@ -322,27 +402,52 @@ export default function CreateParentAccountsFromCSV() {
           if (existingParent1) {
             result.contact1Existed = true;
           } else {
-            try {
-              await executeCreateParent({
-                name: row['Contact 1'],
-                email: row['Contact 1 Email'],
-                studentId: student.id,
-              });
-              result.contact1Created = true;
-            } catch (err: any) {
-              const errorMessage =
-                err?.message || err?.toString() || 'Unknown error';
-              if (
-                errorMessage.includes('Unique constraint failed') &&
-                errorMessage.includes('email')
-              ) {
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parentsData.parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 1 Email'].toLowerCase(),
+            );
+
+            if (existingParentByEmail) {
+              // Update existing parent to add this student
+              try {
+                await executeUpdateParent({
+                  parentId: existingParentByEmail.id,
+                  studentId: student.id,
+                });
+                result.contact1Updated = true;
+              } catch (err: any) {
+                const errorMessage =
+                  err?.message || err?.toString() || 'Unknown error';
                 result.errors.push(
-                  `Contact 1 email already exists: ${row['Contact 1 Email']}`,
+                  `Failed to update Contact 1: ${errorMessage}`,
                 );
-              } else {
-                result.errors.push(
-                  `Failed to create Contact 1: ${errorMessage}`,
-                );
+              }
+            } else {
+              // Create new parent
+              try {
+                await executeCreateParent({
+                  name: row['Contact 1'],
+                  email: row['Contact 1 Email'],
+                  studentId: student.id,
+                });
+                result.contact1Created = true;
+              } catch (err: any) {
+                const errorMessage =
+                  err?.message || err?.toString() || 'Unknown error';
+                if (
+                  errorMessage.includes('Unique constraint failed') &&
+                  errorMessage.includes('email')
+                ) {
+                  result.errors.push(
+                    `Contact 1 email already exists: ${row['Contact 1 Email']}`,
+                  );
+                } else {
+                  result.errors.push(
+                    `Failed to create Contact 1: ${errorMessage}`,
+                  );
+                }
               }
             }
           }
@@ -361,27 +466,52 @@ export default function CreateParentAccountsFromCSV() {
           if (existingParent2) {
             result.contact2Existed = true;
           } else {
-            try {
-              await executeCreateParent({
-                name: row['Contact 2'],
-                email: row['Contact 2 Email'],
-                studentId: student.id,
-              });
-              result.contact2Created = true;
-            } catch (err: any) {
-              const errorMessage =
-                err?.message || err?.toString() || 'Unknown error';
-              if (
-                errorMessage.includes('Unique constraint failed') &&
-                errorMessage.includes('email')
-              ) {
+            // Check if parent exists but doesn't have this student
+            const existingParentByEmail = parentsData.parents.find(
+              (parent) =>
+                parent.email.toLowerCase() ===
+                row['Contact 2 Email'].toLowerCase(),
+            );
+
+            if (existingParentByEmail) {
+              // Update existing parent to add this student
+              try {
+                await executeUpdateParent({
+                  parentId: existingParentByEmail.id,
+                  studentId: student.id,
+                });
+                result.contact2Updated = true;
+              } catch (err: any) {
+                const errorMessage =
+                  err?.message || err?.toString() || 'Unknown error';
                 result.errors.push(
-                  `Contact 2 email already exists: ${row['Contact 2 Email']}`,
+                  `Failed to update Contact 2: ${errorMessage}`,
                 );
-              } else {
-                result.errors.push(
-                  `Failed to create Contact 2: ${errorMessage}`,
-                );
+              }
+            } else {
+              // Create new parent
+              try {
+                await executeCreateParent({
+                  name: row['Contact 2'],
+                  email: row['Contact 2 Email'],
+                  studentId: student.id,
+                });
+                result.contact2Created = true;
+              } catch (err: any) {
+                const errorMessage =
+                  err?.message || err?.toString() || 'Unknown error';
+                if (
+                  errorMessage.includes('Unique constraint failed') &&
+                  errorMessage.includes('email')
+                ) {
+                  result.errors.push(
+                    `Contact 2 email already exists: ${row['Contact 2 Email']}`,
+                  );
+                } else {
+                  result.errors.push(
+                    `Failed to create Contact 2: ${errorMessage}`,
+                  );
+                }
               }
             }
           }
@@ -414,6 +544,7 @@ export default function CreateParentAccountsFromCSV() {
       studentsNotFound: 0,
       contactsToCreate: 0,
       contactsAlreadyExist: 0,
+      contactsToUpdate: 0,
     });
     setFileProblems({
       studentsNotFound: [],
@@ -581,6 +712,14 @@ export default function CreateParentAccountsFromCSV() {
                           {fileStats.contactsAlreadyExist}
                         </div>
                       </div>
+                      <div>
+                        <div className="text-gray-600">
+                          Parent Accounts to Update:
+                        </div>
+                        <div className="font-semibold text-orange-600">
+                          {fileStats.contactsToUpdate}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -616,6 +755,11 @@ export default function CreateParentAccountsFromCSV() {
                                 Already Exists
                               </span>
                             )}
+                            {result.contact1Updated && (
+                              <span className="text-orange-600 ml-2 font-semibold">
+                                Will Update
+                              </span>
+                            )}
                           </div>
                         )}
 
@@ -626,6 +770,11 @@ export default function CreateParentAccountsFromCSV() {
                             {result.contact2Existed && (
                               <span className="text-blue-600 ml-2 font-semibold">
                                 Already Exists
+                              </span>
+                            )}
+                            {result.contact2Updated && (
+                              <span className="text-orange-600 ml-2 font-semibold">
+                                Will Update
                               </span>
                             )}
                           </div>
@@ -833,6 +982,11 @@ export default function CreateParentAccountsFromCSV() {
                         ✓ Created
                       </span>
                     )}
+                    {result.contact1Updated && (
+                      <span className="text-orange-600 ml-2 font-semibold">
+                        ✓ Updated
+                      </span>
+                    )}
                     {result.contact1Existed && (
                       <span className="text-blue-600 ml-2 font-semibold">
                         Already Exists
@@ -848,6 +1002,11 @@ export default function CreateParentAccountsFromCSV() {
                     {result.contact2Created && (
                       <span className="text-green-600 ml-2 font-semibold">
                         ✓ Created
+                      </span>
+                    )}
+                    {result.contact2Updated && (
+                      <span className="text-orange-600 ml-2 font-semibold">
+                        ✓ Updated
                       </span>
                     )}
                     {result.contact2Existed && (
@@ -884,6 +1043,7 @@ export default function CreateParentAccountsFromCSV() {
                     <div>Students found: {stats.studentsFound}</div>
                     <div>Students not found: {stats.studentsNotFound}</div>
                     <div>Parent accounts created: {stats.parentsCreated}</div>
+                    <div>Parent accounts updated: {stats.parentsUpdated}</div>
                     <div>
                       Parent accounts already existed: {stats.parentsExisted}
                     </div>

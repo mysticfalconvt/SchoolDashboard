@@ -26,10 +26,12 @@ export interface ProcessingResult {
   studentFound: boolean;
   contact1Created: boolean;
   contact1Existed: boolean;
+  contact1Updated?: boolean;
   contact1Name?: string;
   contact1Email?: string;
   contact2Created: boolean;
   contact2Existed: boolean;
+  contact2Updated?: boolean;
   contact2Name?: string;
   contact2Email?: string;
   errors: string[];
@@ -273,8 +275,10 @@ export const createProcessingResult = (
     studentFound: !!student,
     contact1Created: false,
     contact1Existed: false,
+    contact1Updated: false,
     contact2Created: false,
     contact2Existed: false,
+    contact2Updated: false,
     errors: student ? [] : ['Student not found'],
   };
 };
@@ -292,6 +296,11 @@ export const generateSummaryStats = (results: ProcessingResult[]) => {
     parentsExisted: results.reduce(
       (sum, r) =>
         sum + (r.contact1Existed ? 1 : 0) + (r.contact2Existed ? 1 : 0),
+      0,
+    ),
+    parentsUpdated: results.reduce(
+      (sum, r) =>
+        sum + (r.contact1Updated ? 1 : 0) + (r.contact2Updated ? 1 : 0),
       0,
     ),
     totalErrors: results.reduce((sum, r) => sum + r.errors.length, 0),
