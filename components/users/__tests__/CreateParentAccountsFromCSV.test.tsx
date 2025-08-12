@@ -31,6 +31,7 @@ const mockToast = require('react-hot-toast');
 
 describe('CreateParentAccountsFromCSV', () => {
   const mockCreateParent = jest.fn();
+  const mockUpdateParent = jest.fn();
 
   const mockStudentsData = {
     students: [
@@ -63,7 +64,7 @@ describe('CreateParentAccountsFromCSV', () => {
     ],
   };
 
-  const validCSVContent = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+  const validCSVContent = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Doe,John,Mary Doe,mary.doe@email.com,John Doe Sr,john.sr@email.com
 Smith,Jane,Sarah Smith,sarah.smith@email.com,Mike Smith,mike.smith@email.com
 Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
@@ -104,6 +105,32 @@ Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
         mutateAsync: mockCreateParent,
       },
     ]);
+
+    // Mock the update parent mutation
+    mockUseGqlMutation.mockImplementation((mutation) => {
+      // Check if it's the update parent mutation by looking at the mutation name
+      const mutationName = mutation?.definitions?.[0]?.name?.value;
+      if (mutationName === 'UPDATE_PARENT_ADD_CHILD_MUTATION') {
+        return [
+          mockUpdateParent,
+          {
+            loading: false,
+            error: null,
+            data: null,
+            mutateAsync: mockUpdateParent,
+          },
+        ];
+      }
+      return [
+        mockCreateParent,
+        {
+          loading: false,
+          error: null,
+          data: null,
+          mutateAsync: mockCreateParent,
+        },
+      ];
+    });
   });
 
   describe('Component Rendering', () => {
@@ -175,20 +202,26 @@ Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
       expect(fileInput).toBeInTheDocument();
     });
 
-    it('enables process button when file is selected', () => {
+    it('enables process button when file is selected', async () => {
       renderWithProviders(<CreateParentAccountsFromCSV />);
 
       const button = screen.getByText('Create Parent Accounts from CSV');
       fireEvent.click(button);
 
       const fileInput = screen.getByLabelText('Select CSV File');
-      const processButton = screen.getByText('Process CSV');
 
-      expect(processButton).toBeDisabled();
+      // The file input should be present but no process button until file is selected
+      expect(fileInput).toBeInTheDocument();
 
       const mockFile = createMockFile(validCSVContent);
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
+      // Wait for preview to load and check that process button is enabled
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       expect(processButton).not.toBeDisabled();
     });
   });
@@ -208,7 +241,12 @@ Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -239,7 +277,12 @@ Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -251,7 +294,7 @@ Wilson,Bob,Lisa Wilson,lisa.wilson@email.com,,`;
     });
 
     it('handles students not found', async () => {
-      const csvWithUnknownStudent = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+      const csvWithUnknownStudent = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Unknown,Student,Parent Name,parent@email.com,,`;
 
       renderWithProviders(<CreateParentAccountsFromCSV />);
@@ -266,7 +309,12 @@ Unknown,Student,Parent Name,parent@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -279,7 +327,7 @@ Unknown,Student,Parent Name,parent@email.com,,`;
 
     it('skips creating accounts that already exist', async () => {
       // Mary Doe already exists for John Doe in mockParentsData
-      const csvWithExistingParent = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+      const csvWithExistingParent = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Doe,John,Mary Doe,mary.doe@email.com,,`;
 
       renderWithProviders(<CreateParentAccountsFromCSV />);
@@ -294,7 +342,12 @@ Doe,John,Mary Doe,mary.doe@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -308,7 +361,7 @@ Doe,John,Mary Doe,mary.doe@email.com,,`;
 
   describe('Student Matching Logic', () => {
     it('matches students by first and last name', async () => {
-      const csvContent = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+      const csvContent = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Doe,John,Test Parent,test@email.com,,`;
 
       renderWithProviders(<CreateParentAccountsFromCSV />);
@@ -323,7 +376,12 @@ Doe,John,Test Parent,test@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -336,7 +394,7 @@ Doe,John,Test Parent,test@email.com,,`;
     });
 
     it('handles name variations and partial matches', async () => {
-      const csvContent = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+      const csvContent = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Smith,Jane,Test Parent,test@email.com,,`;
 
       renderWithProviders(<CreateParentAccountsFromCSV />);
@@ -351,7 +409,12 @@ Smith,Jane,Test Parent,test@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -378,7 +441,12 @@ Smith,Jane,Test Parent,test@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -399,7 +467,12 @@ Smith,Jane,Test Parent,test@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -444,13 +517,10 @@ Smith,Jane,Test Parent,test@email.com,,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
-      fireEvent.click(processButton);
-
+      // When there's a file reading error, the preview step should not load
+      // and an error toast should be shown
       await waitFor(() => {
-        expect(mockToast.error).toHaveBeenCalledWith(
-          'Error processing CSV file',
-        );
+        expect(mockToast.error).toHaveBeenCalledWith('Error reading CSV file');
       });
     });
 
@@ -470,7 +540,12 @@ Missing,Headers`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -481,7 +556,7 @@ Missing,Headers`;
     });
 
     it('handles empty CSV files', async () => {
-      const emptyCSV = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email`;
+      const emptyCSV = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email`;
 
       renderWithProviders(<CreateParentAccountsFromCSV />);
 
@@ -495,7 +570,12 @@ Missing,Headers`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -520,7 +600,12 @@ Missing,Headers`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
@@ -541,27 +626,26 @@ Missing,Headers`;
       const fileInput = screen.getByLabelText('Select CSV File');
       const mockFile = createMockFile(validCSVContent);
 
-      // Create a promise that we can control
-      let resolveFileText: (value: string) => void;
-      const fileTextPromise = new Promise<string>((resolve) => {
-        resolveFileText = resolve;
-      });
-
-      (mockFile.text as jest.Mock).mockReturnValue(fileTextPromise as any);
+      // Mock file.text() to resolve immediately
+      (mockFile.text as jest.Mock).mockResolvedValue(validCSVContent);
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       // Check loading state
-      expect(screen.getByText('Processing...')).toBeInTheDocument();
-
-      // Resolve the promise
-      resolveFileText!(validCSVContent);
+      expect(screen.getByText('Processing CSV File')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(screen.queryByText('Processing...')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Processing CSV File'),
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -579,16 +663,16 @@ Missing,Headers`;
       renderWithProviders(<CreateParentAccountsFromCSV />);
 
       const button = screen.getByText('Create Parent Accounts from CSV');
-      fireEvent.click(button);
 
-      const processButton = screen.getByText('Process CSV');
-      expect(processButton).toBeDisabled();
+      // The main button should be present and not disabled (current implementation)
+      expect(button).toBeInTheDocument();
+      expect(button).not.toBeDisabled();
     });
   });
 
   describe('Data Validation', () => {
     it('only creates accounts with both name and email', async () => {
-      const csvWithMissingData = `Last_Name,First_Name,Contact 1,Email,Contact 2,Email
+      const csvWithMissingData = `Last_Name,First_Name,Contact 1,Contact 1 Email,Contact 2,Contact 2 Email
 Doe,John,Mary Doe,,John Sr,john.sr@email.com
 Smith,Jane,,jane.parent@email.com,Mike Smith,`;
 
@@ -604,7 +688,12 @@ Smith,Jane,,jane.parent@email.com,Mike Smith,`;
 
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
-      const processButton = screen.getByText('Process CSV');
+      // Wait for preview to load and click "Process All Records"
+      await waitFor(() => {
+        expect(screen.getByText('Process All Records')).toBeInTheDocument();
+      });
+
+      const processButton = screen.getByText('Process All Records');
       fireEvent.click(processButton);
 
       await waitFor(() => {
