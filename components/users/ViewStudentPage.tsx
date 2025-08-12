@@ -6,6 +6,7 @@ import { capitalizeFirstLetter } from '../../lib/nameUtils';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import AssignmentViewCardsStudent from '../Assignments/AssignmentViewCardsStudent';
 import CallbackCards from '../Callback/CallbackCards';
+import EmailParentsAboutCallback from '../Callback/EmailParentsAboutCallback';
 import Loading from '../Loading';
 import DisplayPbisCardsWidget from '../PBIS/DisplayPbisCardsWidget';
 import QuickPbisButton from '../PBIS/QuickPbisButton';
@@ -271,11 +272,14 @@ interface ViewStudentPageProps {
 
 export default function ViewStudentPage({ student }: ViewStudentPageProps) {
   // Memoize variables to prevent infinite re-renders
-  const variables = useMemo(() => ({
-    id: student.id,
-    date: new Date(),
-  }), [student.id]);
-  
+  const variables = useMemo(
+    () => ({
+      id: student.id,
+      date: new Date(),
+    }),
+    [student.id],
+  );
+
   const { data, isLoading, error } = useGQLQuery(
     `SingleStudent-${student.id}`,
     GET_SINGLE_TEACHER,
@@ -294,12 +298,12 @@ export default function ViewStudentPage({ student }: ViewStudentPageProps) {
     <div>
       <h3>
         Student info for {getDisplayName(user)} TA: {user?.taTeacher?.name}
-        {/* {me.isStaff && (
+        {me.isStaff && (
           <EmailParentsAboutCallback
             student={user}
-            disabled={canSendCallbackEmail}
+            disabled={canSendCallbackEmail || callbackDisabled}
           />
-        )} */}
+        )}
         {me.isStaff && (
           <QuickPbisButton
             id={user.id}

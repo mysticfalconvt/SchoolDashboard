@@ -117,6 +117,8 @@ const PbisWeeklyReading: React.FC = () => {
     Number.isFinite(currentTotal) && Number.isFinite(previousTotal)
       ? Math.floor(previousTotal / 10000) < Math.floor(currentTotal / 10000)
       : false;
+  // Schoolwide level is just based on 10K levels
+  const schoolWidePbisLevel = Math.floor(currentTotal / 10000);
   return (
     <div className="max-w-screen-2xl mx-auto">
       <h3 className="text-3xl mb-4">In PBIS News,</h3>
@@ -126,8 +128,9 @@ const PbisWeeklyReading: React.FC = () => {
         Perseverance.
       </p>
       {leveledUpSchoolwide ? (
-        <p className="text-2xl mb-6 font-semibold">
-          We went up a schoolwide PBIS level.
+        <p className="text-3xl mb-6 font-semibold">
+          We went up a schoolwide PBIS level. We have reached Level{' '}
+          {schoolWidePbisLevel}
         </p>
       ) : null}
       {hasRandomDrawingWinners ? (
