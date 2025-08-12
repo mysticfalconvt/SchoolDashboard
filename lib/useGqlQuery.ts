@@ -10,7 +10,6 @@ const graphQLClient = new GraphQLClient(
     headers: {
       credentials: 'include',
       mode: 'cors',
-      // authorization: `Bearer token goes here`,
     },
   },
 );
@@ -21,11 +20,19 @@ export const useGQLQuery = <TData = any>(
   variables?: Record<string, any>,
   config: Partial<UseQueryOptions<TData, Error, TData>> = {},
 ) => {
-  // console.log(GraphQLClient);
-  const fetchData = async (): Promise<TData> =>
-    await graphQLClient.request(query, variables);
-  // console.log(document)
-  // const fetchData = async () => await request(endpoint, query, variables);
+  const fetchData = async (): Promise<TData> => {
+    // Create a new client instance for each request to ensure fresh token
+    const client = new GraphQLClient(
+      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
+    );
+    return await client.request(query, variables);
+  };
 
   // Include variables in the query key so React Query knows when to refetch
   const queryKey = variables ? [key, variables] : [key];
@@ -34,9 +41,18 @@ export const useGQLQuery = <TData = any>(
 };
 
 export const useAsyncGQLQuery = <TData = any>(query: DocumentNode) => {
-  // console.log(GraphQLClient);
-  const fetchData = async (variables?: Record<string, any>): Promise<TData> =>
-    await graphQLClient.request(query, variables);
+  const fetchData = async (variables?: Record<string, any>): Promise<TData> => {
+    const client = new GraphQLClient(
+      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      {
+        headers: {
+          credentials: 'include',
+          mode: 'cors',
+        },
+      },
+    );
+    return await client.request(query, variables);
+  };
 
   return fetchData;
 };

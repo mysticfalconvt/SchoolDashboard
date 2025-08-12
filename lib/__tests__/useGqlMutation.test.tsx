@@ -218,12 +218,22 @@ describe('useGqlMutation', () => {
     expect(queryClient.invalidateQueries).not.toHaveBeenCalled();
   });
 
-  it('uses correct GraphQL client based on environment', () => {
+  it('uses correct GraphQL client based on environment', async () => {
     const originalEnv = process.env.NODE_ENV;
+    const mockResponse = { createUser: { id: '1', name: 'John' } };
+    mockRequest.mockResolvedValue(mockResponse);
 
     // Development environment
     (process.env as any).NODE_ENV = 'development';
-    renderHook(() => useGqlMutation(createUserMutation), { wrapper });
+    const { result: devResult } = renderHook(
+      () => useGqlMutation(createUserMutation),
+      { wrapper },
+    );
+
+    // Execute mutation to trigger client creation
+    await act(async () => {
+      devResult.current[0]({ input: { name: 'John' } });
+    });
 
     expect(MockedGraphQLClient).toHaveBeenCalledWith(
       'http://localhost:3000/api/graphql',
@@ -235,9 +245,20 @@ describe('useGqlMutation', () => {
       }),
     );
 
+    // Clear mocks for production test
+    MockedGraphQLClient.mockClear();
+
     // Production environment
     (process.env as any).NODE_ENV = 'production';
-    renderHook(() => useGqlMutation(createUserMutation), { wrapper });
+    const { result: prodResult } = renderHook(
+      () => useGqlMutation(createUserMutation),
+      { wrapper },
+    );
+
+    // Execute mutation to trigger client creation
+    await act(async () => {
+      prodResult.current[0]({ input: { name: 'John' } });
+    });
 
     expect(MockedGraphQLClient).toHaveBeenCalledWith(
       'https://api.example.com/graphql',
@@ -387,16 +408,27 @@ describe('useGqlMutation', () => {
     });
   });
 
-  it('creates new GraphQL client instance for each hook call', () => {
-    const { rerender } = renderHook(() => useGqlMutation(createUserMutation), {
+  it('creates new GraphQL client instance for each mutation call', async () => {
+    const mockResponse = { createUser: { id: '1', name: 'John' } };
+    mockRequest.mockResolvedValue(mockResponse);
+
+    const { result } = renderHook(() => useGqlMutation(createUserMutation), {
       wrapper,
     });
 
+    const [mutate] = result.current;
     const initialCallCount = MockedGraphQLClient.mock.calls.length;
 
-    rerender();
+    // Execute mutation
+    await act(async () => {
+      mutate({ input: { name: 'John' } });
+    });
 
-    // New client should be created for each hook call (not singleton like query)
+    await waitFor(() => {
+      expect(result.current[1].data).toEqual(mockResponse);
+    });
+
+    // New client should be created for each mutation call
     expect(MockedGraphQLClient.mock.calls.length).toBeGreaterThan(
       initialCallCount,
     );

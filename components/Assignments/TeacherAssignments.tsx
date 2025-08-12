@@ -96,7 +96,6 @@ const TeacherAssignments: React.FC = () => {
   if (isLoading) return <Loading />;
 
   const assignments: AssignmentData = data?.authenticatedItem || {};
-  console.log('number of blocks', NUMBER_OF_BLOCKS);
   return (
     <>
       {showUpdater && block && (

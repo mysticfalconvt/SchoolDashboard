@@ -4,7 +4,6 @@ import React from 'react';
 import { FaHome } from 'react-icons/fa';
 import { callbackDisabled, disciplineDisabled } from '../../config';
 import isAllowed from '../../lib/isAllowed';
-import MagicLinkSignIn from '../loginComponents/MagicLinkSignIn';
 import MessagesCount from '../Messages/MessagesCount';
 import { useUser } from '../User';
 
@@ -30,8 +29,9 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
     return null;
   }
 
+  // Don't render navigation if user is not authenticated
   if (!me) {
-    return <MagicLinkSignIn />;
+    return null;
   }
 
   // Helper to render a nav link in a skewed card using exact brand colors
@@ -43,7 +43,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           : 'rounded-lg mx-1 min-w-[90px] h-10 flex items-center justify-center skew-x-[-20deg] shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl'
       }
       style={{
-        background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+        background: 'linear-gradient(to top left, #38B6FF, #760D08)',
       }}
     >
       <Link
@@ -89,7 +89,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
               href="/superUserSettings"
               className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
               style={{
-                background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+                background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
               aria-label="Super User Settings"
             >
@@ -141,7 +141,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
               href="/superUserSettings"
               className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
               style={{
-                background: 'linear-gradient(to top left, #38B6FF, #760D08)'
+                background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
               aria-label="Super User Settings"
             >

@@ -15,7 +15,11 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header style={{ background: 'linear-gradient(to top right, #38B6FF, #760D08)' }}>
+      <header
+        style={{
+          background: 'linear-gradient(to top right, #38B6FF, #760D08)',
+        }}
+      >
         {/* Mobile: NCUJHS left, hamburger right */}
         <div className="flex flex-row items-center w-full px-2 py-2 relative md:static">
           {/* Mobile NCUJHS link with falcon icon */}
@@ -37,7 +41,9 @@ const Header: React.FC = () => {
           {/* Desktop skewed logo/title card */}
           <div
             className={`rounded-2xl mx-2 min-w-[220px] h-16 md:h-20 items-center justify-center skew-x-[-20deg] shadow-lg ${isFetching ? 'animate-pulse' : ''} hidden md:flex`}
-            style={{ background: 'linear-gradient(to top left, #38B6FF, #760D08)' }}
+            style={{
+              background: 'linear-gradient(to top left, #38B6FF, #760D08)',
+            }}
           >
             <Link href="/" className="block skew-x-[20deg]">
               <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
@@ -60,24 +66,40 @@ const Header: React.FC = () => {
               </span>
             </Link>
           </div>
-          {/* Hamburger for mobile (right) */}
-          <button
-            className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30 bg-transparent border-none"
-            aria-label="Open menu"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <FaBars />
-          </button>
-          {/* Desktop nav */}
-          <div className="flex-1 hidden md:block">
-            <Nav mobile={false} onClickLink={() => {}} />
-          </div>
+
+          {/* Only show navigation controls if user is authenticated */}
+          {me ? (
+            <>
+              {/* Hamburger for mobile (right) */}
+              <button
+                className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30 bg-transparent border-none"
+                aria-label="Open menu"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <FaBars />
+              </button>
+              {/* Desktop nav */}
+              <div className="flex-1 hidden md:block">
+                <Nav mobile={false} onClickLink={() => {}} />
+              </div>
+            </>
+          ) : (
+            /* Show a simple welcome message when not authenticated */
+            <div className="flex-1 hidden md:flex justify-end items-center">
+              <span className="text-white/80 text-lg font-medium">
+                Welcome to NCUJHS Dashboard
+              </span>
+            </div>
+          )}
         </div>
+
         {/* Mobile dropdown menu - covers entire screen, always visible when open */}
-        {menuOpen && (
-          <div 
+        {menuOpen && me && (
+          <div
             className="fixed inset-0 shadow-lg z-[9999] animate-fade-in-down overflow-y-auto flex flex-col"
-            style={{ background: 'linear-gradient(to top right, #38B6FF, #760D08)' }}
+            style={{
+              background: 'linear-gradient(to top right, #38B6FF, #760D08)',
+            }}
           >
             <button
               className="absolute top-4 right-4 text-white text-3xl focus:outline-none z-60 bg-transparent border-none"
@@ -90,7 +112,9 @@ const Header: React.FC = () => {
               <Link
                 href="/"
                 className="mb-4 text-white font-extrabold text-2xl tracking-wide px-4 py-2 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200"
-                style={{ background: 'linear-gradient(to top left, #38B6FF, #760D08)' }}
+                style={{
+                  background: 'linear-gradient(to top left, #38B6FF, #760D08)',
+                }}
                 onClick={() => setMenuOpen(false)}
               >
                 Home
@@ -99,7 +123,9 @@ const Header: React.FC = () => {
             </div>
           </div>
         )}
-        {isAllowed(me, 'isStaff') && (
+
+        {/* Only show search bar if user is authenticated and is staff */}
+        {me && isAllowed(me, 'isStaff') && (
           <div className="grid grid-cols-[1fr_auto] border-b border-black">
             <Search />
           </div>
