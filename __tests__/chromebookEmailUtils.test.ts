@@ -95,7 +95,7 @@ describe('chromebookEmailUtils', () => {
           toAddress: 'jane.smith@example.com',
           fromAddress: 'teacher@school.com',
           subject: 'Chromebook Check Notification - John Doe',
-          body: expect.stringContaining('Dear Jane Smith'),
+          body: expect.stringContaining('Dear parents and guardians'),
         }),
       });
 
@@ -104,7 +104,7 @@ describe('chromebookEmailUtils', () => {
           toAddress: 'bob.smith@example.com',
           fromAddress: 'teacher@school.com',
           subject: 'Chromebook Check Notification - John Doe',
-          body: expect.stringContaining('Dear Bob Smith'),
+          body: expect.stringContaining('Dear parents and guardians'),
         }),
       });
     });
@@ -208,7 +208,7 @@ describe('chromebookEmailUtils', () => {
       expect(mockOnProgress).toHaveBeenNthCalledWith(5, { sent: 5, total: 5 });
     });
 
-    it('should include issue details in all emails', async () => {
+    it('should include standardized message in parent emails', async () => {
       const issueDetails = 'Screen is completely broken and needs replacement';
 
       await sendChromebookCheckEmails({
@@ -216,16 +216,25 @@ describe('chromebookEmailUtils', () => {
         issueDetails,
       });
 
-      // Check that issue details are included in all emails
-      mockSendEmail.mock.calls.forEach((call) => {
-        expect(call[0].emailData.body).toContain(issueDetails);
+      // Check that parent emails contain the standardized message
+      const parentEmailCalls = mockSendEmail.mock.calls.filter(
+        (call) =>
+          call[0].emailData.toAddress === 'jane.smith@example.com' ||
+          call[0].emailData.toAddress === 'bob.smith@example.com',
+      );
+
+      parentEmailCalls.forEach((call) => {
+        expect(call[0].emailData.body).toContain('Dear parents and guardians');
+        expect(call[0].emailData.body).toContain('Each week your child\'s TA teacher performs a Chromebook check');
+        expect(call[0].emailData.body).toContain('Joyce Lantagne');
+        expect(call[0].emailData.body).toContain('The PBIS Team');
       });
     });
 
-    it('should format parent names correctly', async () => {
+    it('should use standardized greeting for all parents', async () => {
       await sendChromebookCheckEmails(baseParams);
 
-      // Check that parent names are formatted correctly
+      // Check that parent emails use standardized greeting
       const parentEmailCalls = mockSendEmail.mock.calls.filter(
         (call) =>
           call[0].emailData.toAddress === 'jane.smith@example.com' ||
@@ -234,20 +243,13 @@ describe('chromebookEmailUtils', () => {
 
       expect(parentEmailCalls).toHaveLength(2);
 
-      // Check that "Smith, Jane" becomes "Jane Smith"
-      const janeEmail = parentEmailCalls.find(
-        (call) => call[0].emailData.toAddress === 'jane.smith@example.com',
-      );
-      expect(janeEmail[0].emailData.body).toContain('Dear Jane Smith');
-
-      // Check that "Smith, Bob" becomes "Bob Smith"
-      const bobEmail = parentEmailCalls.find(
-        (call) => call[0].emailData.toAddress === 'bob.smith@example.com',
-      );
-      expect(bobEmail[0].emailData.body).toContain('Dear Bob Smith');
+      // Check that all parent emails use "Dear parents and guardians"
+      parentEmailCalls.forEach((call) => {
+        expect(call[0].emailData.body).toContain('Dear parents and guardians');
+      });
     });
 
-    it('should handle parent names without commas', async () => {
+    it('should use standardized greeting regardless of parent name format', async () => {
       const studentWithSimpleNames = {
         ...baseStudent,
         parent: [
@@ -260,14 +262,14 @@ describe('chromebookEmailUtils', () => {
         student: studentWithSimpleNames,
       });
 
-      // Check that simple names are handled correctly
+      // Check that standardized greeting is used regardless of parent name format
       const janeEmail = mockSendEmail.mock.calls.find(
         (call) => call[0].emailData.toAddress === 'jane.smith@example.com',
       );
-      expect(janeEmail[0].emailData.body).toContain('Dear Jane Smith');
+      expect(janeEmail[0].emailData.body).toContain('Dear parents and guardians');
     });
 
-    it('should handle empty parent names', async () => {
+    it('should use standardized greeting even with empty parent names', async () => {
       const studentWithEmptyNames = {
         ...baseStudent,
         parent: [{ id: 'p1', name: '', email: 'jane.smith@example.com' }],
@@ -278,11 +280,11 @@ describe('chromebookEmailUtils', () => {
         student: studentWithEmptyNames,
       });
 
-      // Check that empty names default to 'Parent/Guardian'
+      // Check that standardized greeting is used even with empty parent names
       const janeEmail = mockSendEmail.mock.calls.find(
         (call) => call[0].emailData.toAddress === 'jane.smith@example.com',
       );
-      expect(janeEmail[0].emailData.body).toContain('Dear Parent/Guardian');
+      expect(janeEmail[0].emailData.body).toContain('Dear parents and guardians');
     });
   });
 
