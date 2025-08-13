@@ -136,10 +136,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
 
   return (
     <div>
-      <GradientButton
-        onClick={() => setShowForm(!showForm)}
-        style={{ marginLeft: '100px' }}
-      >
+      <GradientButton onClick={() => setShowForm(!showForm)}>
         {showForm ? 'Close the form' : 'Add A New Student'}
       </GradientButton>
       <FormContainerStyles visible={showForm}>
