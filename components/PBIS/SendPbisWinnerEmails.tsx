@@ -201,28 +201,28 @@ export default function SendPbisWinnerEmails() {
           subject = '🎉 Congratulations! You Leveled Up in PBIS!';
           message = `Dear ${winner.name},
 
-Congratulations! You have successfully leveled up to Level ${winner.level} in our PBIS program! 
+Congratulations! You have leveled up to Level ${winner.level} in our PBIS program! This achievement demonstrates your commitment to our three habits of work: Respect, Responsibility, and Perseverance.
 
-Your dedication to demonstrating our school habits of Respect, Responsibility, and Perseverance has paid off. Please report to the Bus Lobby to claim your well-deserved reward.
+Please report to the Bus Lobby to claim your well-deserved reward. Your positive behavior and dedication to creating a positive academic and social environment are truly commendable!
 
 Keep up the excellent work!
 
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           break;
 
         case 'ta':
           subject = '🎉 Congratulations! Your TA Team Leveled Up!';
           message = `Dear ${winner.name},
 
-Fantastic news! Your TA team has completed their BINGO Box and reached Level ${winner.level}!
+Congratulations! Your TA team has completed their BINGO Box and reached Level ${winner.level}! This achievement reflects the collective effort and positive behavior of your entire team.
 
-This achievement reflects the collective effort and positive behavior of your entire team. You will be notified when you should receive your team celebration.
+You will be notified when you should receive your team celebration. Your leadership and the team's commitment to our three habits of work: Respect, Responsibility, and Perseverance, have made this possible.
 
 Congratulations on leading by example!
 
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           break;
 
         case 'staff':
@@ -234,26 +234,26 @@ Congratulations! You have been selected as a winner in this week's PBIS staff dr
 
 Your commitment to supporting our students and reinforcing positive behavior has been recognized. Please check with the main office for details about your reward.
 
-Thank you for all you do to support our PBIS program!
+Thank you for all you do to support our PBIS program and for continuing to encourage students to be positive members of our falcon community!
 
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           break;
 
         case 'random':
           subject = '🎉 Congratulations! You Won the PBIS Random Drawing!';
           message = `Dear ${winner.name},
 
-Exciting news! You have been selected as a winner in this week's PBIS random drawing!
+Congratulations! You have been selected as a winner in this week's PBIS random drawing!
 
-Your positive behavior and demonstration of our school habits have earned you this reward. Please report to the Bus Lobby to claim your prize.
+Your positive behavior and demonstration of our three habits of work: Respect, Responsibility, and Perseverance, have earned you this reward. Please report to the Bus Lobby to claim your prize.
 
 ${winner.taTeacher ? `Your TA teacher ${winner.taTeacher} should be proud of your excellent behavior!` : ''}
 
 Keep up the great work!
 
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           break;
       }
 
@@ -288,34 +288,32 @@ PBIS Team`;
 
           if (winner.type === 'personal') {
             subject = '🎉 Great News! Your Child Leveled Up in PBIS!';
-            message = `Dear ${formatParentName(parent.name) || 'Parent/Guardian'},
+            message = `Dear Parents and Guardians,
 
-We're excited to share some wonderful news about ${winner.name}!
+Congratulations! Your child has leveled up to Level ${winner.level}! This means that your child has earned and submitted at least 25 PBIS cards! Remember that PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also the TA and school as a whole - so keep encouraging your child to submit their cards as they earn them!
 
-Your child has successfully leveled up to Level ${winner.level} in our school's PBIS (Positive Behavioral Interventions and Supports) program. This achievement demonstrates their commitment to our school habits of Respect, Responsibility, and Perseverance.
+Individual levels are based on a tiered system, with each level requiring a set number of cards which rises every 2 levels. As the number of required cards increases, so does the number of rewards available to students. Click here to view our level up system poster!
 
-${winner.name} should report to the Bus Lobby to claim their well-deserved reward.
+Check in with your child to find out what prize they have earned. Be sure to congratulate them on modeling our three habits of work: Respect, Responsibility, and Perseverance!
 
-Please take a moment to celebrate this achievement with your child. Their positive behavior and dedication are truly commendable!
+Thank you for continuing to encourage your child to be a positive member of our falcon community.
 
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           } else if (winner.type === 'random') {
             subject = '🎉 Congratulations! Your Child Won the PBIS Drawing!';
-            message = `Dear ${formatParentName(parent.name) || 'Parent/Guardian'},
+            message = `Dear Parents and Guardians,
 
-We have exciting news to share about ${winner.name}!
+Congratulations! Your child has been selected as a winner in this week's PBIS random drawing! This recognition comes as a result of their positive behavior and demonstration of our three habits of work: Respect, Responsibility, and Perseverance.
 
-Your child has been selected as a winner in this week's PBIS random drawing! This recognition comes as a result of their positive behavior and demonstration of our school habits.
+Your child should report to the Bus Lobby to claim their prize.
 
-${winner.name} should report to the Bus Lobby to claim their prize.
+${winner.taTeacher ? `Their TA teacher ${winner.taTeacher} has been impressed with their excellent behavior!` : ''}
 
-${winner.taTeacher ? `${winner.taTeacher}, their TA teacher, has been impressed with their excellent behavior!` : ''}
+Please join us in celebrating this achievement with your child and continue to encourage them to be a positive member of our falcon community!
 
-Please join us in celebrating this achievement with your child!
-
-Best regards,
-PBIS Team`;
+The PBIS Team
+"Go the distance; dare to explore"`;
           }
 
           const emailData = {

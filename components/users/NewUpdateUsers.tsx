@@ -235,13 +235,43 @@ export default function NewUpdateUsers() {
                 </p>
               );
             })}
-            <p>
-              {resultOfUpdate.length} users updated. {unUpdatedUsers?.length}{' '}
-              users not updated
-              {unUpdatedUsers?.map((user: User) => {
-                return <p key={user.name}>{user.name}</p>;
-              })}
-            </p>
+            <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+              <h3 className="font-semibold text-lg mb-2">Summary</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium text-green-700">
+                    New Users:{' '}
+                    {resultOfUpdate.filter((user) => !user.existed).length}
+                  </p>
+                  <p className="font-medium text-blue-700">
+                    Updated Users:{' '}
+                    {resultOfUpdate.filter((user) => user.existed).length}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">
+                    Total Processed: {resultOfUpdate.length}
+                  </p>
+                  <p className="font-medium text-orange-700">
+                    Not Updated: {unUpdatedUsers?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {unUpdatedUsers && unUpdatedUsers.length > 0 && (
+              <div className="mt-3">
+                <p className="font-medium text-gray-700 mb-2">
+                  Users not updated:
+                </p>
+                {unUpdatedUsers.map((user: User) => {
+                  return (
+                    <p key={user.name} className="text-sm text-gray-600">
+                      {user.name}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
