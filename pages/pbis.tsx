@@ -235,7 +235,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
         </div>
         <div>
           <h2 className="hidePrint">Links</h2>
-          <div className="flex justify-around items-center w-full flex-wrap">
+          <div className="flex justify-around items-center w-full flex-wrap gap-2">
             {isAllowed(me, 'canManagePbis') && (
               <>
                 <Link href="/PbisWeeklyReading">
