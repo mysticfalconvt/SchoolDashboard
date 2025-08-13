@@ -311,22 +311,22 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
               <h4>Level -{ta.taTeamPbisLevel}-</h4>
               <p>{ta.taTeamAveragePbisCardsPerStudent} cards per student</p>
               <p>Total of {ta.taStudents?.length} students</p>
-              <p>
+              {/* <p>
                 Uncounted cards:{' '}
                 {ta.taStudents?.reduce(
                   (sum, student) => sum + (student.uncountedCards || 0),
                   0,
                 )}
-              </p>
+              </p> */}
               <div className="text-xs mt-2">
-                {ta.taStudents?.map((student: TaStudent) => (
+                {/* {ta.taStudents?.map((student: TaStudent) => (
                   <div key={student.id} className="text-left">
                     <span className="font-semibold">{student.name}:</span>{' '}
                     {student.studentPbisCardsCount} total,{' '}
                     {student.uncountedCards} uncounted, Level{' '}
                     {student.individualPbisLevel}
                   </div>
-                ))}
+                ))} */}
               </div>
             </div>
           ))}
