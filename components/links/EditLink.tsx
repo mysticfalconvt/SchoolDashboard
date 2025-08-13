@@ -121,6 +121,8 @@ const EditLink: React.FC<EditLinkProps> = ({
 }) => {
   const revalidateIndex = useRevalidatePage('/');
   const revalidateLinksPage = useRevalidatePage('/links');
+  const revalidateEPortfolioPage = useRevalidatePage('/ePortfolio');
+  const revalidatePBISPage = useRevalidatePage('/pbis');
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     name: link.name,
@@ -183,6 +185,10 @@ const EditLink: React.FC<EditLinkProps> = ({
               forEPortfolio: inputs.forEPortfolio,
             });
             refetch?.();
+            revalidateIndex();
+            revalidateLinksPage();
+            revalidateEPortfolioPage();
+            revalidatePBISPage();
             setVisibleForm(null);
           }}
         >
@@ -280,6 +286,8 @@ const EditLink: React.FC<EditLinkProps> = ({
                   await deleteLink({ id: link.id });
                   revalidateIndex();
                   revalidateLinksPage();
+                  revalidateEPortfolioPage();
+                  revalidatePBISPage();
                   queryClient.refetchQueries('allLinks');
                   setVisibleForm(null);
                 }}
