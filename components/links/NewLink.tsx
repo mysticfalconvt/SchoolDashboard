@@ -83,6 +83,7 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
   const revalidateIndexPage = useRevalidatePage('/');
   const revalidateLinkPage = useRevalidatePage('/links');
   const revalidateEPortfolioPage = useRevalidatePage('/ePortfolio');
+  const revalidatePBISPage = useRevalidatePage('/pbis');
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     name: '',
@@ -136,6 +137,10 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
             });
             refetchLinks?.();
             resetForm();
+            revalidateIndexPage();
+            revalidateLinkPage();
+            revalidateEPortfolioPage();
+            revalidatePBISPage();
             setShowForm(false);
           }}
         >
@@ -143,7 +148,9 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
           <fieldset disabled={loading} aria-busy={loading}>
             <div className="form-control w-full mb-4">
               <label className="label" htmlFor="name">
-                <span className="label-text text-white font-semibold">Link Title</span>
+                <span className="label-text text-white font-semibold">
+                  Link Title
+                </span>
               </label>
               <input
                 required
@@ -158,7 +165,9 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
             </div>
             <div className="form-control w-full mb-4">
               <label className="label" htmlFor="link">
-                <span className="label-text text-white font-semibold">Link</span>
+                <span className="label-text text-white font-semibold">
+                  Link
+                </span>
               </label>
               <input
                 type="text"
@@ -172,7 +181,9 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
             </div>
             <div className="form-control w-full mb-4">
               <label className="label" htmlFor="description">
-                <span className="label-text text-white font-semibold">Description</span>
+                <span className="label-text text-white font-semibold">
+                  Description
+                </span>
               </label>
               <textarea
                 id="description"
@@ -185,7 +196,9 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
               />
             </div>
             <div className="divider">
-              <span className="font-bold text-white text-lg">Visibility Options</span>
+              <span className="font-bold text-white text-lg">
+                Visibility Options
+              </span>
             </div>
             <div className="flex flex-col gap-3">
               {[
@@ -214,10 +227,12 @@ const NewLink: React.FC<NewLinkProps> = ({ refetchLinks, hidden }) => {
                 </label>
               ))}
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="mt-6 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition-all duration-200 border-none"
-              style={{ background: 'linear-gradient(135deg, #760D08, #38B6FF)' }}
+              style={{
+                background: 'linear-gradient(135deg, #760D08, #38B6FF)',
+              }}
             >
               + Add A New Link
             </button>

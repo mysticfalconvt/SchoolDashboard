@@ -105,7 +105,12 @@ export default function EmailParentsAboutCallback({
   return (
     <GradientButton
       disabled={
-        loading || emailLoading || !parentEmails.length || disabled || emailSent
+        loading ||
+        emailLoading ||
+        !parentEmails.length ||
+        disabled ||
+        emailSent ||
+        callbackCount === 0
       }
       onClick={async () => {
         setLoading(true);
@@ -127,12 +132,10 @@ export default function EmailParentsAboutCallback({
         });
         // add note to student focus about parent emails
         const studentFocusRes = await createStudentFocus({
-          variables: {
-            comments: `Emailed parents ${parentEmails} about ${callbackCount} items on Callback`,
-            category: 'Parent Contact',
-            teacher: me?.id,
-            student: student.id,
-          },
+          comments: `Emailed parents ${parentEmails} about ${callbackCount} items on Callback`,
+          category: 'Parent Contact',
+          teacher: me?.id,
+          student: student.id,
         });
         // console.log('studentFocusRes', studentFocusRes);
         setEmailSent(true);
