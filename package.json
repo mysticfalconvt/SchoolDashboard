@@ -17,7 +17,6 @@
   "dependencies": {
     "@ramonak/react-progress-bar": "^5.2.0",
     "@sentry/nextjs": "^9.42.1",
-    "@sentry/react": "^7.114.0",
     "babel-core": "^7.0.0-bridge.0",
     "chart.js": "^4.4.2",
     "downshift": "^6",

@@ -2,11 +2,12 @@ import * as Sentry from '@sentry/nextjs';
 
 export function register() {
   Sentry.init({
-    dsn: 'https://fd136ab708a7f9d31644905e226b92e5@o4506610880741376.ingest.us.sentry.io/4506614637002752',
+    dsn: process.env.SENTRY_DSN,
 
     // Adjust this value in production, or use tracesSampler for greater control
     tracesSampleRate: 1,
     enabled: process.env.NODE_ENV === 'production',
+
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
@@ -16,15 +17,15 @@ export function register() {
     // in development and sample at a lower rate in production
     replaysSessionSampleRate: 0.1,
 
-    // You can remove this option if you're not planning to use the Sentry Session Replay feature:
-    integrations: [
-      Sentry.replayIntegration({
-        // Additional Replay configuration goes in here, for example:
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
+    // Remove replay integration for now - it seems to have compatibility issues
+    // integrations: [
+    //   replayIntegration({
+    //     // Additional Replay configuration goes in here, for example:
+    //     maskAllText: true,
+    //     blockAllMedia: true,
+    //   }),
+    // ],
   });
 }
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRequestError = Sentry.captureRequestError;
