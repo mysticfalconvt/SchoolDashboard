@@ -103,7 +103,6 @@ const NewBugReportButton: React.FC = () => {
                 submittedBy: me?.id || '',
               });
 
-              // Todo: send message when callback assigned
               createMessage({
                 subject: 'New Bug Report',
                 message: `${me?.name} reported a bug or asked for a feature`,
