@@ -79,7 +79,7 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
               }`}
               key={`key for student - ${student.id} - ${num}`}
             >
-              <h4>Block {num}</h4>
+              <h4>{num}</h4>
               <p>{blockTeacher.name}</p>
               <p>
                 {blockTeacher[`block${num}ClassName` as keyof BlockTeacher]}
