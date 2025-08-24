@@ -66,7 +66,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
               }`}
               key={`key ${num}`}
             >
-              <h4>Block {num}</h4>
+              <h4>{num}</h4>
               <p>{assignments[`block${num}ClassName`]}</p>
               <p>{assignments[`block${num}Assignment`]}</p>
               {/* <p>

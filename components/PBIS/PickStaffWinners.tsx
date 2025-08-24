@@ -109,7 +109,7 @@ export default function PickStaffWinners() {
 
     // Filter out staff who have already won
     return allStaff.filter((staff) => !allPreviousWinners.includes(staff.id));
-  }, [data?.staff, data?.pbisCollectionDates, showForm]);
+  }, [showForm, data]);
 
   // Check if there are already staff winners in the latest collection
   const hasExistingWinners = useMemo(() => {

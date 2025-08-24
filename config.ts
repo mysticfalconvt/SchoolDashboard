@@ -19,3 +19,8 @@ export const PBIS_STUDENT_RANDOM_DRAWING_WINNERS: boolean = Boolean(
   process.env.NEXT_PUBLIC_PBIS_STUDENT_RANDOM_DRAWING_WINNERS ??
     process.env.PBIS_STUDENT_RANDOM_DRAWING_WINNERS,
 );
+
+// Chromebook check minimum frequency (days between checks)
+export const CHROMEBOOK_CHECK_MIN_DAYS: number = Number(
+  process.env.NEXT_PUBLIC_CHROMEBOOK_CHECK_MIN_FREQUENCY || 5,
+);

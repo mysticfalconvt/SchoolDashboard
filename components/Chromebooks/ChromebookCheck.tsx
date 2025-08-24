@@ -2,14 +2,16 @@ import useSendEmail from '@/components/../lib/useSendEmail';
 import GradientButton from '@/components/styles/Button';
 import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
+import { CHROMEBOOK_CHECK_MIN_DAYS } from '@/config';
 import {
   sendChromebookCheckEmails,
-  type Student,
+  sendBulkChromebookEmails,
+  type Student as EmailStudent,
 } from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 
@@ -62,6 +64,11 @@ export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
           name
           email
         }
+        chromebookCheck(orderBy: { time: desc }, take: 1) {
+          id
+          message
+          time
+        }
       }
     }
   }
@@ -81,6 +88,24 @@ interface User {
   email: string;
 }
 
+interface ChromebookCheck {
+  id: string;
+  message: string;
+  time: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email?: string;
+  parent?: Array<{
+    id: string;
+    name: string;
+    email?: string;
+  }>;
+  chromebookCheck?: ChromebookCheck[];
+}
+
 interface StudentCheckData {
   [studentId: string]: {
     message: string; // 'Everything good' | 'Something wrong'
@@ -89,15 +114,68 @@ interface StudentCheckData {
   };
 }
 
+// Convert our Student type to EmailStudent type for email utils
+const convertToEmailStudent = (student: Student): EmailStudent => ({
+  id: student.id,
+  name: student.name,
+  email: student.email,
+  parent: student.parent,
+});
+
+// Calculate time since last chromebook check
+const getTimeSinceLastCheck = (student: Student): string => {
+  if (!student.chromebookCheck || student.chromebookCheck.length === 0) {
+    return 'never';
+  }
+  
+  const lastCheckTime = new Date(student.chromebookCheck[0].time);
+  const now = new Date();
+  const diffMs = now.getTime() - lastCheckTime.getTime();
+  
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  
+  if (diffDays === 0 && diffHours === 0) {
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    return diffMinutes < 1 ? 'just now' : `${diffMinutes}M`;
+  }
+  
+  if (diffDays === 0) {
+    return `${diffHours}H`;
+  }
+  
+  if (diffHours === 0) {
+    return `${diffDays}D`;
+  }
+  
+  return `${diffDays}D ${diffHours}H`;
+};
+
+// Check if student should be disabled (last check < CHROMEBOOK_CHECK_MIN_DAYS ago)
+const isStudentDisabled = (student: Student): boolean => {
+  if (!student.chromebookCheck || student.chromebookCheck.length === 0) {
+    return false; // Never checked, so not disabled
+  }
+  
+  const lastCheckTime = new Date(student.chromebookCheck[0].time);
+  const now = new Date();
+  const diffMs = now.getTime() - lastCheckTime.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  
+  return diffDays < CHROMEBOOK_CHECK_MIN_DAYS;
+};
+
 // Note: EmailData interface is now imported from chromebookEmailUtils
 
 interface MultiStudentCheckFormProps {
   students: Student[];
+  queryId: string;
   onComplete: () => void;
 }
 
 function MultiStudentCheckForm({
   students,
+  queryId,
   onComplete,
 }: MultiStudentCheckFormProps) {
   const me = useUser() as User;
@@ -111,6 +189,17 @@ function MultiStudentCheckForm({
   );
   const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   const { sendEmail } = useSendEmail();
+  const emailProgressRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to email progress when it becomes visible
+  useEffect(() => {
+    if (isSendingEmails && emailProgressRef.current) {
+      emailProgressRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }, [isSendingEmails]);
 
   const updateStudentData = (
     studentId: string,
@@ -134,11 +223,13 @@ function MultiStudentCheckForm({
   };
 
   const handleStudentSubmit = async (student: Student) => {
-    const data = studentData[student.id];
-    if (
-      !data?.message ||
-      (data.message === 'Something wrong' && !data.customMessage)
-    ) {
+    const data = studentData[student.id] ?? {
+      message: 'Everything good',
+      customMessage: '',
+      isSubmitting: false,
+    };
+    
+    if (data.message === 'Something wrong' && !data.customMessage) {
       toast.error('Please fill in all required fields for ' + student.name);
       return;
     }
@@ -169,7 +260,7 @@ function MultiStudentCheckForm({
 
         try {
           await sendChromebookCheckEmails({
-            student,
+            student: convertToEmailStudent(student),
             teacherName: me.name,
             teacherEmail: me.email,
             issueDetails: data.customMessage,
@@ -187,7 +278,7 @@ function MultiStudentCheckForm({
       }
 
       toast.success(`Chromebook check submitted for ${student.name}`);
-      queryClient.refetchQueries();
+      await queryClient.refetchQueries([`TAChromebookAssignments-${queryId}`]);
 
       // Clear the student's data after successful submission
       setStudentData((prev) => {
@@ -208,8 +299,18 @@ function MultiStudentCheckForm({
     setIsSubmittingAll(true);
     let successCount = 0;
     let failCount = 0;
+    let skippedCount = 0;
+
+    // Collect all students that need emails sent
+    const studentsNeedingEmails: Array<{ student: Student; issueDetails: string }> = [];
 
     for (const student of students) {
+      // Skip disabled students (recently checked)
+      if (isStudentDisabled(student)) {
+        skippedCount += 1;
+        continue;
+      }
+
       const existing = studentData[student.id] ?? {
         message: 'Everything good',
         customMessage: '',
@@ -244,27 +345,12 @@ function MultiStudentCheckForm({
           await createCard({ teacher: me?.id, student: student?.id });
         }
 
+        // Collect students that need emails (issues)
         if (me?.id && existing.message !== 'Everything good') {
-          setIsSendingEmails(true);
-          setEmailProgress({ sent: 0, total: 0 });
-
-          try {
-            await sendChromebookCheckEmails({
-              student,
-              teacherName: me.name,
-              teacherEmail: me.email,
-              issueDetails: existing.customMessage,
-              sendEmail,
-              onProgress: setEmailProgress,
-            });
-          } finally {
-            setIsSendingEmails(false);
-            setEmailProgress({ sent: 0, total: 0 });
-            // Auto-close the form after emails are sent
-            setTimeout(() => {
-              onComplete();
-            }, 1000);
-          }
+          studentsNeedingEmails.push({
+            student: convertToEmailStudent(student),
+            issueDetails: existing.customMessage,
+          });
         }
 
         successCount += 1;
@@ -282,12 +368,39 @@ function MultiStudentCheckForm({
       }
     }
 
-    await queryClient.refetchQueries();
+    // Now send all emails in bulk with proper progress tracking
+    if (studentsNeedingEmails.length > 0) {
+      setIsSendingEmails(true);
+      
+      try {
+        await sendBulkChromebookEmails(
+          studentsNeedingEmails,
+          me.name,
+          me.email,
+          sendEmail,
+          setEmailProgress
+        );
+      } finally {
+        setIsSendingEmails(false);
+        setEmailProgress({ sent: 0, total: 0 });
+        // Auto-close the form after emails are sent
+        setTimeout(() => {
+          onComplete();
+        }, 1000);
+      }
+    }
+
+    await queryClient.refetchQueries([`TAChromebookAssignments-${queryId}`]);
     if (successCount) {
       toast.success(`Submitted ${successCount} check(s)`);
     }
     if (failCount) {
       toast.error(`${failCount} check(s) failed or were invalid`);
+    }
+    if (skippedCount) {
+      toast(`Skipped ${skippedCount} recently checked student(s)`, {
+        icon: 'ℹ️',
+      });
     }
     setIsSubmittingAll(false);
   };
@@ -309,16 +422,26 @@ function MultiStudentCheckForm({
             isSubmitting: false,
           };
           const data = { ...baseDefaults, ...(studentData[student.id] || {}) };
+          const disabled = isStudentDisabled(student);
+          
           return (
             <div
               key={student.id}
-              className="bg-base-200/20 backdrop-blur-sm rounded-lg p-4 border border-white/10"
+              className={`backdrop-blur-sm rounded-lg p-4 border transition-all ${
+                disabled 
+                  ? 'bg-base-200/10 border-white/5 opacity-60' 
+                  : 'bg-base-200/20 border-white/10'
+              }`}
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <div className="lg:w-48 flex-shrink-0">
                   <h3 className="text-white font-semibold text-lg">
                     {student.name}
                   </h3>
+                  <p className={`text-sm ${disabled ? 'text-white/40' : 'text-white/60'}`}>
+                    Last check: {getTimeSinceLastCheck(student)}
+                    {disabled && <span className="block text-white/40 text-xs">Recently checked</span>}
+                  </p>
                 </div>
 
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -328,12 +451,14 @@ function MultiStudentCheckForm({
                         Status
                       </span>
                     </label>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className={`relative inline-flex items-center ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                       <input
                         type="checkbox"
                         className="sr-only peer"
                         checked={data.message === 'Everything good'}
+                        disabled={disabled}
                         onChange={(e) => {
+                          if (disabled) return;
                           const isGood = e.target.checked;
                           updateStudentData(
                             student.id,
@@ -362,14 +487,16 @@ function MultiStudentCheckForm({
                     </label>
                     <input
                       type="text"
-                      className="input input-bordered input-sm bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08]"
+                      className="input input-bordered input-sm bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] disabled:opacity-50"
                       placeholder={
                         data.message === 'Everything good'
                           ? 'No issues to report'
-                          : 'Describe the issue...'
+                          : disabled
+                            ? 'Recently checked'
+                            : 'Describe the issue...'
                       }
                       value={data.customMessage}
-                      disabled={data.message === 'Everything good'}
+                      disabled={disabled || data.message === 'Everything good'}
                       onChange={(e) =>
                         updateStudentData(
                           student.id,
@@ -386,25 +513,27 @@ function MultiStudentCheckForm({
                     type="button"
                     onClick={() => handleStudentSubmit(student)}
                     disabled={
+                      disabled ||
                       data.isSubmitting ||
                       isSendingEmails ||
-                      !data.message ||
                       (data.message === 'Something wrong' &&
                         !data.customMessage)
                     }
                     className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
                     style={{
                       background:
-                        data.isSubmitting || isSendingEmails
+                        disabled || data.isSubmitting || isSendingEmails
                           ? '#666'
                           : 'linear-gradient(135deg, #760D08, #38B6FF)',
                     }}
                   >
-                    {data.isSubmitting
-                      ? 'Submitting...'
-                      : isSendingEmails
-                        ? 'Sending Emails...'
-                        : 'Submit'}
+                    {disabled
+                      ? 'Recently Checked'
+                      : data.isSubmitting
+                        ? 'Submitting...'
+                        : isSendingEmails
+                          ? 'Sending Emails...'
+                          : 'Submit'}
                   </button>
                 </div>
               </div>
@@ -414,7 +543,10 @@ function MultiStudentCheckForm({
       </div>
 
       {isSendingEmails && (
-        <div className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg">
+        <div 
+          ref={emailProgressRef}
+          className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg"
+        >
           <div className="text-white text-center mb-2">
             Sending emails... {emailProgress.sent} / {emailProgress.total}{' '}
             emails sent
@@ -437,20 +569,26 @@ function MultiStudentCheckForm({
         <button
           type="button"
           onClick={handleSubmitAll}
-          disabled={isSubmittingAll || isSendingEmails}
+          disabled={
+            isSubmittingAll || 
+            isSendingEmails || 
+            students.every(student => isStudentDisabled(student))
+          }
           className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
           style={{
             background:
-              isSubmittingAll || isSendingEmails
+              isSubmittingAll || isSendingEmails || students.every(student => isStudentDisabled(student))
                 ? '#666'
                 : 'linear-gradient(135deg, #760D08, #38B6FF)',
           }}
         >
-          {isSubmittingAll
-            ? 'Submitting...'
-            : isSendingEmails
-              ? 'Sending Emails...'
-              : 'Submit All'}
+          {students.every(student => isStudentDisabled(student))
+            ? 'All Recently Checked'
+            : isSubmittingAll
+              ? 'Submitting...'
+              : isSendingEmails
+                ? 'Sending Emails...'
+                : 'Submit All'}
         </button>
         <button
           type="button"
@@ -465,14 +603,21 @@ function MultiStudentCheckForm({
   );
 }
 
-export default function ChromebookCheck() {
+interface ChromebookCheckProps {
+  teacherId?: string;
+}
+
+export default function ChromebookCheck({ teacherId }: ChromebookCheckProps = {}) {
   const me = useUser() as User;
   const [showForm, setShowForm] = useState(false);
+  
+  // Use teacherId if provided, otherwise use current user's id
+  const queryId = teacherId || me?.id;
   const { data: taTeacher } = useGQLQuery(
-    `TAChromebookAssignments-${me?.id}`,
+    `TAChromebookAssignments-${queryId}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
-    { id: me?.id },
-    { enabled: !!me?.id },
+    { id: queryId },
+    { enabled: !!queryId },
   );
 
   const students = taTeacher?.user?.taStudents || [];
@@ -500,6 +645,7 @@ export default function ChromebookCheck() {
         <DialogContent maxHeight="max-h-[50vh]" className="p-3">
           <MultiStudentCheckForm
             students={students}
+            queryId={queryId}
             onComplete={handleFormComplete}
           />
         </DialogContent>

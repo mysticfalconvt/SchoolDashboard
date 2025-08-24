@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent } from '../styles/Dialog';
 import { useUser } from '../User';
 import MagicLinkSignIn from './MagicLinkSignIn';
@@ -44,7 +45,7 @@ const SignInDialog: React.FC<SignInDialogProps> = ({ isOpen, onClose }) => {
       <DialogContent className="text-center">
         <div className="mb-6">
           <div className="flex justify-center mb-4">
-            <img src="/falcon.svg" alt="NCUJHS Falcon" className="w-16 h-16" />
+            <Image src="/falcon.svg" alt="NCUJHS Falcon" width={64} height={64} />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
             NCUJHS Dashboard
