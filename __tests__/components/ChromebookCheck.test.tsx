@@ -1,11 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ChromebookCheck from '../../components/Chromebooks/ChromebookCheck';
-import { sendChromebookCheckEmails } from '../../lib/chromebookEmailUtils';
+import { sendChromebookCheckEmails, sendBulkChromebookEmails } from '../../lib/chromebookEmailUtils';
 
 // Mock the utility function
 jest.mock('../../lib/chromebookEmailUtils', () => ({
   sendChromebookCheckEmails: jest.fn(),
+  sendBulkChromebookEmails: jest.fn(),
   chromebookEmails: [
     'robert.boskind@ncsuvt.org',
     'Joyce.Lantagne@ncsuvt.org',
@@ -98,6 +99,10 @@ describe('ChromebookCheck', () => {
   const mockSendChromebookCheckEmails =
     sendChromebookCheckEmails as jest.MockedFunction<
       typeof sendChromebookCheckEmails
+    >;
+  const mockSendBulkChromebookEmails =
+    sendBulkChromebookEmails as jest.MockedFunction<
+      typeof sendBulkChromebookEmails
     >;
 
   beforeEach(() => {
@@ -290,7 +295,7 @@ describe('ChromebookCheck', () => {
     await user.click(submitAllButton);
 
     await waitFor(() => {
-      expect(mockSendChromebookCheckEmails).toHaveBeenCalledTimes(2);
+      expect(mockSendBulkChromebookEmails).toHaveBeenCalledTimes(1);
     });
   });
 

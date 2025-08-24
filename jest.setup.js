@@ -48,3 +48,6 @@ Object.defineProperty(window, 'matchMedia', {
     })),
 })
 
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = jest.fn()
+

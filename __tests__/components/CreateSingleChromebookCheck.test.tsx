@@ -102,27 +102,27 @@ describe('CreateSingleChromebookCheck', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the Chromebook Check button', () => {
+  it('should render the Single Chromebook Check button', () => {
     render(<CreateSingleChromebookCheck />);
-    expect(screen.getByText('Chromebook Check')).toBeInTheDocument();
+    expect(screen.getByText('Single Chromebook Check')).toBeInTheDocument();
   });
 
   it('should open the form when button is clicked', async () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     expect(screen.getAllByText('Create Chromebook Check')).toHaveLength(2); // Heading and button
-    expect(screen.getByText('Cancel CB Check')).toBeInTheDocument();
+    expect(screen.getByText('Close')).toBeInTheDocument();
   });
 
   it('should display the search component in the form', async () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -156,10 +156,7 @@ describe('CreateSingleChromebookCheck', () => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
 
-    // Change status to "Something wrong" and add details
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
-
+    // Status should already be "Something wrong" by default, so we can add details
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
 
@@ -196,16 +193,13 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
     await waitFor(() => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
-
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
 
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
@@ -214,7 +208,7 @@ describe('CreateSingleChromebookCheck', () => {
     const submitButton = submitButtons.find(
       (button) => button.tagName === 'BUTTON',
     );
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText('Close');
 
     // Click submit to start email sending
     await user.click(submitButton!);
@@ -230,7 +224,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -238,10 +232,7 @@ describe('CreateSingleChromebookCheck', () => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
 
-    // Change status to "Something wrong" and add details
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
-
+    // Status should already be "Something wrong" by default, so we can add details
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
 
@@ -272,7 +263,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -297,7 +288,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -306,9 +297,6 @@ describe('CreateSingleChromebookCheck', () => {
     });
 
     // Change status and submit
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
-
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
 
@@ -349,16 +337,13 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
     await waitFor(() => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
-
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
 
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
@@ -404,16 +389,13 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
     await waitFor(() => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
-
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
 
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
@@ -457,16 +439,13 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
     await waitFor(() => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
-
-    const statusToggle = screen.getByRole('checkbox');
-    await user.click(statusToggle);
 
     const detailsInput = screen.getByPlaceholderText('Describe the issue...');
     await user.type(detailsInput, 'Broken screen');
@@ -495,7 +474,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Chromebook Check');
+    const button = screen.getByText('Single Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -503,13 +482,13 @@ describe('CreateSingleChromebookCheck', () => {
       expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
     });
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText('Close');
     await user.click(cancelButton);
 
     // Form should close
     expect(
       screen.queryByText('Create Chromebook Check'),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Chromebook Check')).toBeInTheDocument();
+    expect(screen.getByText('Single Chromebook Check')).toBeInTheDocument();
   });
 });
