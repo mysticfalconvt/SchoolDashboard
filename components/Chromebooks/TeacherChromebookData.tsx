@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { SmallGradientButton } from '../styles/Button';
-import ChromebookCheck from './ChromebookCheck';
+import GradientButton from '../styles/Button';
+import { Dialog, DialogContent } from '../styles/Dialog';
 
 interface ChromebookCheck {
   id: string;
@@ -77,46 +77,78 @@ const TeacherChromebookData: React.FC<TeacherChromebookDataProps> = ({
   }, [teachers, dateRange]);
 
   return (
-    <>
-      <SmallGradientButton onClick={() => setShowModal(!showModal)}>
+    <div>
+      <GradientButton onClick={() => setShowModal(true)}>
         Show Teacher Data
-      </SmallGradientButton>
-      {showModal ? (
-        <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex justify-center items-center">
-          <div className="flex flex-col w-1/2 h-3/4 z-10 bg-slate-400 p-10 rounded-2xl">
-            <span
-              onClick={() => setShowModal(!showModal)}
-              className="bg-indigo-800 text-red-500 self-end rounded-full h-10 w-10 text-center cursor-pointer"
-            >
-              &times;
-            </span>
-            <div className="flex flex-col gap-2 w-3/4 h-full items-stretch m-auto">
-              <label htmlFor="dateRange">
-                Date Range {dateRange} {`day${dateRange === 1 ? '' : 's'}`}
-              </label>
-              {/* slider from 1-30 days */}
-              <input
-                type="range"
-                min="1"
-                max="30"
-                value={dateRange}
-                onChange={(e) => setDateRange(Number(e.target.value))}
-                className="border-2 border-gray-400 rounded-md text-gray-800"
-              />
-              <div className="flex flex-col justify-center gap-4 items-center h-full mt-2 overflow-auto">
+      </GradientButton>
+
+      <Dialog
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Teacher Chromebook Data"
+        variant="modal"
+        size="lg"
+        maxHeight="80vh"
+      >
+        <DialogContent maxHeight="max-h-[70vh]" className="p-4">
+          <div className="space-y-4">
+            <div className="mb-2">
+              <h2 className="text-lg font-bold text-white mb-1">Teacher Statistics</h2>
+              <p className="text-white/80 text-sm">
+                View chromebook check counts by teacher over a specified date range
+              </p>
+            </div>
+
+            <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text text-white font-medium">
+                    Date Range: {dateRange} {`day${dateRange === 1 ? '' : 's'}`}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={dateRange}
+                  onChange={(e) => setDateRange(Number(e.target.value))}
+                  className="range range-primary"
+                />
+                <div className="w-full flex justify-between text-xs text-white/60 px-2 mt-1">
+                  <span>1 day</span>
+                  <span>15 days</span>
+                  <span>30 days</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-64 overflow-auto">
                 {teacherData.map((teacher) => (
-                  <div key={`teacher-${teacher.name}`}>
-                    <p>
-                      {teacher.name} - {teacher.checks.length || 0}
-                    </p>
+                  <div 
+                    key={`teacher-${teacher.name}`}
+                    className="flex justify-between items-center p-3 bg-base-200/30 rounded-lg"
+                  >
+                    <span className="text-white font-medium">{teacher.name}</span>
+                    <span className="badge badge-primary">
+                      {teacher.checks.length || 0} checks
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="btn btn-outline text-white border-white/30 hover:bg-white/10"
+              >
+                Close
+              </button>
+            </div>
           </div>
-        </div>
-      ) : null}
-    </>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
