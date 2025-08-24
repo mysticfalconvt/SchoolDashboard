@@ -37,6 +37,113 @@ export const chromebookEmails = [
 /**
  * Sends chromebook check notification emails to staff, student, and parents
  */
+/**
+ * Sends chromebook check emails for multiple students in bulk with proper progress tracking
+ */
+export async function sendBulkChromebookEmails(
+  studentsNeedingEmails: Array<{ student: Student; issueDetails: string }>,
+  teacherName: string,
+  teacherEmail: string,
+  sendEmail: (params: { emailData: EmailData }) => void | Promise<any>,
+  onProgress?: (progress: { sent: number; total: number }) => void,
+): Promise<void> {
+  // Calculate total emails across all students
+  let totalEmails = 0;
+  const emailQueue: Array<{ emailData: EmailData; studentName: string }> = [];
+
+  // Build the complete email queue
+  for (const { student, issueDetails } of studentsNeedingEmails) {
+    // Staff emails (same for each student with issues)
+    for (const email of chromebookEmails) {
+      emailQueue.push({
+        emailData: {
+          toAddress: email,
+          fromAddress: teacherEmail,
+          subject: `New Chromebook Check for ${student.name}`,
+          body: `
+<p>There is a new Chromebook check for ${student.name} at NCUJHS.TECH created by ${teacherName}. </p>
+<p>${issueDetails}</p>
+          `,
+        },
+        studentName: student.name,
+      });
+    }
+
+    // Student email if they have one
+    if (student?.email) {
+      emailQueue.push({
+        emailData: {
+          toAddress: student.email,
+          fromAddress: teacherEmail,
+          subject: `Chromebook Check Notification - ${student.name}`,
+          body: `
+<p>Dear ${student.name},</p>
+<p>A chromebook check has been submitted for you by ${teacherName}.</p>
+<p><strong>Issue Details:</strong> ${issueDetails}</p>
+          `,
+        },
+        studentName: student.name,
+      });
+    }
+
+    // Parent emails if they have them
+    const parentsWithEmail = student?.parent?.filter((parent) => parent.email) || [];
+    for (const parent of parentsWithEmail) {
+      emailQueue.push({
+        emailData: {
+          toAddress: parent.email!,
+          fromAddress: teacherEmail,
+          subject: `Chromebook Check Notification - ${student.name}`,
+          body: `
+<p>Dear parents and guardians,</p>
+
+<p>Each week your child's TA teacher performs a Chromebook check for all students in the TA. This check looks at the overall condition of the Chromebook and reports it to Joyce Lantagne, our Tech Support staff member. Unfortunately, your child's Chromebook has not passed this week's check. The Chromebook will be sent to Mrs. Lantagne for evaluation. If she can repair the Chromebook in house, it will be returned to your child once repairs are completed. If the repairs cannot be completed in house, you will receive a letter with information about repair fees and options for repayment or after school community service.</p>
+
+<p>Please encourage your student to care for their Chromebook for the remainder of the school year to avoid further hassle, fees, or potential loss of privilege.</p>
+
+<p>Remember these 10 key Chromebook guidelines:</p>
+<ul>
+<li>Keep the Chromebook free of stickers.</li>
+<li>Make sure there's never anything between the screen and the keyboard - including paper!</li>
+<li>Keep your Chromebook clean - cleaning spray and cloths can be found in all TA Classrooms.</li>
+<li>Make sure the Chromebook is put away and plugged in in the Chromebook cart at the end of each day.</li>
+<li>Remember that these are school-issued devices, not personal devices. School-issued devices are subject to monitoring through GoGuardian.</li>
+<li>Keep the lid of your Chromebook closed when not in use.</li>
+<li>Keep your passwords secured and private! Never share your passwords!</li>
+<li>Fully shut down your Chromebook at least once a day.</li>
+<li>Remember to only use the Chromebook assigned to you - don't let anyone else use your Chromebook either!</li>
+<li>Chromebook use is a privilege, so please use them responsibly.</li>
+</ul>
+
+<p>Thank you for continuing to encourage your child to be a positive member of our falcon community.</p>
+
+<p>The PBIS Team<br>
+"Go the distance; dare to explore"</p>
+          `,
+        },
+        studentName: student.name,
+      });
+    }
+  }
+
+  totalEmails = emailQueue.length;
+  let emailsSent = 0;
+
+  // Send all emails in sequence with proper progress tracking
+  for (const { emailData } of emailQueue) {
+    try {
+      await sendEmail({ emailData });
+      emailsSent++;
+      onProgress?.({ sent: emailsSent, total: totalEmails });
+      // Small delay between emails to avoid overwhelming the email service
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      // Continue sending other emails even if one fails
+    }
+  }
+}
+
 export async function sendChromebookCheckEmails({
   student,
   teacherName,
@@ -51,7 +158,6 @@ export async function sendChromebookCheckEmails({
   const parentEmailsCount =
     student?.parent?.filter((parent) => parent.email).length || 0;
   const totalEmails = staffEmailsCount + studentEmailCount + parentEmailsCount;
-
   let emailsSent = 0;
 
   // Send email to staff

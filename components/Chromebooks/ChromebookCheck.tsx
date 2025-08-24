@@ -5,12 +5,13 @@ import { useUser } from '@/components/User';
 import { CHROMEBOOK_CHECK_MIN_DAYS } from '@/config';
 import {
   sendChromebookCheckEmails,
+  sendBulkChromebookEmails,
   type Student as EmailStudent,
 } from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 
@@ -96,12 +97,12 @@ interface ChromebookCheck {
 interface Student {
   id: string;
   name: string;
-  email: string;
-  parent?: {
+  email?: string;
+  parent?: Array<{
     id: string;
     name: string;
-    email: string;
-  };
+    email?: string;
+  }>;
   chromebookCheck?: ChromebookCheck[];
 }
 
@@ -118,7 +119,7 @@ const convertToEmailStudent = (student: Student): EmailStudent => ({
   id: student.id,
   name: student.name,
   email: student.email,
-  parent: student.parent ? [student.parent] : undefined,
+  parent: student.parent,
 });
 
 // Calculate time since last chromebook check
@@ -168,11 +169,13 @@ const isStudentDisabled = (student: Student): boolean => {
 
 interface MultiStudentCheckFormProps {
   students: Student[];
+  queryId: string;
   onComplete: () => void;
 }
 
 function MultiStudentCheckForm({
   students,
+  queryId,
   onComplete,
 }: MultiStudentCheckFormProps) {
   const me = useUser() as User;
@@ -186,6 +189,17 @@ function MultiStudentCheckForm({
   );
   const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   const { sendEmail } = useSendEmail();
+  const emailProgressRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to email progress when it becomes visible
+  useEffect(() => {
+    if (isSendingEmails && emailProgressRef.current) {
+      emailProgressRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }, [isSendingEmails]);
 
   const updateStudentData = (
     studentId: string,
@@ -264,7 +278,7 @@ function MultiStudentCheckForm({
       }
 
       toast.success(`Chromebook check submitted for ${student.name}`);
-      queryClient.refetchQueries();
+      await queryClient.refetchQueries([`TAChromebookAssignments-${queryId}`]);
 
       // Clear the student's data after successful submission
       setStudentData((prev) => {
@@ -286,6 +300,9 @@ function MultiStudentCheckForm({
     let successCount = 0;
     let failCount = 0;
     let skippedCount = 0;
+
+    // Collect all students that need emails sent
+    const studentsNeedingEmails: Array<{ student: Student; issueDetails: string }> = [];
 
     for (const student of students) {
       // Skip disabled students (recently checked)
@@ -328,27 +345,12 @@ function MultiStudentCheckForm({
           await createCard({ teacher: me?.id, student: student?.id });
         }
 
+        // Collect students that need emails (issues)
         if (me?.id && existing.message !== 'Everything good') {
-          setIsSendingEmails(true);
-          setEmailProgress({ sent: 0, total: 0 });
-
-          try {
-            await sendChromebookCheckEmails({
-              student: convertToEmailStudent(student),
-              teacherName: me.name,
-              teacherEmail: me.email,
-              issueDetails: existing.customMessage,
-              sendEmail,
-              onProgress: setEmailProgress,
-            });
-          } finally {
-            setIsSendingEmails(false);
-            setEmailProgress({ sent: 0, total: 0 });
-            // Auto-close the form after emails are sent
-            setTimeout(() => {
-              onComplete();
-            }, 1000);
-          }
+          studentsNeedingEmails.push({
+            student: convertToEmailStudent(student),
+            issueDetails: existing.customMessage,
+          });
         }
 
         successCount += 1;
@@ -366,7 +368,29 @@ function MultiStudentCheckForm({
       }
     }
 
-    await queryClient.refetchQueries();
+    // Now send all emails in bulk with proper progress tracking
+    if (studentsNeedingEmails.length > 0) {
+      setIsSendingEmails(true);
+      
+      try {
+        await sendBulkChromebookEmails(
+          studentsNeedingEmails,
+          me.name,
+          me.email,
+          sendEmail,
+          setEmailProgress
+        );
+      } finally {
+        setIsSendingEmails(false);
+        setEmailProgress({ sent: 0, total: 0 });
+        // Auto-close the form after emails are sent
+        setTimeout(() => {
+          onComplete();
+        }, 1000);
+      }
+    }
+
+    await queryClient.refetchQueries([`TAChromebookAssignments-${queryId}`]);
     if (successCount) {
       toast.success(`Submitted ${successCount} check(s)`);
     }
@@ -519,7 +543,10 @@ function MultiStudentCheckForm({
       </div>
 
       {isSendingEmails && (
-        <div className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg">
+        <div 
+          ref={emailProgressRef}
+          className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg"
+        >
           <div className="text-white text-center mb-2">
             Sending emails... {emailProgress.sent} / {emailProgress.total}{' '}
             emails sent
@@ -576,14 +603,21 @@ function MultiStudentCheckForm({
   );
 }
 
-export default function ChromebookCheck() {
+interface ChromebookCheckProps {
+  teacherId?: string;
+}
+
+export default function ChromebookCheck({ teacherId }: ChromebookCheckProps = {}) {
   const me = useUser() as User;
   const [showForm, setShowForm] = useState(false);
+  
+  // Use teacherId if provided, otherwise use current user's id
+  const queryId = teacherId || me?.id;
   const { data: taTeacher } = useGQLQuery(
-    `TAChromebookAssignments-${me?.id}`,
+    `TAChromebookAssignments-${queryId}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
-    { id: me?.id },
-    { enabled: !!me?.id },
+    { id: queryId },
+    { enabled: !!queryId },
   );
 
   const students = taTeacher?.user?.taStudents || [];
@@ -611,6 +645,7 @@ export default function ChromebookCheck() {
         <DialogContent maxHeight="max-h-[50vh]" className="p-3">
           <MultiStudentCheckForm
             students={students}
+            queryId={queryId}
             onComplete={handleFormComplete}
           />
         </DialogContent>

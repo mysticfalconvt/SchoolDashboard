@@ -285,13 +285,13 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
     () =>
       data?.taTeacher?.taStudents
         ?.map((student: TaStudent) => {
-          const existingCheck = existingChecks?.users?.filter(
+          const existingCheck = existingChecks?.user?.taStudents?.find(
             (check: any) => check.id === student.id,
           );
           return {
             ...student,
             ChromebookChecks: existingCheck
-              ? existingCheck[0].chromebookCheck
+              ? existingCheck.chromebookCheck
               : [],
           };
         })
@@ -326,7 +326,7 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
           {isAllowedPbisCardCounting && (
             <div className="flex items-center gap-4 mb-6">
               <CountPhysicalCards taStudents={students} refetch={refetch} />
-              <ChromebookCheck />
+              <ChromebookCheck teacherId={query.id} />
             </div>
           )}
 
