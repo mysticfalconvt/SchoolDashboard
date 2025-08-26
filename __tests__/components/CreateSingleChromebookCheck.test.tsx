@@ -102,16 +102,16 @@ describe('CreateSingleChromebookCheck', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the Single Chromebook Check button', () => {
+  it('should render the Chromebook Check button', () => {
     render(<CreateSingleChromebookCheck />);
-    expect(screen.getByText('Single Chromebook Check')).toBeInTheDocument();
+    expect(screen.getByText('Chromebook Check')).toBeInTheDocument();
   });
 
   it('should open the form when button is clicked', async () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     expect(screen.getAllByText('Create Chromebook Check')).toHaveLength(2); // Heading and button
@@ -122,7 +122,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -193,7 +193,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -224,7 +224,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -263,7 +263,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -288,7 +288,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -337,7 +337,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -389,7 +389,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -439,7 +439,7 @@ describe('CreateSingleChromebookCheck', () => {
 
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -474,7 +474,7 @@ describe('CreateSingleChromebookCheck', () => {
     const user = userEvent.setup();
     render(<CreateSingleChromebookCheck />);
 
-    const button = screen.getByText('Single Chromebook Check');
+    const button = screen.getByText('Chromebook Check');
     await user.click(button);
 
     // Wait for student to be selected
@@ -489,6 +489,6 @@ describe('CreateSingleChromebookCheck', () => {
     expect(
       screen.queryByText('Create Chromebook Check'),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Single Chromebook Check')).toBeInTheDocument();
+    expect(screen.getByText('Chromebook Check')).toBeInTheDocument();
   });
 });
