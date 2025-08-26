@@ -70,13 +70,13 @@ export default function CreateSingleChromebookCheck() {
   return (
     <div>
       <GradientButton onClick={() => setShowForm(true)}>
-        Single Chromebook Check
+        Chromebook Check
       </GradientButton>
 
       <Dialog
         isOpen={showForm}
         onClose={() => setShowForm(false)}
-        title="Single Chromebook Check"
+        title="Chromebook Check"
         variant="modal"
         size="lg"
         maxHeight="80vh"
@@ -84,9 +84,11 @@ export default function CreateSingleChromebookCheck() {
         <DialogContent maxHeight="max-h-[70vh]" className="p-4">
           <div className="space-y-4">
             <div className="mb-2">
-              <h2 className="text-lg font-bold text-white mb-1">Create Chromebook Check</h2>
+              <h2 className="text-lg font-bold text-white mb-1">
+                Create Chromebook Check
+              </h2>
               <p className="text-white/80 text-sm">
-                Submit a single chromebook check for any student
+                Submit a chromebook check for any student
               </p>
             </div>
             <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
@@ -117,7 +119,9 @@ export default function CreateSingleChromebookCheck() {
                         checked={status === 'Everything good'}
                         onChange={(e) => {
                           const isGood = e.target.checked;
-                          setStatus(isGood ? 'Everything good' : 'Something wrong');
+                          setStatus(
+                            isGood ? 'Everything good' : 'Something wrong',
+                          );
                           if (isGood) setMessage('');
                         }}
                       />
@@ -194,74 +198,76 @@ export default function CreateSingleChromebookCheck() {
                       : 'linear-gradient(135deg, #760D08, #38B6FF)',
                 }}
                 onClick={async () => {
-              // Persist 'Everything good' for green checks, otherwise only the custom message
-              const messageToSend =
-                status === 'Everything good' ? 'Everything good' : message;
+                  // Persist 'Everything good' for green checks, otherwise only the custom message
+                  const messageToSend =
+                    status === 'Everything good' ? 'Everything good' : message;
 
-              await createChromebookCheck({
-                chromebookCheck: {
-                  student: { connect: { id: studentFor?.userId } },
-                  message: messageToSend,
-                },
-              });
+                  await createChromebookCheck({
+                    chromebookCheck: {
+                      student: { connect: { id: studentFor?.userId } },
+                      message: messageToSend,
+                    },
+                  });
 
-              // check if messageToSend starts with something in goodCheckMessages
-              const isGoodCheck = goodCheckMessages.some((goodMessage) =>
-                messageToSend.startsWith(goodMessage),
-              );
-              if (isGoodCheck) {
-                await createCard({
-                  teacher: me?.id,
-                  student: studentFor?.userId,
-                });
-                await createCard({
-                  teacher: me?.id,
-                  student: studentFor?.userId,
-                });
-                await createCard({
-                  teacher: me?.id,
-                  student: studentFor?.userId,
-                });
-              }
-
-              if (me?.id && !isGoodCheck) {
-                const student = studentDetails?.user as StudentDetails;
-
-                if (student) {
-                  setIsSendingEmails(true);
-                  setEmailProgress({ sent: 0, total: 0 });
-
-                  try {
-                    await sendChromebookCheckEmails({
-                      student,
-                      teacherName: me.name,
-                      teacherEmail: me.email,
-                      issueDetails: messageToSend,
-                      sendEmail,
-                      onProgress: setEmailProgress,
+                  // check if messageToSend starts with something in goodCheckMessages
+                  const isGoodCheck = goodCheckMessages.some((goodMessage) =>
+                    messageToSend.startsWith(goodMessage),
+                  );
+                  if (isGoodCheck) {
+                    await createCard({
+                      teacher: me?.id,
+                      student: studentFor?.userId,
                     });
-                  } finally {
-                    setIsSendingEmails(false);
-                    setEmailProgress({ sent: 0, total: 0 });
-                    // Auto-close the form after emails are sent
-                    setTimeout(() => {
+                    await createCard({
+                      teacher: me?.id,
+                      student: studentFor?.userId,
+                    });
+                    await createCard({
+                      teacher: me?.id,
+                      student: studentFor?.userId,
+                    });
+                  }
+
+                  if (me?.id && !isGoodCheck) {
+                    const student = studentDetails?.user as StudentDetails;
+
+                    if (student) {
+                      setIsSendingEmails(true);
+                      setEmailProgress({ sent: 0, total: 0 });
+
+                      try {
+                        await sendChromebookCheckEmails({
+                          student,
+                          teacherName: me.name,
+                          teacherEmail: me.email,
+                          issueDetails: messageToSend,
+                          sendEmail,
+                          onProgress: setEmailProgress,
+                        });
+                      } finally {
+                        setIsSendingEmails(false);
+                        setEmailProgress({ sent: 0, total: 0 });
+                        // Auto-close the form after emails are sent
+                        setTimeout(() => {
+                          setMessage('');
+                          setShowForm(false);
+                        }, 1000);
+                      }
+                    } else {
                       setMessage('');
                       setShowForm(false);
-                    }, 1000);
+                    }
+                  } else {
+                    setMessage('');
+                    setShowForm(false);
                   }
-                } else {
-                  setMessage('');
-                  setShowForm(false);
-                }
-              } else {
-                  setMessage('');
-                  setShowForm(false);
-                }
-              }}
+                }}
               >
-                {isSendingEmails ? 'Sending Emails...' : 'Create Chromebook Check'}
+                {isSendingEmails
+                  ? 'Sending Emails...'
+                  : 'Create Chromebook Check'}
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => setShowForm(false)}

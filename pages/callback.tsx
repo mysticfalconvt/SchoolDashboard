@@ -10,7 +10,7 @@ import NewCallback from '../components/Callback/NewCallbackButton';
 import NewCallbackMultiStudent from '../components/Callback/newCallbackMultiStudent';
 import DisplayError from '../components/ErrorMessage';
 import Loading from '../components/Loading';
-import { SmallGradientButton } from '../components/styles/Button';
+import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -100,20 +100,20 @@ const Callback: NextPage = () => {
           <div className="flex flex-row items-center gap-2">
             <NewCallback refetch={refetch} />
             <NewCallbackMultiStudent refetch={refetch} />
-            <SmallGradientButton>
-              <Link href="/mystudentscallback">My class students callback</Link>
-            </SmallGradientButton>
+            <GradientButton>
+              <Link href="/mystudentscallback" className="text-white">My class students callback</Link>
+            </GradientButton>
           </div>
         </div>
         <div className="flex flex-row flex-wrap items-center gap-6 justify-start w-full">
-          <label className="flex items-center gap-2 font-bold text-white">
+          <label className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
             Show Completed
             <Toggle
               checked={showCompleted}
               onChange={() => setShowCompleted(!showCompleted)}
             />
           </label>
-          <label className="flex items-center gap-2 font-bold text-white">
+          <label className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
             Show As Table
             <Toggle
               checked={showTable}
