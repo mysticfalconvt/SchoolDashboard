@@ -437,7 +437,7 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
       TAs,
       cardCounts: data?.cardCounts || [],
     },
-    revalidate: false,
+    revalidate: 5 * 60,
   };
 };
 

@@ -501,7 +501,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
         allUsersForSearch: allUsersForSearch ?? null,
         initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
       }, // will be passed to the page component as props
-      revalidate: 60 * 60,
+      revalidate: 5 * 60,
     };
   } catch (error) {
     console.warn('Error during static generation for index page:', error);
@@ -513,7 +513,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
         allUsersForSearch: null,
         initialGoogleCalendarEvents: { events: [] },
       },
-      revalidate: 60 * 60,
+      revalidate: 5 * 60,
     };
   }
 };

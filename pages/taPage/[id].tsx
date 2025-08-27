@@ -395,7 +395,7 @@ export const getStaticProps: GetStaticProps<TaPageProps> = async ({
       data,
       query: { id: params?.id as string },
     },
-    revalidate: 60 * 60 * 1, // 1 hours (in seconds)
+    revalidate: 30 * 60, // 30 minutes (in seconds)
   };
 };
 

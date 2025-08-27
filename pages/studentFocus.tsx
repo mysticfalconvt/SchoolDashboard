@@ -182,7 +182,7 @@ export const getStaticProps: GetStaticProps<StudentFocusPageProps> = async (
     props: {
       initialStudentFoci,
     }, // will be passed to the page component as props
-    revalidate: false,
+    revalidate: 30 * 60, // 30 minutes (in seconds)
   };
 };
 
