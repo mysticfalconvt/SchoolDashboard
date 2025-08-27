@@ -1,8 +1,12 @@
-// This is client side config only - don't put anything in here that shouldn't be public!
-export const endpoint: string =
-  process.env.ENDPOINT || `http://localhost:3000/api/graphql`;
-export const prodEndpoint: string =
-  process.env.ENDPOINT || `https://api.ncujhs.tech/api/graphql`;
+// Client-side endpoint (determined once based on environment)
+export const endpoint: string = process.env.NODE_ENV === 'development' 
+  ? (process.env.NEXT_PUBLIC_ENDPOINT || `http://localhost:3000/api/graphql`)
+  : (process.env.NEXT_PUBLIC_ENDPOINT || `https://api.ncujhs.tech/api/graphql`);
+
+// Server-side endpoint (determined once based on environment, can access all env vars)
+export const backendEndpoint: string = process.env.NODE_ENV === 'development'
+  ? (process.env.LOCAL_BACKEND_ENDPOINT || process.env.ENDPOINT || `http://localhost:3000/api/graphql`)
+  : (process.env.LOCAL_BACKEND_ENDPOINT || process.env.ENDPOINT || `https://api.ncujhs.tech/api/graphql`);
 export const perPage: number = 4;
 export const callbackDisabled: boolean =
   process.env.NEXT_PUBLIC_CALLBACK_DISABLED?.toLowerCase() === 'true' || false;

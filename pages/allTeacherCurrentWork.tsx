@@ -3,7 +3,7 @@ import { GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
 import Table from '../components/Table';
-import { endpoint, NUMBER_OF_BLOCKS, prodEndpoint } from '../config';
+import { NUMBER_OF_BLOCKS, backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -266,7 +266,7 @@ export const getStaticProps: GetStaticProps<
   // console.log(context);
   // fetch PBIS Page data from the server
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

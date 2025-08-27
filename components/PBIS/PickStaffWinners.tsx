@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import React, { useMemo, useState } from 'react';
-import { endpoint, prodEndpoint } from '../../config';
+import { endpoint } from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import useForm from '../../lib/useForm';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -78,7 +78,7 @@ export default function PickStaffWinners() {
 
   const addStaffWinner = async (collectionId: string, staffId: string) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',

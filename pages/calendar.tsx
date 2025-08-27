@@ -3,7 +3,7 @@ import { GetStaticProps, NextPage } from 'next';
 import { useState } from 'react';
 import Calendars, { GET_CALENDARS } from '../components/calendars/Calendars';
 import { LeftEdgeButton } from '../components/styles/Button';
-import { endpoint, prodEndpoint } from '../config';
+import { backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 
 interface CalendarEvent {
@@ -245,7 +245,7 @@ export const getStaticProps: GetStaticProps<CalendarPageProps> = async (
   try {
     // fetch PBIS Page data from the server
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      backendEndpoint,
       {
         headers: {
           authorization: `test auth for keystone`,

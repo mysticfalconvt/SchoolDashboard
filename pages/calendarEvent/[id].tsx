@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import { GetServerSideProps, NextPage } from 'next';
 import { useUser } from '../../components/User';
 import EditCalendarEvent from '../../components/calendars/EditCalendar';
-import { endpoint, prodEndpoint } from '../../config';
+import { endpoint } from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import isAllowed from '../../lib/isAllowed';
 
@@ -99,7 +99,7 @@ export const getServerSideProps: GetServerSideProps<
   CalendarEventPageProps
 > = async (context) => {
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    endpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

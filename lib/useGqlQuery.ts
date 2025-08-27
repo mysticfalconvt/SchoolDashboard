@@ -1,11 +1,11 @@
 import type { DocumentNode } from 'graphql';
 import { useQuery, UseQueryOptions } from 'react-query';
-import { endpoint, prodEndpoint } from '../config';
+import { endpoint } from '../config';
 import { GraphQLClient } from './graphqlClient';
 
 // Create a singleton GraphQL client to prevent recreating it on every hook call
 const graphQLClient = new GraphQLClient(
-  process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+  endpoint,
   {
     headers: {
       credentials: 'include',
@@ -23,7 +23,7 @@ export const useGQLQuery = <TData = any>(
   const fetchData = async (): Promise<TData> => {
     // Create a new client instance for each request to ensure fresh token
     const client = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -43,7 +43,7 @@ export const useGQLQuery = <TData = any>(
 export const useAsyncGQLQuery = <TData = any>(query: DocumentNode) => {
   const fetchData = async (variables?: Record<string, any>): Promise<TData> => {
     const client = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',

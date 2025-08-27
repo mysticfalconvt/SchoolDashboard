@@ -25,7 +25,7 @@ import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
 import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
-import { callbackDisabled, endpoint, prodEndpoint } from '../config';
+import { callbackDisabled, backendEndpoint } from '../config';
 import getDisplayName from '../lib/displayName';
 import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
@@ -429,7 +429,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
     const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      backendEndpoint,
       {
         headers: {
           authorization: `test auth for keystone`,
@@ -501,7 +501,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
         allUsersForSearch: allUsersForSearch ?? null,
         initialGoogleCalendarEvents: { events: initialGoogleCalendarEvents },
       }, // will be passed to the page component as props
-      revalidate: 60 * 60,
+      revalidate: 5 * 60,
     };
   } catch (error) {
     console.warn('Error during static generation for index page:', error);
@@ -513,7 +513,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
         allUsersForSearch: null,
         initialGoogleCalendarEvents: { events: [] },
       },
-      revalidate: 60 * 60,
+      revalidate: 5 * 60,
     };
   }
 };
