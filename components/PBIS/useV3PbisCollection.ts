@@ -3,7 +3,6 @@ import { useState } from 'react';
 import {
   endpoint,
   PBIS_STUDENT_RANDOM_DRAWING_WINNERS,
-  prodEndpoint,
 } from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -219,7 +218,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
   // Direct fetch functions for mutations
   const createPbisCollectionDate = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -232,7 +231,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
   const updateTA = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -248,7 +247,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
   const updateTAlevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -261,7 +260,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
   const updateStudentLevelInCollection = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -274,7 +273,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
   const updateStudentIndividualLevel = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',
@@ -290,7 +289,7 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
 
   const updateStudentRandomDrawingWinner = async (variables: any) => {
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',

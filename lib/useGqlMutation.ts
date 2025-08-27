@@ -1,6 +1,6 @@
 import type { DocumentNode } from 'graphql';
 import { useMutation, UseMutationOptions, useQueryClient } from 'react-query';
-import { endpoint, prodEndpoint } from '../config';
+import { endpoint } from '../config';
 import { GraphQLClient } from './graphqlClient';
 
 export const useGqlMutation = <TData = any, TVariables = any>(
@@ -12,7 +12,7 @@ export const useGqlMutation = <TData = any, TVariables = any>(
   const mutateFn = async (variables?: TVariables): Promise<TData> => {
     // Create a new client instance for each request to ensure fresh token
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      endpoint,
       {
         headers: {
           credentials: 'include',

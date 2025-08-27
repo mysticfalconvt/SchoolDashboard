@@ -6,7 +6,7 @@ import DisplayError from '../components/ErrorMessage';
 import GradientButton from '../components/styles/Button';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { callbackDisabled, endpoint, prodEndpoint } from '../config';
+import { callbackDisabled, backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -459,7 +459,7 @@ export const getStaticProps: GetStaticProps<UsersPageProps> = async (
   // console.log(context);
   // fetch PBIS Page data from the server
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

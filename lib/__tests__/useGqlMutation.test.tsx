@@ -12,10 +12,13 @@ jest.mock('../graphqlClient', () => ({
   })),
 }));
 
-// Mock config
+// Mock config to match our simplified structure
 jest.mock('../../config', () => ({
-  endpoint: 'http://localhost:3000/api/graphql',
-  prodEndpoint: 'https://api.example.com/graphql',
+  get endpoint() {
+    return process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000/api/graphql'
+      : 'https://api.example.com/graphql';
+  },
 }));
 
 const MockedGraphQLClient = GraphQLClient as jest.MockedClass<

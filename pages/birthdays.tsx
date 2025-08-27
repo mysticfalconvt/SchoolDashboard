@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import type { GetStaticProps, NextPage } from 'next';
 import BirthdaysTable from '../components/Birthdays/BirthdaysTable';
 import { useUser } from '../components/User';
-import { endpoint, prodEndpoint } from '../config';
+import { backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -74,7 +74,7 @@ export const getStaticProps: GetStaticProps<BirthdayPageProps> = async (
   // console.log(context);
 
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

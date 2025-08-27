@@ -9,7 +9,7 @@ import DisciplineTable from '../components/discipline/DisciplineTable';
 import ShowCellphoneViolations from '../components/discipline/ShowCellphoneViolations';
 import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
-import { endpoint, prodEndpoint } from '../config';
+import { backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -215,7 +215,7 @@ export const getStaticProps: GetStaticProps<DisciplinePageProps> = async (
   // console.log(context);
   // fetch PBIS Page data from the server
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

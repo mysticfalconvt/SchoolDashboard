@@ -10,7 +10,7 @@ import Loading from '../../components/Loading';
 import CountPhysicalCards from '../../components/PBIS/CountPhysicalCards';
 import { useUser } from '../../components/User';
 import ViewTaStudentTable from '../../components/users/ViewTaStudentTable';
-import { callbackDisabled, endpoint, prodEndpoint } from '../../config';
+import { callbackDisabled, backendEndpoint } from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 
@@ -342,7 +342,7 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,
@@ -370,7 +370,7 @@ export const getStaticProps: GetStaticProps<TaPageProps> = async ({
   params,
 }) => {
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

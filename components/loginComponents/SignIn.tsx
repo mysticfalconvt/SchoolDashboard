@@ -1,6 +1,6 @@
 import { useGqlMutation } from '@/lib/useGqlMutation';
 // @ts-ignore
-import { endpoint, prodEndpoint } from '@/components/../config';
+import { endpoint } from '@/components/../config';
 import Error from '@/components/ErrorMessage';
 import Form from '@/components/styles/Form';
 import { GraphQLClient } from '@/lib/graphqlClient';
@@ -121,10 +121,7 @@ const SignIn: React.FC = () => {
 // const endpoint = "http://localhost:3000/api/graphql";
 
 async function signinNew({ email, password }: FormInputs) {
-  const endppointToUse =
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint;
-
-  const client = new GraphQLClient(endppointToUse);
+  const client = new GraphQLClient(endpoint);
   const res = await client.request(SIGNIN_MUTATION, {
     email: email.toLowerCase(),
     password,

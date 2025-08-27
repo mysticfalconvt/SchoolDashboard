@@ -25,7 +25,7 @@ import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
 import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
-import { callbackDisabled, endpoint, prodEndpoint } from '../config';
+import { callbackDisabled, backendEndpoint } from '../config';
 import getDisplayName from '../lib/displayName';
 import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
@@ -429,7 +429,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
     const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
     const graphQLClient = new GraphQLClient(
-      process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+      backendEndpoint,
       {
         headers: {
           authorization: `test auth for keystone`,

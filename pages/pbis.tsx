@@ -7,7 +7,7 @@ import PbisCardChart from '../components/PBIS/PbisCardChart';
 import PbisFalcon from '../components/PBIS/PbisFalcon';
 import { SmallGradientButton } from '../components/styles/Button';
 import { useUser } from '../components/User';
-import { ADMIN_ID, endpoint, prodEndpoint } from '../config';
+import { ADMIN_ID, backendEndpoint } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -341,7 +341,7 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
 ) => {
   // fetch PBIS Page data from the server
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,

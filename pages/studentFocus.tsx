@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import NewStudentFocusButton from '../components/studentFocus/NewStudentFocusButton';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { endpoint, prodEndpoint } from '../config';
+import { backendEndpoint } from '../config';
 import getDisplayName from '../lib/displayName';
 import { GraphQLClient } from '../lib/graphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -166,7 +166,7 @@ export const getStaticProps: GetStaticProps<StudentFocusPageProps> = async (
   // console.log(context);
   // fetch PBIS Page data from the server
   const graphQLClient = new GraphQLClient(
-    process.env.NODE_ENV === 'development' ? endpoint : prodEndpoint,
+    backendEndpoint,
     {
       headers: {
         authorization: `test auth for keystone`,
