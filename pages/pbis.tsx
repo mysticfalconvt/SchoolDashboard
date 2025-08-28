@@ -7,8 +7,8 @@ import PbisCardChart from '../components/PBIS/PbisCardChart';
 import PbisFalcon from '../components/PBIS/PbisFalcon';
 import { SmallGradientButton } from '../components/styles/Button';
 import { useUser } from '../components/User';
-import { ADMIN_ID, backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { ADMIN_ID } from '../config';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -340,14 +340,6 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
   context,
 ) => {
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchData = async (): Promise<{
     totalSchoolCards: number;
     chromebookCards: number;
@@ -375,7 +367,7 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
       }
     `;
 
-    const lastCollectionData = (await graphQLClient.request(
+    const lastCollectionData = (await smartGraphqlClient.request(
       lastCollectionQuery,
     )) as {
       lastCollection: Array<{ id: string; collectionDate: string }>;
@@ -385,7 +377,7 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
       new Date(0).toISOString();
 
     // Then get the main data with the last collection date
-    return graphQLClient.request(PBIS_PAGE_STATIC_QUERY, {
+    return smartGraphqlClient.request(PBIS_PAGE_STATIC_QUERY, {
       lastCollectionDate,
     });
   };

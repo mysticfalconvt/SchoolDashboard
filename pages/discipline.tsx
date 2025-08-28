@@ -9,8 +9,7 @@ import DisciplineTable from '../components/discipline/DisciplineTable';
 import ShowCellphoneViolations from '../components/discipline/ShowCellphoneViolations';
 import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -214,18 +213,10 @@ export const getStaticProps: GetStaticProps<DisciplinePageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchDisciplineData = async (): Promise<{
     disciplines: Discipline[];
     cellPhoneViolations: CellPhoneViolation[];
-  }> => graphQLClient.request(DISCIPLINE_DATA);
+  }> => smartGraphqlClient.request(DISCIPLINE_DATA);
 
   const initialDisciplineData = await fetchDisciplineData();
 

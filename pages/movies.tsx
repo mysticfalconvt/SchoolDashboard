@@ -5,8 +5,7 @@ import Form from '../components/styles/Form';
 import { useUser } from '../components/User';
 import NewVideo from '../components/video/newVideoButton';
 import SingleVideo from '../components/video/singleVideo';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 
 const GET_ALL_VIDEOS_QUERY = gql`
@@ -88,16 +87,8 @@ const MoviesPage: NextPage<MoviesPageProps> = ({ movieList }) => {
 export const getStaticProps: GetStaticProps<MoviesPageProps> = async () => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchAllVideos = async (): Promise<{ videos: Video[] }> =>
-    graphQLClient.request(GET_ALL_VIDEOS_QUERY);
+    smartGraphqlClient.request(GET_ALL_VIDEOS_QUERY);
 
   const movieList = await fetchAllVideos();
 

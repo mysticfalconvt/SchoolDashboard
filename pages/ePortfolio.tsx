@@ -6,8 +6,7 @@ import DisplayError from '../components/ErrorMessage';
 import Loading from '../components/Loading';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -168,16 +167,8 @@ export const getStaticProps: GetStaticProps<EPortfolioPageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchAllLinks = async (): Promise<{ links: Link[] }> =>
-    graphQLClient.request(GET_ALL_PORTFOLIO_LINKS_QUERY);
+    smartGraphqlClient.request(GET_ALL_PORTFOLIO_LINKS_QUERY);
 
   const rawLinksList = await fetchAllLinks();
 

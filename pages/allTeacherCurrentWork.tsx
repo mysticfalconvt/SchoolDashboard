@@ -3,8 +3,8 @@ import { GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
 import Table from '../components/Table';
-import { NUMBER_OF_BLOCKS, backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { NUMBER_OF_BLOCKS } from '../config';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const ALL_TEACHERS_QUERY = gql`
@@ -265,16 +265,8 @@ export const getStaticProps: GetStaticProps<
 > = async (context) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchTeacherWork = async (): Promise<{ users: TeacherData[] }> =>
-    graphQLClient.request(ALL_TEACHERS_QUERY);
+    smartGraphqlClient.request(ALL_TEACHERS_QUERY);
 
   const initialWorkData = await fetchTeacherWork();
   // console.log(initialWorkData.users);

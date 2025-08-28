@@ -4,9 +4,8 @@ import { useMemo } from 'react';
 import NewStudentFocusButton from '../components/studentFocus/NewStudentFocusButton';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { backendEndpoint } from '../config';
 import getDisplayName from '../lib/displayName';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const ALL_STUDENT_FOCUS_QUERY = gql`
@@ -165,16 +164,8 @@ export const getStaticProps: GetStaticProps<StudentFocusPageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchStudentFoci = async (): Promise<{ studentFoci: StudentFocus[] }> =>
-    graphQLClient.request(ALL_STUDENT_FOCUS_QUERY);
+    smartGraphqlClient.request(ALL_STUDENT_FOCUS_QUERY);
 
   const initialStudentFoci = await fetchStudentFoci();
 

@@ -29,6 +29,12 @@ export class SmartGraphqlClient {
     try {
       console.log(`📡 Attempting GraphQL request to primary endpoint: ${this.primaryEndpoint}`);
       
+      // Add a quick connectivity test first
+      if (this.primaryEndpoint.includes('10.0.0.23')) {
+        console.log(`🔍 Testing connectivity to local endpoint...`);
+        await this.testConnectivity(this.primaryEndpoint);
+      }
+      
       const startTime = Date.now();
       const primaryClient = new GraphQLClient(this.primaryEndpoint, {
         headers: this.options.headers,
@@ -55,10 +61,15 @@ export class SmartGraphqlClient {
           status: primaryError.response.status,
           statusText: primaryError.response.statusText,
           headers: primaryError.response.headers,
+          contentType: primaryError.response.headers?.['content-type'],
           data: typeof primaryError.response.data === 'string' 
-            ? primaryError.response.data.substring(0, 200) + '...' 
+            ? primaryError.response.data.substring(0, 500) + '...' 
             : primaryError.response.data
         } : 'No response object',
+        // If it's a network error, show more details
+        code: primaryError.code,
+        syscall: primaryError.syscall,
+        errno: primaryError.errno,
       });
 
       // If we have a different fallback endpoint, try it
@@ -114,6 +125,56 @@ export class SmartGraphqlClient {
         )
       ),
     ]);
+  }
+
+  private async testConnectivity(endpoint: string): Promise<void> {
+    try {
+      // Try a simple HTTP GET to see if the server is responding
+      const baseUrl = endpoint.replace('/api/graphql', '');
+      console.log(`🌐 Testing base connectivity to: ${baseUrl}`);
+      
+      // Use fetch with a very short timeout for connectivity test
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
+      const response = await fetch(baseUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      console.log(`✅ Base connectivity test: ${response.status} ${response.statusText}`);
+      
+      // Test the actual GraphQL endpoint
+      if (response.ok) {
+        console.log(`🔍 Testing GraphQL endpoint: ${endpoint}`);
+        try {
+          const gqlResponse = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...this.options.headers,
+            },
+            body: JSON.stringify({
+              query: '{ __typename }'
+            }),
+          });
+          
+          console.log(`📊 GraphQL endpoint response: ${gqlResponse.status} ${gqlResponse.statusText}`);
+          const responseText = await gqlResponse.text();
+          console.log(`📄 GraphQL response preview: ${responseText.substring(0, 200)}...`);
+          
+        } catch (gqlError) {
+          console.warn(`❌ GraphQL endpoint test failed:`, gqlError.message);
+        }
+      }
+      
+    } catch (connectivityError) {
+      console.warn(`❌ Basic connectivity test failed:`, {
+        message: connectivityError.message,
+        name: connectivityError.name,
+      });
+    }
   }
 }
 

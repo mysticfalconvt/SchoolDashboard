@@ -2,8 +2,7 @@ import gql from 'graphql-tag';
 import type { GetStaticProps, NextPage } from 'next';
 import BirthdaysTable from '../components/Birthdays/BirthdaysTable';
 import { useUser } from '../components/User';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const ALL_BIRTHDAYS_QUERY = gql`
@@ -73,16 +72,8 @@ export const getStaticProps: GetStaticProps<BirthdayPageProps> = async (
 ) => {
   // console.log(context);
 
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchBirthdayData = async (): Promise<{ birthdays: Birthday[] }> =>
-    graphQLClient.request(ALL_BIRTHDAYS_QUERY);
+    smartGraphqlClient.request(ALL_BIRTHDAYS_QUERY);
 
   const initialBirthdays = await fetchBirthdayData();
 

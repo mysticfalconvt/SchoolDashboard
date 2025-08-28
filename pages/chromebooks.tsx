@@ -4,8 +4,7 @@ import { useMemo } from 'react';
 import ChromebookCheck from '../components/Chromebooks/ChromebookCheck';
 import ChromebookChecksData from '../components/Chromebooks/ChromebookChecksData';
 import { useUser } from '../components/User';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -90,16 +89,8 @@ export const getStaticProps: GetStaticProps<ChromebooksPageProps> = async (
   context,
 ) => {
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchChromebookAssignments = async (): Promise<{ users: User[] }> =>
-    graphQLClient.request(GET_CHROMEBOOK_ASSIGNMENTS_QUERY);
+    smartGraphqlClient.request(GET_CHROMEBOOK_ASSIGNMENTS_QUERY);
 
   const initialChromebookAssignments = await fetchChromebookAssignments();
 

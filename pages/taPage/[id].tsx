@@ -10,8 +10,8 @@ import Loading from '../../components/Loading';
 import CountPhysicalCards from '../../components/PBIS/CountPhysicalCards';
 import { useUser } from '../../components/User';
 import ViewTaStudentTable from '../../components/users/ViewTaStudentTable';
-import { callbackDisabled, backendEndpoint } from '../../config';
-import { GraphQLClient } from '../../lib/graphqlClient';
+import { callbackDisabled } from '../../config';
+import { smartGraphqlClient } from '../../lib/smartGraphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 
 const TA_INFO_QUERY = gql`
@@ -341,16 +341,8 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchData = async (): Promise<{ users: any[] }> =>
-    graphQLClient.request(TA_TEACHER_LIST_QUERY);
+    smartGraphqlClient.request(TA_TEACHER_LIST_QUERY);
   const data = await fetchData();
   const usersToUse = data?.users || [];
 
@@ -369,17 +361,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<TaPageProps> = async ({
   params,
 }) => {
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchData = async () => {
     try {
-      const dataFromFetch = await graphQLClient.request(TA_INFO_QUERY, {
+      const dataFromFetch = await smartGraphqlClient.request(TA_INFO_QUERY, {
         id: params?.id,
       });
       return dataFromFetch;

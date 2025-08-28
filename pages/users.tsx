@@ -6,8 +6,8 @@ import DisplayError from '../components/ErrorMessage';
 import GradientButton from '../components/styles/Button';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { callbackDisabled, backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { callbackDisabled } from '../config';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -458,18 +458,10 @@ export const getStaticProps: GetStaticProps<UsersPageProps> = async (
 ) => {
   // console.log(context);
   // fetch PBIS Page data from the server
-  const graphQLClient = new GraphQLClient(
-    backendEndpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
-    },
-  );
   const fetchStudents = async (): Promise<{ students: Student[] }> =>
-    graphQLClient.request(GET_ALL_STUDENTS);
+    smartGraphqlClient.request(GET_ALL_STUDENTS);
   const fetchTeachers = async (): Promise<{ teachers: Teacher[] }> =>
-    graphQLClient.request(GET_ALL_TEACHERS);
+    smartGraphqlClient.request(GET_ALL_TEACHERS);
 
   const students = await fetchStudents();
   const teachers = await fetchTeachers();
