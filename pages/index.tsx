@@ -25,9 +25,9 @@ import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
 import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
-import { callbackDisabled, backendEndpoint } from '../config';
+import { callbackDisabled } from '../config';
 import getDisplayName from '../lib/displayName';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -428,14 +428,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
     const today = new Date();
     const { lastSunday, nextSaturday } = getLastAndNextSunday(today);
 
-    const graphQLClient = new GraphQLClient(
-      backendEndpoint,
-      {
-        headers: {
-          authorization: `test auth for keystone`,
-        },
-      },
-    );
+    // Use smart GraphQL client with automatic retry and fallback
+    const graphQLClient = smartGraphqlClient;
 
     // Reusable fetch with retry logic
     const fetchWithRetry = async (

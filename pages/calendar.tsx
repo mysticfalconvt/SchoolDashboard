@@ -3,8 +3,7 @@ import { GetStaticProps, NextPage } from 'next';
 import { useState } from 'react';
 import Calendars, { GET_CALENDARS } from '../components/calendars/Calendars';
 import { LeftEdgeButton } from '../components/styles/Button';
-import { backendEndpoint } from '../config';
-import { GraphQLClient } from '../lib/graphqlClient';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 
 interface CalendarEvent {
   status: string;
@@ -244,15 +243,8 @@ export const getStaticProps: GetStaticProps<CalendarPageProps> = async (
 ) => {
   try {
     // fetch PBIS Page data from the server
-    const graphQLClient = new GraphQLClient(
-      backendEndpoint,
-      {
-        headers: {
-          authorization: `test auth for keystone`,
-        },
-      },
-    );
-    const fetchAllCalendars = async () => graphQLClient.request(GET_CALENDARS);
+    // Use smart GraphQL client with automatic retry and fallback
+    const fetchAllCalendars = async () => smartGraphqlClient.request(GET_CALENDARS);
     const initialCalendarDates = await fetchAllCalendars();
     console.log('initialCalendarDates', initialCalendarDates);
     const initialGoogleCalendarEvents = await getCalendarData();
