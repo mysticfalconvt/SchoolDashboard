@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import { GetServerSideProps, NextPage } from 'next';
 import { useUser } from '../../components/User';
 import EditCalendarEvent from '../../components/calendars/EditCalendar';
-import { endpoint } from '../../config';
+import { endpoint, GRAPHQL_AUTHORIZATION } from '../../config';
 import { GraphQLClient } from '../../lib/graphqlClient';
 import isAllowed from '../../lib/isAllowed';
 
@@ -98,14 +98,11 @@ const GET_SINGLE_CALENDAR_EVENT = gql`
 export const getServerSideProps: GetServerSideProps<
   CalendarEventPageProps
 > = async (context) => {
-  const graphQLClient = new GraphQLClient(
-    endpoint,
-    {
-      headers: {
-        authorization: `test auth for keystone`,
-      },
+  const graphQLClient = new GraphQLClient(endpoint, {
+    headers: {
+      authorization: GRAPHQL_AUTHORIZATION,
     },
-  );
+  });
   const fetchThisCalendar = async (): Promise<{ calendar: CalendarEvent }> =>
     graphQLClient.request(GET_SINGLE_CALENDAR_EVENT, { id: context.query.id });
 

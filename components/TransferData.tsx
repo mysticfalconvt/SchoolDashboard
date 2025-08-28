@@ -1,5 +1,6 @@
 import { gql } from 'graphql-tag';
 import React from 'react';
+import { GRAPHQL_AUTHORIZATION } from '../config';
 import { GraphQLClient } from '../lib/graphqlClient';
 import GradientButton from './styles/Button';
 // import {users} from "../users"
@@ -172,7 +173,7 @@ const getData = async (): Promise<DisciplineItem[]> => {
     credentials: 'include' as const,
     mode: 'cors' as const,
     headers: {
-      authorization: `test auth for keystone`,
+      authorization: GRAPHQL_AUTHORIZATION,
     },
   };
 
@@ -192,7 +193,7 @@ const sendDataToTransfer = async (item: DisciplineItem): Promise<any> => {
     credentials: 'include' as const,
     mode: 'cors' as const,
     headers: {
-      authorization: `test auth for keystone`,
+      authorization: GRAPHQL_AUTHORIZATION,
     },
   };
 
@@ -354,7 +355,7 @@ const sendUserUpdate = async (user: User): Promise<any> => {
     credentials: 'include' as const,
     mode: 'cors' as const,
     headers: {
-      authorization: `test auth for keystone`,
+      authorization: GRAPHQL_AUTHORIZATION,
     },
   };
 
@@ -759,7 +760,7 @@ const sendData = async (user: User): Promise<void> => {
     credentials: 'include' as const,
     mode: 'cors' as const,
     headers: {
-      authorization: `test auth for keystone`,
+      authorization: GRAPHQL_AUTHORIZATION,
     },
   };
 
