@@ -17,6 +17,8 @@ const emailCorrections = {
     "destiny-ann.perry@ncsuvt.org": "destinyann.perry@ncsuvt.org",
     "rory.chitambar@ncsuvt.org": "gregory.chitambar@ncsuvt.org",
     "alex.cochran@ncsuvt.org": "alexander.cochran@ncsuvt.org",
+    "hailey.marie@ncsuvt.org": "hailey.ste.marie@ncsuvt.org",
+
 };
 
 // Function to validate email format
