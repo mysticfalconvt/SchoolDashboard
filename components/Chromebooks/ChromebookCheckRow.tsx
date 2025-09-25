@@ -33,6 +33,8 @@ const getColorFromMessage = (message: string): string => {
   if (message === 'Everything good') return 'green';
   if (message.startsWith('As Issued')) return 'green';
   if (message.startsWith('Same as previous week')) return 'green';
+  if (message === 'Out for Service' || message === 'Not in Cart')
+    return 'orange';
   return 'red';
 };
 
@@ -63,15 +65,21 @@ export default function ChromebookCheckRow({
         return (
           <td
             key={`check-${check.id}`}
-            className="w-20 rounded-md border border-slate-500 border-spacing-5 "
+            className="w-20 border border-slate-500 border-spacing-5 p-1"
           >
             <div
+              className="h-full p-2 rounded-md border-2 flex flex-col justify-between"
               style={{
                 borderColor: getColorFromMessage(message),
+                backgroundColor: `${getColorFromMessage(message)}10`,
               }}
-              className="text-md m-1 h-full p-1 rounded-md border-2"
             >
-              {message} - {date}
+              <div className="text-md font-medium leading-tight break-words">
+                {message}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {date}
+              </div>
             </div>
           </td>
         );

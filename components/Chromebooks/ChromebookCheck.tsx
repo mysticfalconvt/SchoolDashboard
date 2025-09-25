@@ -4,14 +4,14 @@ import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import { CHROMEBOOK_CHECK_MIN_DAYS } from '@/config';
 import {
-  sendChromebookCheckEmails,
   sendBulkChromebookEmails,
+  sendChromebookCheckEmails,
   type Student as EmailStudent,
 } from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 
@@ -74,12 +74,15 @@ export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   }
 `;
 
-// Two-state model: either everything is good or there is an issue with a custom message
+// Four-state model: everything good, something wrong, out for service, or not in cart
 export const ChromeBookCheckMessageOptions = [
   'Everything good',
   'Something wrong',
+  'Out for Service',
+  'Not in Cart',
 ];
 export const goodCheckMessages = ['Everything good'];
+export const noEmailNoPBISMessages = ['Out for Service', 'Not in Cart'];
 // Note: chromebookEmails and formatParentName are now imported from chromebookEmailUtils
 
 interface User {
@@ -108,7 +111,7 @@ interface Student {
 
 interface StudentCheckData {
   [studentId: string]: {
-    message: string; // 'Everything good' | 'Something wrong'
+    message: string; // 'Everything good' | 'Something wrong' | 'Out for Service' | 'Not in Cart'
     customMessage: string; // required when message === 'Something wrong'
     isSubmitting: boolean;
   };
@@ -127,27 +130,29 @@ const getTimeSinceLastCheck = (student: Student): string => {
   if (!student.chromebookCheck || student.chromebookCheck.length === 0) {
     return 'never';
   }
-  
+
   const lastCheckTime = new Date(student.chromebookCheck[0].time);
   const now = new Date();
   const diffMs = now.getTime() - lastCheckTime.getTime();
-  
+
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  
+  const diffHours = Math.floor(
+    (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+  );
+
   if (diffDays === 0 && diffHours === 0) {
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     return diffMinutes < 1 ? 'just now' : `${diffMinutes}M`;
   }
-  
+
   if (diffDays === 0) {
     return `${diffHours}H`;
   }
-  
+
   if (diffHours === 0) {
     return `${diffDays}D`;
   }
-  
+
   return `${diffDays}D ${diffHours}H`;
 };
 
@@ -156,12 +161,12 @@ const isStudentDisabled = (student: Student): boolean => {
   if (!student.chromebookCheck || student.chromebookCheck.length === 0) {
     return false; // Never checked, so not disabled
   }
-  
+
   const lastCheckTime = new Date(student.chromebookCheck[0].time);
   const now = new Date();
   const diffMs = now.getTime() - lastCheckTime.getTime();
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  
+
   return diffDays < CHROMEBOOK_CHECK_MIN_DAYS;
 };
 
@@ -194,9 +199,9 @@ function MultiStudentCheckForm({
   // Auto-scroll to email progress when it becomes visible
   useEffect(() => {
     if (isSendingEmails && emailProgressRef.current) {
-      emailProgressRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
+      emailProgressRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
       });
     }
   }, [isSendingEmails]);
@@ -228,7 +233,7 @@ function MultiStudentCheckForm({
       customMessage: '',
       isSubmitting: false,
     };
-    
+
     if (data.message === 'Something wrong' && !data.customMessage) {
       toast.error('Please fill in all required fields for ' + student.name);
       return;
@@ -240,11 +245,11 @@ function MultiStudentCheckForm({
       await createChromebookCheck({
         chromebookCheck: {
           student: { connect: { id: student.id } },
-          // Persist 'Everything good' for green checks, otherwise only the custom message
+          // Persist the status message for predefined options, custom message for "Something wrong"
           message:
-            data.message === 'Everything good'
-              ? 'Everything good'
-              : data.customMessage,
+            data.message === 'Something wrong'
+              ? data.customMessage
+              : data.message,
         },
       });
 
@@ -254,7 +259,11 @@ function MultiStudentCheckForm({
         await createCard({ teacher: me?.id, student: student?.id });
       }
 
-      if (me?.id && !goodCheckMessages.includes(data.message)) {
+      if (
+        me?.id &&
+        !goodCheckMessages.includes(data.message) &&
+        !noEmailNoPBISMessages.includes(data.message)
+      ) {
         setIsSendingEmails(true);
         setEmailProgress({ sent: 0, total: 0 });
 
@@ -302,7 +311,10 @@ function MultiStudentCheckForm({
     let skippedCount = 0;
 
     // Collect all students that need emails sent
-    const studentsNeedingEmails: Array<{ student: Student; issueDetails: string }> = [];
+    const studentsNeedingEmails: Array<{
+      student: Student;
+      issueDetails: string;
+    }> = [];
 
     for (const student of students) {
       // Skip disabled students (recently checked)
@@ -328,9 +340,9 @@ function MultiStudentCheckForm({
 
       try {
         const messageToSend =
-          existing.message === 'Everything good'
-            ? 'Everything good'
-            : existing.customMessage;
+          existing.message === 'Something wrong'
+            ? existing.customMessage
+            : existing.message;
 
         await createChromebookCheck({
           chromebookCheck: {
@@ -346,7 +358,11 @@ function MultiStudentCheckForm({
         }
 
         // Collect students that need emails (issues)
-        if (me?.id && existing.message !== 'Everything good') {
+        if (
+          me?.id &&
+          existing.message !== 'Everything good' &&
+          !noEmailNoPBISMessages.includes(existing.message)
+        ) {
           studentsNeedingEmails.push({
             student: convertToEmailStudent(student),
             issueDetails: existing.customMessage,
@@ -371,14 +387,14 @@ function MultiStudentCheckForm({
     // Now send all emails in bulk with proper progress tracking
     if (studentsNeedingEmails.length > 0) {
       setIsSendingEmails(true);
-      
+
       try {
         await sendBulkChromebookEmails(
           studentsNeedingEmails,
           me.name,
           me.email,
           sendEmail,
-          setEmailProgress
+          setEmailProgress,
         );
       } finally {
         setIsSendingEmails(false);
@@ -423,13 +439,13 @@ function MultiStudentCheckForm({
           };
           const data = { ...baseDefaults, ...(studentData[student.id] || {}) };
           const disabled = isStudentDisabled(student);
-          
+
           return (
             <div
               key={student.id}
               className={`backdrop-blur-sm rounded-lg p-4 border transition-all ${
-                disabled 
-                  ? 'bg-base-200/10 border-white/5 opacity-60' 
+                disabled
+                  ? 'bg-base-200/10 border-white/5 opacity-60'
                   : 'bg-base-200/20 border-white/10'
               }`}
             >
@@ -438,9 +454,15 @@ function MultiStudentCheckForm({
                   <h3 className="text-white font-semibold text-lg">
                     {student.name}
                   </h3>
-                  <p className={`text-sm ${disabled ? 'text-white/40' : 'text-white/60'}`}>
+                  <p
+                    className={`text-sm ${disabled ? 'text-white/40' : 'text-white/60'}`}
+                  >
                     Last check: {getTimeSinceLastCheck(student)}
-                    {disabled && <span className="block text-white/40 text-xs">Recently checked</span>}
+                    {disabled && (
+                      <span className="block text-white/40 text-xs">
+                        Recently checked
+                      </span>
+                    )}
                   </p>
                 </div>
 
@@ -451,32 +473,28 @@ function MultiStudentCheckForm({
                         Status
                       </span>
                     </label>
-                    <label className={`relative inline-flex items-center ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={data.message === 'Everything good'}
-                        disabled={disabled}
-                        onChange={(e) => {
-                          if (disabled) return;
-                          const isGood = e.target.checked;
-                          updateStudentData(
-                            student.id,
-                            'message',
-                            isGood ? 'Everything good' : 'Something wrong',
-                          );
-                          if (isGood) {
-                            updateStudentData(student.id, 'customMessage', '');
-                          }
-                        }}
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      <span className="ml-3 text-sm font-medium text-white">
-                        {data.message === 'Everything good'
-                          ? 'Everything good'
-                          : 'Something wrong'}
-                      </span>
-                    </label>
+                    <select
+                      className="select select-bordered select-sm bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] disabled:opacity-50"
+                      value={data.message}
+                      disabled={disabled}
+                      onChange={(e) => {
+                        if (disabled) return;
+                        const newMessage = e.target.value;
+                        updateStudentData(student.id, 'message', newMessage);
+                        if (
+                          newMessage === 'Everything good' ||
+                          noEmailNoPBISMessages.includes(newMessage)
+                        ) {
+                          updateStudentData(student.id, 'customMessage', '');
+                        }
+                      }}
+                    >
+                      {ChromeBookCheckMessageOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="form-control">
@@ -489,14 +507,19 @@ function MultiStudentCheckForm({
                       type="text"
                       className="input input-bordered input-sm bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] disabled:opacity-50"
                       placeholder={
-                        data.message === 'Everything good'
-                          ? 'No issues to report'
+                        data.message === 'Everything good' ||
+                        noEmailNoPBISMessages.includes(data.message)
+                          ? 'No additional details needed'
                           : disabled
                             ? 'Recently checked'
                             : 'Describe the issue...'
                       }
                       value={data.customMessage}
-                      disabled={disabled || data.message === 'Everything good'}
+                      disabled={
+                        disabled ||
+                        data.message === 'Everything good' ||
+                        noEmailNoPBISMessages.includes(data.message)
+                      }
                       onChange={(e) =>
                         updateStudentData(
                           student.id,
@@ -543,7 +566,7 @@ function MultiStudentCheckForm({
       </div>
 
       {isSendingEmails && (
-        <div 
+        <div
           ref={emailProgressRef}
           className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg"
         >
@@ -570,19 +593,21 @@ function MultiStudentCheckForm({
           type="button"
           onClick={handleSubmitAll}
           disabled={
-            isSubmittingAll || 
-            isSendingEmails || 
-            students.every(student => isStudentDisabled(student))
+            isSubmittingAll ||
+            isSendingEmails ||
+            students.every((student) => isStudentDisabled(student))
           }
           className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
           style={{
             background:
-              isSubmittingAll || isSendingEmails || students.every(student => isStudentDisabled(student))
+              isSubmittingAll ||
+              isSendingEmails ||
+              students.every((student) => isStudentDisabled(student))
                 ? '#666'
                 : 'linear-gradient(135deg, #760D08, #38B6FF)',
           }}
         >
-          {students.every(student => isStudentDisabled(student))
+          {students.every((student) => isStudentDisabled(student))
             ? 'All Recently Checked'
             : isSubmittingAll
               ? 'Submitting...'
@@ -607,10 +632,12 @@ interface ChromebookCheckProps {
   teacherId?: string;
 }
 
-export default function ChromebookCheck({ teacherId }: ChromebookCheckProps = {}) {
+export default function ChromebookCheck({
+  teacherId,
+}: ChromebookCheckProps = {}) {
   const me = useUser() as User;
   const [showForm, setShowForm] = useState(false);
-  
+
   // Use teacherId if provided, otherwise use current user's id
   const queryId = teacherId || me?.id;
   const { data: taTeacher } = useGQLQuery(

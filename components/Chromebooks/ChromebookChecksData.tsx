@@ -38,44 +38,48 @@ const getColorFromMessage = (message: string): string => {
   // Backwards compatibility with legacy "good" values
   if (message.startsWith('As Issued')) return 'green';
   if (message.startsWith('Same as previous week')) return 'green';
+  // Orange for status-only options
+  if (message === 'Out for Service' || message === 'Not in Cart')
+    return 'orange';
   // All other messages indicate an issue
   return 'red';
 };
 
 const ChromebookMessageLegend = () => {
+  const legendItems = [
+    'Everything good',
+    'Something wrong',
+    'Out for Service',
+    'Not in Cart',
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage('Everything good'),
-          width: '140px',
-          height: '60px',
-          textAlign: 'center',
-          borderRadius: '5px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 600,
-        }}
-      >
-        Everything good
-      </div>
-      <div
-        style={{
-          backgroundColor: getColorFromMessage('Something wrong'),
-          width: '140px',
-          height: '60px',
-          textAlign: 'center',
-          borderRadius: '5px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 600,
-        }}
-      >
-        Something wrong
+    <div className="mb-4">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        Status Legend
+      </h3>
+      <div className="flex flex-wrap gap-3">
+        {legendItems.map((item) => (
+          <div
+            key={item}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border-2 shadow-sm"
+            style={{
+              borderColor: getColorFromMessage(item),
+              backgroundColor: `${getColorFromMessage(item)}20`,
+            }}
+          >
+            <div
+              className="w-4 h-4 rounded-full border-2"
+              style={{
+                backgroundColor: getColorFromMessage(item),
+                borderColor: getColorFromMessage(item),
+              }}
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {item}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -86,7 +90,7 @@ export default function ChromebookChecksData({
 }: ChromebookChecksDataProps) {
   const [displayGreen, setDisplayGreen] = useState(false);
   const [filterText, setFilterText] = useState('');
-  const [showRecent, setShowRecent] = useState(false);
+  const [showRecent, setShowRecent] = useState(true);
 
   const checksToShow = useMemo(() => {
     let checksToShow: ChromebookAssignment[] = [];

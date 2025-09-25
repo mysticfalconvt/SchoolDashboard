@@ -15,6 +15,7 @@ import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
   CREATE_QUICK_PBIS,
   goodCheckMessages,
+  noEmailNoPBISMessages,
 } from './ChromebookCheck';
 
 const GET_STUDENT_DETAILS_QUERY = gql`
@@ -51,9 +52,9 @@ export default function CreateSingleChromebookCheck() {
   const [message, setMessage] = useState('');
   const [studentFor, setStudentCheckIsFor] = useState<StudentUser | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [status, setStatus] = useState<'Everything good' | 'Something wrong'>(
-    'Something wrong',
-  );
+  const [status, setStatus] = useState<
+    'Everything good' | 'Something wrong' | 'Out for Service' | 'Not in Cart'
+  >('Something wrong');
   const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
   const [isSendingEmails, setIsSendingEmails] = useState(false);
   const { sendEmail, emailLoading } = useSendEmail();
@@ -108,31 +109,34 @@ export default function CreateSingleChromebookCheck() {
                 </div>
 
                 <div className="form-control">
-                  <div className="flex items-center justify-between py-2">
+                  <label className="label pb-2">
                     <span className="label-text text-white font-medium text-base">
                       Status
                     </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={status === 'Everything good'}
-                        onChange={(e) => {
-                          const isGood = e.target.checked;
-                          setStatus(
-                            isGood ? 'Everything good' : 'Something wrong',
-                          );
-                          if (isGood) setMessage('');
-                        }}
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      <span className="ml-4 text-base font-medium text-white">
-                        {status === 'Everything good'
-                          ? 'Everything good'
-                          : 'Something wrong'}
-                      </span>
-                    </label>
-                  </div>
+                  </label>
+                  <select
+                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] h-12"
+                    value={status}
+                    onChange={(e) => {
+                      const newStatus = e.target.value as
+                        | 'Everything good'
+                        | 'Something wrong'
+                        | 'Out for Service'
+                        | 'Not in Cart';
+                      setStatus(newStatus);
+                      if (
+                        newStatus === 'Everything good' ||
+                        noEmailNoPBISMessages.includes(newStatus)
+                      ) {
+                        setMessage('');
+                      }
+                    }}
+                  >
+                    <option value="Everything good">Everything good</option>
+                    <option value="Something wrong">Something wrong</option>
+                    <option value="Out for Service">Out for Service</option>
+                    <option value="Not in Cart">Not in Cart</option>
+                  </select>
                 </div>
 
                 <div className="form-control">
@@ -146,12 +150,16 @@ export default function CreateSingleChromebookCheck() {
                     name="message"
                     type="text"
                     className="input input-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] disabled:opacity-50 h-12"
-                    disabled={status === 'Everything good'}
+                    disabled={
+                      status === 'Everything good' ||
+                      noEmailNoPBISMessages.includes(status)
+                    }
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={
-                      status === 'Everything good'
-                        ? 'No issues to report'
+                      status === 'Everything good' ||
+                      noEmailNoPBISMessages.includes(status)
+                        ? 'No additional details needed'
                         : 'Describe the issue...'
                     }
                   />
@@ -198,9 +206,9 @@ export default function CreateSingleChromebookCheck() {
                       : 'linear-gradient(135deg, #760D08, #38B6FF)',
                 }}
                 onClick={async () => {
-                  // Persist 'Everything good' for green checks, otherwise only the custom message
+                  // Persist the status message for predefined options, custom message for "Something wrong"
                   const messageToSend =
-                    status === 'Everything good' ? 'Everything good' : message;
+                    status === 'Something wrong' ? message : status;
 
                   await createChromebookCheck({
                     chromebookCheck: {
@@ -228,7 +236,11 @@ export default function CreateSingleChromebookCheck() {
                     });
                   }
 
-                  if (me?.id && !isGoodCheck) {
+                  if (
+                    me?.id &&
+                    !isGoodCheck &&
+                    !noEmailNoPBISMessages.includes(status)
+                  ) {
                     const student = studentDetails?.user as StudentDetails;
 
                     if (student) {
