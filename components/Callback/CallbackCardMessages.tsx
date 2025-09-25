@@ -195,7 +195,7 @@ export default function CallbackCardMessages({
               <select
                 id={`student - ${callback.id}`}
                 value={studentMessage}
-                className={loading ? 'inputUpdating' : ''}
+                className={`text-white ${loading ? 'inputUpdating' : ''}`}
                 onChange={handleSelectStudentMessage}
               >
                 {studentMessageOptionsArray.map((option) => (
