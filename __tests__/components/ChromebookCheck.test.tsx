@@ -1,7 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ChromebookCheck from '../../components/Chromebooks/ChromebookCheck';
-import { sendChromebookCheckEmails, sendBulkChromebookEmails } from '../../lib/chromebookEmailUtils';
+import {
+  sendBulkChromebookEmails,
+  sendChromebookCheckEmails,
+} from '../../lib/chromebookEmailUtils';
 
 // Mock the utility function
 jest.mock('../../lib/chromebookEmailUtils', () => ({
@@ -160,8 +163,8 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change status to "Something wrong" and add details
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]); // Toggle to "Something wrong"
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -196,8 +199,8 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change status to "Something wrong" and add details
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]); // Toggle to "Something wrong"
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -227,8 +230,8 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change status to "Something wrong" and add details
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]); // Toggle to "Something wrong"
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -280,9 +283,9 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change both students to "Something wrong"
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]); // First student
-    await user.click(statusToggles[1]); // Second student
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong'); // First student
+    await user.selectOptions(statusSelects[1], 'Something wrong'); // Second student
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -307,8 +310,8 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change status and submit
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]);
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -347,8 +350,8 @@ describe('ChromebookCheck', () => {
     await user.click(button);
 
     // Change status to "Something wrong" and add details
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]);
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
@@ -402,8 +405,8 @@ describe('ChromebookCheck', () => {
     const button = screen.getByText(/TA Chromebook Checks \(1 students\)/);
     await user.click(button);
 
-    const statusToggles = screen.getAllByRole('checkbox');
-    await user.click(statusToggles[0]);
+    const statusSelects = screen.getAllByRole('combobox');
+    await user.selectOptions(statusSelects[0], 'Something wrong');
 
     const detailsInputs = screen.getAllByPlaceholderText(
       'Describe the issue...',
