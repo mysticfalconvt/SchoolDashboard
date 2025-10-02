@@ -190,12 +190,12 @@ export default function CallbackCardMessages({
             </p>
           )}
           {isStudent && (
-            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
+            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300 bg-transparent">
               Student Message:
               <select
                 id={`student - ${callback.id}`}
                 value={studentMessage}
-                className={`text-white ${loading ? 'inputUpdating' : ''}`}
+                className={`text-[var(--textColor)] ${loading ? 'inputUpdating' : ''}`}
                 onChange={handleSelectStudentMessage}
               >
                 {studentMessageOptionsArray.map((option) => (
