@@ -5,6 +5,7 @@ import SendPbisWinnerEmails from '../components/PBIS/SendPbisWinnerEmails';
 // import StudentFocusTable from '../components/StudentFocusTable';
 import { useUser } from '../components/User';
 import GradientButton from '../components/styles/Button';
+import BulkCompleteOldCallbacks from '../components/Callback/BulkCompleteOldCallbacks';
 import NewStudent from '../components/users/CreateNewStudent';
 import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import NewEvents from '../components/users/NewEvents';
@@ -29,6 +30,7 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />}
       {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromCSV />}
       {isAllowed(me, 'isSuperAdmin') && <NewEvents />}
+      {isAllowed(me, 'isSuperAdmin') && <BulkCompleteOldCallbacks />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, 'canManagePbis') && <NewWeeklyPbisCollection />}
       {isAllowed(me, 'canManagePbis') && <PickStaffWinners />}
