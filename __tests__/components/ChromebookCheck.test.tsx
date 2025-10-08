@@ -132,15 +132,15 @@ describe('ChromebookCheck', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display student names in the dialog', async () => {
+  it('should display student names in the dialog in Last, First format', async () => {
     const user = userEvent.setup();
     render(<ChromebookCheck />);
 
     const button = screen.getByText(/TA Chromebook Checks \(2 students\)/);
     await user.click(button);
 
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Doe, John')).toBeInTheDocument();
+    expect(screen.getByText('Smith, Jane')).toBeInTheDocument();
   });
 
   it('should show progress bar when sending emails', async () => {

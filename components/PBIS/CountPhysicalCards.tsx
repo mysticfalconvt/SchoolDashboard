@@ -2,6 +2,7 @@ import DisplayError from '@/components/ErrorMessage';
 import GradientButton from '@/components/styles/Button';
 import Form from '@/components/styles/Form';
 import { useUser } from '@/components/User';
+import { lastNameCommaFirstName } from '@/lib/lastNameCommaFirstName';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
@@ -76,6 +77,13 @@ export default function CountPhysicalCards({
   const [countCardsMutation, { loading, error, data }] =
     useGqlMutation(CREATE_CARD_MUTATION);
 
+  // Sort students by last name
+  const sortedStudents = [...taStudents].sort((a, b) => {
+    const aFormatted = lastNameCommaFirstName(a.name);
+    const bFormatted = lastNameCommaFirstName(b.name);
+    return aFormatted.localeCompare(bFormatted);
+  });
+
   return (
     <div>
       <GradientButton
@@ -125,7 +133,7 @@ export default function CountPhysicalCards({
                 <DisplayError error={error as any} />
                 <fieldset disabled={loading} aria-busy={loading}>
                   <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {taStudents.map((student) => (
+                    {sortedStudents.map((student) => (
                       <div
                         key={student.id}
                         className="flex items-center justify-between gap-4"
@@ -134,7 +142,7 @@ export default function CountPhysicalCards({
                           htmlFor={student.id}
                           className="text-white font-semibold flex-1"
                         >
-                          {student.name}
+                          {lastNameCommaFirstName(student.name)}
                         </label>
                         <input
                           type="number"

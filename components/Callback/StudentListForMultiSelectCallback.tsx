@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { lastNameCommaFirstName } from '@/lib/lastNameCommaFirstName';
 import { SmallGradientButton } from '../styles/Button';
 
 interface Student {
@@ -69,13 +70,13 @@ export default function StudentList({
 
   const allStudentsAlphabetical = uniqueStudents.sort((a, b) => {
     if (firstNameSort) {
-      const aLastName = a.name.split(' ')[1]?.toLowerCase() || '';
-      const bLastName = b.name.split(' ')[1]?.toLowerCase() || '';
-      return aLastName > bLastName ? 1 : -1;
-    } else {
       const aFirstName = a.name.split(' ')[0]?.toLowerCase() || '';
       const bFirstName = b.name.split(' ')[0]?.toLowerCase() || '';
       return aFirstName > bFirstName ? 1 : -1;
+    } else {
+      const aFormatted = lastNameCommaFirstName(a.name).toLowerCase();
+      const bFormatted = lastNameCommaFirstName(b.name).toLowerCase();
+      return aFormatted.localeCompare(bFormatted);
     }
   });
 
@@ -93,9 +94,9 @@ export default function StudentList({
         const bFirstName = b.name.split(' ')[0]?.toLowerCase() || '';
         return aFirstName > bFirstName ? 1 : -1;
       } else {
-        const aLastName = a.name.split(' ')[1]?.toLowerCase() || '';
-        const bLastName = b.name.split(' ')[1]?.toLowerCase() || '';
-        return aLastName > bLastName ? 1 : -1;
+        const aFormatted = lastNameCommaFirstName(a.name).toLowerCase();
+        const bFormatted = lastNameCommaFirstName(b.name).toLowerCase();
+        return aFormatted.localeCompare(bFormatted);
       }
     });
 
@@ -121,7 +122,7 @@ export default function StudentList({
               }
             }}
           />
-          {student.name}
+          {firstNameSort ? student.name : lastNameCommaFirstName(student.name)}
         </label>
       </li>
     ));

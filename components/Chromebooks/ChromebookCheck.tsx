@@ -1,5 +1,7 @@
 import useSendEmail from '@/components/../lib/useSendEmail';
-import GradientButton from '@/components/styles/Button';
+import GradientButton, {
+  SmallGradientButton,
+} from '@/components/styles/Button';
 import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import { CHROMEBOOK_CHECK_MIN_DAYS } from '@/config';
@@ -8,6 +10,7 @@ import {
   sendChromebookCheckEmails,
   type Student as EmailStudent,
 } from '@/lib/chromebookEmailUtils';
+import { lastNameCommaFirstName } from '@/lib/lastNameCommaFirstName';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
@@ -196,6 +199,13 @@ function MultiStudentCheckForm({
   const { sendEmail } = useSendEmail();
   const emailProgressRef = useRef<HTMLDivElement>(null);
 
+  // Sort students by last name
+  const sortedStudents = [...students].sort((a, b) => {
+    const aFormatted = lastNameCommaFirstName(a.name);
+    const bFormatted = lastNameCommaFirstName(b.name);
+    return aFormatted.localeCompare(bFormatted);
+  });
+
   // Auto-scroll to email progress when it becomes visible
   useEffect(() => {
     if (isSendingEmails && emailProgressRef.current) {
@@ -316,7 +326,7 @@ function MultiStudentCheckForm({
       issueDetails: string;
     }> = [];
 
-    for (const student of students) {
+    for (const student of sortedStudents) {
       // Skip disabled students (recently checked)
       if (isStudentDisabled(student)) {
         skippedCount += 1;
@@ -431,7 +441,7 @@ function MultiStudentCheckForm({
       </div>
 
       <div className="space-y-4">
-        {students.map((student) => {
+        {sortedStudents.map((student) => {
           const baseDefaults = {
             message: 'Everything good',
             customMessage: '',
@@ -452,7 +462,7 @@ function MultiStudentCheckForm({
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <div className="lg:w-48 flex-shrink-0">
                   <h3 className="text-white font-semibold text-lg">
-                    {student.name}
+                    {lastNameCommaFirstName(student.name)}
                   </h3>
                   <p
                     className={`text-sm ${disabled ? 'text-white/40' : 'text-white/60'}`}
@@ -532,7 +542,7 @@ function MultiStudentCheckForm({
                 </div>
 
                 <div className="flex-shrink-0">
-                  <button
+                  <SmallGradientButton
                     type="button"
                     onClick={() => handleStudentSubmit(student)}
                     disabled={
@@ -542,13 +552,6 @@ function MultiStudentCheckForm({
                       (data.message === 'Something wrong' &&
                         !data.customMessage)
                     }
-                    className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
-                    style={{
-                      background:
-                        disabled || data.isSubmitting || isSendingEmails
-                          ? '#666'
-                          : 'linear-gradient(135deg, #760D08, #38B6FF)',
-                    }}
                   >
                     {disabled
                       ? 'Recently Checked'
@@ -557,7 +560,7 @@ function MultiStudentCheckForm({
                         : isSendingEmails
                           ? 'Sending Emails...'
                           : 'Submit'}
-                  </button>
+                  </SmallGradientButton>
                 </div>
               </div>
             </div>
@@ -589,40 +592,31 @@ function MultiStudentCheckForm({
       )}
 
       <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-        <button
+        <SmallGradientButton
           type="button"
           onClick={handleSubmitAll}
           disabled={
             isSubmittingAll ||
             isSendingEmails ||
-            students.every((student) => isStudentDisabled(student))
+            sortedStudents.every((student) => isStudentDisabled(student))
           }
-          className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
-          style={{
-            background:
-              isSubmittingAll ||
-              isSendingEmails ||
-              students.every((student) => isStudentDisabled(student))
-                ? '#666'
-                : 'linear-gradient(135deg, #760D08, #38B6FF)',
-          }}
         >
-          {students.every((student) => isStudentDisabled(student))
+          {sortedStudents.every((student) => isStudentDisabled(student))
             ? 'All Recently Checked'
             : isSubmittingAll
               ? 'Submitting...'
               : isSendingEmails
                 ? 'Sending Emails...'
                 : 'Submit All'}
-        </button>
-        <button
+        </SmallGradientButton>
+        <SmallGradientButton
           type="button"
           onClick={onComplete}
           disabled={isSendingEmails}
-          className="btn btn-outline text-white border-white/30 hover:bg-white/10 disabled:opacity-50"
+          className="opacity-70 hover:opacity-100"
         >
           Close
-        </button>
+        </SmallGradientButton>
       </div>
     </div>
   );
@@ -668,6 +662,7 @@ export default function ChromebookCheck({
         variant="modal"
         size="xl"
         maxHeight="60vh"
+        className="max-w-7xl"
       >
         <DialogContent maxHeight="max-h-[50vh]" className="p-3">
           <MultiStudentCheckForm

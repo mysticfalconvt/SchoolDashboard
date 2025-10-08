@@ -1,3 +1,4 @@
+import { lastNameCommaFirstName } from '@/lib/lastNameCommaFirstName';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
@@ -93,6 +94,15 @@ const Form = ({
       setSelectedStudentIds([...selectedStudentIds, id]);
     }
   };
+
+  // Sort students by last name
+  const sortedStudents = [...students].sort((a, b) => {
+    const aName = a.preferredName || a.name || '';
+    const bName = b.preferredName || b.name || '';
+    const aFormatted = lastNameCommaFirstName(aName).toLowerCase();
+    const bFormatted = lastNameCommaFirstName(bName).toLowerCase();
+    return aFormatted.localeCompare(bFormatted);
+  });
   return (
     <>
       {/* Backdrop overlay */}
@@ -102,7 +112,7 @@ const Form = ({
       />
 
       {/* Modal */}
-      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-md h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
         <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
           <h4 className="text-white text-xl font-semibold">
             Give PBIS Card to {title}
@@ -143,9 +153,10 @@ const Form = ({
               <div className="mb-4">
                 <p className="block text-white font-semibold mb-2">Students</p>
                 <div className="max-h-64 overflow-y-auto rounded bg-white/10 p-2">
-                  {students.map((student) => {
-                    const displayName =
+                  {sortedStudents.map((student) => {
+                    const studentName =
                       student.preferredName || student.name || student.id;
+                    const displayName = lastNameCommaFirstName(studentName);
                     const checked = selectedStudentIds.includes(student.id);
                     return (
                       <label

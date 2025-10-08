@@ -1,7 +1,7 @@
 import useCreateMessage from '@/components/Messages/useCreateMessage';
 import SearchForUserName from '@/components/SearchForUserName';
 import GradientButton from '@/components/styles/Button';
-import Form from '@/components/styles/Form';
+import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
@@ -51,13 +51,14 @@ interface StudentUser {
 }
 
 interface CardFormProps {
-  visible: boolean;
-  hide: (show: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-function CardForm({ visible, hide }: CardFormProps) {
-  const { inputs, handleChange, clearForm, resetForm } = useForm({
+function CardForm({ isOpen, onClose }: CardFormProps) {
+  const { inputs, handleChange, resetForm } = useForm({
     message: '',
+    category: '',
   });
   const me = useUser() as User;
   const teacher = me?.id;
@@ -67,136 +68,172 @@ function CardForm({ visible, hide }: CardFormProps) {
   const [createCard, { loading, error, data }] =
     useGqlMutation(CREATE_PBIS_CARD);
   const createMessage = useCreateMessage();
+
   if (error) {
     console.log(error);
     return <p>{error.message}</p>;
   }
+
   return (
-    <div className={`modal ${visible ? 'modal-open' : ''}`}>
-      <div className="modal-backdrop" onClick={() => hide(false)}></div>
-      <div 
-        className="modal-box relative max-w-md w-full rounded-xl shadow-2xl p-6"
-        style={{ background: 'linear-gradient(to top left, #760D08, #38B6FF)' }}
-      >
-        {hide && (
-          <button
-            type="button"
-            onClick={() => hide(false)}
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white hover:bg-white/20 border-none z-10"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        )}
-        <Form className="w-full bg-transparent border-0 shadow-none p-0">
-          <label className="text-lg font-bold text-white mb-2">
-            New PBIS Card
-          </label>
-          <SearchForUserName
-            name="studentName"
-            value={inputs.studentName}
-            updateUser={setStudentCardIsFor}
-            userType="isStudent"
-          />
-          <div className="form-control w-full">
-            <label className="label">
-              <span className="label-text text-white font-semibold text-lg">Message</span>
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              placeholder="Student Message"
-              value={inputs.message}
-              onChange={handleChange}
-              className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-[5rem]"
-            />
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title="New PBIS Card"
+      variant="modal"
+      size="md"
+      maxHeight="80vh"
+    >
+      <DialogContent maxHeight="max-h-[70vh]" className="p-4">
+        <div className="space-y-4">
+          <div className="mb-2">
+            <p className="text-white/80 text-sm">
+              Create a PBIS card for a student
+            </p>
           </div>
-          <div className="form-control w-full">
-            <div className="flex flex-wrap gap-4 justify-center text-white font-semibold w-full mt-4">
-              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                <input
-                  type="radio"
-                  name="category"
-                  value="respect"
-                  onChange={handleChange}
-                  className="radio radio-sm"
-                  style={{ 
-                    accentColor: '#760D08',
-                    borderColor: '#760D08'
-                  }}
+          <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+            <div className="space-y-6">
+              <div className="form-control">
+                <label className="label pb-2">
+                  <span className="label-text text-white font-medium text-base">
+                    Select Student
+                  </span>
+                </label>
+                <SearchForUserName
+                  name="studentName"
+                  value={inputs.studentName}
+                  updateUser={setStudentCardIsFor}
+                  userType="isStudent"
                 />
-                <span className="label-text text-white font-semibold">Respect</span>
-              </label>
-              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                <input
-                  type="radio"
-                  name="category"
-                  value="responsibility"
+              </div>
+
+              <div className="form-control">
+                <label className="label pb-2">
+                  <span className="label-text text-white font-medium text-base">
+                    Message
+                  </span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  placeholder="Student Message"
+                  value={inputs.message}
                   onChange={handleChange}
-                  className="radio radio-sm"
-                  style={{ 
-                    accentColor: '#760D08',
-                    borderColor: '#760D08'
-                  }}
+                  className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-[5rem]"
                 />
-                <span className="label-text text-white font-semibold">Responsibility</span>
-              </label>
-              <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                <input
-                  type="radio"
-                  name="category"
-                  value="perseverance"
-                  onChange={handleChange}
-                  className="radio radio-sm"
-                  style={{ 
-                    accentColor: '#760D08',
-                    borderColor: '#760D08'
-                  }}
-                />
-                <span className="label-text text-white font-semibold">Perseverance</span>
-              </label>
+              </div>
+
+              <div className="form-control">
+                <label className="label pb-2">
+                  <span className="label-text text-white font-medium text-base">
+                    Category
+                  </span>
+                </label>
+                <div className="flex flex-wrap gap-4 justify-center text-white font-semibold w-full">
+                  <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                    <input
+                      type="radio"
+                      name="category"
+                      value="respect"
+                      checked={inputs.category === 'respect'}
+                      onChange={handleChange}
+                      className="radio radio-sm"
+                      style={{
+                        accentColor: '#760D08',
+                        borderColor: '#760D08',
+                      }}
+                    />
+                    <span className="label-text text-white font-semibold">
+                      Respect
+                    </span>
+                  </label>
+                  <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                    <input
+                      type="radio"
+                      name="category"
+                      value="responsibility"
+                      checked={inputs.category === 'responsibility'}
+                      onChange={handleChange}
+                      className="radio radio-sm"
+                      style={{
+                        accentColor: '#760D08',
+                        borderColor: '#760D08',
+                      }}
+                    />
+                    <span className="label-text text-white font-semibold">
+                      Responsibility
+                    </span>
+                  </label>
+                  <label className="label cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                    <input
+                      type="radio"
+                      name="category"
+                      value="perseverance"
+                      checked={inputs.category === 'perseverance'}
+                      onChange={handleChange}
+                      className="radio radio-sm"
+                      style={{
+                        accentColor: '#760D08',
+                        borderColor: '#760D08',
+                      }}
+                    />
+                    <span className="label-text text-white font-semibold">
+                      Perseverance
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
-          <GradientButton
-            type="submit"
-            disabled={!studentCardIsFor || !inputs.category}
-            className={`mt-4 w-full ${!studentCardIsFor || !inputs.category ? 'text-[var(--red)]' : ''}`}
-            onClick={async (e) => {
-              e.preventDefault();
-              await createCard({
-                teacher,
-                student: studentCardIsFor?.userId,
-                message: inputs.message,
-                category: inputs.category,
-              });
-              await createMessage({
-                subject: 'New PBIS Card',
-                message: inputs.message,
-                receiver: studentCardIsFor?.userId || '',
-                link: '',
-              });
-              hide(false);
-            }}
-          >
-            Give {studentCardIsFor && `${studentCardIsFor.userName} `}A PBIS
-            Card
-          </GradientButton>
-        </Form>
-      </div>
-      <style jsx>{`
-        .visible {
-          opacity: 1;
-          transition: all 0.6s ease-in-out;
-          transform: scale(1);
-        }
-        .invisible {
-          opacity: 0;
-          pointer-events: none;
-          transition: all 0.6s ease-in-out;
-          transform: scale(0.9);
-        }
-      `}</style>
-    </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              disabled={!studentCardIsFor || !inputs.category}
+              className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
+              style={{
+                background:
+                  !studentCardIsFor || !inputs.category
+                    ? '#666'
+                    : 'linear-gradient(135deg, #760D08, #38B6FF)',
+              }}
+              onClick={async () => {
+                await createCard({
+                  teacher,
+                  student: studentCardIsFor?.userId,
+                  message: inputs.message,
+                  category: inputs.category,
+                });
+                await createMessage({
+                  subject: 'New PBIS Card',
+                  message: inputs.message,
+                  receiver: studentCardIsFor?.userId || '',
+                  link: '',
+                });
+                // Don't reset form data - only clear student selection
+                setStudentCardIsFor(undefined);
+                // Clear the student name input field by updating the form inputs directly
+                handleChange({
+                  target: { name: 'studentName', value: '' },
+                } as React.ChangeEvent<HTMLInputElement>);
+                // Close the form after successful submission
+                onClose();
+              }}
+            >
+              Give {studentCardIsFor && `${studentCardIsFor.userName} `}A PBIS
+              Card
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-outline text-white border-white/30 hover:bg-white/10"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -212,14 +249,15 @@ export default function PbisCardFormButton({
     <div className="p-5 flex transition-all duration-1000">
       <GradientButton
         onClick={() => {
-          setDisplayCardForm(!displayCardForm);
+          setDisplayCardForm(true);
         }}
       >
         PBIS CARD
       </GradientButton>
-      {displayCardForm && (
-        <CardForm visible={displayCardForm} hide={setDisplayCardForm} />
-      )}
+      <CardForm
+        isOpen={displayCardForm}
+        onClose={() => setDisplayCardForm(false)}
+      />
     </div>
   );
 }
