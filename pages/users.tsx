@@ -8,6 +8,7 @@ import Table from '../components/Table';
 import { useUser } from '../components/User';
 import { callbackDisabled } from '../config';
 import isAllowed from '../lib/isAllowed';
+import { lastNameCommaFirstName } from '../lib/lastNameCommaFirstName';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const GET_ALL_STUDENTS = gql`
@@ -149,19 +150,11 @@ const Users: NextPage = () => {
             Header: 'Name',
             accessor: 'name',
             Cell: ({ row }: any) => {
-              const { name } = row.original;
-              const nameWithFirstLetterUpperCase = name
-                .split(' ')
-                .map(
-                  (name: string) =>
-                    name.charAt(0).toUpperCase() + name.slice(1),
-                )
-                .join(' ');
-
-              const { preferredName } = row.original;
+              const { name, preferredName } = row.original;
+              const formattedName = lastNameCommaFirstName(name);
               const nameToShow = preferredName
-                ? `${nameWithFirstLetterUpperCase} - (${preferredName})`
-                : nameWithFirstLetterUpperCase;
+                ? `${formattedName} - (${preferredName})`
+                : formattedName;
               return (
                 <Link href={`/userProfile/${row.original.id}`}>
                   {nameToShow}

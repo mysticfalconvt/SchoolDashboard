@@ -100,11 +100,6 @@ describe('UsersPage', () => {
     },
   ];
 
-  const mockProps = {
-    students: { students: mockStudents },
-    teachers: { teachers: mockTeachers },
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     useUser.mockReturnValue(mockUser);
@@ -123,7 +118,7 @@ describe('UsersPage', () => {
     };
     useUser.mockReturnValue(nonStaffUser);
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     expect(screen.getByText('User does not have access')).toBeInTheDocument();
   });
@@ -135,7 +130,7 @@ describe('UsersPage', () => {
       error: null,
     });
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     expect(screen.getByTestId('users-table')).toBeInTheDocument();
     expect(screen.getByTestId('data-length')).toHaveTextContent('2');
@@ -148,7 +143,7 @@ describe('UsersPage', () => {
       error: null,
     });
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     const teachersButton = screen.getByText('Show Teachers');
     fireEvent.click(teachersButton);
@@ -165,7 +160,7 @@ describe('UsersPage', () => {
       error: null,
     });
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     expect(screen.getByTestId('search-column')).toHaveTextContent('name');
   });
@@ -177,7 +172,7 @@ describe('UsersPage', () => {
       error: null,
     });
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     expect(screen.getByTestId('data-length')).toHaveTextContent('0');
   });
@@ -185,7 +180,7 @@ describe('UsersPage', () => {
   it('handles null user gracefully', () => {
     useUser.mockReturnValue(null);
 
-    renderWithProviders(<UsersPage {...mockProps} />);
+    renderWithProviders(<UsersPage />);
 
     expect(screen.getByText('User does not have access')).toBeInTheDocument();
   });

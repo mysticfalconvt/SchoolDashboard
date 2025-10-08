@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { callbackDisabled } from '../../config';
+import { lastNameCommaFirstName } from '../../lib/lastNameCommaFirstName';
 import QuickPbisButton from '../PBIS/QuickPbisButton';
 import Table from '../Table';
 
@@ -37,16 +38,11 @@ export default function ViewStudentTable({
             Header: 'Name',
             accessor: 'name',
             Cell: ({ row }: { row: { original: Student } }) => {
-              const { name } = row.original;
-              const nameWithFirstLetterUpperCase = name
-                .split(' ')
-                .map((name) => name.charAt(0).toUpperCase() + name.slice(1))
-                .join(' ');
-
-              const { preferredName } = row.original;
+              const { name, preferredName } = row.original;
+              const formattedName = lastNameCommaFirstName(name);
               const nameToShow = preferredName
-                ? `${nameWithFirstLetterUpperCase} - (${preferredName})`
-                : nameWithFirstLetterUpperCase;
+                ? `${formattedName} - (${preferredName})`
+                : formattedName;
               return (
                 <>
                   <Link href={`/userProfile/${row.original.id}`} >

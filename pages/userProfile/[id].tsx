@@ -135,6 +135,10 @@ const UserProfile: NextPage<UserProfilePageProps> = ({ query }) => {
     `SingleUser-${query.id}`,
     GET_SINGLE_USER,
     variables,
+    {
+      enabled: !!me,
+      staleTime: 0, // Always fetch fresh data on page load
+    },
   );
   if (isLoading || !me) return <Loading />;
   if (error) return <p>{error.message}</p>;
