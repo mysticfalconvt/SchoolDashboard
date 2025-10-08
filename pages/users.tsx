@@ -1,5 +1,5 @@
 import { gql } from 'graphql-tag';
-import type { GetStaticProps, NextPage } from 'next';
+import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import DisplayError from '../components/ErrorMessage';
@@ -7,7 +7,6 @@ import GradientButton from '../components/styles/Button';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
 import { callbackDisabled } from '../config';
-import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -114,20 +113,9 @@ interface Teacher {
   };
 }
 
-interface UsersPageProps {
-  students?: {
-    students: Student[];
-  };
-  teachers?: {
-    teachers: Teacher[];
-  };
-}
-
-const Users: NextPage<UsersPageProps> = (props) => {
+const Users: NextPage = () => {
   const me = useUser();
   const [userSortType, setUserSortType] = useState('student');
-  const cachedStudents = props?.students;
-  const cachedTeachers = props?.teachers;
   // stale time of 2 minutes
   const staleTime = 2 * 60 * 1000;
   const {
@@ -137,12 +125,9 @@ const Users: NextPage<UsersPageProps> = (props) => {
   } = useGQLQuery(
     'allStudents',
     GET_ALL_STUDENTS,
+    {},
     {
-      date: new Date(),
-    },
-    {
-      enabled: userSortType === 'student',
-      initialData: cachedStudents,
+      enabled: userSortType === 'student' && !!me,
       staleTime,
     },
   );
@@ -151,8 +136,7 @@ const Users: NextPage<UsersPageProps> = (props) => {
     GET_ALL_TEACHERS,
     {},
     {
-      enabled: userSortType === 'staff',
-      initialData: cachedTeachers,
+      enabled: userSortType === 'staff' && !!me,
       staleTime,
     },
   );
@@ -451,28 +435,6 @@ const Users: NextPage<UsersPageProps> = (props) => {
       )}
     </div>
   );
-};
-
-export const getStaticProps: GetStaticProps<UsersPageProps> = async (
-  context,
-) => {
-  // console.log(context);
-  // fetch PBIS Page data from the server
-  const fetchStudents = async (): Promise<{ students: Student[] }> =>
-    smartGraphqlClient.request(GET_ALL_STUDENTS);
-  const fetchTeachers = async (): Promise<{ teachers: Teacher[] }> =>
-    smartGraphqlClient.request(GET_ALL_TEACHERS);
-
-  const students = await fetchStudents();
-  const teachers = await fetchTeachers();
-
-  return {
-    props: {
-      students: students || { students: [] },
-      teachers: teachers || { teachers: [] },
-    }, // will be passed to the page component as props
-    revalidate: 1200, // In seconds
-  };
 };
 
 export default Users;

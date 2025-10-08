@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import { useMemo } from 'react';
 import CallbackTable from '../../components/Callback/CallbackTable';
 import ChromebookCheck, {
@@ -11,7 +11,6 @@ import CountPhysicalCards from '../../components/PBIS/CountPhysicalCards';
 import { useUser } from '../../components/User';
 import ViewTaStudentTable from '../../components/users/ViewTaStudentTable';
 import { callbackDisabled } from '../../config';
-import { smartGraphqlClient } from '../../lib/smartGraphqlClient';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 
 const TA_INFO_QUERY = gql`
@@ -139,16 +138,6 @@ const TA_INFO_QUERY = gql`
   }
 `;
 
-const TA_TEACHER_LIST_QUERY = gql`
-  query TA_TEACHER_LIST_QUERY {
-    users(where: { hasTA: { equals: true } }) {
-      id
-      name
-      email
-    }
-  }
-`;
-
 interface TaStudent {
   averageTimeToCompleteCallback?: number;
   parent?: {
@@ -222,49 +211,26 @@ interface TaStudent {
   ChromebookChecks?: any[];
 }
 
-interface TaTeam {
-  teamName: string;
-  countedCards: number;
-  uncountedCards: number;
-  averageCardsPerStudent: number;
-  currentLevel: number;
-}
-
-interface TaTeacher {
-  PbisCardCount: number;
-  taPbisCardCount: number;
-  name: string;
-  id: string;
-  email: string;
-  taTeamAveragePbisCardsPerStudent?: number;
-  taTeam?: TaTeam;
-  taStudents: TaStudent[];
-}
-
 interface TaPageProps {
-  data: {
-    taTeacher?: TaTeacher;
-  };
   query: {
     id: string;
   };
 }
 
-const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
+const TA: NextPage<TaPageProps> = ({ query }) => {
   const me = useUser();
   const { data, isLoading, error, refetch } = useGQLQuery(
-    `taInfo-${initialData?.taTeacher?.name}`,
+    `taInfo-${query.id}`,
     TA_INFO_QUERY,
     {
       id: query.id,
     },
     {
       enabled: !!me,
-      initialData,
       staleTime: 0,
     },
   );
-  const { data: existingChecks, isLoading: CBCheckLoading } = useGQLQuery(
+  const { data: existingChecks } = useGQLQuery(
     `TAChromebookChecks-${query.id}`,
     GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
     { id: query.id },
@@ -309,8 +275,6 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
     0,
   );
   const taStudentCount = students.length;
-  const taAveragePbisCards =
-    taStudentCount > 0 ? taTotalPbisCards / taStudentCount : 0;
 
   return (
     <div>
@@ -340,46 +304,13 @@ const TA: NextPage<TaPageProps> = ({ data: initialData, query }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const fetchData = async (): Promise<{ users: any[] }> =>
-    smartGraphqlClient.request(TA_TEACHER_LIST_QUERY);
-  const data = await fetchData();
-  const usersToUse = data?.users || [];
-
-  const paths =
-    usersToUse?.map((user: any) => ({
-      params: {
-        id: user.id,
-      },
-    })) || [];
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps: GetStaticProps<TaPageProps> = async ({
+export const getServerSideProps: GetServerSideProps<TaPageProps> = async ({
   params,
 }) => {
-  const fetchData = async () => {
-    try {
-      const dataFromFetch = await smartGraphqlClient.request(TA_INFO_QUERY, {
-        id: params?.id,
-      });
-      return dataFromFetch;
-    } catch (e) {
-      console.log(e);
-      console.log('error', params?.id);
-    }
-  };
-  const data = (await fetchData()) || {};
-
   return {
     props: {
-      data,
       query: { id: params?.id as string },
     },
-    revalidate: 30 * 60, // 30 minutes (in seconds)
   };
 };
 
