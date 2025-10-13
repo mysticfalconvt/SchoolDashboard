@@ -18,6 +18,8 @@ const emailCorrections = {
     "rory.chitambar@ncsuvt.org": "gregory.chitambar@ncsuvt.org",
     "alex.cochran@ncsuvt.org": "alexander.cochran@ncsuvt.org",
     "hailey.marie@ncsuvt.org": "hailey.ste.marie@ncsuvt.org",
+    "jessey-jaymes.charest@ncsuvt.org": "jesseyjaymes.charest@ncsuvt.org",
+    "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
 
 };
 
