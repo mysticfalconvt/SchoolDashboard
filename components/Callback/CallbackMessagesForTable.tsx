@@ -1,6 +1,6 @@
 import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 import { UPDATE_CALLBACK_MESSAGES_MUTATION } from './CallbackCardMessages';
@@ -50,6 +50,14 @@ const CallbackMessagesForTable = React.memo(function CallbackMessagesForTable({
   );
   const [updateCallback] = useGqlMutation(UPDATE_CALLBACK_MESSAGES_MUTATION);
 
+  // Update state when callbackItem prop changes (e.g., after marking completed)
+  useEffect(() => {
+    setTeacherMessage(callbackItem.messageFromTeacher || '');
+    setStudentMessage(callbackItem.messageFromStudent || '');
+    setTeacherMessageDate(callbackItem.messageFromTeacherDate || '');
+    setStudentMessageDate(callbackItem.messageFromStudentDate || '');
+  }, [callbackItem]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -60,12 +68,14 @@ const CallbackMessagesForTable = React.memo(function CallbackMessagesForTable({
         messageFromStudent: studentMessage,
         messageFromStudentDate: studentMessageDate,
       });
-      
+
       // Invalidate specific queries to trigger refetch - avoid refetching ALL queries
       queryClient.invalidateQueries(['taInfo']);
       queryClient.invalidateQueries(['allCallbacks']);
-      
-      toast.success(`Updated Callback Message for ${callbackItem.student.name}`);
+
+      toast.success(
+        `Updated Callback Message for ${callbackItem.student.name}`,
+      );
     } catch (error) {
       toast.error('Failed to update message');
       console.error(error);
