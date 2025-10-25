@@ -17,6 +17,7 @@ interface Student {
   YearPbisCount?: number;
   individualPbisLevel?: number;
   callbackCount?: number;
+  totalCallbackCount?: number;
   averageTimeToCompleteCallback?: number;
 }
 
@@ -45,7 +46,7 @@ export default function ViewStudentTable({
                 : formattedName;
               return (
                 <>
-                  <Link href={`/userProfile/${row.original.id}`} >
+                  <Link href={`/userProfile/${row.original.id}`}>
                     {nameToShow}
                   </Link>
                   <QuickPbisButton id={row.original.id} />
@@ -61,7 +62,7 @@ export default function ViewStudentTable({
               const showLink = !!row.original?.taTeacher?.id;
               if (showLink)
                 return (
-                  <Link href={`/userProfile/${row.original?.taTeacher?.id}`} >
+                  <Link href={`/userProfile/${row.original?.taTeacher?.id}`}>
                     {row.original?.taTeacher?.name}
                   </Link>
                 );
@@ -82,8 +83,17 @@ export default function ViewStudentTable({
             accessor: 'individualPbisLevel',
           },
           {
-            Header: 'Callback',
+            Header: 'Current Callback',
             accessor: 'callbackCount',
+          },
+          {
+            Header: 'Completed Callback',
+            accessor: 'completedCallbackCount',
+            Cell: ({ row }: { row: { original: Student } }) => {
+              const total = row.original.totalCallbackCount || 0;
+              const current = row.original.callbackCount || 0;
+              return total - current;
+            },
           },
           {
             Header: 'Average days on callback',
@@ -114,7 +124,11 @@ export default function ViewStudentTable({
     });
   }, [users]);
   const hiddenColumns = callbackDisabled
-    ? ['callbackCount', 'averageTimeToCompleteCallback']
+    ? [
+        'callbackCount',
+        'averageTimeToCompleteCallback',
+        'completedCallbackCount',
+      ]
     : [];
   return (
     <div>

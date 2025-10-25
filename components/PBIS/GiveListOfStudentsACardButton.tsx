@@ -212,6 +212,7 @@ export default function GiveListOfStudentsACardButton({
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
   const [displayForm, setDisplayForm] = React.useState(false);
+  console.log(students.length);
   const [message, setMessage] = React.useState(
     `${me.name} gave a card to the entire class`,
   );
@@ -243,6 +244,10 @@ export default function GiveListOfStudentsACardButton({
     setMessage(`${me.name} gave a card to the entire class`);
     setSelectedStudentIds([]);
   }, [selectedStudentIds, me, message, queryClient, createCard]);
+
+  if (students.length === 0) {
+    return null;
+  }
   return (
     <>
       <SmallGradientButton
