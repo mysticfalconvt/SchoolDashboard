@@ -56,7 +56,7 @@ export default function DisplayPbisCollectionData({
             key={`ta-${teacher.id}`}
             className="border border-gray-300 rounded p-4"
           >
-            <h3>TA Quest!</h3>
+            <h3>TA Bingo!</h3>
             <h4>{teacher.name}</h4>
             <h4>Level {teacher.taTeamPbisLevel}</h4>
             <p>{teacher.taTeamAveragePbisCardsPerStudent} cards per student</p>

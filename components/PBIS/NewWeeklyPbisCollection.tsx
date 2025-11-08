@@ -5,8 +5,8 @@ import useRevalidatePage from '../../lib/useRevalidatePage';
 import GradientButton from '../styles/Button';
 import Form from '../styles/Form';
 import { useUser } from '../User';
-import useV3PbisCollection from './useV3PbisCollection';
 import { usePbisCalculations } from './usePbisCalculations';
+import useV3PbisCollection from './useV3PbisCollection';
 
 interface FormInputs {
   confirmation: string;
@@ -121,8 +121,13 @@ export default function NewWeeklyPbisCollection() {
                       </h3>
                       <div className="mt-2 text-sm text-yellow-100">
                         <p>
-                          A PBIS collection was run {calculatedResults.daysSinceLastCollection} day{calculatedResults.daysSinceLastCollection !== 1 ? 's' : ''} ago. 
-                          PBIS collections are typically run weekly. Are you sure you want to proceed?
+                          A PBIS collection was run{' '}
+                          {calculatedResults.daysSinceLastCollection} day
+                          {calculatedResults.daysSinceLastCollection !== 1
+                            ? 's'
+                            : ''}{' '}
+                          ago. PBIS collections are typically run weekly. Are
+                          you sure you want to proceed?
                         </p>
                       </div>
                     </div>
@@ -161,23 +166,38 @@ export default function NewWeeklyPbisCollection() {
 
                   {/* Total Cards */}
                   <div className="bg-white bg-opacity-10 p-3 rounded">
-                    <h4 className="text-white font-semibold mb-2">📊 Collection Summary</h4>
+                    <h4 className="text-white font-semibold mb-2">
+                      📊 Collection Summary
+                    </h4>
                     <p className="text-white text-sm">
-                      Total cards to be collected: <strong>{calculatedResults.totalCards}</strong>
+                      Total cards to be collected:{' '}
+                      <strong>{calculatedResults.totalCards}</strong>
                     </p>
                   </div>
 
                   {/* TA Team Level Changes */}
                   {calculatedResults.taTeachersWithChanges.length > 0 && (
                     <div className="bg-green-600 bg-opacity-20 p-3 rounded">
-                      <h4 className="text-white font-semibold mb-2">🎉 TA Teams Leveling Up ({calculatedResults.taTeachersWithChanges.length})</h4>
+                      <h4 className="text-white font-semibold mb-2">
+                        🎉 TA Teams Leveling Up (
+                        {calculatedResults.taTeachersWithChanges.length})
+                      </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {calculatedResults.taTeachersWithChanges.map((teacher) => (
-                          <div key={teacher.id} className="text-white text-sm">
-                            <strong>{teacher.name}</strong> - Level {teacher.taTeamPbisLevel} → {teacher.taTeamPbisLevel + teacher.taTeamPbisLevelChange} 
-                            ({Math.round(teacher.newCardsPerStudent)} avg cards/student)
-                          </div>
-                        ))}
+                        {calculatedResults.taTeachersWithChanges.map(
+                          (teacher) => (
+                            <div
+                              key={teacher.id}
+                              className="text-white text-sm"
+                            >
+                              <strong>{teacher.name}</strong> - Level{' '}
+                              {teacher.taTeamPbisLevel} →{' '}
+                              {teacher.taTeamPbisLevel +
+                                teacher.taTeamPbisLevelChange}
+                              ({Math.round(teacher.newCardsPerStudent)} avg
+                              cards/student)
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
@@ -185,12 +205,16 @@ export default function NewWeeklyPbisCollection() {
                   {/* Students Leveling Up */}
                   {calculatedResults.studentsLevelingUp.length > 0 && (
                     <div className="bg-purple-600 bg-opacity-20 p-3 rounded">
-                      <h4 className="text-white font-semibold mb-2">⭐ Students Leveling Up ({calculatedResults.studentsLevelingUp.length})</h4>
+                      <h4 className="text-white font-semibold mb-2">
+                        ⭐ Students Leveling Up (
+                        {calculatedResults.studentsLevelingUp.length})
+                      </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {calculatedResults.studentsLevelingUp.map((student) => (
                           <div key={student.id} className="text-white text-sm">
-                            <strong>{student.name}</strong> - Level {student.individualPbisLevel} → {student.newLevel} 
-                            ({student.totalPBISCards} total cards)
+                            <strong>{student.name}</strong> - Level{' '}
+                            {student.individualPbisLevel} → {student.newLevel}(
+                            {student.totalPBISCards} total cards)
                           </div>
                         ))}
                       </div>
@@ -200,25 +224,38 @@ export default function NewWeeklyPbisCollection() {
                   {/* Random Drawing Winners */}
                   {calculatedResults.randomDrawingWinners.length > 0 && (
                     <div className="bg-yellow-600 bg-opacity-20 p-3 rounded">
-                      <h4 className="text-white font-semibold mb-2">🎲 Random Drawing Winners ({calculatedResults.randomDrawingWinners.length})</h4>
+                      <h4 className="text-white font-semibold mb-2">
+                        🎲 Random Drawing Winners (
+                        {calculatedResults.randomDrawingWinners.length})
+                      </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {calculatedResults.randomDrawingWinners.map((winner, index) => (
-                          <div key={`${winner.id}-${index}`} className="text-white text-sm">
-                            <strong>{winner.name}</strong> - {winner.ticketCount} ticket{winner.ticketCount !== 1 ? 's' : ''}
-                          </div>
-                        ))}
+                        {calculatedResults.randomDrawingWinners.map(
+                          (winner, index) => (
+                            <div
+                              key={`${winner.id}-${index}`}
+                              className="text-white text-sm"
+                            >
+                              <strong>{winner.name}</strong> -{' '}
+                              {winner.ticketCount} ticket
+                              {winner.ticketCount !== 1 ? 's' : ''}
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
 
                   {/* No Changes Message */}
-                  {calculatedResults.taTeachersWithChanges.length === 0 && 
-                   calculatedResults.studentsLevelingUp.length === 0 && 
-                   calculatedResults.randomDrawingWinners.length === 0 && (
-                    <div className="bg-gray-600 bg-opacity-20 p-3 rounded">
-                      <p className="text-white text-sm">No level changes or winners will be generated from this collection.</p>
-                    </div>
-                  )}
+                  {calculatedResults.taTeachersWithChanges.length === 0 &&
+                    calculatedResults.studentsLevelingUp.length === 0 &&
+                    calculatedResults.randomDrawingWinners.length === 0 && (
+                      <div className="bg-gray-600 bg-opacity-20 p-3 rounded">
+                        <p className="text-white text-sm">
+                          No level changes or winners will be generated from
+                          this collection.
+                        </p>
+                      </div>
+                    )}
                 </div>
               )}
 
@@ -246,6 +283,15 @@ export default function NewWeeklyPbisCollection() {
               >
                 <h1 className="text-white text-lg font-semibold mb-4">
                   Run the weekly PBIS Card Collection
+                  {calculatedResults.daysSinceLastCollection !== null && (
+                    <span className="ml-2 text-sm font-normal opacity-90">
+                      (Last run: {calculatedResults.daysSinceLastCollection} day
+                      {calculatedResults.daysSinceLastCollection !== 1
+                        ? 's'
+                        : ''}{' '}
+                      ago)
+                    </span>
+                  )}
                 </h1>
                 <fieldset
                   disabled={running || !data}
@@ -268,9 +314,39 @@ export default function NewWeeklyPbisCollection() {
                       className="w-full p-2 rounded border mt-2"
                     />
                   </label>
-                  <button type="submit" className="mt-6">
-                    Run Card Collection
-                  </button>
+                  <GradientButton
+                    type="submit"
+                    className="mt-6"
+                    disabled={running || !data}
+                  >
+                    {running ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Running Collection...
+                      </>
+                    ) : (
+                      'Run Card Collection'
+                    )}
+                  </GradientButton>
                 </fieldset>
               </Form>
             </div>
