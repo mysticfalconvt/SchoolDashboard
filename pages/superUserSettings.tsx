@@ -1,11 +1,12 @@
 import type { NextPage } from 'next';
+import Link from 'next/link';
 import NewWeeklyPbisCollection from '../components/PBIS/NewWeeklyPbisCollection';
 import PickStaffWinners from '../components/PBIS/PickStaffWinners';
 import SendPbisWinnerEmails from '../components/PBIS/SendPbisWinnerEmails';
 // import StudentFocusTable from '../components/StudentFocusTable';
+import BulkCompleteOldCallbacks from '../components/Callback/BulkCompleteOldCallbacks';
 import { useUser } from '../components/User';
 import GradientButton from '../components/styles/Button';
-import BulkCompleteOldCallbacks from '../components/Callback/BulkCompleteOldCallbacks';
 import NewStudent from '../components/users/CreateNewStudent';
 import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import NewEvents from '../components/users/NewEvents';
@@ -35,6 +36,11 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'canManagePbis') && <NewWeeklyPbisCollection />}
       {isAllowed(me, 'canManagePbis') && <PickStaffWinners />}
       {isAllowed(me, 'canManagePbis') && <SendPbisWinnerEmails />}
+      {isAllowed(me, 'isSuperAdmin') && (
+        <Link href="/communicatorChat">
+          <GradientButton>Communicator Chat</GradientButton>
+        </Link>
+      )}
       {/* {isAllowed(me, "isSuperAdmin") && <CreateChromebookAssignments />} */}
       {/* {isAllowed(me, "isSuperAdmin") && <TransferData />} */}
     </div>
