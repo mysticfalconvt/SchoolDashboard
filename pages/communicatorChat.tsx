@@ -217,7 +217,7 @@ const CommunicatorChat: NextPage = () => {
     error: modelsError,
     refetch: refetchModels,
   } = useQuery<ModelsResponse, Error>('communicatorModels', fetchModels, {
-    enabled: !!me && isAllowed(me, 'isSuperAdmin'),
+    enabled: !!me && isAllowed(me, 'isCommunicatorEnabled'),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
