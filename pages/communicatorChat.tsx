@@ -60,6 +60,10 @@ interface CommunicatorMessage {
   userComment?: string;
   errorMessage?: string;
   hasError?: string;
+  user?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface CommunicatorMessageListData {
@@ -98,6 +102,10 @@ const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
       userComment
       errorMessage
       hasError
+      user {
+        id
+        name
+      }
     }
   }
 `;
@@ -119,6 +127,10 @@ const QUERY_ALL_COMMUNICATOR_MESSAGES = gql`
       userComment
       errorMessage
       hasError
+      user {
+        id
+        name
+      }
     }
   }
 `;
@@ -173,6 +185,7 @@ const CommunicatorChat: NextPage = () => {
   );
   const [copied, setCopied] = useState<boolean>(false);
   const [detailsTab, setDetailsTab] = useState<'query' | 'rawData'>('query');
+  const [showOnlyFailures, setShowOnlyFailures] = useState<boolean>(false);
 
   const isSuperAdmin = isAllowed(me, 'isSuperAdmin');
   const queryToUse = isSuperAdmin
@@ -378,19 +391,21 @@ const CommunicatorChat: NextPage = () => {
   };
 
   const messages = messagesData?.communicatorChats || [];
-  // Filter out error messages (hasError === 'true') from the sidebar
-  // Users can still see them if they navigate to them, but they won't clutter the list
-  const successfulMessages = messages.filter((msg) => msg.hasError !== 'true');
+  // Filter messages based on showOnlyFailures toggle (for superadmins)
+  const filteredMessages =
+    isSuperAdmin && showOnlyFailures
+      ? messages.filter((msg) => msg.hasError === 'true')
+      : messages.filter((msg) => msg.hasError !== 'true');
   // Sort messages by date (newest first)
-  const sortedMessages = [...successfulMessages].sort((a, b) => {
+  const sortedMessages = [...filteredMessages].sort((a, b) => {
     const dateA = new Date(a.timestamp || a.createdAt || 0).getTime();
     const dateB = new Date(b.timestamp || b.createdAt || 0).getTime();
     return dateB - dateA;
   });
 
-  // Set default model to gpt-oss-20b if available
+  // Set default model to gpt-oss-20b if available (only on initial load)
   useEffect(() => {
-    if (modelsData?.models) {
+    if (modelsData?.models && !selectedModel) {
       const defaultModel = modelsData.models.find(
         (model) =>
           model.id.toLowerCase().includes('gpt-oss-20b') ||
@@ -400,10 +415,21 @@ const CommunicatorChat: NextPage = () => {
       );
       if (defaultModel) {
         setSelectedModel(defaultModel.id);
+      } else if (modelsData.models.length > 0) {
+        // If gpt-oss-20b not available, select first available model
+        const firstAvailable = modelsData.models.find(
+          (model) => model.available,
+        );
+        if (firstAvailable) {
+          setSelectedModel(firstAvailable.id);
+        } else {
+          setSelectedModel(modelsData.models[0]?.id || '');
+        }
       } else {
         setSelectedModel('');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelsData]);
 
   // Show loading while checking authentication
@@ -433,9 +459,33 @@ const CommunicatorChat: NextPage = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Communicator Chat
-        </h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Communicator Chat
+          </h1>
+          {isSuperAdmin && models.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="model-selector"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+              >
+                Model:
+              </label>
+              <select
+                id="model-selector"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              >
+                {models.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name} {!model.available && '(Unavailable)'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {modelsLoading ? (
@@ -474,17 +524,34 @@ const CommunicatorChat: NextPage = () => {
                 : 'absolute md:relative z-10 h-full bg-white dark:bg-gray-900'
             } min-w-[100px] max-w-[25vw] border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300`}
           >
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Messages
-              </h2>
-              <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="md:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-              >
-                {sidebarCollapsed ? '☰' : '✕'}
-              </button>
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Messages
+                </h2>
+                <button
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="md:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                  aria-label={
+                    sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'
+                  }
+                >
+                  {sidebarCollapsed ? '☰' : '✕'}
+                </button>
+              </div>
+              {isSuperAdmin && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showOnlyFailures}
+                    onChange={(e) => setShowOnlyFailures(e.target.checked)}
+                    className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-400 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Show only failures
+                  </span>
+                </label>
+              )}
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {messagesLoading ? (
@@ -504,6 +571,10 @@ const CommunicatorChat: NextPage = () => {
                     createdAt={message.createdAt}
                     isSelected={selectedMessageId === message.id}
                     onClick={() => handleMessageClick(message)}
+                    userName={message.user?.name}
+                    showUserName={isSuperAdmin}
+                    hasError={message.hasError === 'true'}
+                    errorMessage={message.errorMessage}
                   />
                 ))
               )}
@@ -601,34 +672,7 @@ const CommunicatorChat: NextPage = () => {
                 </div>
               ) : queryResponse ? (
                 <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                  {/* Show error message if this is an error response */}
-                  {(queryResponse.hasError === 'true' ||
-                    queryResponse.error) && (
-                    <div className="mb-6 pb-4 border-b border-red-300 dark:border-red-600">
-                      <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
-                        <p className="font-semibold text-lg mb-2">
-                          Error occurred
-                        </p>
-                        <p className="mb-2">
-                          {queryResponse.errorMessage ||
-                            queryResponse.message ||
-                            'An error occurred while processing this request.'}
-                        </p>
-                        {queryResponse.details && (
-                          <details className="mt-2">
-                            <summary className="cursor-pointer text-sm font-medium">
-                              Technical details
-                            </summary>
-                            <pre className="mt-2 text-xs bg-red-50 dark:bg-red-900/50 p-2 rounded overflow-x-auto">
-                              {queryResponse.details}
-                            </pre>
-                          </details>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Question Header */}
+                  {/* Question Header - show first, even for errors */}
                   <div className="mb-6 pb-4 border-b border-gray-300 dark:border-gray-600">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -668,6 +712,48 @@ const CommunicatorChat: NextPage = () => {
                       </button>
                     </div>
                   </div>
+
+                  {/* Show error message if this is an error response */}
+                  {(queryResponse.hasError === 'true' ||
+                    queryResponse.error) && (
+                    <div className="mb-6 pb-4 border-b border-red-300 dark:border-red-600">
+                      <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
+                        <p className="font-semibold text-lg mb-2">
+                          Error occurred
+                        </p>
+                        <p className="mb-2">
+                          {queryResponse.errorMessage ||
+                            queryResponse.message ||
+                            'An error occurred while processing this request.'}
+                        </p>
+                        {queryResponse.details && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-sm font-medium">
+                              Technical details
+                            </summary>
+                            <pre className="mt-2 text-xs bg-red-50 dark:bg-red-900/50 p-2 rounded overflow-x-auto">
+                              {queryResponse.details}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                      {/* Show raw data for errors if available */}
+                      {queryResponse.rawData && (
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                            Raw Data:
+                          </p>
+                          <div className="w-full">
+                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                              <code className="text-gray-900 dark:text-gray-100 block">
+                                {JSON.stringify(queryResponse.rawData, null, 2)}
+                              </code>
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Explanation Content - only show if not an error */}
                   {queryResponse.explanation &&
@@ -938,114 +1024,126 @@ const CommunicatorChat: NextPage = () => {
                       ? 'Timestamp'
                       : 'Details'
                 }
-                size="lg"
+                size="xl"
+                className="max-w-[95vw]"
               >
-                <div className="space-y-4">
-                  {/* Show tabs if both graphqlQuery and rawData are available */}
-                  {detailsField === 'data' &&
-                    queryResponse?.graphqlQuery &&
-                    queryResponse?.rawData && (
-                      <div className="flex border-b border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col h-full max-h-[70vh] -m-6 p-6 overflow-hidden">
+                  {/* Fixed header with tabs and copy button */}
+                  {detailsField === 'data' && (
+                    <div className="flex-shrink-0 space-y-3 mb-4">
+                      {/* Show tabs if both graphqlQuery and rawData are available */}
+                      {queryResponse?.graphqlQuery &&
+                        queryResponse?.rawData && (
+                          <div className="flex gap-1 border-b-2 border-gray-300 dark:border-gray-600">
+                            <button
+                              onClick={() => setDetailsTab('query')}
+                              className={`px-6 py-3 font-semibold text-sm transition-all rounded-t-lg ${
+                                detailsTab === 'query'
+                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 -mb-[2px]'
+                                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                              }`}
+                            >
+                              GraphQL Query
+                            </button>
+                            <button
+                              onClick={() => setDetailsTab('rawData')}
+                              className={`px-6 py-3 font-semibold text-sm transition-all rounded-t-lg ${
+                                detailsTab === 'rawData'
+                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 -mb-[2px]'
+                                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                              }`}
+                            >
+                              Raw Data
+                            </button>
+                          </div>
+                        )}
+                      {/* Copy button */}
+                      <div className="flex justify-end">
                         <button
-                          onClick={() => setDetailsTab('query')}
-                          className={`px-4 py-2 font-medium text-sm transition-colors ${
-                            detailsTab === 'query'
-                              ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                          }`}
+                          onClick={async () => {
+                            let textToCopy = '';
+                            if (
+                              detailsTab === 'query' &&
+                              queryResponse?.graphqlQuery
+                            ) {
+                              textToCopy = queryResponse.graphqlQuery;
+                            } else if (
+                              detailsTab === 'rawData' &&
+                              queryResponse?.rawData
+                            ) {
+                              textToCopy = JSON.stringify(
+                                queryResponse.rawData,
+                                null,
+                                2,
+                              );
+                            }
+                            try {
+                              await navigator.clipboard.writeText(textToCopy);
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            } catch (err) {
+                              console.error('Failed to copy:', err);
+                            }
+                          }}
+                          className="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
                         >
-                          GraphQL Query
-                        </button>
-                        <button
-                          onClick={() => setDetailsTab('rawData')}
-                          className={`px-4 py-2 font-medium text-sm transition-colors ${
-                            detailsTab === 'rawData'
-                              ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                          }`}
-                        >
-                          Raw Data
+                          {copied ? (
+                            <>
+                              <span>✓</span>
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>📋</span>
+                              <span>Copy to Clipboard</span>
+                            </>
+                          )}
                         </button>
                       </div>
-                    )}
-
-                  {detailsField === 'data' && (
-                    <div className="flex justify-end mb-2">
-                      <button
-                        onClick={async () => {
-                          let textToCopy = '';
-                          if (
-                            detailsTab === 'query' &&
-                            queryResponse?.graphqlQuery
-                          ) {
-                            textToCopy = queryResponse.graphqlQuery;
-                          } else if (
-                            detailsTab === 'rawData' &&
-                            queryResponse?.rawData
-                          ) {
-                            textToCopy = JSON.stringify(
-                              queryResponse.rawData,
-                              null,
-                              2,
-                            );
-                          }
-                          try {
-                            await navigator.clipboard.writeText(textToCopy);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          } catch (err) {
-                            console.error('Failed to copy:', err);
-                          }
-                        }}
-                        className="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
-                      >
-                        {copied ? (
-                          <>
-                            <span>✓</span>
-                            <span>Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>📋</span>
-                            <span>Copy to Clipboard</span>
-                          </>
-                        )}
-                      </button>
                     </div>
                   )}
+                  {/* Scrollable data area */}
                   {detailsField === 'data' && (
-                    <div className="relative">
+                    <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
                       {detailsTab === 'query' &&
                         queryResponse?.graphqlQuery && (
-                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
-                            <code className="text-gray-900 dark:text-gray-100">
-                              {queryResponse.graphqlQuery}
-                            </code>
-                          </pre>
+                          <div className="flex-1 overflow-auto">
+                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre">
+                              <code className="text-gray-900 dark:text-gray-100 block">
+                                {queryResponse.graphqlQuery}
+                              </code>
+                            </pre>
+                          </div>
                         )}
                       {detailsTab === 'rawData' && queryResponse?.rawData && (
-                        <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
-                          <code className="text-gray-900 dark:text-gray-100">
-                            {JSON.stringify(queryResponse.rawData, null, 2)}
-                          </code>
-                        </pre>
+                        <div className="flex-1 overflow-auto">
+                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre">
+                            <code className="text-gray-900 dark:text-gray-100 block">
+                              {JSON.stringify(queryResponse.rawData, null, 2)}
+                            </code>
+                          </pre>
+                        </div>
                       )}
                       {/* If only one is available, show it regardless of tab */}
                       {!queryResponse?.graphqlQuery &&
                         queryResponse?.rawData && (
-                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
-                            <code className="text-gray-900 dark:text-gray-100">
-                              {JSON.stringify(queryResponse.rawData, null, 2)}
-                            </code>
-                          </pre>
+                          <div className="flex-1 overflow-auto">
+                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre">
+                              <code className="text-gray-900 dark:text-gray-100 block">
+                                {JSON.stringify(queryResponse.rawData, null, 2)}
+                              </code>
+                            </pre>
+                          </div>
                         )}
                       {queryResponse?.graphqlQuery &&
                         !queryResponse?.rawData && (
-                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
-                            <code className="text-gray-900 dark:text-gray-100">
-                              {queryResponse.graphqlQuery}
-                            </code>
-                          </pre>
+                          <div className="flex-1 overflow-auto">
+                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre">
+                              <code className="text-gray-900 dark:text-gray-100 block">
+                                {queryResponse.graphqlQuery}
+                              </code>
+                            </pre>
+                          </div>
                         )}
                     </div>
                   )}
