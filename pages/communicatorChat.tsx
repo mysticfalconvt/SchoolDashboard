@@ -1,10 +1,17 @@
+import gql from 'graphql-tag';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
+import MessagePreviewCard from '../components/communicator/MessagePreviewCard';
+import QueryLoadingSpinner from '../components/communicator/QueryLoadingSpinner';
 import Loading from '../components/Loading';
 import GradientButton from '../components/styles/Button';
+import { FormDialog } from '../components/styles/Dialog';
 import { useUser } from '../components/User';
 import isAllowed from '../lib/isAllowed';
+import { markdownToHtml } from '../lib/markdownToHtml';
+import { useGqlMutation } from '../lib/useGqlMutation';
+import { useGQLQuery } from '../lib/useGqlQuery';
 
 interface Model {
   id: string;
@@ -17,14 +24,100 @@ interface ModelsResponse {
 }
 
 interface QueryResponse {
+  id?: string;
   question: string;
-  explanation: string;
+  explanation?: string;
   graphqlQuery?: string;
-  timestamp?: string;
+  timestamp?: string | null;
+  createdAt?: string | null;
   iterations?: number;
   evaluationScore?: number;
   rawData?: any;
+  model?: string;
+  userRating?: number;
+  userComment?: string;
+  // Error fields
+  error?: boolean;
+  message?: string;
+  details?: string;
+  status?: number;
+  errorMessage?: string;
+  hasError?: string;
 }
+
+interface CommunicatorMessage {
+  id: string;
+  question: string;
+  explanation?: string;
+  graphqlQuery?: string;
+  timestamp?: string | null;
+  createdAt?: string | null;
+  iterations?: number;
+  evaluationScore?: number;
+  rawData?: any;
+  model?: string;
+  userRating?: number;
+  userComment?: string;
+  errorMessage?: string;
+  hasError?: string;
+}
+
+interface CommunicatorMessageListData {
+  communicatorChats: CommunicatorMessage[];
+}
+
+interface CommunicatorQueryData {
+  queryCommunicator: QueryResponse;
+}
+
+interface CommunicatorQueryVariables {
+  question: string;
+  model: string;
+}
+
+const COMMUNICATOR_QUERY_MUTATION = gql`
+  mutation QueryCommunicator($question: String!, $model: String!) {
+    queryCommunicator(question: $question, model: $model)
+  }
+`;
+
+const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
+  query QueryCommunicatorMessageList {
+    communicatorChats {
+      id
+      question
+      explanation
+      graphqlQuery
+      timestamp
+      createdAt
+      iterations
+      evaluationScore
+      rawData
+      model
+      userRating
+      userComment
+      errorMessage
+      hasError
+    }
+  }
+`;
+
+const UPDATE_COMMUNICATOR_CHAT_RATING = gql`
+  mutation UpdateCommunicatorChatRating(
+    $id: ID!
+    $userRating: Int!
+    $userComment: String
+  ) {
+    updateCommunicatorChat(
+      where: { id: $id }
+      data: { userRating: $userRating, userComment: $userComment }
+    ) {
+      id
+      userRating
+      userComment
+    }
+  }
+`;
 
 const fetchModels = async (): Promise<ModelsResponse> => {
   const response = await fetch('/api/communicator/models');
@@ -34,110 +127,6 @@ const fetchModels = async (): Promise<ModelsResponse> => {
   return response.json();
 };
 
-// Simple markdown to HTML converter for basic markdown features
-const markdownToHtml = (markdown: string): string => {
-  let html = markdown;
-
-  // Process tables first (before other replacements)
-  const lines = html.split('\n');
-  const processedLines: string[] = [];
-  let inTable = false;
-  let tableRows: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const isTableRow = line.trim().startsWith('|') && line.trim().endsWith('|');
-    const isTableSeparator = /^\|[\s\-:]+\|/.test(line.trim());
-
-    if (isTableRow && !isTableSeparator) {
-      if (!inTable) {
-        inTable = true;
-        tableRows = [];
-        processedLines.push(
-          '<table class="border-collapse border border-gray-300 dark:border-gray-600 w-full my-4">',
-        );
-      }
-      const cells = line
-        .split('|')
-        .map((cell) => cell.trim())
-        .filter((cell) => cell.length > 0);
-      const isHeader =
-        i > 0 && lines[i - 1] && /^\|[\s\-:]+\|/.test(lines[i - 1].trim());
-
-      if (isHeader && tableRows.length === 0) {
-        tableRows.push('<thead><tr>');
-        cells.forEach((cell) => {
-          tableRows.push(
-            `<th class="border border-gray-300 dark:border-gray-600 px-4 py-2 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100">${cell}</th>`,
-          );
-        });
-        tableRows.push('</tr></thead><tbody>');
-      } else {
-        tableRows.push('<tr>');
-        cells.forEach((cell) => {
-          tableRows.push(
-            `<td class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-gray-100">${cell}</td>`,
-          );
-        });
-        tableRows.push('</tr>');
-      }
-    } else if (isTableSeparator) {
-      // Skip separator lines
-      continue;
-    } else {
-      if (inTable) {
-        tableRows.push('</tbody></table>');
-        processedLines.push(tableRows.join(''));
-        tableRows = [];
-        inTable = false;
-      }
-      processedLines.push(line);
-    }
-  }
-
-  if (inTable) {
-    tableRows.push('</tbody></table>');
-    processedLines.push(tableRows.join(''));
-  }
-
-  html = processedLines.join('\n');
-
-  // Headers
-  html = html.replace(
-    /^### (.*$)/gim,
-    '<h3 class="text-xl font-semibold mt-4 mb-2 text-gray-900 dark:text-gray-100">$1</h3>',
-  );
-  html = html.replace(
-    /^## (.*$)/gim,
-    '<h2 class="text-2xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">$1</h2>',
-  );
-  html = html.replace(
-    /^# (.*$)/gim,
-    '<h1 class="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100">$1</h1>',
-  );
-
-  // Bold
-  html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-
-  // Italic
-  html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-
-  // Paragraphs (double line breaks)
-  const paragraphs = html.split('\n\n');
-  html = paragraphs
-    .map((para) => {
-      const trimmed = para.trim();
-      if (!trimmed) return '';
-      if (trimmed.startsWith('<')) return trimmed; // Already HTML (tables, headers, etc.)
-      // Replace single line breaks with <br> within paragraphs
-      const withBreaks = trimmed.replace(/\n/g, '<br>');
-      return `<p class="mb-4 text-gray-900 dark:text-gray-100">${withBreaks}</p>`;
-    })
-    .join('\n');
-
-  return html;
-};
-
 const CommunicatorChat: NextPage = () => {
   const me = useUser();
   const [selectedModel, setSelectedModel] = useState<string>('');
@@ -145,8 +134,82 @@ const CommunicatorChat: NextPage = () => {
   const [queryResponse, setQueryResponse] = useState<QueryResponse | null>(
     null,
   );
-  const [isQueryLoading, setIsQueryLoading] = useState<boolean>(false);
-  const [queryError, setQueryError] = useState<string | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null,
+  );
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [showDetailsModal, setShowDetailsModal] = useState<boolean>(false);
+  const [detailsField, setDetailsField] = useState<string | null>(null);
+  const [showRatingModal, setShowRatingModal] = useState<boolean>(false);
+  const [ratingValue, setRatingValue] = useState<number>(5);
+  const [ratingComment, setRatingComment] = useState<string>('');
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
+  const [userFriendlyError, setUserFriendlyError] = useState<string | null>(
+    null,
+  );
+  const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(
+    null,
+  );
+
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    refetch: refetchMessages,
+  } = useGQLQuery<CommunicatorMessageListData>(
+    'communicatorMessages',
+    QUERY_COMMUNICATOR_MESSAGE_LIST,
+    {},
+    {
+      enabled: !!me && isAllowed(me, 'isCommunicatorEnabled'),
+      staleTime: 30 * 1000, // 30 seconds
+    },
+  );
+
+  const [, { data, loading: isQueryLoading, error, mutateAsync }] =
+    useGqlMutation<CommunicatorQueryData, CommunicatorQueryVariables>(
+      COMMUNICATOR_QUERY_MUTATION,
+      {
+        onSuccess: () => {
+          // Clear any previous errors on success
+          setUserFriendlyError(null);
+          // Refetch messages list after successful mutation
+          refetchMessages();
+        },
+        onError: (error) => {
+          // This handles network/GraphQL errors (when mutation throws)
+          // Backend errors are now returned in the response, not thrown
+          setUserFriendlyError('Sorry, the request failed. Please try again.');
+          // Clear pending question on error
+          setPendingQuestion(null);
+          // Store the question from the input field if available for retry
+          // (This is a fallback for network errors where we don't get a response)
+        },
+      },
+    );
+
+  const [updateRating, { loading: isUpdatingRating }] = useGqlMutation<
+    {
+      updateCommunicatorChat: {
+        id: string;
+        userRating: number;
+        userComment: string;
+      };
+    },
+    { id: string; userRating: number; userComment?: string }
+  >(UPDATE_COMMUNICATOR_CHAT_RATING, {
+    onSuccess: () => {
+      // Refetch messages to get updated rating
+      refetchMessages();
+      // Update the current queryResponse if it's the same message
+      if (queryResponse?.id) {
+        refetchMessages().then(() => {
+          // The useEffect will update queryResponse when messagesData changes
+        });
+      }
+      setShowRatingModal(false);
+      setRatingComment('');
+    },
+  });
 
   const {
     data: modelsData,
@@ -164,38 +227,134 @@ const CommunicatorChat: NextPage = () => {
       return;
     }
 
-    setIsQueryLoading(true);
-    setQueryError(null);
+    const questionText = question.trim();
+
+    // Clear current response and selection
     setQueryResponse(null);
+    setSelectedMessageId(null);
+    // Store the question we're asking so we can find it later
+    setPendingQuestion(questionText);
 
     try {
-      const response = await fetch('/api/communicator/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: question.trim(),
-          model: selectedModel,
-          includeRawData: true,
-        }),
+      // Clear any previous errors
+      setUserFriendlyError(null);
+
+      await mutateAsync({
+        question: questionText,
+        model: selectedModel,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to execute query');
-      }
-
-      const data: QueryResponse = await response.json();
-      setQueryResponse(data);
+      // After mutation succeeds, wait a bit for the backend to save, then refetch
+      // and find the new message
+      setTimeout(async () => {
+        await refetchMessages();
+      }, 500);
     } catch (error) {
-      setQueryError(
-        error instanceof Error ? error.message : 'An unknown error occurred',
-      );
-    } finally {
-      setIsQueryLoading(false);
+      // Error is already handled by onError callback, but log it for debugging
+      console.error('Error executing communicator query:', error);
+      setPendingQuestion(null);
     }
   };
+
+  // Update queryResponse when data changes (new query response)
+  useEffect(() => {
+    if (data?.queryCommunicator) {
+      const response = data.queryCommunicator;
+
+      // Check if the response contains an error
+      if (response.error) {
+        // Handle error response from backend
+        // Still set queryResponse so we can display the error in the message view
+        setQueryResponse(response);
+        // Store the question so we can retry it
+        if (response.question) {
+          setLastFailedQuestion(response.question);
+        }
+        setUserFriendlyError(
+          response.message || 'Sorry, the request failed. Please try again.',
+        );
+        setPendingQuestion(null);
+        // Still refetch messages so the error is saved to the list
+        setTimeout(async () => {
+          await refetchMessages();
+        }, 500);
+        return;
+      }
+
+      // Clear any previous errors on successful response
+      setUserFriendlyError(null);
+      setLastFailedQuestion(null);
+
+      // Set the response immediately from the mutation result
+      setQueryResponse(response);
+
+      // After a short delay, refetch messages and find the matching one
+      const timeoutId = setTimeout(async () => {
+        await refetchMessages();
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [data, refetchMessages]);
+
+  // When messages are refetched after a new query, find and select the new message
+  useEffect(() => {
+    if (messagesData?.communicatorChats && pendingQuestion) {
+      // Find the message that matches the question we just asked
+      const matchingMessages = messagesData.communicatorChats.filter(
+        (msg) => msg.question === pendingQuestion,
+      );
+
+      if (matchingMessages.length > 0) {
+        // Sort by date to get the most recent one
+        const sortedMatches = [...matchingMessages].sort((a, b) => {
+          const dateA = new Date(a.timestamp || a.createdAt || 0).getTime();
+          const dateB = new Date(b.timestamp || b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+
+        const newestMatch = sortedMatches[0];
+        setSelectedMessageId(newestMatch.id);
+        setQueryResponse(newestMatch as QueryResponse);
+        // Clear pending question since we found it
+        setPendingQuestion(null);
+      }
+    }
+  }, [messagesData, pendingQuestion]);
+
+  // Update queryResponse when messagesData changes (e.g., after rating update)
+  // Only update if we're not waiting for a new question
+  useEffect(() => {
+    if (
+      queryResponse?.id &&
+      messagesData?.communicatorChats &&
+      !pendingQuestion
+    ) {
+      const updatedMessage = messagesData.communicatorChats.find(
+        (msg) => msg.id === queryResponse.id,
+      );
+      if (updatedMessage) {
+        setQueryResponse(updatedMessage as QueryResponse);
+      }
+    }
+  }, [messagesData, queryResponse?.id, pendingQuestion]);
+
+  // Handle clicking on a message card
+  const handleMessageClick = (message: CommunicatorMessage) => {
+    setSelectedMessageId(message.id);
+    setQueryResponse(message as QueryResponse);
+  };
+
+  const messages = messagesData?.communicatorChats || [];
+  // Filter out error messages (hasError === 'true') from the sidebar
+  // Users can still see them if they navigate to them, but they won't clutter the list
+  const successfulMessages = messages.filter((msg) => msg.hasError !== 'true');
+  // Sort messages by date (newest first)
+  const sortedMessages = [...successfulMessages].sort((a, b) => {
+    const dateA = new Date(a.timestamp || a.createdAt || 0).getTime();
+    const dateB = new Date(b.timestamp || b.createdAt || 0).getTime();
+    return dateB - dateA;
+  });
 
   // Set default model to gpt-oss-20b if available
   useEffect(() => {
@@ -221,7 +380,7 @@ const CommunicatorChat: NextPage = () => {
   }
 
   // Show warning page if user is not signed in or doesn't have isSuperAdmin permission
-  if (!me || !isAllowed(me, 'isSuperAdmin')) {
+  if (!me || !isAllowed(me, 'isCommunicatorEnabled')) {
     return (
       <div className="max-w-2xl mx-auto p-8">
         <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded">
@@ -240,16 +399,20 @@ const CommunicatorChat: NextPage = () => {
   const isGptOss20bAvailable = selectedModel !== '';
 
   return (
-    <div>
-      <h1>Communicator Chat</h1>
+    <div className="h-screen flex flex-col">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          Communicator Chat
+        </h1>
+      </div>
 
       {modelsLoading ? (
-        <div className="mt-4">
-          <p className="text-gray-900 dark:text-gray-100">Loading...</p>
+        <div className="flex-1 flex items-center justify-center">
+          <Loading />
         </div>
       ) : modelsError ? (
-        <div className="mt-4">
-          <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded mb-4">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
             <p className="font-semibold">Error loading service</p>
             <p>{modelsError.message}</p>
             <GradientButton onClick={() => refetchModels()} className="mt-2">
@@ -258,59 +421,596 @@ const CommunicatorChat: NextPage = () => {
           </div>
         </div>
       ) : !isGptOss20bAvailable ? (
-        <div className="mt-4">
-          <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded mb-4">
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded">
             <p className="font-semibold text-lg">
               This service is not currently available
             </p>
           </div>
         </div>
       ) : (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Query</h2>
-          <form onSubmit={handleQuerySubmit} className="mb-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Enter your question..."
-                className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                disabled={isQueryLoading}
-              />
-              <GradientButton
-                type="submit"
-                disabled={isQueryLoading || !question.trim()}
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Sidebar */}
+          <div
+            className={`${
+              sidebarCollapsed
+                ? 'hidden md:flex md:w-0'
+                : 'flex w-full md:w-1/4'
+            } ${
+              sidebarCollapsed
+                ? ''
+                : 'absolute md:relative z-10 h-full bg-white dark:bg-gray-900'
+            } min-w-[100px] max-w-[25vw] border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300`}
+          >
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Messages
+              </h2>
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="md:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
               >
-                {isQueryLoading ? 'Querying...' : 'Query'}
-              </GradientButton>
+                {sidebarCollapsed ? '☰' : '✕'}
+              </button>
             </div>
-          </form>
-
-          {isQueryLoading && (
-            <div className="flex items-center justify-center p-8">
-              <Loading />
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {messagesLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <Loading />
+                </div>
+              ) : sortedMessages.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
+                  No messages yet
+                </p>
+              ) : (
+                sortedMessages.map((message) => (
+                  <MessagePreviewCard
+                    key={message.id}
+                    question={message.question}
+                    timestamp={message.timestamp}
+                    createdAt={message.createdAt}
+                    isSelected={selectedMessageId === message.id}
+                    onClick={() => handleMessageClick(message)}
+                  />
+                ))
+              )}
             </div>
-          )}
+          </div>
 
-          {queryError && (
-            <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded mb-4">
-              <p className="font-semibold">Error</p>
-              <p>{queryError}</p>
-            </div>
-          )}
-
-          {queryResponse && (
-            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-              <div className="prose max-w-none dark:prose-invert">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: markdownToHtml(queryResponse.explanation),
-                  }}
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <form onSubmit={handleQuerySubmit} className="flex gap-2">
+                <input
+                  type="text"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Enter your question..."
+                  className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  disabled={isQueryLoading}
                 />
-              </div>
+                <GradientButton
+                  type="submit"
+                  disabled={isQueryLoading || !question.trim()}
+                >
+                  {isQueryLoading ? 'Querying...' : 'Query'}
+                </GradientButton>
+                {sidebarCollapsed && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarCollapsed(false)}
+                    className="md:hidden px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  >
+                    ☰
+                  </button>
+                )}
+              </form>
             </div>
-          )}
+
+            <div className="flex-1 overflow-y-auto p-4">
+              {isQueryLoading ? (
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <QueryLoadingSpinner />
+                </div>
+              ) : error || userFriendlyError ? (
+                <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded-lg">
+                  <p className="font-semibold text-lg mb-2">
+                    Sorry, something went wrong
+                  </p>
+                  <p className="mb-4">
+                    {userFriendlyError ||
+                      'The request failed. Please try again.'}
+                  </p>
+                  {(queryResponse?.question || lastFailedQuestion) && (
+                    <button
+                      onClick={async () => {
+                        const questionToRetry =
+                          queryResponse?.question || lastFailedQuestion;
+                        if (!selectedModel || !questionToRetry) {
+                          return;
+                        }
+                        // Clear errors
+                        setUserFriendlyError(null);
+                        setQueryResponse(null);
+                        setSelectedMessageId(null);
+                        setPendingQuestion(questionToRetry);
+                        setLastFailedQuestion(null);
+
+                        // Re-submit the question
+                        try {
+                          await mutateAsync({
+                            question: questionToRetry,
+                            model: selectedModel,
+                          });
+                        } catch (error) {
+                          console.error('Error re-asking question:', error);
+                        }
+                      }}
+                      disabled={isQueryLoading}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isQueryLoading ? 'Retrying...' : 'Try Again'}
+                    </button>
+                  )}
+                  {!queryResponse?.question && !lastFailedQuestion && (
+                    <button
+                      onClick={() => {
+                        setUserFriendlyError(null);
+                        setQueryResponse(null);
+                        setSelectedMessageId(null);
+                        setLastFailedQuestion(null);
+                      }}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+                    >
+                      Clear Error
+                    </button>
+                  )}
+                </div>
+              ) : queryResponse ? (
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                  {/* Show error message if this is an error response */}
+                  {(queryResponse.hasError === 'true' ||
+                    queryResponse.error) && (
+                    <div className="mb-6 pb-4 border-b border-red-300 dark:border-red-600">
+                      <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
+                        <p className="font-semibold text-lg mb-2">
+                          Error occurred
+                        </p>
+                        <p className="mb-2">
+                          {queryResponse.errorMessage ||
+                            queryResponse.message ||
+                            'An error occurred while processing this request.'}
+                        </p>
+                        {queryResponse.details && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-sm font-medium">
+                              Technical details
+                            </summary>
+                            <pre className="mt-2 text-xs bg-red-50 dark:bg-red-900/50 p-2 rounded overflow-x-auto">
+                              {queryResponse.details}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Question Header */}
+                  <div className="mb-6 pb-4 border-b border-gray-300 dark:border-gray-600">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                          {queryResponse.question}
+                        </h2>
+                        {queryResponse.timestamp && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(queryResponse.timestamp).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (!selectedModel || !queryResponse.question) {
+                            return;
+                          }
+                          setQueryResponse(null);
+                          setSelectedMessageId(null);
+                          try {
+                            await mutateAsync({
+                              question: queryResponse.question,
+                              model: selectedModel,
+                            });
+                          } catch (error) {
+                            console.error('Error re-asking question:', error);
+                          }
+                        }}
+                        disabled={isQueryLoading}
+                        className="flex-shrink-0 p-2 square rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Re-ask this question"
+                        aria-label="Re-ask this question"
+                      >
+                        <span className="text-xl">
+                          {isQueryLoading ? '⏳' : '🔄'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Explanation Content - only show if not an error */}
+                  {queryResponse.explanation &&
+                    queryResponse.hasError !== 'true' &&
+                    !queryResponse.error && (
+                      <div className="prose max-w-none dark:prose-invert mb-6">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: markdownToHtml(queryResponse.explanation),
+                          }}
+                        />
+                      </div>
+                    )}
+
+                  {/* Detail Icons - only show if not an error */}
+                  {queryResponse.hasError !== 'true' &&
+                    !queryResponse.error && (
+                      <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+                        {queryResponse.graphqlQuery && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('graphqlQuery');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                            title="View GraphQL Query"
+                          >
+                            <span className="text-xl">🔍</span>
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                              GraphQL Query
+                            </span>
+                          </button>
+                        )}
+                        {queryResponse.iterations !== undefined && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('iterations');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                            title={`Iterations: ${queryResponse.iterations}`}
+                          >
+                            <span className="text-xl">🔄</span>
+                            <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
+                              Iterations: {queryResponse.iterations}
+                            </span>
+                          </button>
+                        )}
+                        {queryResponse.evaluationScore !== undefined && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('evaluationScore');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                            title={`Evaluation Score: ${queryResponse.evaluationScore}`}
+                          >
+                            <span className="text-xl">⭐</span>
+                            <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                              Score: {queryResponse.evaluationScore}
+                            </span>
+                          </button>
+                        )}
+                        {queryResponse.rawData && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('rawData');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                            title="View Raw Data"
+                          >
+                            <span className="text-xl">📊</span>
+                            <span className="text-sm font-medium text-orange-900 dark:text-orange-100">
+                              Raw Data
+                            </span>
+                          </button>
+                        )}
+                        {queryResponse.model && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('model');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                            title={`Model: ${queryResponse.model}`}
+                          >
+                            <span className="text-xl">🤖</span>
+                            <span className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
+                              {queryResponse.model}
+                            </span>
+                          </button>
+                        )}
+                        {queryResponse.timestamp && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('timestamp');
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            title={`Timestamp: ${new Date(queryResponse.timestamp).toLocaleString()}`}
+                          >
+                            <span className="text-xl">🕐</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              Timestamp
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                  {/* Rating Section - only show if not an error */}
+                  {queryResponse.id &&
+                    queryResponse.hasError !== 'true' &&
+                    !queryResponse.error &&
+                    (queryResponse.userRating === undefined ||
+                      queryResponse.userRating === null ||
+                      queryResponse.userRating === 0) && (
+                      <div className="mt-6 pt-4 border-t border-gray-300 dark:border-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                          Rate this response:
+                        </p>
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => {
+                              setRatingValue(1);
+                              setRatingComment('');
+                              setShowRatingModal(true);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                            title="Thumbs down - Rate this response"
+                          >
+                            <span className="text-2xl">👎</span>
+                            <span className="text-sm font-medium text-red-900 dark:text-red-100">
+                              Thumbs Down
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setRatingValue(10);
+                              setRatingComment('');
+                              setShowRatingModal(true);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                            title="Thumbs up - Rate this response"
+                          >
+                            <span className="text-2xl">👍</span>
+                            <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                              Thumbs Up
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Show existing rating if rated - only show if not an error */}
+                  {queryResponse.id &&
+                    queryResponse.hasError !== 'true' &&
+                    !queryResponse.error &&
+                    queryResponse.userRating !== undefined &&
+                    queryResponse.userRating !== null &&
+                    queryResponse.userRating > 0 && (
+                      <div className="mt-6 pt-4 border-t border-gray-300 dark:border-gray-600">
+                        <button
+                          onClick={() => {
+                            setRatingValue(queryResponse.userRating || 5);
+                            setRatingComment(queryResponse.userComment || '');
+                            setShowRatingModal(true);
+                          }}
+                          className="w-full text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-3 transition-colors"
+                          title="Click to update your rating"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">
+                              {queryResponse.userRating >= 5 ? '👍' : '👎'}
+                            </span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              Your rating: {queryResponse.userRating}/10
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                              (Click to update)
+                            </span>
+                          </div>
+                          {queryResponse.userComment && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                              "{queryResponse.userComment}"
+                            </p>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                  <p>Select a message or ask a new question</p>
+                </div>
+              )}
+
+              {/* Rating Modal */}
+              <FormDialog
+                isOpen={showRatingModal}
+                onClose={() => {
+                  setShowRatingModal(false);
+                  setRatingComment('');
+                }}
+                title="Rate this response"
+                size="md"
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      Rating (1-10):
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={ratingValue}
+                        onChange={(e) =>
+                          setRatingValue(parseInt(e.target.value))
+                        }
+                        className="flex-1"
+                      />
+                      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 w-12 text-center">
+                        {ratingValue}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <span>1 (Poor)</span>
+                      <span>10 (Excellent)</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="rating-comment"
+                      className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2"
+                    >
+                      Comment (optional):
+                    </label>
+                    <textarea
+                      id="rating-comment"
+                      value={ratingComment}
+                      onChange={(e) => setRatingComment(e.target.value)}
+                      rows={4}
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      placeholder="Add any comments about this response..."
+                    />
+                  </div>
+
+                  <div className="flex gap-3 justify-end pt-4">
+                    <button
+                      onClick={() => {
+                        setShowRatingModal(false);
+                        setRatingComment('');
+                      }}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      disabled={isUpdatingRating}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!queryResponse?.id) return;
+                        try {
+                          await updateRating({
+                            id: queryResponse.id,
+                            userRating: ratingValue,
+                            userComment: ratingComment.trim() || undefined,
+                          });
+                        } catch (error) {
+                          console.error('Error updating rating:', error);
+                        }
+                      }}
+                      disabled={isUpdatingRating}
+                      className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isUpdatingRating ? 'Submitting...' : 'Submit'}
+                    </button>
+                  </div>
+                </div>
+              </FormDialog>
+
+              {/* Details Modal */}
+              <FormDialog
+                isOpen={showDetailsModal}
+                onClose={() => {
+                  setShowDetailsModal(false);
+                  setDetailsField(null);
+                }}
+                title={
+                  detailsField === 'graphqlQuery'
+                    ? 'GraphQL Query'
+                    : detailsField === 'iterations'
+                      ? 'Iterations'
+                      : detailsField === 'evaluationScore'
+                        ? 'Evaluation Score'
+                        : detailsField === 'rawData'
+                          ? 'Raw Data'
+                          : detailsField === 'model'
+                            ? 'Model'
+                            : detailsField === 'timestamp'
+                              ? 'Timestamp'
+                              : 'Details'
+                }
+                size="lg"
+              >
+                <div className="space-y-4">
+                  {detailsField === 'graphqlQuery' &&
+                    queryResponse?.graphqlQuery && (
+                      <div>
+                        <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm">
+                          <code>{queryResponse.graphqlQuery}</code>
+                        </pre>
+                      </div>
+                    )}
+                  {detailsField === 'iterations' &&
+                    queryResponse?.iterations !== undefined && (
+                      <div>
+                        <p className="text-lg font-semibold mb-2">
+                          Number of Iterations: {queryResponse.iterations}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          This indicates how many iterations the query took to
+                          complete.
+                        </p>
+                      </div>
+                    )}
+                  {detailsField === 'evaluationScore' &&
+                    queryResponse?.evaluationScore !== undefined && (
+                      <div>
+                        <p className="text-lg font-semibold mb-2">
+                          Evaluation Score: {queryResponse.evaluationScore}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          This score represents the quality or accuracy of the
+                          response.
+                        </p>
+                      </div>
+                    )}
+                  {detailsField === 'rawData' && queryResponse?.rawData && (
+                    <div>
+                      <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm max-h-[60vh] overflow-y-auto">
+                        <code>
+                          {JSON.stringify(queryResponse.rawData, null, 2)}
+                        </code>
+                      </pre>
+                    </div>
+                  )}
+                  {detailsField === 'model' && queryResponse?.model && (
+                    <div>
+                      <p className="text-lg font-semibold mb-2">
+                        Model Used: {queryResponse.model}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        This is the AI model that generated the response.
+                      </p>
+                    </div>
+                  )}
+                  {detailsField === 'timestamp' && queryResponse?.timestamp && (
+                    <div>
+                      <p className="text-lg font-semibold mb-2">
+                        Timestamp:{' '}
+                        {new Date(queryResponse.timestamp).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        ISO Format: {queryResponse.timestamp}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </FormDialog>
+            </div>
+          </div>
         </div>
       )}
     </div>

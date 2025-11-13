@@ -42,6 +42,7 @@ const CURRENT_USER_QUERY = gql`
         canSeeAllCallback
         canManagePbis
         canHaveSpecialGroups
+        isCommunicatorEnabled
         hasTA
         hasClasses
         isStudent
@@ -128,6 +129,7 @@ export interface User {
   isStaff?: boolean;
   isTeacher?: boolean;
   isSuperAdmin?: boolean;
+  isCommunicatorEnabled?: boolean;
   PbisCardCount?: number;
   YearPbisCount?: number;
   teacherPbisCardCount?: number;

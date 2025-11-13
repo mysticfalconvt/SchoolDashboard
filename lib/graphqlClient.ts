@@ -55,17 +55,44 @@ export class GraphQLClient {
         ...this.fetchOptions,
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
         // If we get a 401 Unauthorized, clear the token
         if (response.status === 401 && typeof window !== 'undefined') {
           localStorage.removeItem('token');
         }
-        throw new Error(`GraphQL request failed: ${response.statusText}`);
+        
+        // Try to get error details from response body
+        let errorMessage = `GraphQL request failed: ${response.status} ${response.statusText}`;
+        try {
+          if (isJson) {
+            const errorJson = await response.json();
+            if (errorJson.message) {
+              errorMessage = errorJson.message;
+            } else if (errorJson.error) {
+              errorMessage = errorJson.error;
+            } else if (errorJson.errors && Array.isArray(errorJson.errors)) {
+              errorMessage = errorJson.errors.map((e: any) => e.message || e).join(', ');
+            } else {
+              errorMessage = `${errorMessage} - ${JSON.stringify(errorJson).substring(0, 200)}`;
+            }
+          } else {
+            const errorText = await response.text();
+            if (errorText) {
+              errorMessage = `${errorMessage} - ${errorText.substring(0, 200)}`;
+            }
+          }
+        } catch {
+          // If we can't read the body, just use the status
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      if (!isJson) {
         throw new Error(`Expected JSON response but got ${contentType}`);
       }
 
