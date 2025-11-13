@@ -125,8 +125,8 @@ export default function EditStudent({ student }: EditStudentProps) {
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[90vh] rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)] flex-shrink-0">
               <h4 className="text-white text-xl font-semibold">
                 Edit {student.name}'s Schedule
               </h4>
@@ -138,7 +138,7 @@ export default function EditStudent({ student }: EditStudentProps) {
                 ×
               </button>
             </div>
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1">
               <Form
                 className="w-full bg-transparent border-0 shadow-none p-0"
                 onSubmit={async (e) => {
@@ -153,56 +153,35 @@ export default function EditStudent({ student }: EditStudentProps) {
               >
                 <DisplayError error={error as any} />
                 <fieldset disabled={loading} aria-busy={loading}>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="name"
-                      className="block text-white font-semibold mb-1"
-                    >
-                      Name
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={inputs.name || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 rounded border bg-white text-gray-900"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="ta"
-                      className="block text-white font-semibold mb-1"
-                    >
-                      TA
-                    </label>
-                    <select
-                      id="ta"
-                      name="ta"
-                      value={inputs.ta}
-                      onChange={handleChange}
-                      className="w-full p-2 rounded border bg-white text-gray-900"
-                    >
-                      {teacherList.map((item: Teacher) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {Array.from({ length: NUMBER_OF_BLOCKS }, (_, i) => (
-                    <div key={`block${i + 1}`} className="mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="mb-4">
                       <label
-                        htmlFor={`block${i + 1}`}
+                        htmlFor="name"
                         className="block text-white font-semibold mb-1"
                       >
-                        Block {i + 1}
+                        Name
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={inputs.name || ''}
+                        onChange={handleChange}
+                        className="w-full p-2 rounded border bg-white text-gray-900"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="ta"
+                        className="block text-white font-semibold mb-1"
+                      >
+                        TA
                       </label>
                       <select
-                        id={`block${i + 1}`}
-                        name={`block${i + 1}`}
-                        value={inputs[`block${i + 1}`]}
+                        id="ta"
+                        name="ta"
+                        value={inputs.ta}
                         onChange={handleChange}
                         className="w-full p-2 rounded border bg-white text-gray-900"
                       >
@@ -213,7 +192,30 @@ export default function EditStudent({ student }: EditStudentProps) {
                         ))}
                       </select>
                     </div>
-                  ))}
+                    {Array.from({ length: NUMBER_OF_BLOCKS }, (_, i) => (
+                      <div key={`block${i + 1}`} className="mb-4">
+                        <label
+                          htmlFor={`block${i + 1}`}
+                          className="block text-white font-semibold mb-1"
+                        >
+                          Block {i + 1}
+                        </label>
+                        <select
+                          id={`block${i + 1}`}
+                          name={`block${i + 1}`}
+                          value={inputs[`block${i + 1}`]}
+                          onChange={handleChange}
+                          className="w-full p-2 rounded border bg-white text-gray-900"
+                        >
+                          {teacherList.map((item: Teacher) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
                   <div className="flex gap-2 mt-6">
                     <button type="submit" className="flex-1">
                       + Publish

@@ -82,7 +82,28 @@ const COMMUNICATOR_QUERY_MUTATION = gql`
 `;
 
 const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
-  query QueryCommunicatorMessageList {
+  query QueryCommunicatorMessageList($userId: ID) {
+    communicatorChats(where: { user: { id: { equals: $userId } } }) {
+      id
+      question
+      explanation
+      graphqlQuery
+      timestamp
+      createdAt
+      iterations
+      evaluationScore
+      rawData
+      model
+      userRating
+      userComment
+      errorMessage
+      hasError
+    }
+  }
+`;
+
+const QUERY_ALL_COMMUNICATOR_MESSAGES = gql`
+  query QueryAllCommunicatorMessages {
     communicatorChats {
       id
       question
@@ -150,17 +171,28 @@ const CommunicatorChat: NextPage = () => {
   const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(
     null,
   );
+  const [copied, setCopied] = useState<boolean>(false);
+  const [detailsTab, setDetailsTab] = useState<'query' | 'rawData'>('query');
+
+  const isSuperAdmin = isAllowed(me, 'isSuperAdmin');
+  const queryToUse = isSuperAdmin
+    ? QUERY_ALL_COMMUNICATOR_MESSAGES
+    : QUERY_COMMUNICATOR_MESSAGE_LIST;
+  const queryVariables = isSuperAdmin ? {} : { userId: me?.id || '' };
 
   const {
     data: messagesData,
     isLoading: messagesLoading,
     refetch: refetchMessages,
   } = useGQLQuery<CommunicatorMessageListData>(
-    'communicatorMessages',
-    QUERY_COMMUNICATOR_MESSAGE_LIST,
-    {},
+    `communicatorMessages-${isSuperAdmin ? 'all' : me?.id || ''}`,
+    queryToUse,
+    queryVariables,
     {
-      enabled: !!me && isAllowed(me, 'isCommunicatorEnabled'),
+      enabled:
+        !!me &&
+        isAllowed(me, 'isCommunicatorEnabled') &&
+        (isSuperAdmin || !!me.id),
       staleTime: 30 * 1000, // 30 seconds
     },
   );
@@ -654,80 +686,29 @@ const CommunicatorChat: NextPage = () => {
                   {queryResponse.hasError !== 'true' &&
                     !queryResponse.error && (
                       <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-300 dark:border-gray-600">
-                        {queryResponse.graphqlQuery && (
-                          <button
-                            onClick={() => {
-                              setDetailsField('graphqlQuery');
-                              setShowDetailsModal(true);
-                            }}
-                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                            title="View GraphQL Query"
-                          >
-                            <span className="text-xl">🔍</span>
-                            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                              GraphQL Query
-                            </span>
-                          </button>
-                        )}
                         {queryResponse.iterations !== undefined && (
-                          <button
-                            onClick={() => {
-                              setDetailsField('iterations');
-                              setShowDetailsModal(true);
-                            }}
-                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
-                            title={`Iterations: ${queryResponse.iterations}`}
-                          >
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                             <span className="text-xl">🔄</span>
                             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
                               Iterations: {queryResponse.iterations}
                             </span>
-                          </button>
+                          </div>
                         )}
                         {queryResponse.evaluationScore !== undefined && (
-                          <button
-                            onClick={() => {
-                              setDetailsField('evaluationScore');
-                              setShowDetailsModal(true);
-                            }}
-                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-                            title={`Evaluation Score: ${queryResponse.evaluationScore}`}
-                          >
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                             <span className="text-xl">⭐</span>
                             <span className="text-sm font-medium text-green-900 dark:text-green-100">
                               Score: {queryResponse.evaluationScore}
                             </span>
-                          </button>
-                        )}
-                        {queryResponse.rawData && (
-                          <button
-                            onClick={() => {
-                              setDetailsField('rawData');
-                              setShowDetailsModal(true);
-                            }}
-                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
-                            title="View Raw Data"
-                          >
-                            <span className="text-xl">📊</span>
-                            <span className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                              Raw Data
-                            </span>
-                          </button>
+                          </div>
                         )}
                         {queryResponse.model && (
-                          <button
-                            onClick={() => {
-                              setDetailsField('model');
-                              setShowDetailsModal(true);
-                            }}
-                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
-                            title={`Model: ${queryResponse.model}`}
-                          >
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
                             <span className="text-xl">🤖</span>
                             <span className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
                               {queryResponse.model}
                             </span>
-                          </button>
+                          </div>
                         )}
                         {queryResponse.timestamp && (
                           <button
@@ -741,6 +722,27 @@ const CommunicatorChat: NextPage = () => {
                             <span className="text-xl">🕐</span>
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               Timestamp
+                            </span>
+                          </button>
+                        )}
+                        {(queryResponse.graphqlQuery ||
+                          queryResponse.rawData) && (
+                          <button
+                            onClick={() => {
+                              setDetailsField('data');
+                              setDetailsTab(
+                                queryResponse.graphqlQuery
+                                  ? 'query'
+                                  : 'rawData',
+                              );
+                              setShowDetailsModal(true);
+                            }}
+                            className="group relative flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                            title="View GraphQL Query and Raw Data"
+                          >
+                            <span className="text-xl">📊</span>
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                              Data
                             </span>
                           </button>
                         )}
@@ -926,74 +928,125 @@ const CommunicatorChat: NextPage = () => {
                 onClose={() => {
                   setShowDetailsModal(false);
                   setDetailsField(null);
+                  setCopied(false);
+                  setDetailsTab('query');
                 }}
                 title={
-                  detailsField === 'graphqlQuery'
-                    ? 'GraphQL Query'
-                    : detailsField === 'iterations'
-                      ? 'Iterations'
-                      : detailsField === 'evaluationScore'
-                        ? 'Evaluation Score'
-                        : detailsField === 'rawData'
-                          ? 'Raw Data'
-                          : detailsField === 'model'
-                            ? 'Model'
-                            : detailsField === 'timestamp'
-                              ? 'Timestamp'
-                              : 'Details'
+                  detailsField === 'data'
+                    ? 'Data'
+                    : detailsField === 'timestamp'
+                      ? 'Timestamp'
+                      : 'Details'
                 }
                 size="lg"
               >
                 <div className="space-y-4">
-                  {detailsField === 'graphqlQuery' &&
-                    queryResponse?.graphqlQuery && (
-                      <div>
-                        <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm">
-                          <code>{queryResponse.graphqlQuery}</code>
-                        </pre>
+                  {/* Show tabs if both graphqlQuery and rawData are available */}
+                  {detailsField === 'data' &&
+                    queryResponse?.graphqlQuery &&
+                    queryResponse?.rawData && (
+                      <div className="flex border-b border-gray-200 dark:border-gray-700">
+                        <button
+                          onClick={() => setDetailsTab('query')}
+                          className={`px-4 py-2 font-medium text-sm transition-colors ${
+                            detailsTab === 'query'
+                              ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                          }`}
+                        >
+                          GraphQL Query
+                        </button>
+                        <button
+                          onClick={() => setDetailsTab('rawData')}
+                          className={`px-4 py-2 font-medium text-sm transition-colors ${
+                            detailsTab === 'rawData'
+                              ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                          }`}
+                        >
+                          Raw Data
+                        </button>
                       </div>
                     )}
-                  {detailsField === 'iterations' &&
-                    queryResponse?.iterations !== undefined && (
-                      <div>
-                        <p className="text-lg font-semibold mb-2">
-                          Number of Iterations: {queryResponse.iterations}
-                        </p>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          This indicates how many iterations the query took to
-                          complete.
-                        </p>
-                      </div>
-                    )}
-                  {detailsField === 'evaluationScore' &&
-                    queryResponse?.evaluationScore !== undefined && (
-                      <div>
-                        <p className="text-lg font-semibold mb-2">
-                          Evaluation Score: {queryResponse.evaluationScore}
-                        </p>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          This score represents the quality or accuracy of the
-                          response.
-                        </p>
-                      </div>
-                    )}
-                  {detailsField === 'rawData' && queryResponse?.rawData && (
-                    <div>
-                      <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm max-h-[60vh] overflow-y-auto">
-                        <code>
-                          {JSON.stringify(queryResponse.rawData, null, 2)}
-                        </code>
-                      </pre>
+
+                  {detailsField === 'data' && (
+                    <div className="flex justify-end mb-2">
+                      <button
+                        onClick={async () => {
+                          let textToCopy = '';
+                          if (
+                            detailsTab === 'query' &&
+                            queryResponse?.graphqlQuery
+                          ) {
+                            textToCopy = queryResponse.graphqlQuery;
+                          } else if (
+                            detailsTab === 'rawData' &&
+                            queryResponse?.rawData
+                          ) {
+                            textToCopy = JSON.stringify(
+                              queryResponse.rawData,
+                              null,
+                              2,
+                            );
+                          }
+                          try {
+                            await navigator.clipboard.writeText(textToCopy);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          } catch (err) {
+                            console.error('Failed to copy:', err);
+                          }
+                        }}
+                        className="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
+                      >
+                        {copied ? (
+                          <>
+                            <span>✓</span>
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>📋</span>
+                            <span>Copy to Clipboard</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
-                  {detailsField === 'model' && queryResponse?.model && (
-                    <div>
-                      <p className="text-lg font-semibold mb-2">
-                        Model Used: {queryResponse.model}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        This is the AI model that generated the response.
-                      </p>
+                  {detailsField === 'data' && (
+                    <div className="relative">
+                      {detailsTab === 'query' &&
+                        queryResponse?.graphqlQuery && (
+                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
+                            <code className="text-gray-900 dark:text-gray-100">
+                              {queryResponse.graphqlQuery}
+                            </code>
+                          </pre>
+                        )}
+                      {detailsTab === 'rawData' && queryResponse?.rawData && (
+                        <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
+                          <code className="text-gray-900 dark:text-gray-100">
+                            {JSON.stringify(queryResponse.rawData, null, 2)}
+                          </code>
+                        </pre>
+                      )}
+                      {/* If only one is available, show it regardless of tab */}
+                      {!queryResponse?.graphqlQuery &&
+                        queryResponse?.rawData && (
+                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
+                            <code className="text-gray-900 dark:text-gray-100">
+                              {JSON.stringify(queryResponse.rawData, null, 2)}
+                            </code>
+                          </pre>
+                        )}
+                      {queryResponse?.graphqlQuery &&
+                        !queryResponse?.rawData && (
+                          <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-[70vh] overflow-y-auto">
+                            <code className="text-gray-900 dark:text-gray-100">
+                              {queryResponse.graphqlQuery}
+                            </code>
+                          </pre>
+                        )}
                     </div>
                   )}
                   {detailsField === 'timestamp' && queryResponse?.timestamp && (
