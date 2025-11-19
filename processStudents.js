@@ -21,7 +21,7 @@ const emailCorrections = {
     "jessey-jaymes.charest@ncsuvt.org": "jesseyjaymes.charest@ncsuvt.org",
     "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
     "joey.iii@ncsuvt.org": "joseph.valenti@ncsuvt.org",
-    "hector.figueroa@ncsuvt.org": " hectorm.figueroa@ncsuvt.org",
+    "hector.figueroa@ncsuvt.org": "hectorm.figueroa@ncsuvt.org",
 };
 
 // Function to validate email format
