@@ -305,12 +305,11 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
     const fetchWithRetry = async (retries = 3, delay = 1000) => {
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          const jwt = new google.auth.JWT(
-            credentials.client_email,
-            undefined,
-            credentials.private_key,
-            scopes,
-          );
+          const jwt = new google.auth.JWT({
+            email: credentials.client_email,
+            key: credentials.private_key,
+            scopes: scopes,
+          });
 
           const calendar = await google.calendar({
             version: 'v3',

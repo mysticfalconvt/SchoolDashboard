@@ -120,12 +120,11 @@ const getCalendarData = async (): Promise<CalendarEvent[]> => {
     const fetchWithRetry = async (retries = 3, delay = 1000) => {
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          const jwt = new google.auth.JWT(
-            credentials.client_email,
-            undefined,
-            credentials.private_key,
-            scopes,
-          );
+          const jwt = new google.auth.JWT({
+            email: credentials.client_email,
+            key: credentials.private_key,
+            scopes: scopes,
+          });
 
           const loginAuth = google.auth.fromJSON(credentials);
           const calendar = await (google as any).calendar({
@@ -246,7 +245,7 @@ export const getStaticProps: GetStaticProps<CalendarPageProps> = async (
     // Use smart GraphQL client with automatic retry and fallback
     const fetchAllCalendars = async () => smartGraphqlClient.request(GET_CALENDARS);
     const initialCalendarDates = await fetchAllCalendars();
-    console.log('initialCalendarDates', initialCalendarDates);
+    // console.log('initialCalendarDates', initialCalendarDates);
     const initialGoogleCalendarEvents = await getCalendarData();
     return {
       props: {

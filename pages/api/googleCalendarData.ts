@@ -30,12 +30,11 @@ export const getCalendarData = async (
 
   const credentials = JSON.parse(process.env.CREDENTIALS || '');
 
-  const jwt = new google.auth.JWT(
-    credentials.client_email,
-    undefined,
-    credentials.private_key,
-    scopes,
-  );
+  const jwt = new google.auth.JWT({
+    email: credentials.client_email,
+    key: credentials.private_key,
+    scopes: scopes,
+  });
 
   const calendar = await google.calendar({
     version: 'v3',
