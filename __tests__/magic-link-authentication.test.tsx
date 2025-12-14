@@ -400,10 +400,13 @@ describe('Magic Link Authentication Flow', () => {
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
+        headers: {
+          get: jest.fn().mockReturnValue('application/json'),
+        },
       });
 
       await expect(client.request('query { test }')).rejects.toThrow(
-        'GraphQL request failed: Unauthorized',
+        'GraphQL request failed: 401 Unauthorized',
       );
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
     });

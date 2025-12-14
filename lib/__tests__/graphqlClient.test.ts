@@ -174,6 +174,7 @@ describe('GraphQLClient', () => {
     it('throws error on non-OK response', async () => {
       const mockResponse = {
         ok: false,
+        status: 400,
         statusText: 'Bad Request',
         headers: {
           get: jest.fn().mockReturnValue('application/json'),
@@ -184,7 +185,7 @@ describe('GraphQLClient', () => {
 
       const query = 'query { users { id } }';
 
-      await expect(client.request(query)).rejects.toThrow('GraphQL request failed: Bad Request');
+      await expect(client.request(query)).rejects.toThrow('GraphQL request failed: 400 Bad Request');
     });
 
     it('throws error on non-JSON response', async () => {
