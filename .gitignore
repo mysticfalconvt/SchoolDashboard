@@ -39,5 +39,5 @@ yarn-error.log*
 
 # TypeScript build cache
 tsconfig.tsbuildinfo
-studentList.json
-students.json
+students_input.json
+students_output.json

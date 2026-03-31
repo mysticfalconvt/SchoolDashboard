@@ -22,6 +22,7 @@ const emailCorrections = {
     "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
     "joey.iii@ncsuvt.org": "joseph.valenti@ncsuvt.org",
     "hector.figueroa@ncsuvt.org": "hectorm.figueroa@ncsuvt.org",
+    "dre.duran@ncsuvt.org": "andres.duran@ncsuvt.org",
 };
 
 // Function to validate email format
@@ -71,10 +72,10 @@ function cleanStudent(student, emailChanges, nullBlocksRemoved, appliedCorrectio
 function processStudents() {
     try {
         // Read the input file
-        const inputPath = path.join(__dirname, 'studentList.json');
-        const outputPath = path.join(__dirname, 'students.json');
+        const inputPath = path.join(__dirname, 'students_input.json');
+        const outputPath = path.join(__dirname, 'students_output.json');
 
-        console.log('Reading studentList.json...');
+        console.log('Reading students_input.json...');
         const rawData = fs.readFileSync(inputPath, 'utf8');
         const students = JSON.parse(rawData);
 
