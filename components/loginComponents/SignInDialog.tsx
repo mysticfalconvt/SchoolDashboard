@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent } from '../styles/Dialog';
 import { useUser } from '../User';
+import GoogleSignIn from './GoogleSignIn';
 import MagicLinkSignIn from './MagicLinkSignIn';
 
 interface SignInDialogProps {
@@ -56,6 +57,14 @@ const SignInDialog: React.FC<SignInDialogProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+          <GoogleSignIn />
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-white/20" />
+            <span className="text-white/60 text-sm">or</span>
+            <div className="flex-1 h-px bg-white/20" />
+          </div>
+
           <MagicLinkSignIn />
         </div>
 

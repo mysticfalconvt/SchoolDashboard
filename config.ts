@@ -57,3 +57,8 @@ export const CHROMEBOOK_CHECK_MIN_DAYS: number = Number(
 // Server-side GraphQL authorization header
 export const GRAPHQL_AUTHORIZATION: string =
   process.env.API_KEY_KEYSTONE || 'test auth for keystone';
+
+// Google Sign-In: OAuth 2.0 Web client ID (public). Must match the backend's
+// GOOGLE_OAUTH_CLIENT_ID. When empty, the Google sign-in button is hidden.
+export const GoogleClientId: string =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
