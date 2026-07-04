@@ -248,6 +248,11 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
                     Data Table
                   </SmallGradientButton>
                 </Link>
+                <Link href="/PbisCardEntryHistory">
+                  <SmallGradientButton title="Card Entry History">
+                    Card Entry History
+                  </SmallGradientButton>
+                </Link>
               </>
             )}
             {isAllowed(me, 'isStaff') && (

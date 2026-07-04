@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NUMBER_OF_BLOCKS } from '../../config';
+import AssignmentHistory from './AssignmentHistory';
 
 interface AssignmentData {
   block1Assignment?: string;
@@ -42,9 +43,20 @@ interface AssignmentViewCardsProps {
 const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
   assignments,
 }) => {
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyBlock, setHistoryBlock] = useState<number>();
+  const teacherId = assignments?.id as string | undefined;
+
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
       <h3 className="m-2">Current Class Assignments</h3>
+      {showHistory && historyBlock && teacherId && (
+        <AssignmentHistory
+          teacherId={teacherId}
+          block={historyBlock}
+          hide={setShowHistory}
+        />
+      )}
       <div
         className="grid grid-cols-1 md:grid-cols-[repeat(var(--num-blocks),minmax(0,1fr))]"
         style={{ '--num-blocks': NUMBER_OF_BLOCKS } as React.CSSProperties}
@@ -76,6 +88,18 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
                     .split(',')[0]
                 }
               </p> */}
+              {teacherId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryBlock(num);
+                    setShowHistory(true);
+                  }}
+                  className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+                >
+                  History
+                </button>
+              )}
             </div>
           );
         })}

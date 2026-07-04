@@ -4,6 +4,7 @@ import { NUMBER_OF_BLOCKS } from '../../config';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../Loading';
 import { useUser } from '../User';
+import AssignmentHistory from './AssignmentHistory';
 import MessageUpdater from './AssignmentUpdater';
 
 interface AssignmentData {
@@ -85,6 +86,8 @@ const TeacherAssignments: React.FC = () => {
   const me = useUser();
   const [showUpdater, setShowUpdater] = useState(false);
   const [block, setBlock] = useState<number>();
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyBlock, setHistoryBlock] = useState<number>();
 
   // get messages data
   const { data, isLoading, error, refetch } = useGQLQuery(
@@ -106,6 +109,13 @@ const TeacherAssignments: React.FC = () => {
           refetch={async () => {
             await refetch();
           }}
+        />
+      )}
+      {showHistory && historyBlock && me?.id && (
+        <AssignmentHistory
+          teacherId={me.id}
+          block={historyBlock}
+          hide={setShowHistory}
         />
       )}
       <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
@@ -148,6 +158,17 @@ const TeacherAssignments: React.FC = () => {
                       .split(',')[0]
                   }
                 </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHistoryBlock(num);
+                    setShowHistory(true);
+                  }}
+                  className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+                >
+                  History
+                </button>
               </div>
             );
           })}
