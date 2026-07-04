@@ -42,6 +42,11 @@ export const limitCallbackToAssigner: boolean =
   false;
 export const disciplineDisabled: boolean =
   process.env.NEXT_PUBLIC_DISCIPLINE_DISABLED === 'true' || false;
+// Dev tool: show the "Impersonate" button. Only in a development build, and
+// must ALSO be enabled on the backend via ALLOW_IMPERSONATION. Never in prod.
+export const allowImpersonation: boolean =
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_ALLOW_IMPERSONATION?.toLowerCase() === 'true';
 
 export const NUMBER_OF_BLOCKS: number = Number(
   process.env.NEXT_PUBLIC_NUMBER_OF_BLOCKS || 5,

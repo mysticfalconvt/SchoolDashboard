@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Loading from '../../components/Loading';
 import { useUser } from '../../components/User';
 import EditStudent from '../../components/users/EditStudent';
+import ImpersonateButton from '../../components/users/ImpersonateButton';
 import ViewParentPage from '../../components/users/ViewParentPage';
 import ViewStudentPage from '../../components/users/ViewStudentPage';
 import ViewTeacherPage from '../../components/users/ViewTeacherPage';
@@ -155,6 +156,7 @@ const UserProfile: NextPage<UserProfilePageProps> = ({ query }) => {
             {isStudent && <EditStudent student={user as any} />}
             {/* <SendParentEmailSignupButton student={user} /> */}
             {/* <ResetPasswordToPassword userID={query.id} /> */}
+            <ImpersonateButton userId={user.id} userName={user.name} />
           </>
         )}
       </div>

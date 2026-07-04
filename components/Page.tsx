@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ToastBar, Toaster, toast } from 'react-hot-toast';
 import SignInDialog from './loginComponents/SignInDialog';
 import Header from './navagation/Header';
+import ImpersonationBanner from './users/ImpersonationBanner';
 import ThemeSwitcher from './styles/ThemeSwitcher';
 import { useUser } from './User';
 
@@ -66,6 +67,7 @@ export default function Page({ children }: PageProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
+      <ImpersonationBanner />
       <ThemeSwitcher theme={theme} setTheme={setLocalTheme} />
 
       {/* Show SignInDialog when user is not authenticated, but not on loginLink page */}
