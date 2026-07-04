@@ -2,9 +2,7 @@ import gql from 'graphql-tag';
 import { GetServerSideProps, NextPage } from 'next';
 import { useMemo } from 'react';
 import CallbackTable from '../../components/Callback/CallbackTable';
-import ChromebookCheck, {
-  GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY,
-} from '../../components/Chromebooks/ChromebookCheck';
+import { GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY } from '../../components/Chromebooks/ChromebookCheck';
 import DisplayError from '../../components/ErrorMessage';
 import Loading from '../../components/Loading';
 import CountPhysicalCards from '../../components/PBIS/CountPhysicalCards';
@@ -290,7 +288,6 @@ const TA: NextPage<TaPageProps> = ({ query }) => {
           {isAllowedPbisCardCounting && (
             <div className="flex items-center gap-4 mb-6">
               <CountPhysicalCards taStudents={students} refetch={refetch} />
-              <ChromebookCheck teacherId={query.id} />
             </div>
           )}
 

@@ -35,6 +35,11 @@ export const fallbackBackendEndpoint: string =
 export const perPage: number = 4;
 export const callbackDisabled: boolean =
   process.env.NEXT_PUBLIC_CALLBACK_DISABLED?.toLowerCase() === 'true' || false;
+// When true, callback is limited to the assigning teacher / related staff.
+// When absent or false (the default), all staff can see callback.
+export const limitCallbackToAssigner: boolean =
+  process.env.NEXT_PUBLIC_LIMIT_CALLBACK_TO_ASSIGNER?.toLowerCase() === 'true' ||
+  false;
 export const disciplineDisabled: boolean =
   process.env.NEXT_PUBLIC_DISCIPLINE_DISABLED === 'true' || false;
 

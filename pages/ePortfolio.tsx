@@ -54,7 +54,7 @@ interface EPortfolioPageProps {
 
 const EPortfolio: NextPage<EPortfolioPageProps> = (props) => {
   const me = useUser();
-  const editor = isAllowed(me, 'canManageLinks');
+  const editor = isAllowed(me, 'isSuperAdmin') || isAllowed(me, 'canManagePbis');
   const hiddenColumns = editor ? [] : ['Edit'];
   const [visibleForm, setVisibleForm] = useState('');
   const { data, isLoading, error, refetch } = useGQLQuery(

@@ -279,7 +279,7 @@ const EditLink: React.FC<EditLinkProps> = ({
             <button type="submit" className="mt-6">
               + Publish
             </button>
-            {user?.isSuperAdmin ? (
+            {user?.isSuperAdmin || user?.canManagePbis ? (
               <button
                 type="button"
                 onClick={async () => {

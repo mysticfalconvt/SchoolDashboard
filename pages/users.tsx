@@ -6,7 +6,7 @@ import DisplayError from '../components/ErrorMessage';
 import GradientButton from '../components/styles/Button';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
-import { callbackDisabled } from '../config';
+import { callbackDisabled, limitCallbackToAssigner } from '../config';
 import isAllowed from '../lib/isAllowed';
 import { lastNameCommaFirstName } from '../lib/lastNameCommaFirstName';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -365,15 +365,20 @@ const Users: NextPage = () => {
     );
   }, [teachers]);
 
-  const hiddenColumns =
-    callbackDisabled || !me?.canSeeAllCallback
-      ? [
-          'callbackCount',
-          'totalCallback',
-          'callbackItemsCount',
-          'averageTimeToCompleteCallback',
-        ]
-      : [];
+  // Show callback columns to staff by default; only restrict to canSeeAllCallback
+  // users when callback limiting is enabled.
+  const canSeeCallbackColumns =
+    !callbackDisabled &&
+    me?.isStaff &&
+    (!limitCallbackToAssigner || me?.canSeeAllCallback);
+  const hiddenColumns = canSeeCallbackColumns
+    ? []
+    : [
+        'callbackCount',
+        'totalCallback',
+        'callbackItemsCount',
+        'averageTimeToCompleteCallback',
+      ];
 
   if (!me?.isStaff) return <p>User does not have access</p>;
   // if (studentLoading) return <Loading />;
