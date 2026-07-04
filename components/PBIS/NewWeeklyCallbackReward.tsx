@@ -19,7 +19,11 @@ const CARDS_PER_STUDENT = 3;
 const RECENT_RUN_DAYS = 6;
 
 const GET_CALLBACK_REWARD_DATA = gql`
-  query GET_CALLBACK_REWARD_DATA($recentDate: DateTime) {
+  query GET_CALLBACK_REWARD_DATA {
+    lastRun: callbackRewardRuns(orderBy: { runDate: desc }, take: 1) {
+      id
+      runDate
+    }
     eligibleStudents: users(
       where: {
         AND: [
@@ -33,18 +37,43 @@ const GET_CALLBACK_REWARD_DATA = gql`
       name
       callbackCount
     }
-    recentRewardCount: pbisCardsCount(
+    ineligibleStudents: users(
       where: {
-        category: { equals: "callback" }
-        dateGiven: { gte: $recentDate }
+        AND: [
+          { isStudent: { equals: true } }
+          { callbackCount: { gte: ${CALLBACK_THRESHOLD} } }
+        ]
       }
-    )
+      orderBy: { name: asc }
+    ) {
+      id
+      name
+      callbackCount
+    }
   }
 `;
 
 const CREATE_CARDS_MUTATION = gql`
   mutation CREATE_CALLBACK_REWARD_CARDS($cards: [PbisCardCreateInput!]!) {
     createPbisCards(data: $cards) {
+      id
+    }
+  }
+`;
+
+const CREATE_CALLBACK_REWARD_RUN = gql`
+  mutation CREATE_CALLBACK_REWARD_RUN(
+    $eligible: [UserWhereUniqueInput!]!
+    $ineligible: [UserWhereUniqueInput!]!
+    $cardsAwarded: Int
+  ) {
+    createCallbackRewardRun(
+      data: {
+        eligibleStudents: { connect: $eligible }
+        ineligibleStudents: { connect: $ineligible }
+        cardsAwarded: $cardsAwarded
+      }
+    ) {
       id
     }
   }
@@ -65,24 +94,29 @@ export default function NewWeeklyCallbackReward() {
   const router = useRouter();
   const user = useUser();
 
-  const recentDate = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - RECENT_RUN_DAYS);
-    return d.toISOString();
-  }, []);
-
   const { data, isLoading } = useGQLQuery(
     'callbackRewardData',
     GET_CALLBACK_REWARD_DATA,
-    { recentDate },
+    {},
     { enabled: !!user && showForm },
   );
 
   const [createCards] = useGqlMutation(CREATE_CARDS_MUTATION);
+  const [createRewardRun] = useGqlMutation(CREATE_CALLBACK_REWARD_RUN);
 
   const eligibleStudents: EligibleStudent[] = data?.eligibleStudents || [];
+  const ineligibleStudents: EligibleStudent[] = data?.ineligibleStudents || [];
   const totalCards = eligibleStudents.length * CARDS_PER_STUDENT;
-  const hasRecentRun = (data?.recentRewardCount || 0) > 0;
+
+  // Warn if the last recorded run was fewer than RECENT_RUN_DAYS ago.
+  const lastRunDate: string | undefined = data?.lastRun?.[0]?.runDate;
+  const daysSinceLastRun = lastRunDate
+    ? Math.floor(
+        (Date.now() - new Date(lastRunDate).getTime()) / (1000 * 60 * 60 * 24),
+      )
+    : undefined;
+  const hasRecentRun =
+    daysSinceLastRun !== undefined && daysSinceLastRun < RECENT_RUN_DAYS;
 
   if (!user) {
     return (
@@ -116,7 +150,14 @@ export default function NewWeeklyCallbackReward() {
         category: 'callback',
       })),
     );
-    return createCards({ cards });
+    const result = await createCards({ cards });
+    // Record this run's yes/no results for the history heatmap.
+    await createRewardRun({
+      eligible: eligibleStudents.map((s) => ({ id: s.id })),
+      ineligible: ineligibleStudents.map((s) => ({ id: s.id })),
+      cardsAwarded: cards.length,
+    });
+    return result;
   };
 
   return (
@@ -165,9 +206,14 @@ export default function NewWeeklyCallbackReward() {
                     ⚠️ Warning: Recently run
                   </h3>
                   <p className="mt-2 text-sm text-yellow-100">
-                    The callback reward appears to have been run within the last{' '}
-                    {RECENT_RUN_DAYS} days. Are you sure you want to run it
-                    again?
+                    The callback reward was last run{' '}
+                    {daysSinceLastRun === 0
+                      ? 'today'
+                      : `${daysSinceLastRun} day${
+                          daysSinceLastRun === 1 ? '' : 's'
+                        } ago`}
+                    , which is fewer than {RECENT_RUN_DAYS} days ago. Are you
+                    sure you want to run it again?
                   </p>
                 </div>
               )}
@@ -233,6 +279,24 @@ export default function NewWeeklyCallbackReward() {
                       <p className="text-white text-sm">
                         No students are currently eligible.
                       </p>
+                    </div>
+                  )}
+
+                  {ineligibleStudents.length > 0 && (
+                    <div className="bg-red-600 bg-opacity-20 p-3 rounded">
+                      <h4 className="text-white font-semibold mb-2">
+                        Not eligible ({ineligibleStudents.length}) —{' '}
+                        {CALLBACK_THRESHOLD}+ active callbacks
+                      </h4>
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {ineligibleStudents.map((student) => (
+                          <div key={student.id} className="text-white text-sm">
+                            <strong>{student.name}</strong> —{' '}
+                            {student.callbackCount} active callback
+                            {student.callbackCount === 1 ? '' : 's'}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

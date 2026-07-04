@@ -263,6 +263,13 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
                 </SmallGradientButton>
               </Link>
             )}
+            {isAllowed(me, 'isStaff') && (
+              <Link href="/CallbackRewardHistory">
+                <SmallGradientButton title="Callback Reward History">
+                  Callback Reward History
+                </SmallGradientButton>
+              </Link>
+            )}
             {links?.map((link: PbisLink) => (
               <Link
                 key={link.id}
