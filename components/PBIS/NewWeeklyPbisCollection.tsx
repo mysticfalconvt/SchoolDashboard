@@ -266,7 +266,10 @@ export default function NewWeeklyPbisCollection() {
                   // Submit the inputfields to the backend:
                   if (inputs.confirmation === 'yes') {
                     setRunning(true);
-                    const res = await runCardCollection();
+                    // Commit exactly the random drawing winners shown in the preview
+                    const res = await runCardCollection(
+                      calculatedResults.randomDrawingWinners.map((w) => w.id),
+                    );
                     resetForm();
                     if (res) {
                       const revalidateRes = await sendRevalidationRequest();

@@ -196,7 +196,7 @@ interface PbisCollectionData {
 }
 
 interface UseV3PbisCollectionReturn {
-  runCardCollection: () => Promise<string>;
+  runCardCollection: (previewWinnerIds?: string[]) => Promise<string>;
   data: PbisCollectionData | undefined;
   setGetData: (get: boolean) => void;
   getData: boolean;
@@ -317,7 +317,9 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
     teacher.taStudents.reduce((acc, cur) => acc + cur.studentPbisCardsCount, 0),
   );
 
-  async function runCardCollection(): Promise<string> {
+  async function runCardCollection(
+    previewWinnerIds?: string[],
+  ): Promise<string> {
     setLoading(true);
     const collectionDate = new Date().toISOString();
     const cardsThisCollection = data?.pbisCardsCount || 0;
@@ -485,20 +487,26 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
             [],
           );
 
-          const randomDrawingWinnerIds: string[] = [];
-          // pick the winners
-          for (let i = 0; i < weeklyWinnerCount; i++) {
-            const ticketsWithoutPreviousWinners: string[] = shuffle(
-              tickets.filter(
-                (ticket: string) => !randomDrawingWinnerIds.includes(ticket),
-              ),
-            );
-            const winnerRandomNumber = Math.floor(
-              Math.random() * ticketsWithoutPreviousWinners.length,
-            );
-            const winnerId = ticketsWithoutPreviousWinners[winnerRandomNumber];
-            if (winnerId) {
-              randomDrawingWinnerIds.push(winnerId);
+          let randomDrawingWinnerIds: string[] = [];
+          if (previewWinnerIds && previewWinnerIds.length > 0) {
+            // Save exactly the winners shown in the preview.
+            randomDrawingWinnerIds = previewWinnerIds;
+          } else {
+            // Fallback: draw winners now (one ticket per card).
+            for (let i = 0; i < weeklyWinnerCount; i++) {
+              const ticketsWithoutPreviousWinners: string[] = shuffle(
+                tickets.filter(
+                  (ticket: string) => !randomDrawingWinnerIds.includes(ticket),
+                ),
+              );
+              const winnerRandomNumber = Math.floor(
+                Math.random() * ticketsWithoutPreviousWinners.length,
+              );
+              const winnerId =
+                ticketsWithoutPreviousWinners[winnerRandomNumber];
+              if (winnerId) {
+                randomDrawingWinnerIds.push(winnerId);
+              }
             }
           }
 

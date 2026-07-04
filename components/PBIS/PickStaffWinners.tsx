@@ -9,17 +9,26 @@ import GradientButton from '../styles/Button';
 import Form from '../styles/Form';
 import { useUser } from '../User';
 
-const GET_STAFF_AND_WINNERS_QUERY = gql`
-  query GET_STAFF_AND_WINNERS {
-    staff: users(where: { isStaff: { equals: true } }) {
-      id
-      name
-      email
-    }
+const GET_COLLECTIONS_QUERY = gql`
+  query GET_COLLECTIONS {
     pbisCollectionDates(orderBy: { collectionDate: desc }) {
       id
       collectionDate
       staffRandomWinners {
+        id
+        name
+        email
+      }
+    }
+  }
+`;
+
+// Staff cards given since the last collection — one ticket per card.
+const GET_STAFF_CARDS_SINCE_QUERY = gql`
+  query GET_STAFF_CARDS_SINCE($date: DateTime!) {
+    staffPbisCards(where: { dateGiven: { gt: $date } }) {
+      id
+      recipient {
         id
         name
         email
@@ -52,6 +61,7 @@ interface StaffMember {
   id: string;
   name: string;
   email?: string;
+  tickets?: number;
 }
 
 interface PreviousWinner {
@@ -69,12 +79,26 @@ export default function PickStaffWinners() {
 
   const user = useUser();
 
-  const { data, isLoading } = useGQLQuery(
-    'Staff and Winners',
-    GET_STAFF_AND_WINNERS_QUERY,
+  const { data: collectionsData, isLoading: collectionsLoading } = useGQLQuery(
+    'Staff Winner Collections',
+    GET_COLLECTIONS_QUERY,
     {},
     {},
   );
+
+  const lastCollectionDate =
+    collectionsData?.pbisCollectionDates?.[0]?.collectionDate ||
+    new Date(0).toISOString();
+
+  const { data: staffCardsData, isLoading: staffCardsLoading } = useGQLQuery(
+    'Staff Cards Since Collection',
+    GET_STAFF_CARDS_SINCE_QUERY,
+    { date: lastCollectionDate },
+    { enabled: !!collectionsData },
+  );
+
+  const data = collectionsData;
+  const isLoading = collectionsLoading || staffCardsLoading;
 
   const addStaffWinner = async (collectionId: string, staffId: string) => {
     const graphQLClient = new GraphQLClient(
@@ -92,24 +116,64 @@ export default function PickStaffWinners() {
     });
   };
 
-  const availableStaff = useMemo(() => {
+  // Staff who received staff cards since the last collection, weighted by the
+  // number of cards received (one ticket per card), excluding past winners.
+  const availableStaff = useMemo<StaffMember[]>(() => {
     if (!data || !showForm) {
       return [];
     }
 
-    const allStaff: StaffMember[] = data.staff || [];
     const allPreviousWinners: string[] = [];
-
-    // Get all previous staff winners
     data.pbisCollectionDates?.forEach((collection: any) => {
       collection.staffRandomWinners?.forEach((winner: PreviousWinner) => {
         allPreviousWinners.push(winner.id);
       });
     });
 
-    // Filter out staff who have already won
-    return allStaff.filter((staff) => !allPreviousWinners.includes(staff.id));
-  }, [showForm, data]);
+    const byRecipient: Record<string, StaffMember> = {};
+    (staffCardsData?.staffPbisCards || []).forEach((card: any) => {
+      const r = card.recipient;
+      if (!r || allPreviousWinners.includes(r.id)) return;
+      const existing =
+        byRecipient[r.id] ||
+        (byRecipient[r.id] = {
+          id: r.id,
+          name: r.name,
+          email: r.email,
+          tickets: 0,
+        });
+      existing.tickets = (existing.tickets || 0) + 1;
+    });
+
+    return Object.values(byRecipient).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+  }, [showForm, data, staffCardsData]);
+
+  // Build one ticket per card, then draw unique weighted winners.
+  const drawWeightedWinners = (numberOfWinners: number): StaffMember[] => {
+    const tickets: StaffMember[] = [];
+    availableStaff.forEach((staff) => {
+      for (let i = 0; i < (staff.tickets || 0); i++) tickets.push(staff);
+    });
+    const winners: StaffMember[] = [];
+    const chosen = new Set<string>();
+    while (winners.length < numberOfWinners && winners.length < availableStaff.length) {
+      if (tickets.length === 0) break;
+      const pick = tickets[Math.floor(Math.random() * tickets.length)];
+      if (!chosen.has(pick.id)) {
+        chosen.add(pick.id);
+        winners.push(pick);
+      }
+      // remove all tickets for the chosen staff to avoid reselection loops
+      if (chosen.has(pick.id)) {
+        for (let i = tickets.length - 1; i >= 0; i--) {
+          if (tickets[i].id === pick.id) tickets.splice(i, 1);
+        }
+      }
+    }
+    return winners;
+  };
 
   // Check if there are already staff winners in the latest collection
   const hasExistingWinners = useMemo(() => {
@@ -133,12 +197,7 @@ export default function PickStaffWinners() {
   }, [data?.pbisCollectionDates]);
 
   const pickRandomStaff = (numberOfWinners: number) => {
-    const shuffled = [...availableStaff].sort(() => 0.5 - Math.random());
-    const winners = shuffled.slice(
-      0,
-      Math.min(numberOfWinners, availableStaff.length),
-    );
-    setSelectedWinners(winners);
+    setSelectedWinners(drawWeightedWinners(numberOfWinners));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,15 +205,9 @@ export default function PickStaffWinners() {
     if (inputs.confirmation === 'yes') {
       setRunning(true);
 
-      const numberOfWinners = parseInt(inputs.numberOfWinners || '5', 10);
-
-      // Pick random staff
-      const shuffled = [...availableStaff].sort(() => 0.5 - Math.random());
-      const winners = shuffled.slice(
-        0,
-        Math.min(numberOfWinners, availableStaff.length),
-      );
-      setSelectedWinners(winners);
+      // Commit the winners already shown in the preview so what the admin
+      // sees is exactly what gets saved.
+      const winners = selectedWinners;
 
       // Get latest collection
       const latestCollection = data?.pbisCollectionDates?.[0];
@@ -248,20 +301,23 @@ export default function PickStaffWinners() {
                 <>
                   <div className="mb-6">
                     <h3 className="text-white text-lg font-semibold mb-3">
-                      Available Staff (Not Previously Won):
+                      Eligible Staff (received cards this period, not previously
+                      won):
                     </h3>
                     {availableStaff.length > 0 ? (
                       <div className="space-y-2 max-h-32 overflow-y-auto bg-white bg-opacity-10 p-3 rounded">
                         {availableStaff.map((staff) => (
                           <div key={staff.id} className="text-white text-sm">
                             <strong>{staff.name}</strong> (
-                            {staff.email || 'No email'})
+                            {staff.email || 'No email'}) — {staff.tickets || 0}{' '}
+                            card{(staff.tickets || 0) === 1 ? '' : 's'}
                           </div>
                         ))}
                       </div>
                     ) : (
                       <p className="text-white text-sm">
-                        All staff members have already won recently.
+                        No staff have received staff cards since the last
+                        collection (or all eligible staff have already won).
                       </p>
                     )}
                   </div>
@@ -269,7 +325,7 @@ export default function PickStaffWinners() {
                   {selectedWinners.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-white text-lg font-semibold mb-3">
-                        Selected Winners:
+                        Preview — Winners to be saved:
                       </h3>
                       <div className="space-y-2 bg-green-600 bg-opacity-20 p-3 rounded">
                         {selectedWinners.map((winner) => (
@@ -366,6 +422,21 @@ export default function PickStaffWinners() {
                         />
                       </label>
 
+                      <button
+                        type="button"
+                        onClick={() =>
+                          pickRandomStaff(
+                            parseInt(inputs.numberOfWinners || '5', 10),
+                          )
+                        }
+                        disabled={availableStaff.length === 0}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      >
+                        {selectedWinners.length > 0
+                          ? 'Re-roll Winners'
+                          : 'Preview Winners'}
+                      </button>
+
                       <label
                         htmlFor="confirmation"
                         className="block text-white font-semibold mb-1 mt-4"
@@ -392,13 +463,18 @@ export default function PickStaffWinners() {
                       <button
                         type="submit"
                         className="mt-6"
-                        disabled={availableStaff.length === 0}
+                        disabled={
+                          availableStaff.length === 0 ||
+                          selectedWinners.length === 0
+                        }
                       >
                         {running
-                          ? 'Picking Winners...'
-                          : hasExistingWinners
-                            ? 'Add More Staff Winners'
-                            : 'Pick Staff Winners'}
+                          ? 'Saving Winners...'
+                          : selectedWinners.length === 0
+                            ? 'Preview winners first'
+                            : hasExistingWinners
+                              ? 'Save These Staff Winners (adds to existing)'
+                              : 'Save These Staff Winners'}
                       </button>
                     </fieldset>
                   </Form>

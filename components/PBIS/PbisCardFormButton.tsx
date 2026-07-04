@@ -1,12 +1,15 @@
 import useCreateMessage from '@/components/Messages/useCreateMessage';
 import SearchForUserName from '@/components/SearchForUserName';
-import GradientButton from '@/components/styles/Button';
+import GradientButton, {
+  SmallGradientButton,
+} from '@/components/styles/Button';
 import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const CREATE_PBIS_CARD = gql`
   mutation CREATE_QUICK_PBIS(
@@ -34,6 +37,29 @@ const CREATE_PBIS_CARD = gql`
   }
 `;
 
+const CREATE_STAFF_PBIS_CARD = gql`
+  mutation CREATE_STAFF_PBIS_CARD(
+    $giver: ID!
+    $recipient: ID!
+    $message: String
+    $category: String
+  ) {
+    createStaffPbisCard(
+      data: {
+        giver: { connect: { id: $giver } }
+        recipient: { connect: { id: $recipient } }
+        cardMessage: $message
+        category: $category
+      }
+    ) {
+      id
+      recipient {
+        name
+      }
+    }
+  }
+`;
+
 interface FormInputs {
   message: string;
   category?: string;
@@ -43,6 +69,8 @@ interface FormInputs {
 interface User {
   id: string;
   name: string;
+  isStaff?: boolean;
+  isStudent?: boolean;
 }
 
 interface StudentUser {
@@ -65,14 +93,63 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
   const [studentCardIsFor, setStudentCardIsFor] = useState<
     StudentUser | undefined
   >();
-  const [createCard, { loading, error, data }] =
-    useGqlMutation(CREATE_PBIS_CARD);
+  // Students may only give cards to staff. Staff can toggle between giving a
+  // regular card to a student or a staff card to another staff member.
+  const isStudentGiver = !!me?.isStudent && !me?.isStaff;
+  const [recipientType, setRecipientType] = useState<'isStudent' | 'isStaff'>(
+    isStudentGiver ? 'isStaff' : 'isStudent',
+  );
+  const isStaffCard = recipientType === 'isStaff';
+
+  const [createCard] = useGqlMutation(CREATE_PBIS_CARD);
+  const [createStaffCard] = useGqlMutation(CREATE_STAFF_PBIS_CARD);
   const createMessage = useCreateMessage();
 
-  if (error) {
-    console.log(error);
-    return <p>{error.message}</p>;
-  }
+  const clearRecipient = () => {
+    setStudentCardIsFor(undefined);
+    handleChange({
+      target: { name: 'studentName', value: '' },
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+
+  const messageMissing = !inputs.message || inputs.message.trim() === '';
+  // A category is always required. Staff cards additionally require a comment.
+  const submitDisabled = isStaffCard
+    ? !studentCardIsFor || !inputs.category || messageMissing
+    : !studentCardIsFor || !inputs.category;
+
+  const handleGiveCard = async () => {
+    if (!studentCardIsFor) return;
+    try {
+      if (isStaffCard) {
+        await createStaffCard({
+          giver: teacher,
+          recipient: studentCardIsFor.userId,
+          message: inputs.message,
+          category: inputs.category,
+        });
+      } else {
+        await createCard({
+          teacher,
+          student: studentCardIsFor.userId,
+          message: inputs.message,
+          category: inputs.category,
+        });
+      }
+      await createMessage({
+        subject: isStaffCard ? 'New Staff PBIS Card' : 'New PBIS Card',
+        message: inputs.message,
+        receiver: studentCardIsFor.userId || '',
+        link: '',
+      });
+      toast.success(`Gave ${studentCardIsFor.userName} a PBIS card`);
+      clearRecipient();
+      onClose();
+    } catch (err: any) {
+      // Surface backend validation errors (daily limit / missing comment).
+      toast.error(err?.message || 'Could not give the PBIS card.');
+    }
+  };
 
   return (
     <Dialog
@@ -87,22 +164,52 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
         <div className="space-y-4">
           <div className="mb-2">
             <p className="text-white/80 text-sm">
-              Create a PBIS card for a student
+              {isStaffCard
+                ? 'Create a PBIS card for a staff member (a comment is required)'
+                : 'Create a PBIS card for a student'}
             </p>
           </div>
+
+          {/* Staff can choose to card a student or a staff member */}
+          {!isStudentGiver && (
+            <div className="flex justify-center gap-2">
+              <SmallGradientButton
+                type="button"
+                onClick={() => {
+                  setRecipientType('isStudent');
+                  clearRecipient();
+                }}
+                style={recipientType === 'isStudent' ? {} : { opacity: 0.5 }}
+              >
+                Give to Student
+              </SmallGradientButton>
+              <SmallGradientButton
+                type="button"
+                onClick={() => {
+                  setRecipientType('isStaff');
+                  clearRecipient();
+                }}
+                style={recipientType === 'isStaff' ? {} : { opacity: 0.5 }}
+              >
+                Give to Staff
+              </SmallGradientButton>
+            </div>
+          )}
+
           <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
             <div className="space-y-6">
               <div className="form-control">
                 <label className="label pb-2">
                   <span className="label-text text-white font-medium text-base">
-                    Select Student
+                    {isStaffCard ? 'Select Staff' : 'Select Student'}
                   </span>
                 </label>
                 <SearchForUserName
+                  key={recipientType}
                   name="studentName"
                   value={inputs.studentName}
                   updateUser={setStudentCardIsFor}
-                  userType="isStudent"
+                  userType={recipientType}
                 />
               </div>
 
@@ -115,7 +222,7 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
                 <textarea
                   id="message"
                   name="message"
-                  placeholder="Student Message"
+                  placeholder={isStaffCard ? 'Message for staff' : 'Student Message'}
                   value={inputs.message}
                   onChange={handleChange}
                   className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-[5rem]"
@@ -185,48 +292,20 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-            <button
+          <div className="flex justify-end items-center gap-2 pt-4 border-t border-white/10">
+            <SmallGradientButton
               type="button"
-              disabled={!studentCardIsFor || !inputs.category}
-              className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
-              style={{
-                background:
-                  !studentCardIsFor || !inputs.category
-                    ? '#666'
-                    : 'linear-gradient(135deg, #760D08, #38B6FF)',
-              }}
-              onClick={async () => {
-                await createCard({
-                  teacher,
-                  student: studentCardIsFor?.userId,
-                  message: inputs.message,
-                  category: inputs.category,
-                });
-                await createMessage({
-                  subject: 'New PBIS Card',
-                  message: inputs.message,
-                  receiver: studentCardIsFor?.userId || '',
-                  link: '',
-                });
-                // Don't reset form data - only clear student selection
-                setStudentCardIsFor(undefined);
-                // Clear the student name input field by updating the form inputs directly
-                handleChange({
-                  target: { name: 'studentName', value: '' },
-                } as React.ChangeEvent<HTMLInputElement>);
-                // Close the form after successful submission
-                onClose();
-              }}
+              disabled={submitDisabled}
+              onClick={handleGiveCard}
             >
               Give {studentCardIsFor && `${studentCardIsFor.userName} `}A PBIS
               Card
-            </button>
+            </SmallGradientButton>
 
             <button
               type="button"
               onClick={onClose}
-              className="btn btn-outline text-white border-white/30 hover:bg-white/10"
+              className="text-white font-medium border border-white/30 rounded-xl px-4 py-2 hover:bg-white/10 transition-colors"
             >
               Close
             </button>

@@ -14,13 +14,10 @@ jest.mock('../../User', () => ({
 }));
 
 jest.mock('../../../lib/useGqlQuery', () => ({
+  // Both the collections query and the staff-cards query read from this single
+  // mocked object (each picks the field it needs).
   useGQLQuery: () => ({
     data: {
-      staff: [
-        { id: 'staff1', name: 'John Teacher', email: 'john@school.edu' },
-        { id: 'staff2', name: 'Jane Coach', email: 'jane@school.edu' },
-        { id: 'staff3', name: 'Bob Principal', email: 'bob@school.edu' },
-      ],
       pbisCollectionDates: [
         {
           id: 'collection1',
@@ -28,6 +25,30 @@ jest.mock('../../../lib/useGqlQuery', () => ({
           staffRandomWinners: [
             { id: 'staff1', name: 'John Teacher', email: 'john@school.edu' },
           ],
+        },
+      ],
+      // Staff cards given since the last collection (one ticket per card).
+      // staff1 is a previous winner and should be excluded.
+      staffPbisCards: [
+        {
+          id: 'c1',
+          recipient: { id: 'staff2', name: 'Jane Coach', email: 'jane@school.edu' },
+        },
+        {
+          id: 'c2',
+          recipient: {
+            id: 'staff3',
+            name: 'Bob Principal',
+            email: 'bob@school.edu',
+          },
+        },
+        {
+          id: 'c3',
+          recipient: {
+            id: 'staff1',
+            name: 'John Teacher',
+            email: 'john@school.edu',
+          },
         },
       ],
     },
@@ -110,7 +131,9 @@ describe('PickStaffWinners', () => {
       // Should NOT show previous winner (staff1) in the available staff list
       // Note: John Teacher will appear in the warning message, but not in the available staff list
       const availableStaffSection = screen
-        .getByText('Available Staff (Not Previously Won):')
+        .getByText(
+          'Eligible Staff (received cards this period, not previously won):',
+        )
         .closest('div');
       expect(availableStaffSection).not.toContainElement(
         screen.queryByText(/John Teacher/),
@@ -164,8 +187,8 @@ describe('PickStaffWinners', () => {
       expect(screen.getByText(/John Teacher/)).toBeInTheDocument();
       expect(screen.getByText(/john@school.edu/)).toBeInTheDocument();
 
-      // Should show updated button text
-      expect(screen.getByText('Add More Staff Winners')).toBeInTheDocument();
+      // Winners must be previewed before they can be saved
+      expect(screen.getByText('Preview winners first')).toBeInTheDocument();
     });
   });
 });

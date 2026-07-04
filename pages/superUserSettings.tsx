@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import NewWeeklyCallbackReward from '../components/PBIS/NewWeeklyCallbackReward';
 import NewWeeklyPbisCollection from '../components/PBIS/NewWeeklyPbisCollection';
 import PickStaffWinners from '../components/PBIS/PickStaffWinners';
 import SendPbisWinnerEmails from '../components/PBIS/SendPbisWinnerEmails';
@@ -34,6 +35,7 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <BulkCompleteOldCallbacks />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, 'canManagePbis') && <NewWeeklyPbisCollection />}
+      {isAllowed(me, 'canManagePbis') && <NewWeeklyCallbackReward />}
       {isAllowed(me, 'canManagePbis') && <PickStaffWinners />}
       {isAllowed(me, 'canManagePbis') && <SendPbisWinnerEmails />}
       {isAllowed(me, 'isSuperAdmin') && (

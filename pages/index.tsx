@@ -159,7 +159,7 @@ export default function Home(props: HomeProps) {
         </h1>
         <div className="flex flex-wrap justify-around items-center">
           <PbisWidget initialCardCount={props?.totalCards} />
-          {me && isAllowed(me, 'isStaff') && (
+          {me && (isAllowed(me, 'isStaff') || isAllowed(me, 'isStudent')) && (
             <PbisCardFormButton teacher={me} />
           )}
           {/* {me && isAllowed(me || {}, "isStaff") && (
@@ -488,7 +488,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
     const initialGoogleCalendarEvents = await getCalendarData();
     return {
       props: {
-        totalCards: totalCards?.pbisCardsCount ?? null,
+        totalCards:
+          totalCards?.pbisCardsCount != null
+            ? totalCards.pbisCardsCount + (totalCards.staffPbisCardsCount ?? 0)
+            : null,
         homePageLinks: homePageLinks ?? null,
         weeklyCalendar: weeklyCalendar ?? null,
         allUsersForSearch: allUsersForSearch ?? null,
