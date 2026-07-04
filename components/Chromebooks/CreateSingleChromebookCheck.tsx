@@ -13,7 +13,6 @@ import gql from 'graphql-tag';
 import { useState } from 'react';
 import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
-  CREATE_QUICK_PBIS,
   goodCheckMessages,
   noEmailNoPBISMessages,
 } from './ChromebookCheck';
@@ -59,7 +58,6 @@ export default function CreateSingleChromebookCheck() {
   const [isSendingEmails, setIsSendingEmails] = useState(false);
   const { sendEmail, emailLoading } = useSendEmail();
 
-  const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
 
   // Fetch student details when a student is selected
   const { data: studentDetails } = useGQLQuery(
@@ -221,20 +219,6 @@ export default function CreateSingleChromebookCheck() {
                   const isGoodCheck = goodCheckMessages.some((goodMessage) =>
                     messageToSend.startsWith(goodMessage),
                   );
-                  if (isGoodCheck) {
-                    await createCard({
-                      teacher: me?.id,
-                      student: studentFor?.userId,
-                    });
-                    await createCard({
-                      teacher: me?.id,
-                      student: studentFor?.userId,
-                    });
-                    await createCard({
-                      teacher: me?.id,
-                      student: studentFor?.userId,
-                    });
-                  }
 
                   if (
                     me?.id &&

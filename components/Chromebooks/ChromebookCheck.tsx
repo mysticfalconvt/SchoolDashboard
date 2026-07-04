@@ -33,26 +33,6 @@ export const CREATE_CHROMEBOOK_CHECK_MUTATION = gql`
   }
 `;
 
-export const CREATE_QUICK_PBIS = gql`
-  mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {
-    createPbisCard(
-      data: {
-        teacher: { connect: { id: $teacher } }
-        student: { connect: { id: $student } }
-        category: "Chromebook Check"
-      }
-    ) {
-      id
-      student {
-        name
-      }
-      teacher {
-        name
-      }
-    }
-  }
-`;
-
 export const GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
   query GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY($id: ID) {
     user(where: { id: $id }) {
@@ -195,7 +175,6 @@ function MultiStudentCheckForm({
   const [createChromebookCheck] = useGqlMutation(
     CREATE_CHROMEBOOK_CHECK_MUTATION,
   );
-  const [createCard] = useGqlMutation(CREATE_QUICK_PBIS);
   const { sendEmail } = useSendEmail();
   const emailProgressRef = useRef<HTMLDivElement>(null);
 
@@ -262,12 +241,6 @@ function MultiStudentCheckForm({
               : data.message,
         },
       });
-
-      if (goodCheckMessages.includes(data.message) && student?.id) {
-        await createCard({ teacher: me?.id, student: student?.id });
-        await createCard({ teacher: me?.id, student: student?.id });
-        await createCard({ teacher: me?.id, student: student?.id });
-      }
 
       if (
         me?.id &&
@@ -360,12 +333,6 @@ function MultiStudentCheckForm({
             message: messageToSend,
           },
         });
-
-        if (existing.message === 'Everything good' && student?.id) {
-          await createCard({ teacher: me?.id, student: student?.id });
-          await createCard({ teacher: me?.id, student: student?.id });
-          await createCard({ teacher: me?.id, student: student?.id });
-        }
 
         // Collect students that need emails (issues)
         if (
