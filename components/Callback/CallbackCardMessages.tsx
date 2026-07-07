@@ -66,6 +66,7 @@ const studentDeleteMessage = 'Remove Message';
 const studentMessageOptions = [
   'I am finished. Please check my work.',
   'I am stuck. I will come see you.',
+  "I'm done with my work; when can I visit you to have it checked?",
 ];
 
 export default function CallbackCardMessages({
@@ -153,113 +154,157 @@ export default function CallbackCardMessages({
 
   return (
     <Form
-      //   className={showForm ? 'visible' : 'hidden'}
-      // hidden={!showForm}
+      className="border-0 bg-transparent shadow-none p-0 w-full"
       onSubmit={handleSubmit}
     >
-      <FormGroup>
-        <fieldset disabled={loading} aria-busy={loading}>
-          {!isStudent && (
-            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
-              Student:
-              <span
-                className={
-                  callback?.messageFromStudent
-                    ? 'text-white text-[1.6rem] p-2 break-words hasText'
-                    : ''
-                }
-              >
-                {callback.messageFromStudent || '----'}
-              </span>
-              <span>{callback.messageFromStudentDate || ''}</span>
-            </p>
-          )}
-          {!isTeacher && (
-            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
-              Teacher:
-              <span
-                className={
-                  callback?.messageFromTeacher
-                    ? 'text-white text-[1.6rem] p-2 break-words hasText'
-                    : ''
-                }
-              >
-                {callback.messageFromTeacher || '----'}
-              </span>
-              <span>{callback.messageFromTeacherDate || '----'}</span>
-            </p>
-          )}
-          {isStudent && (
-            <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300 bg-transparent">
-              Student Message:
-              <select
-                id={`student - ${callback.id}`}
-                value={studentMessage}
-                className={`text-[var(--textColor)] ${loading ? 'inputUpdating' : ''}`}
-                onChange={handleSelectStudentMessage}
-              >
-                {studentMessageOptionsArray.map((option) => (
-                  <option
-                    key={option.key}
-                    value={option.value}
-                    selected={option.selected}
-                  >
-                    {option.value}
-                  </option>
-                ))}
-              </select>
-              <span>{studentMessageDate || '-'}</span>
-            </p>
-          )}
+      <FormGroup className="justify-center">
+        <fieldset disabled={loading} aria-busy={loading} className="w-full">
+          <div className="flex flex-col items-center gap-3 w-full text-center">
+            {/* Student's message (visible to teachers / staff) */}
+            {!isStudent && (
+              <div className="w-full">
+                <p className="text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70">
+                  Student
+                </p>
+                {callback?.messageFromStudent ? (
+                  <>
+                    <p className="text-white text-lg font-medium break-words px-2">
+                      {callback.messageFromStudent}
+                    </p>
+                    {callback.messageFromStudentDate && (
+                      <p className="text-xs opacity-60">
+                        {callback.messageFromStudentDate}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="opacity-50 text-base">No message yet</p>
+                )}
+              </div>
+            )}
 
-          {isTeacher && (
-            <>
-              {studentMessage && (
-                <SmallGradientButton
-                  type="button"
-                  style={{
-                    fontSize: '1rem',
-                    paddingBlock: '0.5rem',
-                    textAlign: 'center',
-                  }}
-                  onClick={async () => {
-                    const todaysDate = new Date().toLocaleDateString();
-                    await updateCallback({
-                      id: callback.id,
-                      messageFromTeacher: teacherMessage,
-                      messageFromStudent: '',
-                      messageFromStudentDate: todaysDate,
-                    });
-                    queryClient.invalidateQueries(['myStudentCallbacks']);
-                    queryClient.invalidateQueries(['allCallbacks']);
-                    toast.success(
-                      `Updated Callback Message for ${callback.student.name}`,
-                    );
-                  }}
+            {/* Teacher's message (read-only for students / staff) */}
+            {!isTeacher && (
+              <div className="w-full">
+                <p className="text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70">
+                  Teacher
+                </p>
+                {callback?.messageFromTeacher ? (
+                  <>
+                    <p className="text-white text-lg font-medium break-words px-2">
+                      {callback.messageFromTeacher}
+                    </p>
+                    {callback.messageFromTeacherDate && (
+                      <p className="text-xs opacity-60">
+                        {callback.messageFromTeacherDate}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="opacity-50 text-base">No message yet</p>
+                )}
+              </div>
+            )}
+
+            {/* Teacher: remove the student's message */}
+            {isTeacher && studentMessage && (
+              <SmallGradientButton
+                type="button"
+                style={{ fontSize: '0.9rem', paddingBlock: '0.4rem' }}
+                onClick={async () => {
+                  const todaysDate = new Date().toLocaleDateString();
+                  await updateCallback({
+                    id: callback.id,
+                    messageFromTeacher: teacherMessage,
+                    messageFromStudent: '',
+                    messageFromStudentDate: todaysDate,
+                  });
+                  queryClient.invalidateQueries(['myStudentCallbacks']);
+                  queryClient.invalidateQueries(['allCallbacks']);
+                  toast.success(
+                    `Updated Callback Message for ${callback.student.name}`,
+                  );
+                }}
+              >
+                Delete Student Message
+              </SmallGradientButton>
+            )}
+
+            {/* Student: choose a message to the teacher */}
+            {isStudent && (
+              <div className="w-full">
+                <label
+                  htmlFor={`student - ${callback.id}`}
+                  className="block text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70 mb-1"
                 >
-                  Delete Student Message
-                </SmallGradientButton>
-              )}
-              <p className="relative border-none p-0 m-0 text-[14px] text-[var(--textColor)] text-center transition-all duration-300">
-                Teacher:
+                  Your message to the teacher
+                </label>
+                <select
+                  id={`student - ${callback.id}`}
+                  value={studentMessage}
+                  className={loading ? 'inputUpdating' : ''}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    color: '#1a1a1a',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    textAlign: 'left',
+                    textOverflow: 'ellipsis',
+                  }}
+                  onChange={handleSelectStudentMessage}
+                >
+                  {studentMessageOptionsArray.map((option) => (
+                    <option
+                      key={option.key}
+                      value={option.value}
+                      selected={option.selected}
+                    >
+                      {option.value}
+                    </option>
+                  ))}
+                </select>
+                {studentMessageDate && (
+                  <p className="text-xs opacity-60 mt-1">{studentMessageDate}</p>
+                )}
+              </div>
+            )}
+
+            {/* Teacher: write a message back */}
+            {isTeacher && (
+              <div className="w-full">
+                <label
+                  htmlFor={`teacher-${callback.id}`}
+                  className="block text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70 mb-1"
+                >
+                  Teacher message
+                </label>
                 <textarea
                   id={`teacher-${callback.id}`}
                   placeholder="Message from Teacher"
                   value={teacherMessage}
                   className={loading ? 'inputUpdating' : ''}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    color: '#1a1a1a',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                  }}
                   onKeyDown={submitOnEnter}
                   onChange={(e) => {
-                    //   console.log(e.target.value);
                     const todaysDate = new Date().toLocaleDateString();
                     setTeacherMessage(e.target.value);
                     setTeacherMessageDate(todaysDate);
                   }}
                   title="Enter to submit change, Shift-Enter for new line"
                 />
-                <span>{teacherMessageDate || '-'}</span>
-              </p>
-            </>
-          )}
+                {teacherMessageDate && (
+                  <p className="text-xs opacity-60 mt-1">{teacherMessageDate}</p>
+                )}
+              </div>
+            )}
+          </div>
         </fieldset>
       </FormGroup>
       <style jsx>{`
