@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../Loading';
@@ -61,18 +61,20 @@ const MessagesCount: React.FC<MessagesCountProps> = ({ mobile = false }) => {
   );
   const unread = data?.messagesCount;
   const [viewAllMessages, setViewAllMessages] = useState(false);
+  // nodeRef avoids react-transition-group's deprecated findDOMNode usage.
+  const nodeRef = useRef<HTMLSpanElement>(null);
   if (isLoading) return <Loading />;
   return (
     <span className="hidePrint relative">
       <TransitionGroup>
         <CSSTransition
+          nodeRef={nodeRef}
           unmountOnExit
           classNames="count"
-          className="count"
           key={unread}
           timeout={{ enter: 400, exit: 400 }}
         >
-          <>
+          <span ref={nodeRef} className="count">
             <button
               type="button"
               className={
@@ -104,7 +106,7 @@ const MessagesCount: React.FC<MessagesCountProps> = ({ mobile = false }) => {
                 onClose={() => setViewAllMessages(false)}
               />
             )}
-          </>
+          </span>
         </CSSTransition>
       </TransitionGroup>
     </span>

@@ -270,6 +270,7 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
                   value={inputs.studentName}
                   updateUser={setStudentCardIsFor}
                   userType={recipientType}
+                  excludeSelf
                 />
               </div>
 

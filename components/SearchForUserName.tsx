@@ -34,6 +34,9 @@ interface SearchForUserNameProps {
   value: string;
   updateUser: (result: SearchResult) => void;
   userType: string;
+  // When true, the current user is excluded from results (e.g. so you can't
+  // give yourself a PBIS card).
+  excludeSelf?: boolean;
 }
 
 const SearchForUserName: React.FC<SearchForUserNameProps> = ({
@@ -41,6 +44,7 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
   value,
   updateUser,
   userType,
+  excludeSelf = false,
 }) => {
   const me = useUser();
   const [usersToDisplay, setUsersToDisplay] = useState<User[]>([]);
@@ -55,9 +59,10 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
     },
   );
   const usersFilteredByType =
-    allUsers?.users?.filter((item: User) =>
-      userType ? item[userType as keyof User] === true : true,
-    ) || [];
+    allUsers?.users?.filter((item: User) => {
+      if (excludeSelf && me?.id && item.id === me.id) return false;
+      return userType ? item[userType as keyof User] === true : true;
+    }) || [];
 
   const items = usersToDisplay;
   const filterUsers = (valueToFilter: string) => {

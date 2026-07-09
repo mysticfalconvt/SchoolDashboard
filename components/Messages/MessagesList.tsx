@@ -26,22 +26,27 @@ const MessagesList: React.FC<MessagesListProps> = ({
   // console.log(messages);
   return (
     <div className="fixed top-0 right-0 h-full w-full max-w-md z-40 bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-l-4 border-gray-400 shadow-2xl flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-gray-300">
+      <div className="flex items-center justify-between p-4 border-b border-white/20">
         <h3 className="text-white text-2xl font-bold">Messages</h3>
         <button
           type="button"
           onClick={onClose}
-          className="text-white text-3xl font-extrabold bg-black bg-opacity-40 rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+          className="text-white bg-black/40 hover:bg-black/70 rounded-full w-11 h-11 flex items-center justify-center leading-none text-2xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300"
           aria-label="Close"
         >
-          ×
+          <span aria-hidden className="-mt-0.5">
+            &times;
+          </span>
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto flex flex-col p-4 gap-2">
-        {messages.map((message) => (
-          // console.log(message);
-          (<SingleMessageInList key={message.id} message={message} />)
-        ))}
+      <div className="flex-1 overflow-y-auto flex flex-col p-4 gap-3">
+        {messages.length === 0 ? (
+          <p className="text-white/80 text-center mt-8">No messages.</p>
+        ) : (
+          messages.map((message) => (
+            <SingleMessageInList key={message.id} message={message} />
+          ))
+        )}
       </div>
     </div>
   );
