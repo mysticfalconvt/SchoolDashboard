@@ -5,11 +5,13 @@ import DoughnutChart from '../components/Chart/DonutChart';
 import DisplayPbisCollectionData from '../components/PBIS/DisplayPbisCollectionData';
 import PbisCardChart from '../components/PBIS/PbisCardChart';
 import PbisFalcon from '../components/PBIS/PbisFalcon';
+import PbisVisitorStats from '../components/PBIS/PbisVisitorStats';
+import StaffPbisCardTable from '../components/PBIS/StaffPbisCardTable';
 import { SmallGradientButton } from '../components/styles/Button';
 import { useUser } from '../components/User';
 import { ADMIN_ID } from '../config';
-import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const PBIS_PAGE_QUERY = gql`
@@ -301,6 +303,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
             chartData={teamWideCardsInCategories}
           />
         )}
+        {isAllowed(me, 'isStaff') && <PbisVisitorStats />}
       </div>
       <PbisCardChart className="hidePrint" cardCounts={cardCounts} />
       <div>
@@ -345,6 +348,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           ))}
       </div>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
+      {isAllowed(me, 'canManagePbis') && <StaffPbisCardTable />}
     </div>
   );
 };

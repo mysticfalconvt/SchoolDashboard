@@ -68,6 +68,16 @@ export const CHROMEBOOK_CHECK_MIN_DAYS: number = Number(
 export const GRAPHQL_AUTHORIZATION: string =
   process.env.API_KEY_KEYSTONE || 'test auth for keystone';
 
+// Umami analytics (self-hosted). Base URL is shared by the tracking script in
+// _document.tsx and the server-side stats API route. Website id reuses the
+// existing UMAMI_ID env var.
+export const umamiUrl: string =
+  process.env.NEXT_PUBLIC_UMAMI_URL ||
+  process.env.UMAMI_URL ||
+  'https://umami.rboskind.com';
+export const umamiWebsiteId: string | undefined =
+  process.env.NEXT_PUBLIC_UMAMI_ID || process.env.UMAMI_ID;
+
 // Google Sign-In: OAuth 2.0 Web client ID (public). Must match the backend's
 // GOOGLE_OAUTH_CLIENT_ID. When empty, the Google sign-in button is hidden.
 export const GoogleClientId: string =

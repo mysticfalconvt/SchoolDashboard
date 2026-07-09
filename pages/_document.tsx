@@ -1,4 +1,5 @@
 import Document, { Head, Html, Main, NextScript } from 'next/document';
+import { umamiUrl, umamiWebsiteId } from '../config';
 
 export default class MyDocument extends Document {
   // static getInitialProps({ renderPage }: DocumentContext): Promise<DocumentInitialProps> {
@@ -18,8 +19,8 @@ export default class MyDocument extends Document {
           {process.env.NODE_ENV === 'production' && (
             <script
               async
-              src="https://umami.rboskind.com/script.js"
-              data-website-id={process.env.UMAMI_ID || ''}
+              src={`${umamiUrl}/script.js`}
+              data-website-id={umamiWebsiteId || ''}
             ></script>
           )}
         </Head>

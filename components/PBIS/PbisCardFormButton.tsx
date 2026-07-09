@@ -7,9 +7,13 @@ import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+
+// Students may give at most this many PBIS cards per day.
+const DAILY_STUDENT_CARD_LIMIT = 3;
 
 const CREATE_PBIS_CARD = gql`
   mutation CREATE_QUICK_PBIS(
@@ -34,6 +38,19 @@ const CREATE_PBIS_CARD = gql`
         name
       }
     }
+  }
+`;
+
+// Count of staff cards a student has already given since the given time.
+// Students only ever give staff cards, so this is their full daily total.
+const STUDENT_CARDS_GIVEN_SINCE = gql`
+  query STUDENT_CARDS_GIVEN_SINCE($giver: ID!, $since: DateTime!) {
+    staffPbisCardsCount(
+      where: {
+        giver: { id: { equals: $giver } }
+        dateGiven: { gte: $since }
+      }
+    )
   }
 `;
 
@@ -101,9 +118,31 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
   );
   const isStaffCard = recipientType === 'isStaff';
 
-  const [createCard] = useGqlMutation(CREATE_PBIS_CARD);
-  const [createStaffCard] = useGqlMutation(CREATE_STAFF_PBIS_CARD);
+  // Use mutateAsync so a rejected mutation is caught below (mutate() never
+  // rejects, which previously let a failed card still show a success toast).
+  const [, { mutateAsync: createCard }] = useGqlMutation(CREATE_PBIS_CARD);
+  const [, { mutateAsync: createStaffCard }] =
+    useGqlMutation(CREATE_STAFF_PBIS_CARD);
   const createMessage = useCreateMessage();
+
+  // Start of today (local), computed once per mount so the query key is stable.
+  const [startOfToday] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  });
+
+  // How many cards this student has already given today. Only relevant (and
+  // only fetched) for student givers while the dialog is open.
+  const { data: cardsTodayData } = useGQLQuery(
+    'studentCardsGivenToday',
+    STUDENT_CARDS_GIVEN_SINCE,
+    { giver: teacher, since: startOfToday },
+    { enabled: isOpen && isStudentGiver && !!teacher },
+  );
+  const cardsGivenToday = cardsTodayData?.staffPbisCardsCount ?? 0;
+  const atDailyLimit =
+    isStudentGiver && cardsGivenToday >= DAILY_STUDENT_CARD_LIMIT;
 
   const clearRecipient = () => {
     setStudentCardIsFor(undefined);
@@ -114,12 +153,19 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
 
   const messageMissing = !inputs.message || inputs.message.trim() === '';
   // A category is always required. Staff cards additionally require a comment.
-  const submitDisabled = isStaffCard
+  const missingFields = isStaffCard
     ? !studentCardIsFor || !inputs.category || messageMissing
     : !studentCardIsFor || !inputs.category;
+  const submitDisabled = missingFields || atDailyLimit;
 
   const handleGiveCard = async () => {
     if (!studentCardIsFor) return;
+    if (atDailyLimit) {
+      toast.error(
+        `You've already given ${DAILY_STUDENT_CARD_LIMIT} PBIS cards today.`,
+      );
+      return;
+    }
     try {
       if (isStaffCard) {
         await createStaffCard({
@@ -169,6 +215,20 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
                 : 'Create a PBIS card for a student'}
             </p>
           </div>
+
+          {/* Daily limit warning for students */}
+          {isStudentGiver &&
+            (atDailyLimit ? (
+              <div className="rounded-lg border border-red-400/60 bg-red-500/20 p-3 text-sm text-white">
+                You&apos;ve already given {DAILY_STUDENT_CARD_LIMIT} PBIS cards
+                today. You can give more tomorrow.
+              </div>
+            ) : (
+              <div className="rounded-lg border border-white/20 bg-white/10 p-3 text-sm text-white/90">
+                You&apos;ve given {cardsGivenToday} of{' '}
+                {DAILY_STUDENT_CARD_LIMIT} PBIS cards today.
+              </div>
+            ))}
 
           {/* Staff can choose to card a student or a staff member */}
           {!isStudentGiver && (
