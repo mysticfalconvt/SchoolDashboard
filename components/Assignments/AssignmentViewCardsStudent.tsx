@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { NUMBER_OF_BLOCKS } from '../../config';
 import AssignmentHistory from './AssignmentHistory';
+import useAssignmentHistoryBlocks from './useAssignmentHistoryBlocks';
+
+// Students: a block flashes when the teacher updated it within this window.
+const RECENT_UPDATE_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 interface BlockTeacher {
   id: string;
@@ -45,6 +49,16 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
   const [historyBlock, setHistoryBlock] = useState<number>();
   const [historyTeacherId, setHistoryTeacherId] = useState<string>();
 
+  const blockTeacherIds = [...Array(NUMBER_OF_BLOCKS)]
+    .map((e, i) => {
+      const bt = student[`block${i + 1}Teacher` as keyof Student] as
+        | BlockTeacher
+        | undefined;
+      return bt?.id;
+    })
+    .filter((id): id is string => !!id);
+  const hasHistory = useAssignmentHistoryBlocks(blockTeacherIds);
+
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
       <h3 className="m-2">Current Class Assignments</h3>
@@ -74,19 +88,22 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
             );
           }
 
-          const today = new Date();
-          const messageDate = new Date(
+          const lastUpdated = new Date(
             (blockTeacher[
               `block${num}AssignmentLastUpdated` as keyof BlockTeacher
             ] as string) || '',
           );
-          const newUpdate = today.getTime() - messageDate.getTime() < 164000000;
+          const hasValidDate = !Number.isNaN(lastUpdated.getTime());
+          // Only flash when the teacher genuinely posted an update recently.
+          // A block with no valid date (never posted) must not flash.
+          const recentlyUpdated =
+            hasValidDate && Date.now() - lastUpdated.getTime() < RECENT_UPDATE_MS;
 
           return (
             <div
               className={`flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] text-xl ${
-                newUpdate
-                  ? 'needsUpdate bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
+                recentlyUpdated
+                  ? 'flashAssignment bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
                   : ''
               }`}
               key={`key for student - ${student.id} - ${num}`}
@@ -99,28 +116,22 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
               <p>
                 {blockTeacher[`block${num}Assignment` as keyof BlockTeacher]}
               </p>
-              <p>
-                {
-                  new Date(
-                    blockTeacher[
-                      `block${num}AssignmentLastUpdated` as keyof BlockTeacher
-                    ] as string,
-                  )
-                    .toLocaleString()
-                    .split(',')[0]
-                }
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setHistoryTeacherId(blockTeacher.id);
-                  setHistoryBlock(num);
-                  setShowHistory(true);
-                }}
-                className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
-              >
-                History
-              </button>
+              {hasValidDate && (
+                <p>{lastUpdated.toLocaleString().split(',')[0]}</p>
+              )}
+              {hasHistory(blockTeacher.id, num) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryTeacherId(blockTeacher.id);
+                    setHistoryBlock(num);
+                    setShowHistory(true);
+                  }}
+                  className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+                >
+                  History
+                </button>
+              )}
             </div>
           );
         })}
@@ -137,7 +148,7 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
             background-position: 0% 57%;
           }
         }
-        .needsUpdate {
+        .flashAssignment {
           animation: AnimationName 3s ease infinite;
         }
       `}</style>

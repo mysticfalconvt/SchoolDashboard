@@ -1,7 +1,9 @@
 import gql from 'graphql-tag';
 import { GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import AssignmentHistory from '../components/Assignments/AssignmentHistory';
+import useAssignmentHistoryBlocks from '../components/Assignments/useAssignmentHistoryBlocks';
 import Table from '../components/Table';
 import { NUMBER_OF_BLOCKS } from '../config';
 import { smartGraphqlClient } from '../lib/smartGraphqlClient';
@@ -84,9 +86,16 @@ interface TeacherData {
 interface DisplayClassworkProps {
   data: TeacherData;
   block: string;
+  onShowHistory: (teacherId: string, block: number) => void;
+  hasHistory: (teacherId: string, block: number) => boolean;
 }
 
-const DisplayClasswork: React.FC<DisplayClassworkProps> = ({ data, block }) => {
+const DisplayClasswork: React.FC<DisplayClassworkProps> = ({
+  data,
+  block,
+  onShowHistory,
+  hasHistory,
+}) => {
   if (!data) return null;
 
   const classname = data[
@@ -126,6 +135,15 @@ const DisplayClasswork: React.FC<DisplayClassworkProps> = ({ data, block }) => {
       ) : (
         <h3 className="m-0 p-0 text-xl font-semibold">No Data</h3>
       )}
+      {data.id && hasHistory(data.id, Number(block)) && (
+        <button
+          type="button"
+          onClick={() => onShowHistory(data.id, Number(block))}
+          className="mt-2 text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+        >
+          History
+        </button>
+      )}
     </div>
   );
 };
@@ -150,8 +168,46 @@ const AllTeacherCurrentWork: NextPage<AllTeacherCurrentWorkProps> = (props) => {
     },
   );
 
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyBlock, setHistoryBlock] = useState<number>();
+  const [historyTeacherId, setHistoryTeacherId] = useState<string>();
+
+  const teacherIds = (data?.users || []).map((u) => u.id);
+  const hasHistory = useAssignmentHistoryBlocks(teacherIds);
+  // Keep the checker in a ref so the memoized columns don't rebuild on every
+  // render while still calling the latest version.
+  const hasHistoryRef = useRef(hasHistory);
+  hasHistoryRef.current = hasHistory;
+
+  const handleShowHistory = useCallback((teacherId: string, block: number) => {
+    setHistoryTeacherId(teacherId);
+    setHistoryBlock(block);
+    setShowHistory(true);
+  }, []);
+  const checkHasHistory = useCallback(
+    (teacherId: string, block: number) =>
+      hasHistoryRef.current(teacherId, block),
+    [],
+  );
+
   const columns = useMemo(() => {
-    const columns = [
+    const blockColumns = [...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
+      const num = i + 1;
+      return {
+        Header: `Block ${num}`,
+        accessor: `block${num}Assignment`,
+        Cell: ({ row }: any) => (
+          <DisplayClasswork
+            data={row.original}
+            block={String(num)}
+            onShowHistory={handleShowHistory}
+            hasHistory={checkHasHistory}
+          />
+        ),
+      };
+    });
+
+    return [
       {
         Header: 'Teacher',
         columns: [
@@ -164,97 +220,24 @@ const AllTeacherCurrentWork: NextPage<AllTeacherCurrentWorkProps> = (props) => {
               </Link>
             ),
           },
-          {
-            Header: 'Block 1',
-            accessor: 'block1Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="1" />
-            ),
-          },
-          {
-            Header: 'Block 2',
-            accessor: 'block2Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="2" />
-            ),
-          },
-          {
-            Header: 'Block 3',
-            accessor: 'block3Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="3" />
-            ),
-          },
-          {
-            Header: 'Block 4',
-            accessor: 'block4Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="4" />
-            ),
-          },
-          {
-            Header: 'Block 5',
-            accessor: 'block5Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="5" />
-            ),
-          },
-          {
-            Header: 'Block 6',
-            accessor: 'block6Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="6" />
-            ),
-          },
-          {
-            Header: 'Block 7',
-            accessor: 'block7Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="7" />
-            ),
-          },
-          {
-            Header: 'Block 8',
-            accessor: 'block8Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="8" />
-            ),
-          },
-          {
-            Header: 'Block 9',
-            accessor: 'block9Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="9" />
-            ),
-          },
-          {
-            Header: 'Block 10',
-            accessor: 'block10Assignment',
-            Cell: ({ row }: any) => (
-              <DisplayClasswork data={row.original} block="10" />
-            ),
-          },
+          ...blockColumns,
         ],
       },
     ];
-    const numberOfBlocksToRemove = 10 - NUMBER_OF_BLOCKS;
-    // remove number of columns based on number of blocks
-    return [
-      {
-        ...columns[0],
-        columns: columns[0].columns.slice(
-          0,
-          columns[0].columns.length - numberOfBlocksToRemove,
-        ),
-      },
-    ];
-  }, []);
+  }, [handleShowHistory, checkHasHistory]);
 
   return (
     <div className="flex flex-col flex-wrap justify-around w-full">
       <h1 className="text-center text-2xl font-bold mb-6">
         All Teacher Current Work
       </h1>
+      {showHistory && historyBlock && historyTeacherId && (
+        <AssignmentHistory
+          teacherId={historyTeacherId}
+          block={historyBlock}
+          hide={setShowHistory}
+        />
+      )}
       <Table data={data?.users || []} columns={columns} searchColumn="name" />
     </div>
   );

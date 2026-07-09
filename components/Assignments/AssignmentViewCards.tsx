@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { NUMBER_OF_BLOCKS } from '../../config';
 import AssignmentHistory from './AssignmentHistory';
+import useAssignmentHistoryBlocks from './useAssignmentHistoryBlocks';
+
+// Teachers: a block flashes when it hasn't been updated in longer than this.
+const STALE_ASSIGNMENT_MS = 8 * 24 * 60 * 60 * 1000; // 8 days
 
 interface AssignmentData {
   block1Assignment?: string;
@@ -46,6 +50,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
   const [showHistory, setShowHistory] = useState(false);
   const [historyBlock, setHistoryBlock] = useState<number>();
   const teacherId = assignments?.id as string | undefined;
+  const hasHistory = useAssignmentHistoryBlocks(teacherId ? [teacherId] : []);
 
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
@@ -63,17 +68,23 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
       >
         {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
           const num = i + 1;
-          const today = new Date();
-          const messageDate = new Date(
-            assignments[`block${num}AssignmentLastUpdated`] || '',
-          );
-          const newUpdate = today.getTime() - messageDate.getTime() < 86400000;
+          const lastUpdatedRaw =
+            assignments[`block${num}AssignmentLastUpdated`];
+          const lastUpdated = lastUpdatedRaw ? new Date(lastUpdatedRaw) : null;
+          const noValidDate =
+            !lastUpdated || Number.isNaN(lastUpdated.getTime());
+          // Teachers: flag a block that has never been updated (flash until
+          // it's first filled in), or that has gone stale — not updated in
+          // over 8 days (once-a-week cadence plus a buffer).
+          const isStale =
+            noValidDate ||
+            Date.now() - lastUpdated!.getTime() > STALE_ASSIGNMENT_MS;
 
           return (
             <div
               className={`flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] text-xl ${
-                newUpdate
-                  ? 'needsUpdate bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
+                isStale
+                  ? 'flashAssignment bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
                   : ''
               }`}
               key={`key ${num}`}
@@ -88,7 +99,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
                     .split(',')[0]
                 }
               </p> */}
-              {teacherId && (
+              {teacherId && hasHistory(teacherId, num) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -116,7 +127,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
             background-position: 0% 57%;
           }
         }
-        .needsUpdate {
+        .flashAssignment {
           animation: AnimationName 3s ease infinite;
         }
       `}</style>

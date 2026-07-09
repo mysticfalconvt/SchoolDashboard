@@ -23,12 +23,13 @@ import PbisWidget from '../components/PBIS/PbisWidget';
 import StudentPbisData from '../components/PBIS/StudentPbisData';
 import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
+import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
 import ViewStudentPage from '../components/users/ViewStudentPage';
 import { callbackDisabled } from '../config';
 import getDisplayName from '../lib/displayName';
-import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
 const GET_STUDENT_CLASSSWORK_QUERY = gql`
@@ -184,11 +185,11 @@ export default function Home(props: HomeProps) {
             </GradientButton>
           )} */}
 
-          {/* {me && isAllowed(me || {}, "isStaff") && (
+          {me && isAllowed(me, 'isStaff') && (
             <GradientButton>
               <Link href="/allTeacherCurrentWork">Current Work</Link>
             </GradientButton>
-          )} */}
+          )}
           {me && isAllowed(me, 'isStaff') && <CreateSingleChromebookCheck />}
           <HomePageLinks me={me} initialData={props?.homePageLinks} />
           {isAllowed(me, 'hasClasses') && <TeacherAssignments />}
