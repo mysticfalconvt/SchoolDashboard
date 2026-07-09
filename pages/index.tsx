@@ -212,6 +212,16 @@ export default function Home(props: HomeProps) {
             </div>
           )}
           {me &&
+            isAllowed(me, 'isStaff') &&
+            !!me.staffPbisCardsReceived?.length && (
+              <div className="w-full">
+                <DisplayPbisCardWidget
+                  cards={me.staffPbisCardsReceived}
+                  title="Your PBIS Cards"
+                />
+              </div>
+            )}
+          {me &&
             isAllowed(me, 'isParent') &&
             me.children?.map((child) => (
               <div key={child.id}>

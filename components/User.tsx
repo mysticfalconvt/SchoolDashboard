@@ -77,6 +77,16 @@ const CURRENT_USER_QUERY = gql`
           }
           dateGiven
         }
+        staffPbisCardsReceived(orderBy: { dateGiven: desc }, take: 20) {
+          id
+          cardMessage
+          category
+          giver {
+            id
+            name
+          }
+          dateGiven
+        }
         taTeam {
           id
           teamName
@@ -141,6 +151,13 @@ export interface User {
     cardMessage: string;
     category: string;
     teacher: { id: string; name: string };
+    dateGiven: string;
+  }>;
+  staffPbisCardsReceived?: Array<{
+    id: string;
+    cardMessage: string;
+    category: string;
+    giver: { id: string; name: string };
     dateGiven: string;
   }>;
   taTeam?: { id: string; teamName: string };
