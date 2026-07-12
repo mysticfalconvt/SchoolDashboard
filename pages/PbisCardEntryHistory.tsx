@@ -55,12 +55,12 @@ function heatColor(count: number): string {
   return 'rgba(59, 130, 246, 1)';
 }
 
-type TabKey = 'heatmap' | 'table' | 'calendar';
+type TabKey = 'heatmap' | 'table' | 'calendar' | 'overview';
 
 const PbisCardEntryHistory: NextPage = () => {
   const me = useUser();
 
-  const [tab, setTab] = useState<TabKey>('heatmap');
+  const [tab, setTab] = useState<TabKey>('overview');
   const [start, setStart] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() - 120);
@@ -157,6 +157,7 @@ const PbisCardEntryHistory: NextPage = () => {
       <div className="flex gap-2 border-b border-[var(--blue)] mb-4">
         {(
           [
+            ['overview', 'Month Overview'],
             ['heatmap', 'Heatmap'],
             ['table', 'Table'],
             ['calendar', 'Month Calendar'],
@@ -189,6 +190,7 @@ const PbisCardEntryHistory: NextPage = () => {
           )}
           {tab === 'table' && <TableView teachers={teachers} />}
           {tab === 'calendar' && <CalendarView teachers={teachers} />}
+          {tab === 'overview' && <MonthOverviewView teachers={teachers} />}
         </>
       )}
     </div>
@@ -221,7 +223,7 @@ const HeatmapView: React.FC<{
       <tbody>
         {teachers.map((teacher) => (
           <tr key={teacher.id}>
-            <td className="sticky left-0 bg-white px-2 py-1 whitespace-nowrap border border-gray-200">
+            <td className="sticky left-0 bg-[var(--backgroundColor)] text-[var(--textColor)] px-2 py-1 whitespace-nowrap border border-gray-200">
               {teacher.name}
             </td>
             {dayList.map((day) => {
@@ -359,6 +361,104 @@ const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
               <span className="text-xs">{date.getDate()}</span>
               {count > 0 && (
                 <span className="text-sm font-bold self-end">{count}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ---- Month calendar across ALL teachers: per-day count of who entered ----
+const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
+  teachers,
+}) => {
+  const [cursor, setCursor] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(1);
+    return d;
+  });
+
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells: (Date | null)[] = [];
+  for (let i = 0; i < startWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+
+  const monthLabel = cursor.toLocaleString('default', {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  // For a given day, the names of teachers who entered at least one card
+  const teachersForDay = (date: Date): string[] =>
+    teachers
+      .filter((t) => (t.days[dayKey(date)] || 0) > 0)
+      .map((t) => t.name);
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCursor(new Date(year, month - 1, 1))}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+          >
+            ‹
+          </button>
+          <span className="min-w-[10rem] text-center font-semibold">
+            {monthLabel}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCursor(new Date(year, month + 1, 1))}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+          >
+            ›
+          </button>
+        </div>
+        <span className="opacity-80 text-sm">
+          Each day shows how many teachers entered cards. Hover a day to see who.
+        </span>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 max-w-3xl">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+          <div key={d} className="text-center font-semibold text-sm">
+            {d}
+          </div>
+        ))}
+        {cells.map((date, i) => {
+          if (!date) return <div key={`empty-${i}`} />;
+          const names = teachersForDay(date);
+          const count = names.length;
+          return (
+            <div
+              key={dayKey(date)}
+              className="group relative h-16 rounded border border-gray-200 p-1 flex flex-col justify-between"
+              style={{ backgroundColor: heatColor(count) }}
+            >
+              <span className="text-xs">{date.getDate()}</span>
+              {count > 0 && (
+                <span className="text-sm font-bold self-end">{count}</span>
+              )}
+              {count > 0 && (
+                <div className="pointer-events-none absolute z-20 left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-max max-w-xs rounded border border-[var(--blue)] bg-[var(--backgroundColor)] text-[var(--textColor)] shadow-lg p-2 text-left">
+                  <p className="font-semibold text-xs mb-1">
+                    {dayKey(date)} — {count} teacher{count === 1 ? '' : 's'}
+                  </p>
+                  <ul className="text-xs list-disc pl-4 space-y-0.5">
+                    {names.map((name) => (
+                      <li key={name}>{name}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           );
