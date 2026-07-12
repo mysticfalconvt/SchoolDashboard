@@ -42,10 +42,6 @@ function dayKey(date: Date): string {
   return date.toLocaleDateString('en-CA');
 }
 
-function isoDateInput(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
 // Shade a heatmap cell by how many cards were entered that day
 function heatColor(count: number): string {
   if (!count) return 'transparent';
@@ -61,21 +57,17 @@ const PbisCardEntryHistory: NextPage = () => {
   const me = useUser();
 
   const [tab, setTab] = useState<TabKey>('overview');
-  const [start, setStart] = useState<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 120);
-    return isoDateInput(d);
-  });
-  const [end, setEnd] = useState<string>(() => isoDateInput(new Date()));
 
-  // Inclusive end-of-day bound for the query
+  // Always look back over the last 12 months
   const variables = useMemo(() => {
-    const endDate = new Date(`${end}T23:59:59.999`);
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1);
     return {
-      start: new Date(`${start}T00:00:00.000`).toISOString(),
+      start: startDate.toISOString(),
       end: endDate.toISOString(),
     };
-  }, [start, end]);
+  }, []);
 
   const { data, isLoading } = useGQLQuery(
     'pbisCardEntries',
@@ -126,32 +118,8 @@ const PbisCardEntryHistory: NextPage = () => {
     <div className="m-4">
       <h1>PBIS Card Entry History</h1>
       <p className="opacity-80">
-        Days that teachers entered PBIS cards, within the selected date range.
+        Days that teachers entered PBIS cards, over the last 12 months.
       </p>
-
-      {/* Date range controls */}
-      <div className="flex flex-wrap items-center gap-4 my-4">
-        <label className="flex items-center gap-2">
-          From:
-          <input
-            type="date"
-            value={start}
-            max={end}
-            onChange={(e) => setStart(e.target.value)}
-            className="text-black rounded px-2 py-1"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          To:
-          <input
-            type="date"
-            value={end}
-            min={start}
-            onChange={(e) => setEnd(e.target.value)}
-            className="text-black rounded px-2 py-1"
-          />
-        </label>
-      </div>
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--blue)] mb-4">
