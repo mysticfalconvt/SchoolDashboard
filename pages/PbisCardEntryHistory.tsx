@@ -156,7 +156,9 @@ const PbisCardEntryHistory: NextPage = () => {
           {tab === 'heatmap' && (
             <HeatmapView teachers={teachers} dayList={dayList} />
           )}
-          {tab === 'table' && <TableView teachers={teachers} />}
+          {tab === 'table' && (
+            <TableView teachers={teachers} dayList={dayList} />
+          )}
           {tab === 'calendar' && <CalendarView teachers={teachers} />}
           {tab === 'overview' && <MonthOverviewView teachers={teachers} />}
         </>
@@ -217,7 +219,18 @@ const HeatmapView: React.FC<{
 );
 
 // ---- Table: per-teacher summary, sortable ----
-const TableView: React.FC<{ teachers: TeacherActivity[] }> = ({ teachers }) => {
+const TableView: React.FC<{
+  teachers: TeacherActivity[];
+  dayList: string[];
+}> = ({ teachers, dayList }) => {
+  // Weeks in the period, from the first to the last card given (min 1 week).
+  const weeks = useMemo(() => {
+    if (dayList.length === 0) return 1;
+    const first = new Date(dayList[0]).getTime();
+    const last = new Date(dayList[dayList.length - 1]).getTime();
+    return Math.max(1, (last - first) / (7 * 24 * 60 * 60 * 1000));
+  }, [dayList]);
+
   const rows = useMemo(
     () =>
       teachers.map((t) => {
@@ -226,10 +239,11 @@ const TableView: React.FC<{ teachers: TeacherActivity[] }> = ({ teachers }) => {
           name: t.name,
           activeDays: dayKeys.length,
           totalCards: t.total,
+          avgPerWeek: Math.round((t.total / weeks) * 10) / 10,
           lastEntry: dayKeys.length ? dayKeys[dayKeys.length - 1] : '',
         };
       }),
-    [teachers],
+    [teachers, weeks],
   );
 
   const columns = useMemo(
@@ -237,14 +251,13 @@ const TableView: React.FC<{ teachers: TeacherActivity[] }> = ({ teachers }) => {
       { Header: 'Teacher', accessor: 'name' },
       { Header: 'Days With Entries', accessor: 'activeDays' },
       { Header: 'Total Cards', accessor: 'totalCards' },
+      { Header: 'Avg Cards / Week', accessor: 'avgPerWeek' },
       { Header: 'Last Entry', accessor: 'lastEntry' },
     ],
     [],
   );
 
-  return (
-    <Table columns={columns} data={rows} searchColumn="name" />
-  );
+  return <Table columns={columns} data={rows} searchColumn="name" />;
 };
 
 // ---- Month calendar for a single selected teacher ----
