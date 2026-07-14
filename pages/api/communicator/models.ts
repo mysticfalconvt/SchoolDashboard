@@ -1,15 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { lmStudio } from '../../../lib/communicator/lmStudio';
 
 interface Model {
   id: string;
   name: string;
   available: boolean;
+  maxContextLength?: number;
 }
 
 interface ModelsResponse {
   models: Model[];
 }
 
+// Ported from the standalone communicator service (src/routes/models.ts).
+// Lists the LLM models available from LM Studio. Called directly by the browser
+// (no API key), so it is intentionally unauthenticated.
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ModelsResponse | { error: string }>,
@@ -18,30 +23,20 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const COMMUNICATOR_ENDPOINT = process.env.COMMUNICATOR_ENDPOINT;
-  const COMMUNICATOR_API_KEY = process.env.COMMUNICATOR_API_KEY;
-
-  if (!COMMUNICATOR_ENDPOINT || !COMMUNICATOR_API_KEY) {
-    return res.status(500).json({
-      error: 'Communicator service configuration is missing',
-    });
-  }
-
   try {
-    const response = await fetch(`${COMMUNICATOR_ENDPOINT}/models`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': COMMUNICATOR_API_KEY,
-      },
-    });
+    const lmModels = await lmStudio.getModelsWithLimits();
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch models: ${response.statusText}`);
-    }
+    const response: ModelsResponse = {
+      models: lmModels.map((model) => ({
+        id: model.id,
+        name: model.id, // LM Studio doesn't provide a separate display name
+        available: true,
+        maxContextLength:
+          model.max_context_length > 0 ? model.max_context_length : undefined,
+      })),
+    };
 
-    const data: ModelsResponse = await response.json();
-    res.status(200).json(data);
+    res.status(200).json(response);
   } catch (error) {
     console.error('Models API Error:', error);
     res.status(500).json({
