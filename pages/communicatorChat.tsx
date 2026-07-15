@@ -403,20 +403,20 @@ const CommunicatorChat: NextPage = () => {
     return dateB - dateA;
   });
 
-  // Set default model to gpt-oss-20b if available (only on initial load)
+  // Set default model to gpt-oss-120b if available (only on initial load)
   useEffect(() => {
     if (modelsData?.models && !selectedModel) {
       const defaultModel = modelsData.models.find(
         (model) =>
-          model.id.toLowerCase().includes('gpt-oss-20b') ||
-          model.name.toLowerCase().includes('gpt-oss-20b') ||
-          model.id.toLowerCase().includes('gpt oss 20b') ||
-          model.name.toLowerCase().includes('gpt oss 20b'),
+          model.id.toLowerCase().includes('gpt-oss-120b') ||
+          model.name.toLowerCase().includes('gpt-oss-120b') ||
+          model.id.toLowerCase().includes('gpt oss 120b') ||
+          model.name.toLowerCase().includes('gpt oss 120b'),
       );
       if (defaultModel) {
         setSelectedModel(defaultModel.id);
       } else if (modelsData.models.length > 0) {
-        // If gpt-oss-20b not available, select first available model
+        // If gpt-oss-120b not available, select first available model
         const firstAvailable = modelsData.models.find(
           (model) => model.available,
         );
