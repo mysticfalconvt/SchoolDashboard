@@ -81,20 +81,12 @@ export default withSentryConfig(nextConfig, {
   telemetry: false,
 
   webpack: {
-    // Sentry's build-time wrapping loader pulls in rollup, which needs a
-    // platform-specific native binary. This repo's .npmrc sets
-    // `optional=false`, so that binary is deliberately never installed and the
-    // loader cannot run -- it fails the build with "Cannot find module
-    // @rollup/rollup-linux-x64-gnu".
-    //
-    // We do not need it: server-side errors are already captured by the
-    // `onRequestError` hook exported from instrumentation.ts (Next 15 invokes
-    // it for API routes and data-fetching in the pages router) and by
-    // `captureUnderscoreErrorException` in pages/_error.tsx. Build-time
-    // wrapping would only add tracing spans, which Bugsink cannot ingest.
-    autoInstrumentServerFunctions: false,
-    autoInstrumentMiddleware: false,
-    autoInstrumentAppDirectory: false,
+    // Build-time wrapping of API routes and data-fetching functions. This
+    // requires rollup's platform-specific native binary, which means .npmrc
+    // must NOT set `optional=false` -- see the note in that file.
+    autoInstrumentServerFunctions: true,
+    autoInstrumentMiddleware: true,
+    autoInstrumentAppDirectory: true,
 
     // Bugsink cannot ingest cron monitors.
     automaticVercelMonitors: false,
