@@ -129,6 +129,9 @@ const NewBugReportButton: React.FC = () => {
               resetForm();
               setShowForm(false);
             } catch (error) {
+              // Deliberately NOT reported to Sentry/Bugsink. The Keystone
+              // BugReport list forwards submissions to Bugsink from an
+              // afterOperation hook, so a capture here would double-report.
               console.error('Error creating bug report:', error);
             }
           }}
