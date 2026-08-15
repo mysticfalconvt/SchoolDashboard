@@ -101,6 +101,7 @@ export class QueryGeneratorService {
   private readonly MAX_TOKENS = 2000; // Max tokens for LLM responses
   private readonly MAX_ITERATIONS = 4; // Max follow-up queries
   private readonly MIN_SCORE_THRESHOLD = 6; // Minimum score to consider complete
+  private readonly MAX_TOOL_ATTEMPTS = 2; // Retries when a model botches a tool call
 
   /**
    * Truncate large JSON results to fit within token limits
@@ -330,13 +331,13 @@ Use the identify_schema_types tool to specify which types are needed.`;
       throw new Error('No tool call returned');
     }
 
-    const args = JSON.parse(toolCall.function.arguments);
+    const args = this.parseToolArguments(toolCall.function.arguments) ?? {};
 
     console.log('Identified types:', args.types);
     console.log('Reasoning:', args.reasoning);
 
     return {
-      types: args.types || [],
+      types: Array.isArray(args.types) ? args.types : [],
       reasoning: args.reasoning || 'No reasoning provided',
     };
   }
@@ -499,47 +500,126 @@ ${relevantSchema}`;
 
 Use the generate_graphql_query tool to provide your answer.`;
 
-    const response = await lmStudio.chatCompletionWithTools({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      tools: [GRAPHQL_TOOL],
-      tool_choice: 'required',
-      temperature: 0.2,
-      max_tokens: 1000, // Queries should be concise
-    });
+    // Smaller local models regularly botch the tool call — no tool_calls at all,
+    // malformed JSON arguments, or arguments that omit/nest the "query" field.
+    // Retry once with the failure spelled out before giving up.
+    let lastFailure = '';
 
-    const choice = response.choices[0];
-    if (
-      !choice ||
-      !choice.message.tool_calls ||
-      choice.message.tool_calls.length === 0
-    ) {
-      throw new Error('LLM did not generate a query using the tool');
+    for (let attempt = 1; attempt <= this.MAX_TOOL_ATTEMPTS; attempt++) {
+      const attemptPrompt =
+        attempt === 1
+          ? userPrompt
+          : `${userPrompt}
+
+Your previous attempt failed: ${lastFailure}
+Call the generate_graphql_query tool with a "query" argument whose value is the complete GraphQL query as a single string.`;
+
+      const response = await lmStudio.chatCompletionWithTools({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: attemptPrompt },
+        ],
+        tools: [GRAPHQL_TOOL],
+        tool_choice: 'required',
+        temperature: 0.2,
+        max_tokens: 1000, // Queries should be concise
+      });
+
+      const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+      if (!toolCall) {
+        lastFailure = 'the model replied without calling the tool';
+        console.warn(`⚠️ Query generation attempt ${attempt}: ${lastFailure}`);
+        continue;
+      }
+
+      const args = this.parseToolArguments(toolCall.function.arguments);
+      const queryArgs = this.extractQueryArgs(args);
+      if (!queryArgs) {
+        lastFailure = `the tool call did not include a "query" string (arguments: ${String(
+          toolCall.function.arguments,
+        ).substring(0, 300)})`;
+        console.warn(`⚠️ Query generation attempt ${attempt}: ${lastFailure}`);
+        continue;
+      }
+
+      // Validate that the generated GraphQL is a query, not a mutation or subscription
+      if (!this.isQueryOperation(queryArgs.query)) {
+        throw new Error(
+          'Operation not allowed. Only read operations (queries) are permitted. Mutations and subscriptions are not supported.',
+        );
+      }
+
+      return {
+        query: queryArgs.query,
+        variables: queryArgs.variables,
+        reasoning: queryArgs.reasoning || 'No reasoning provided',
+      };
     }
 
-    const toolCall = choice.message.tool_calls[0];
-    if (!toolCall) {
-      throw new Error('No tool call returned');
+    throw new Error(
+      `The model "${model}" did not return a usable GraphQL query after ${this.MAX_TOOL_ATTEMPTS} attempts: ${lastFailure}`,
+    );
+  }
+
+  /**
+   * Tool-call arguments are supposed to be a JSON string, but local models
+   * sometimes double-encode them or emit invalid JSON. Returns null when the
+   * arguments can't be parsed.
+   */
+  private parseToolArguments(raw: unknown): any {
+    if (raw && typeof raw === 'object') {
+      return raw;
+    }
+    if (typeof raw !== 'string') {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'string') {
+        // Double-encoded arguments
+        try {
+          return JSON.parse(parsed);
+        } catch {
+          return null;
+        }
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Pull the generated query out of the tool arguments, tolerating the wrapper
+   * shapes and field aliases models use instead of a bare { query, ... }.
+   */
+  private extractQueryArgs(args: any): {
+    query: string;
+    variables?: Record<string, any>;
+    reasoning?: string;
+  } | null {
+    if (!args || typeof args !== 'object') {
+      return null;
     }
 
-    const args = JSON.parse(toolCall.function.arguments);
-
-    // Validate that the generated GraphQL is a query, not a mutation or subscription
-    const generatedQuery = args.query.trim();
-    if (!this.isQueryOperation(generatedQuery)) {
-      throw new Error(
-        'Operation not allowed. Only read operations (queries) are permitted. Mutations and subscriptions are not supported.',
-      );
+    const containers = [args, args.arguments, args.parameters, args.input];
+    for (const container of containers) {
+      if (!container || typeof container !== 'object') {
+        continue;
+      }
+      const value =
+        container.query ?? container.graphql_query ?? container.graphqlQuery;
+      if (typeof value === 'string' && value.trim()) {
+        return {
+          query: value.trim(),
+          variables: container.variables,
+          reasoning: container.reasoning,
+        };
+      }
     }
 
-    return {
-      query: args.query,
-      variables: args.variables,
-      reasoning: args.reasoning || 'No reasoning provided',
-    };
+    return null;
   }
 
   /**
@@ -721,7 +801,11 @@ ${
       return { score: 7, isComplete: true };
     }
 
-    const args = JSON.parse(toolCall.function.arguments);
+    const args = this.parseToolArguments(toolCall.function.arguments);
+    if (!args || typeof args !== 'object') {
+      // Unparseable evaluation - assume it's complete rather than failing the request
+      return { score: 7, isComplete: true };
+    }
 
     console.log(
       `Evaluation - Score: ${args.score}/10, Complete: ${args.is_complete}`,
@@ -826,12 +910,33 @@ ${
       console.log(`Question: ${currentQuestion}`);
 
       // Step 1: Generate GraphQL query
-      const { query, variables, reasoning } = await this.generateQuery(
-        currentQuestion,
-        model,
-        userId,
-        userName,
-      );
+      let generated: {
+        query: string;
+        variables?: Record<string, any>;
+        reasoning: string;
+      };
+      try {
+        generated = await this.generateQuery(
+          currentQuestion,
+          model,
+          userId,
+          userName,
+        );
+      } catch (error) {
+        // A follow-up iteration failing shouldn't throw away the answer we
+        // already built from earlier iterations.
+        if (allData.length > 0 && finalExplanation) {
+          console.warn(
+            `⚠️ Follow-up query generation failed on iteration ${iteration}, returning earlier results:`,
+            error,
+          );
+          iteration -= 1; // this iteration produced nothing
+          break;
+        }
+        throw error;
+      }
+
+      const { query, variables, reasoning } = generated;
       allQueries.push(query);
       console.log('Generated query:', query);
 
