@@ -35,8 +35,14 @@ interface AssignmentData {
   block9ClassName?: string;
   block9AssignmentLastUpdated?: string;
   block10Assignment?: string;
+  block11Assignment?: string;
+  block12Assignment?: string;
   block10ClassName?: string;
+  block11ClassName?: string;
+  block12ClassName?: string;
   block10AssignmentLastUpdated?: string;
+  block11AssignmentLastUpdated?: string;
+  block12AssignmentLastUpdated?: string;
   [key: string]: any;
 }
 

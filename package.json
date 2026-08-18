@@ -13,7 +13,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "type-check": "tsc --noEmit",
-    "process-students": "node processStudents.js"
+    "process-students": "node processStudents.js",
+    "build-staff": "node buildStaffList.js",
+    "build-students": "node buildStudentsInput.js"
   },
   "dependencies": {
     "@ramonak/react-progress-bar": "^5.2.0",

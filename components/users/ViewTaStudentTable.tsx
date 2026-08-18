@@ -34,6 +34,8 @@ interface Student {
   block8Teacher?: BlockTeacher;
   block9Teacher?: BlockTeacher;
   block10Teacher?: BlockTeacher;
+  block11Teacher?: BlockTeacher;
+  block12Teacher?: BlockTeacher;
   parent?: any;
   studentDisciplineCount?: number;
 }
@@ -236,6 +238,36 @@ export default function ViewTaStudentTable({
                 return (
                   <Link href={`/userProfile/${row.original?.block10Teacher?.id}`} >
                     {row.original?.block10Teacher?.name}
+                  </Link>
+                );
+              return null;
+            },
+          },
+          {
+            Header: 'Block 11',
+            accessor: 'block11Teacher.name',
+            Cell: ({ row }: { row: { original: Student } }) => {
+              const showLink = !!row.original?.block11Teacher?.id;
+              // console.log(row);
+              if (showLink)
+                return (
+                  <Link href={`/userProfile/${row.original?.block11Teacher?.id}`} >
+                    {row.original?.block11Teacher?.name}
+                  </Link>
+                );
+              return null;
+            },
+          },
+          {
+            Header: 'Block 12',
+            accessor: 'block12Teacher.name',
+            Cell: ({ row }: { row: { original: Student } }) => {
+              const showLink = !!row.original?.block12Teacher?.id;
+              // console.log(row);
+              if (showLink)
+                return (
+                  <Link href={`/userProfile/${row.original?.block12Teacher?.id}`} >
+                    {row.original?.block12Teacher?.name}
                   </Link>
                 );
               return null;

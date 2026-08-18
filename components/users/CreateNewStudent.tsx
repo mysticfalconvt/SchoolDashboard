@@ -27,6 +27,8 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
     $block8: ID!
     $block9: ID!
     $block10: ID!
+    $block11: ID!
+    $block12: ID!
   ) {
     createUser(
       data: {
@@ -43,6 +45,8 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
         block8Teacher: { connect: { id: $block8 } }
         block9Teacher: { connect: { id: $block9 } }
         block10Teacher: { connect: { id: $block10 } }
+        block11Teacher: { connect: { id: $block11 } }
+        block12Teacher: { connect: { id: $block12 } }
         isStudent: true
         password: "password"
       }
@@ -89,6 +93,8 @@ interface StudentInputs {
   block8: string;
   block9: string;
   block10: string;
+  block11: string;
+  block12: string;
 }
 
 const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
@@ -115,6 +121,8 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
     block8: '',
     block9: '',
     block10: '',
+    block11: '',
+    block12: '',
   });
 
   const [createNewStudent, { loading, error }] = useGqlMutation(

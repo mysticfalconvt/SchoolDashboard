@@ -92,6 +92,16 @@ const TA_INFO_QUERY = gql`
           id
           block10Assignment
         }
+        block11Teacher {
+          name
+          id
+          block11Assignment
+        }
+        block12Teacher {
+          name
+          id
+          block12Assignment
+        }
         callbackCount
         studentCellPhoneViolationCount
         PbisCardCount
@@ -162,6 +172,8 @@ interface BlockTeacher {
   block8Assignment?: string;
   block9Assignment?: string;
   block10Assignment?: string;
+  block11Assignment?: string;
+  block12Assignment?: string;
 }
 
 interface CallbackItem {
@@ -205,6 +217,8 @@ interface TaStudent {
   block8Teacher?: BlockTeacher;
   block9Teacher?: BlockTeacher;
   block10Teacher?: BlockTeacher;
+  block11Teacher?: BlockTeacher;
+  block12Teacher?: BlockTeacher;
   callbackCount?: number;
   studentCellPhoneViolationCount?: number;
   PbisCardCount: number;

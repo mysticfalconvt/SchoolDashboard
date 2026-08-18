@@ -210,6 +210,30 @@ const GET_SINGLE_TEACHER = gql`
         )
         YearPbisCount: studentPbisCardsCount
       }
+      block11Students {
+        id
+        name
+        individualPbisLevel
+        callbackCount
+        totalCallbackCount
+        averageTimeToCompleteCallback
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
+      }
+      block12Students {
+        id
+        name
+        individualPbisLevel
+        callbackCount
+        totalCallbackCount
+        averageTimeToCompleteCallback
+        PbisCardCount: studentPbisCardsCount(
+          where: { dateGiven: { gte: $date } }
+        )
+        YearPbisCount: studentPbisCardsCount
+      }
 
       block1Assignment
       block1ClassName
@@ -241,6 +265,12 @@ const GET_SINGLE_TEACHER = gql`
       block10Assignment
       block10ClassName
       block10AssignmentLastUpdated
+      block11Assignment
+      block11ClassName
+      block11AssignmentLastUpdated
+      block12Assignment
+      block12ClassName
+      block12AssignmentLastUpdated
     }
   }
 `;
@@ -298,6 +328,8 @@ interface Teacher {
   block8Students: Student[];
   block9Students: Student[];
   block10Students: Student[];
+  block11Students: Student[];
+  block12Students: Student[];
   block1Assignment?: string;
   block1ClassName?: string;
   block1AssignmentLastUpdated?: string;
@@ -328,6 +360,12 @@ interface Teacher {
   block10Assignment?: string;
   block10ClassName?: string;
   block10AssignmentLastUpdated?: string;
+  block11Assignment?: string;
+  block11ClassName?: string;
+  block11AssignmentLastUpdated?: string;
+  block12Assignment?: string;
+  block12ClassName?: string;
+  block12AssignmentLastUpdated?: string;
 }
 
 interface ViewTeacherPageProps {
@@ -369,6 +407,8 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
     block8Students = [],
     block9Students = [],
     block10Students = [],
+    block11Students = [],
+    block12Students = [],
     callbackAssigned = [],
   } = user || {};
   return (
@@ -417,6 +457,14 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
             title="Block 10"
             students={block10Students}
           />
+          <GiveListOfStudentsACardButton
+            title="Block 11"
+            students={block11Students}
+          />
+          <GiveListOfStudentsACardButton
+            title="Block 12"
+            students={block12Students}
+          />
         </div>
       )}
       <h3>Teacher info</h3>
@@ -453,6 +501,12 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
       )}
       {block10Students[0] && (
         <ViewStudentTable users={block10Students} title="Block 10" />
+      )}
+      {block11Students[0] && (
+        <ViewStudentTable users={block11Students} title="Block 11" />
+      )}
+      {block12Students[0] && (
+        <ViewStudentTable users={block12Students} title="Block 12" />
       )}
       <CallbackCards callbacks={callbackAssigned} />
     </div>

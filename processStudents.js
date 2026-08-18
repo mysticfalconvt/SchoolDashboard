@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
+// Six colour classes x the A/B rotation. Keep in sync with NUMBER_OF_BLOCKS in
+// config.ts and schemas/blocks.ts in the Keystone backend.
+const NUMBER_OF_BLOCKS = 12;
+
 // Email corrections mapping - fixes common typos or name changes in student emails
 // Format: "incorrect.email@domain.com": "correct.email@domain.com"
 // 
@@ -10,19 +14,11 @@ const path = require('path');
 // 3. Log the change for audit purposes
 // 4. Only affects the student's email field, not their teacher assignments
 //
+// Departed students are pruned each year - a correction that stops firing is
+// reported in red as "not found in data" when this script runs.
 // Add more corrections here as needed:
 const emailCorrections = {
-    "ruthie.lawson@ncsuvt.org": "ruth.lawson@ncsuvt.org",
-    "dayana.bernardo@ncsuvt.org": "dayana.chunbernardo@ncsuvt.org",
-    "destiny-ann.perry@ncsuvt.org": "destinyann.perry@ncsuvt.org",
-    "rory.chitambar@ncsuvt.org": "gregory.chitambar@ncsuvt.org",
-    "alex.cochran@ncsuvt.org": "alexander.cochran@ncsuvt.org",
-    "hailey.marie@ncsuvt.org": "hailey.ste.marie@ncsuvt.org",
-    "jessey-jaymes.charest@ncsuvt.org": "jesseyjaymes.charest@ncsuvt.org",
-    "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
-    "joey.iii@ncsuvt.org": "joseph.valenti@ncsuvt.org",
     "hector.figueroa@ncsuvt.org": "hectorm.figueroa@ncsuvt.org",
-    "dre.duran@ncsuvt.org": "andres.duran@ncsuvt.org",
 };
 
 // Function to validate email format
@@ -33,7 +29,7 @@ function isValidEmail(email) {
 
 // Function to check if all blocks are null
 function allBlocksAreNull(student) {
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= NUMBER_OF_BLOCKS; i++) {
         if (student[`block${i}`] !== "null") {
             return false;
         }
@@ -53,7 +49,7 @@ function cleanStudent(student, emailChanges, nullBlocksRemoved, appliedCorrectio
 
     // Remove individual null blocks
     const removedBlocks = [];
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= NUMBER_OF_BLOCKS; i++) {
         if (student[`block${i}`] === "null") {
             removedBlocks.push(`block${i}`);
             delete student[`block${i}`];

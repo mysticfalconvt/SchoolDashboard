@@ -48,8 +48,11 @@ export const allowImpersonation: boolean =
   process.env.NODE_ENV === 'development' &&
   process.env.NEXT_PUBLIC_ALLOW_IMPERSONATION?.toLowerCase() === 'true';
 
+// Six colour-coded classes (ROYGBP) x the A/B rotation. block1-6 are the A
+// rotation, block7-12 the B rotation, keyed on colour so a block number means
+// the same class to every student and teacher.
 export const NUMBER_OF_BLOCKS: number = Number(
-  process.env.NEXT_PUBLIC_NUMBER_OF_BLOCKS || 5,
+  process.env.NEXT_PUBLIC_NUMBER_OF_BLOCKS || 12,
 );
 export const ADMIN_ID: string | undefined = process.env.NEXT_PUBLIC_ADMIN_ID;
 

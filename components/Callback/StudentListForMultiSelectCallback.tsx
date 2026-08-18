@@ -18,6 +18,8 @@ interface StudentList {
   block8Students?: Student[];
   block9Students?: Student[];
   block10Students?: Student[];
+  block11Students?: Student[];
+  block12Students?: Student[];
 }
 
 interface StudentListProps {
@@ -46,6 +48,8 @@ export default function StudentList({
     block8Students,
     block9Students,
     block10Students,
+    block11Students,
+    block12Students,
   } = studentList || {};
   const [showSingleClass, setShowSingleClass] = useState(false);
   const [firstNameSort, setFirstNameSort] = useState(false);
@@ -60,6 +64,8 @@ export default function StudentList({
     ...(block8Students || []),
     ...(block9Students || []),
     ...(block10Students || []),
+    ...(block11Students || []),
+    ...(block12Students || []),
   ];
 
   // Remove duplicates based on student ID
@@ -242,6 +248,22 @@ export default function StudentList({
                   block 10 Students
                 </h4>
                 <DisplaySingleClass classList={block10Students} />
+              </div>
+            )}
+            {block11Students?.length > 0 && (
+              <div>
+                <h4 className="mb-0 text-base text-gray-700 w-max">
+                  block 10 Students
+                </h4>
+                <DisplaySingleClass classList={block11Students} />
+              </div>
+            )}
+            {block12Students?.length > 0 && (
+              <div>
+                <h4 className="mb-0 text-base text-gray-700 w-max">
+                  block 10 Students
+                </h4>
+                <DisplaySingleClass classList={block12Students} />
               </div>
             )}
           </>

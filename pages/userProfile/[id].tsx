@@ -68,6 +68,14 @@ const GET_SINGLE_USER = gql`
         name
         id
       }
+      block11Teacher {
+        name
+        id
+      }
+      block12Teacher {
+        name
+        id
+      }
 
       taTeacher {
         name
@@ -113,6 +121,8 @@ interface UserProfile {
   block8Teacher?: BlockTeacher;
   block9Teacher?: BlockTeacher;
   block10Teacher?: BlockTeacher;
+  block11Teacher?: BlockTeacher;
+  block12Teacher?: BlockTeacher;
   taTeacher?: BlockTeacher;
   isStaff?: boolean;
   isParent?: boolean;

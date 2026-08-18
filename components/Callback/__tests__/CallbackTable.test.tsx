@@ -97,6 +97,8 @@ describe('CallbackTable', () => {
       block8Students: [],
       block9Students: [],
       block10Students: [],
+      block11Students: [],
+      block12Students: [],
     },
   };
 

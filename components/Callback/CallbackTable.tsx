@@ -43,6 +43,12 @@ const GET_STUDENTS_BY_BLOCK_QUERY = gql`
       block10Students {
         id
       }
+      block11Students {
+        id
+      }
+      block12Students {
+        id
+      }
     }
   }
 `;
@@ -93,6 +99,8 @@ interface StudentsByBlock {
   B8?: string[];
   B9?: string[];
   B10?: string[];
+  B11?: string[];
+  B12?: string[];
 }
 
 const CallbackTable = React.memo(function CallbackTable({
@@ -143,6 +151,12 @@ const CallbackTable = React.memo(function CallbackTable({
     const B10 = students?.block10Students?.map(
       (student: { id: string }) => student.id,
     );
+    const B11 = students?.block11Students?.map(
+      (student: { id: string }) => student.id,
+    );
+    const B12 = students?.block12Students?.map(
+      (student: { id: string }) => student.id,
+    );
     const studentsByBlock = {
       B1,
       B2,
@@ -154,6 +168,8 @@ const CallbackTable = React.memo(function CallbackTable({
       B8,
       B9,
       B10,
+      B11,
+      B12,
     };
     return studentsByBlock;
   }, [data]);

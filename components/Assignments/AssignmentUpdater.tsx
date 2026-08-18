@@ -52,8 +52,14 @@ const UPDATE_ASSIGNMENTS = gql`
     $block9ClassName: String
     $block9AssignmentLastUpdated: DateTime
     $block10Assignment: String
+    $block11Assignment: String
+    $block12Assignment: String
     $block10ClassName: String
+    $block11ClassName: String
+    $block12ClassName: String
     $block10AssignmentLastUpdated: DateTime
+    $block11AssignmentLastUpdated: DateTime
+    $block12AssignmentLastUpdated: DateTime
   ) {
     updateUser(
       where: { id: $id }
@@ -86,8 +92,14 @@ const UPDATE_ASSIGNMENTS = gql`
         block9ClassName: $block9ClassName
         block9AssignmentLastUpdated: $block9AssignmentLastUpdated
         block10Assignment: $block10Assignment
+        block11Assignment: $block11Assignment
+        block12Assignment: $block12Assignment
         block10ClassName: $block10ClassName
+        block11ClassName: $block11ClassName
+        block12ClassName: $block12ClassName
         block10AssignmentLastUpdated: $block10AssignmentLastUpdated
+        block11AssignmentLastUpdated: $block11AssignmentLastUpdated
+        block12AssignmentLastUpdated: $block12AssignmentLastUpdated
       }
     ) {
       id
@@ -188,6 +200,8 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
                 updateData[`block8AssignmentLastUpdated`] = todaysDate;
                 updateData[`block9AssignmentLastUpdated`] = todaysDate;
                 updateData[`block10AssignmentLastUpdated`] = todaysDate;
+                updateData[`block11AssignmentLastUpdated`] = todaysDate;
+                updateData[`block12AssignmentLastUpdated`] = todaysDate;
                 updateData[`block1Assignment`] = inputs.assignment;
                 updateData[`block2Assignment`] = inputs.assignment;
                 updateData[`block3Assignment`] = inputs.assignment;
@@ -198,6 +212,8 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
                 updateData[`block8Assignment`] = inputs.assignment;
                 updateData[`block9Assignment`] = inputs.assignment;
                 updateData[`block10Assignment`] = inputs.assignment;
+                updateData[`block11Assignment`] = inputs.assignment;
+                updateData[`block12Assignment`] = inputs.assignment;
                 updateData.id = me.id;
                 await updateAssignment(updateData);
                 toast.success(`Updated Assignment for Block ${block}`);

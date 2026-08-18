@@ -109,6 +109,20 @@ const GET_STUDENT_CLASSSWORK_QUERY = gql`
         block10Assignment
         block10AssignmentLastUpdated
       }
+      block11Teacher {
+        name
+        id
+        block11ClassName
+        block11Assignment
+        block11AssignmentLastUpdated
+      }
+      block12Teacher {
+        name
+        id
+        block12ClassName
+        block12Assignment
+        block12AssignmentLastUpdated
+      }
     }
   }
 `;

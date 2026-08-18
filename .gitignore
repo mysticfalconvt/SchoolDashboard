@@ -39,5 +39,13 @@ yarn-error.log*
 
 # TypeScript build cache
 tsconfig.tsbuildinfo
+
+# Rosters, schedule exports and anything generated from them. These carry
+# student and staff names and must never be committed. The office's export is
+# renamed each year, so ignore the extension rather than a fixed filename.
+*.csv
+!**/__tests__/**/*.csv
+staff_from_website.txt
+staff_input.json
 students_input.json
 students_output.json

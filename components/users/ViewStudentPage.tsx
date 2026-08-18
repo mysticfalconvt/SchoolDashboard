@@ -112,6 +112,20 @@ const GET_SINGLE_TEACHER = gql`
         block10Assignment
         block10AssignmentLastUpdated
       }
+      block11Teacher {
+        name
+        id
+        block11ClassName
+        block11Assignment
+        block11AssignmentLastUpdated
+      }
+      block12Teacher {
+        name
+        id
+        block12ClassName
+        block12Assignment
+        block12AssignmentLastUpdated
+      }
       taTeacher {
         id
         name
@@ -181,8 +195,14 @@ interface BlockTeacher {
   block9Assignment?: string;
   block9AssignmentLastUpdated?: string;
   block10ClassName?: string;
+  block11ClassName?: string;
+  block12ClassName?: string;
   block10Assignment?: string;
+  block11Assignment?: string;
+  block12Assignment?: string;
   block10AssignmentLastUpdated?: string;
+  block11AssignmentLastUpdated?: string;
+  block12AssignmentLastUpdated?: string;
 }
 
 interface CallbackItem {
@@ -250,6 +270,8 @@ interface User {
   block8Teacher: BlockTeacher;
   block9Teacher: BlockTeacher;
   block10Teacher: BlockTeacher;
+  block11Teacher: BlockTeacher;
+  block12Teacher: BlockTeacher;
   taTeacher: {
     id: string;
     name: string;
