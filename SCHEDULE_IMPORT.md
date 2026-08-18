@@ -31,6 +31,44 @@ Both JSON files are pasted into forms on `/superUserSettings` (super-admin only)
 into **Batch add/update students from JSON**. Staff must go first — students
 reference teachers by email.
 
+## How addresses are generated
+
+`nameToEmail()` in `buildStaffList.js` is the single implementation, shared by the
+staff and student generators.
+
+```
+first name  first given name only, all separators stripped
+surname     lowercased, hyphens and periods KEPT, spaces dropped
+```
+
+The asymmetry is the district's real convention, verified against the directory:
+
+| Sheet name | Address |
+| --- | --- |
+| `Dutton-Byrd, Colton` | `colton.dutton-byrd@` — hyphen kept |
+| `Saxton-Gilbar, Elena` | `elena.saxton-gilbar@` — hyphen kept |
+| `Ste. Marie, Hailey` | `hailey.ste.marie@` — period kept, space dropped |
+| `Dunham Westlund, Eli` | `eli.dunhamwestlund@` — space dropped |
+| `Perez Maus, Leonel` | `leonel.perezmaus@` — space dropped |
+| `van Tuil, Belynda` | `belynda.vantuil@` — space dropped |
+| `Perry, Destiny-Ann` | `destinyann.perry@` — first-name hyphen dropped |
+| `Schuyler, Jeremiah T` | `jeremiah.schuyler@` — middle initial dropped |
+
+This rule reproduces every address verified so far, including four that used to
+need hand-written corrections.
+
+The exceptions that remain are **district-wide name collisions**, where the office
+disambiguates by hand — usually by switching to a formal first name. These cannot
+be derived from a name and must be recorded:
+
+- `pip.cornelius-dreher@` → `philip.dreher@` (formal first name, and only the
+  second half of the surname)
+- `hector.figueroa@` → `hectorm.figueroa@` (middle initial appended)
+
+A wrong student address does not create a duplicate — it creates an account whose
+email does not match the student's real one, so they simply cannot sign in. If a
+student reports that, add a correction and re-import.
+
 ## Fixing names in one place
 
 `emailOverrides.js` holds `teacherEmailCorrections`, keyed generated address →

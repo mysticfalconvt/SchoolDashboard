@@ -19,6 +19,10 @@ const NUMBER_OF_BLOCKS = 12;
 // Add more corrections here as needed:
 const emailCorrections = {
     "hector.figueroa@ncsuvt.org": "hectorm.figueroa@ncsuvt.org",
+    // Pip Cornelius-Dreher's account uses his formal first name and only the
+    // second half of his surname - a district name-collision case that no naming
+    // rule can derive.
+    "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
 };
 
 // Function to validate email format

@@ -105,11 +105,30 @@ function findScratchTableStart(rows) {
     return index === -1 ? rows.length : index;
 }
 
-// "Schuyler, Jeremiah T" -> "jeremiah.schuyler@ncsuvt.org". Only the first given
-// name is used, which drops trailing middle initials.
+// "Schuyler, Jeremiah T" -> "jeremiah.schuyler@ncsuvt.org"
+//
+// Only the first given name is used, which drops trailing middle initials, and
+// any separator inside it is removed ("Destiny-Ann" -> "destinyann").
+//
+// Surnames keep hyphens and periods but lose spaces. That asymmetry is the
+// district's actual convention, verified against the directory:
+//
+//   Dutton-Byrd      -> dutton-byrd      (hyphen kept)
+//   Saxton-Gilbar    -> saxton-gilbar    (hyphen kept)
+//   Ste. Marie       -> ste.marie        (period kept, space dropped)
+//   Dunham Westlund  -> dunhamwestlund   (space dropped)
+//   Perez Maus       -> perezmaus        (space dropped)
+//   van Tuil         -> vantuil          (space dropped)
+//
+// Genuine exceptions are district-wide name collisions, where the office
+// disambiguates by hand - those live in emailOverrides.js and
+// processStudents.js and cannot be derived from a name.
 function nameToEmail(csvName) {
     const [last, first] = csvName.split(',');
-    const cleanLast = last.trim().toLowerCase().replace(/[^a-z]/g, '');
+    const cleanLast = last.trim().toLowerCase()
+        .replace(/[^a-z.\-]/g, '')
+        .replace(/[.\-]{2,}/g, (match) => match[0])
+        .replace(/^[.\-]+|[.\-]+$/g, '');
     const cleanFirst = first.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g, '');
     return `${cleanFirst}.${cleanLast}${EMAIL_DOMAIN}`;
 }

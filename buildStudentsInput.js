@@ -70,6 +70,18 @@ function studentEmail(csvName) {
     return nameToEmail(csvName);
 }
 
+// "Agcaoili, Vyelle Alistaire Segador" -> "Vyelle Agcaoili"
+//
+// First given name plus surname, keeping the sheet's own capitalisation, which
+// matches how staff names are stored ("Deanna Gann"). Middle names are dropped.
+// This is carried in the payload because the backend would otherwise derive a
+// name from the email address, which is both lowercase and lossy - hectorm.figueroa
+// would become "Hectorm Figueroa".
+function studentName(csvName) {
+    const [last, first] = csvName.split(',');
+    return `${first.trim().split(/\s+/)[0]} ${last.trim()}`;
+}
+
 function buildStudentsInput() {
     const csvPath = process.argv[2]
         || path.join(__dirname, 'student users to update - student schedule data.csv');
@@ -116,7 +128,7 @@ function buildStudentsInput() {
         };
 
         // Key order matches what processStudents.js and the backend expect.
-        const student = { email: studentEmail(name) };
+        const student = { email: studentEmail(name), name: studentName(name) };
         COLOURS.forEach((colour, n) => {
             student[`block${n + 1}`] = slot(columnIndex(A_START, colour));
         });
