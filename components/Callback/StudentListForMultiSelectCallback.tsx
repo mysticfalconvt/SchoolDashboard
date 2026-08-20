@@ -106,32 +106,50 @@ export default function StudentList({
       }
     });
 
-    return uniqueClassList.map((student) => (
-      <li
-        className="list-none overflow-hidden flex flex-row items-start justify-start p-0 h-5"
-        key={`${student.id}-${student.name}`}
-      >
-        <label htmlFor={student.id} className="ml-2.5 text-sm flex p-0">
-          <input
-            type="checkbox"
-            checked={selectedStudents.includes(student.id)}
-            id={student.id}
-            name={student.name}
-            className="relative cursor-pointer mb-1.5 w-2.5 p-0"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setSelectedStudents([...selectedStudents, student.id]);
-              } else {
-                setSelectedStudents(
-                  selectedStudents.filter((id) => id !== student.id),
-                );
-              }
-            }}
-          />
-          {firstNameSort ? student.name : lastNameCommaFirstName(student.name)}
-        </label>
-      </li>
-    ));
+    return (
+      <ul className="list-none m-0 p-0 space-y-1">
+        {uniqueClassList.map((student) => {
+          const isSelected = selectedStudents.includes(student.id);
+          return (
+            <li
+              className="list-none m-0 p-0"
+              key={`${student.id}-${student.name}`}
+            >
+              <label
+                htmlFor={student.id}
+                className={`flex items-start gap-2 text-sm leading-5 cursor-pointer m-0 -mx-1.5 px-1.5 py-0.5 rounded transition-colors duration-150 ${
+                  isSelected
+                    ? 'bg-white/15 text-white font-semibold'
+                    : 'text-white/80 font-normal hover:bg-white/5'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  id={student.id}
+                  name={student.name}
+                  className="h-4 w-4 shrink-0 mt-0.5 cursor-pointer accent-[#38B6FF]"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedStudents([...selectedStudents, student.id]);
+                    } else {
+                      setSelectedStudents(
+                        selectedStudents.filter((id) => id !== student.id),
+                      );
+                    }
+                  }}
+                />
+                <span className="min-w-0 break-words">
+                  {firstNameSort
+                    ? student.name
+                    : lastNameCommaFirstName(student.name)}
+                </span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    );
   }
 
   return (
@@ -156,12 +174,12 @@ export default function StudentList({
           {firstNameSort ? 'Sort by last name' : 'Sort by first name'}
         </SmallGradientButton>
       </div>
-      <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-4 items-start">
         {showSingleClass ? (
           <>
             {allStudentsAlphabetical?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   All Students
                 </h4>
                 <DisplaySingleClass classList={allStudents} />
@@ -172,7 +190,7 @@ export default function StudentList({
           <>
             {block1Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 1 Students
                 </h4>
                 <DisplaySingleClass classList={block1Students} />
@@ -180,7 +198,7 @@ export default function StudentList({
             )}
             {block2Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 2 Students
                 </h4>
                 <DisplaySingleClass classList={block2Students} />
@@ -188,7 +206,7 @@ export default function StudentList({
             )}
             {block3Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 3 Students
                 </h4>
                 <DisplaySingleClass classList={block3Students} />
@@ -196,7 +214,7 @@ export default function StudentList({
             )}
             {block4Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 4 Students
                 </h4>
                 <DisplaySingleClass classList={block4Students} />
@@ -204,7 +222,7 @@ export default function StudentList({
             )}
             {block5Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 5 Students
                 </h4>
                 <DisplaySingleClass classList={block5Students} />
@@ -212,7 +230,7 @@ export default function StudentList({
             )}
             {block6Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 6 Students
                 </h4>
                 <DisplaySingleClass classList={block6Students} />
@@ -220,7 +238,7 @@ export default function StudentList({
             )}
             {block7Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 7 Students
                 </h4>
                 <DisplaySingleClass classList={block7Students} />
@@ -228,7 +246,7 @@ export default function StudentList({
             )}
             {block8Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 8 Students
                 </h4>
                 <DisplaySingleClass classList={block8Students} />
@@ -236,7 +254,7 @@ export default function StudentList({
             )}
             {block9Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 9 Students
                 </h4>
                 <DisplaySingleClass classList={block9Students} />
@@ -244,7 +262,7 @@ export default function StudentList({
             )}
             {block10Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
+                <h4 className="mb-1 text-base font-semibold text-white">
                   block 10 Students
                 </h4>
                 <DisplaySingleClass classList={block10Students} />
@@ -252,16 +270,16 @@ export default function StudentList({
             )}
             {block11Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
-                  block 10 Students
+                <h4 className="mb-1 text-base font-semibold text-white">
+                  block 11 Students
                 </h4>
                 <DisplaySingleClass classList={block11Students} />
               </div>
             )}
             {block12Students?.length > 0 && (
               <div>
-                <h4 className="mb-0 text-base text-gray-700 w-max">
-                  block 10 Students
+                <h4 className="mb-1 text-base font-semibold text-white">
+                  block 12 Students
                 </h4>
                 <DisplaySingleClass classList={block12Students} />
               </div>

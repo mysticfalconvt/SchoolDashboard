@@ -6,7 +6,7 @@ interface DialogProps {
   onClose: () => void;
   title?: string;
   variant?: 'inline' | 'modal';
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
@@ -36,6 +36,8 @@ const sizeClasses = {
   md: 'max-w-lg',
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
+  // grows with the viewport for content-heavy dialogs (long student lists, etc.)
+  '2xl': 'max-w-4xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[100rem]',
 };
 
 export function DialogBackdrop({
@@ -169,6 +171,7 @@ export function FormDialog({
   className = '',
   showCloseButton = true,
   closeOnBackdropClick = true,
+  maxHeight,
 }: Omit<DialogProps, 'variant'>) {
   return (
     <Dialog
@@ -181,7 +184,9 @@ export function FormDialog({
       showCloseButton={showCloseButton}
       closeOnBackdropClick={closeOnBackdropClick}
     >
-      <DialogContent className="pt-2 px-8">{children}</DialogContent>
+      <DialogContent className="pt-2 px-8" maxHeight={maxHeight}>
+        {children}
+      </DialogContent>
     </Dialog>
   );
 }

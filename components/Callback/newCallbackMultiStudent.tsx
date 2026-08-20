@@ -192,7 +192,8 @@ export default function NewCallbackMultiStudent({
         isOpen={showForm}
         onClose={() => setShowForm(false)}
         title="Add a New Callback Assignment"
-        size="xl"
+        size="2xl"
+        maxHeight="max-h-[80vh]"
       >
         <Form className="w-full max-w-none bg-transparent border-0 shadow-none p-0">
           <DisplayError error={error as any} />
