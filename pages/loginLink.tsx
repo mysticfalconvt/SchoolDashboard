@@ -3,7 +3,6 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useQueryClient } from 'react-query';
 import useSendEmail from '../lib/useSendEmail';
 
 const LOGIN_LINK_MUTATION = gql`
@@ -32,11 +31,29 @@ export default function LoginLink() {
   const token = router.query.token as string;
   const email = router.query.email as string;
   const user = useUser();
-  const [mutation, { data, loading, error }] =
-    useGqlMutation(LOGIN_LINK_MUTATION);
-  const queryClient = useQueryClient();
+  const [mutation, { data, loading, error }] = useGqlMutation(
+    LOGIN_LINK_MUTATION,
+    {
+      // Store the session token here, in the success callback, before anything
+      // else can run. The default onSuccess for useGqlMutation invalidates
+      // every query, which fired a refetch of `me` while the token was still
+      // unset -- that unauthenticated "not signed in" answer then sat in the
+      // cache for its full 5 minute staleTime, so landing on `/` popped the
+      // sign-in dialog even though the link had been redeemed successfully.
+      onSuccess: (result: any) => {
+        const sessionToken = result?.redeemUserMagicAuthToken?.token;
+        if (sessionToken && typeof window !== 'undefined') {
+          localStorage.setItem('token', sessionToken);
+        }
+      },
+    },
+  );
   const { sendEmail } = useSendEmail();
   const [hasAttemptedMutation, setHasAttemptedMutation] = React.useState(false);
+  // A ref, not the state above: state updates are not visible to a second run
+  // of the same effect (React 18 double-invokes effects in development), and
+  // redeeming a single-use magic token twice fails the second time.
+  const hasFiredMutation = React.useRef(false);
   const [mutationError, setMutationError] = React.useState<string | null>(null);
   const [timeoutReached, setTimeoutReached] = React.useState(false);
   const [hasReportedError, setHasReportedError] = React.useState(false);
@@ -80,7 +97,8 @@ export default function LoginLink() {
     // In test environment, router.isReady might be undefined, so we treat it as ready if token/email exist
     const isRouterReady = router.isReady !== false && (token || email || router.isReady);
 
-    if (token && email && !data && !loading && !hasAttemptedMutation && isRouterReady) {
+    if (token && email && !data && !loading && !hasFiredMutation.current && isRouterReady) {
+      hasFiredMutation.current = true;
       setHasAttemptedMutation(true);
       mutation({
         token,
@@ -137,22 +155,27 @@ export default function LoginLink() {
         (response.token && response.item); // Handle case where typename is undefined but we have success data
 
       if (isSuccess) {
-        // Store the session token
+        // Store the session token (onSuccess above normally got here first;
+        // this is the backstop for a cached/replayed mutation result).
         const sessionToken = response.token;
         if (sessionToken) {
           localStorage.setItem('token', sessionToken);
         }
 
-        // Refetch queries to update user state
-        queryClient.refetchQueries();
-
-        // Redirect to home page after a short delay
-        setTimeout(() => {
-          router.push('/');
-        }, 2000);
+        // A full page load, not router.push. A client-side push carries the
+        // react-query cache along with it, and that cache may hold the
+        // unauthenticated `me` result from the request that was already in
+        // flight while the link was being redeemed -- which is why this
+        // sometimes dropped you on the sign-in dialog, and why reloading the
+        // page fixed it. Loading `/` fresh starts from the stored token.
+        const redirect = setTimeout(() => {
+          window.location.replace('/');
+        }, 1500);
+        return () => clearTimeout(redirect);
       }
     }
-  }, [data, router, queryClient]);
+    return undefined;
+  }, [data]);
 
   // Report authentication failure
   React.useEffect(() => {

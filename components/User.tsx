@@ -173,8 +173,19 @@ export interface User {
   lastCollection?: string;
 }
 
-export function useUser(): User | undefined {
-  const { data: pbisDates } = useGQLQuery(
+export interface UserStatus {
+  user: User | undefined;
+  /**
+   * True until we actually know whether there is a signed-in user. Distinct
+   * from `user === undefined`, which is also what an anonymous visitor looks
+   * like -- treating the two the same is what made the sign-in dialog flash
+   * open on every page load before the `me` query had answered.
+   */
+  isLoading: boolean;
+}
+
+export function useUserStatus(): UserStatus {
+  const pbisDatesQuery = useGQLQuery(
     'pbisDates',
     GET_ALL_PBIS_DATES_QUERY,
     {},
@@ -186,6 +197,8 @@ export function useUser(): User | undefined {
       refetchOnReconnect: false,
     },
   );
+
+  const pbisDates = pbisDatesQuery.data;
 
   // Extract the complex expression to avoid dependency array issues
   const pbisCollectionDates = pbisDates?.pbisCollectionDates;
@@ -200,7 +213,7 @@ export function useUser(): User | undefined {
     return new Date(latestCollectionDateOr2YearsAgo);
   }, [latestCollectionDateOr2YearsAgo]);
 
-  const { data } = useGQLQuery(
+  const meQuery = useGQLQuery(
     `me`, // Include date in query key for proper caching
     CURRENT_USER_QUERY,
     {
@@ -215,6 +228,8 @@ export function useUser(): User | undefined {
       refetchOnReconnect: true, // refetch on network reconnect
     },
   );
+
+  const data = meQuery.data;
 
   // Memoize the user data processing to prevent object recreation
   const userData = useMemo(() => {
@@ -233,7 +248,19 @@ export function useUser(): User | undefined {
     return processedUser;
   }, [data?.authenticatedItem, latestCollectionDateOr2YearsAgo]);
 
-  return userData;
+  // Resolved once `me` has come back, or once either query has failed (a failed
+  // pbisDates query leaves `me` disabled forever, so it has to count too).
+  const isLoading =
+    !userData &&
+    !meQuery.isFetched &&
+    !meQuery.isError &&
+    !pbisDatesQuery.isError;
+
+  return { user: userData, isLoading };
+}
+
+export function useUser(): User | undefined {
+  return useUserStatus().user;
 }
 
 export { CURRENT_USER_QUERY };

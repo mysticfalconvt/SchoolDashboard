@@ -3,7 +3,6 @@ import { GraphQLClient } from '@/lib/graphqlClient';
 import gql from 'graphql-tag';
 import Script from 'next/script';
 import React from 'react';
-import { useQueryClient } from 'react-query';
 
 const GOOGLE_SIGNIN_MUTATION = gql`
   mutation GOOGLE_SIGNIN_MUTATION($idToken: String!) {
@@ -26,7 +25,6 @@ declare global {
 }
 
 const GoogleSignIn: React.FC = () => {
-  const queryClient = useQueryClient();
   const buttonRef = React.useRef<HTMLDivElement>(null);
   const [scriptLoaded, setScriptLoaded] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -40,14 +38,25 @@ const GoogleSignIn: React.FC = () => {
         return;
       }
       try {
-        const client = new GraphQLClient(endpoint);
+        // credentials: 'include' to match every other call in the app
+        // (useGqlQuery/useGqlMutation set it). Without it the browser drops any
+        // session cookie the backend sets here, so a Google session lived only
+        // in localStorage and behaved differently from the other sign-in paths.
+        const client = new GraphQLClient(endpoint, {
+          headers: { credentials: 'include', mode: 'cors' },
+        });
         const res = await client.request<{
           authenticateUserWithGoogle: GoogleAuthResult;
         }>(GOOGLE_SIGNIN_MUTATION, { idToken });
         const result = res.authenticateUserWithGoogle;
         if (result?.success && result.sessionToken) {
           localStorage.setItem('token', result.sessionToken);
-          await queryClient.refetchQueries();
+          // Reload rather than refetchQueries(): the `me` query is usually
+          // already in flight (unauthenticated) when the credential comes back,
+          // and react-query dedupes the refetch onto that request -- caching
+          // "signed out" for the next five minutes. A full load starts from the
+          // token we just stored. Same URL, so the user keeps their place.
+          window.location.reload();
         } else {
           setError(result?.message || 'Unable to sign in with Google');
         }
@@ -55,7 +64,7 @@ const GoogleSignIn: React.FC = () => {
         setError(err?.message || 'Unable to sign in with Google');
       }
     },
-    [queryClient],
+    [],
   );
 
   // Initialize Google Identity Services once the script has loaded.

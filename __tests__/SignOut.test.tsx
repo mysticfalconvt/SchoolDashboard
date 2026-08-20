@@ -42,6 +42,9 @@ describe('SignOut Component', () => {
         data: null,
         loading: false,
         error: null,
+        // SignOut uses mutateAsync so it can actually wait for endSession to
+        // land before tearing the page down.
+        mutateAsync: mockSignout,
       },
     ]);
   });

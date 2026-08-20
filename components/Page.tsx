@@ -6,7 +6,7 @@ import SignInDialog from './loginComponents/SignInDialog';
 import Header from './navagation/Header';
 import ImpersonationBanner from './users/ImpersonationBanner';
 import ThemeSwitcher from './styles/ThemeSwitcher';
-import { useUser } from './User';
+import { useUserStatus } from './User';
 
 interface PageProps {
   children: React.ReactNode;
@@ -15,7 +15,7 @@ interface PageProps {
 export default function Page({ children }: PageProps) {
   // get theme from local storage
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const me = useUser();
+  const { user: me, isLoading: authLoading } = useUserStatus();
   const router = useRouter();
 
   // Check if we're on the loginLink page
@@ -70,8 +70,12 @@ export default function Page({ children }: PageProps) {
       <ImpersonationBanner />
       <ThemeSwitcher theme={theme} setTheme={setLocalTheme} />
 
-      {/* Show SignInDialog when user is not authenticated, but not on loginLink page */}
-      {!isLoginLinkPage && <SignInDialog isOpen={!me} />}
+      {/* Show SignInDialog when user is not authenticated, but not on loginLink
+          page. `authLoading` matters: while the `me` query is still in flight
+          we do not yet know whether anyone is signed in, and popping the dialog
+          on that guess is what made a good session look like a signed-out one
+          until you reloaded. */}
+      {!isLoginLinkPage && !authLoading && <SignInDialog isOpen={!me} />}
 
       <Toaster
         position="top-right"
