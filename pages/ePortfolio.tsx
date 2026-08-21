@@ -151,7 +151,7 @@ const EPortfolio: NextPage<EPortfolioPageProps> = (props) => {
   if (error) return <DisplayError error={error} />;
   return (
     <div>
-      <h1 className="text-4xl mb-5 text-center">E-Portfolio Information</h1>
+      <h1 className="text-4xl mb-5 text-center">PLP Information</h1>
       <Table
         data={filteredLinks || []}
         columns={columns}

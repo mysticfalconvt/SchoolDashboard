@@ -258,7 +258,7 @@ const EditLink: React.FC<EditLinkProps> = ({
                 { id: 'forPbis', label: 'Show on The PBIS Page' },
                 {
                   id: 'forEPortfolio',
-                  label: 'Show on The E-Portfolio Page',
+                  label: 'Show on The PLP Page',
                 },
               ].map(({ id, label }) => (
                 <label

@@ -82,7 +82,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
         {isAllowed(me, 'canHaveSpecialGroups') && (
           <NavCard href="/specialGroup">SpGroup</NavCard>
         )}
-        <NavCard href="/ePortfolio">E-Portfolio</NavCard>
+        <NavCard href="/ePortfolio">PLP</NavCard>
         {isAllowed(me, 'isCommunicatorEnabled') && (
           <NavCard href="/communicatorChat">🤖</NavCard>
         )}
@@ -137,7 +137,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
         {isAllowed(me, 'canHaveSpecialGroups') && (
           <NavCard href="/specialGroup">SpGroup</NavCard>
         )}
-        <NavCard href="/ePortfolio">E-Portfolio</NavCard>
+        <NavCard href="/ePortfolio">PLP</NavCard>
         {isAllowed(me, 'isCommunicatorEnabled') && (
           <NavCard href="/communicatorChat">🤖</NavCard>
         )}

@@ -2,6 +2,7 @@ import useSendEmail from '@/components/../lib/useSendEmail';
 import GradientButton from '@/components/styles/Button';
 import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
+import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React from 'react';
 
@@ -33,6 +34,18 @@ const CREATE_STUDENT_FOCUS = gql`
   }
 `;
 
+const GET_SPECIAL_GROUP_TEACHERS = gql`
+  query GET_SPECIAL_GROUP_TEACHERS($studentId: ID!) {
+    teachers: users(
+      where: { specialGroupStudents: { some: { id: { equals: $studentId } } } }
+    ) {
+      id
+      name
+      email
+    }
+  }
+`;
+
 interface Parent {
   email: string;
 }
@@ -55,6 +68,13 @@ interface Student {
 
 interface User {
   id: string;
+  name: string;
+  email: string;
+}
+
+interface SpecialGroupTeacher {
+  id: string;
+  name: string;
   email: string;
 }
 
@@ -146,6 +166,52 @@ function createTeacherNotificationEmail({
   return email;
 }
 
+function createSpecialGroupTeacherEmail({
+  teacher,
+  fromAddress,
+  senderName,
+  studentName,
+  callbackItems,
+  parentEmails,
+}: {
+  teacher: SpecialGroupTeacher;
+  fromAddress: string;
+  senderName: string;
+  studentName: string;
+  callbackItems: CallbackItem[];
+  parentEmails: string[];
+}): EmailData {
+  const callbackNumber = callbackItems.length;
+  const assignmentList = callbackItems
+    .map(
+      (item) =>
+        `<li><strong>${item.title}</strong> - ${item.teacher.name}</li>`,
+    )
+    .join('');
+
+  const email = {
+    toAddress: teacher.email,
+    fromAddress,
+    subject: `Parent Notification Sent for ${studentName} - Your Special Group`,
+    body: `
+        <p>${studentName} is in your special group. ${senderName} just notified their parents about callback items.</p>
+        <p><strong>Student:</strong> ${studentName}</p>
+        <p><strong>Number of callback items:</strong> ${callbackNumber}</p>
+        <p><strong>Assignments:</strong></p>
+        <ul>
+          ${assignmentList}
+        </ul>
+        <p><strong>Parent emails notified:</strong></p>
+        <ul>
+          ${parentEmails.map((parentEmail) => `<li>${parentEmail}</li>`).join('')}
+        </ul>
+        <p><a href="https://ncujhs.tech">Click here to sign in and view them</a></p>
+        <p>Messages were sent on ${new Date().toLocaleDateString()}</p>
+        `,
+  };
+  return email;
+}
+
 export default function EmailParentsAboutCallback({
   student,
   disabled,
@@ -160,6 +226,19 @@ export default function EmailParentsAboutCallback({
   const callbacks = student.callbackItems;
   const callbackCount = callbacks.length;
   const parentEmails = student.parent.map((parent) => parent.email);
+  const { data: specialGroupData } = useGQLQuery(
+    `specialGroupTeachers-${student.id}`,
+    GET_SPECIAL_GROUP_TEACHERS,
+    { studentId: student.id },
+    { enabled: !!student?.id, staleTime: 1000 * 60 * 5 },
+  );
+  // teachers who have this student in a special group get a copy of the
+  // notification, minus whoever is sending it (they get their own copy below)
+  const specialGroupTeachers: SpecialGroupTeacher[] = (
+    specialGroupData?.teachers || []
+  ).filter(
+    (teacher: SpecialGroupTeacher) => teacher.email && teacher.id !== me?.id,
+  );
   return (
     <div>
       <GradientButton
@@ -207,9 +286,32 @@ export default function EmailParentsAboutCallback({
               emailData: teacherNotificationEmail,
             });
 
+            // Notify any teacher who has this student in a special group
+            await Promise.all(
+              specialGroupTeachers.map(async (teacher) => {
+                const specialGroupEmail = createSpecialGroupTeacherEmail({
+                  teacher,
+                  fromAddress: me.email,
+                  senderName: me.name,
+                  studentName,
+                  callbackItems: callbacks,
+                  parentEmails,
+                });
+                await sendEmail({
+                  emailData: specialGroupEmail,
+                });
+              }),
+            );
+
             // add note to student focus about parent emails
             const studentFocusRes = await createStudentFocus({
-              comments: `Emailed parents ${parentEmails} about ${callbackCount} items on Callback`,
+              comments: `Emailed parents ${parentEmails} about ${callbackCount} items on Callback${
+                specialGroupTeachers.length
+                  ? `. Also notified special group teacher(s) ${specialGroupTeachers
+                      .map((teacher) => teacher.name)
+                      .join(', ')}`
+                  : ''
+              }`,
               category: 'Parent Contact',
               teacher: me?.id,
               student: student.id,
