@@ -144,6 +144,48 @@ export async function sendBulkChromebookEmails(
   }
 }
 
+export interface NoStudentChromebookEmailParams {
+  classroomName?: string;
+  teacherName: string;
+  teacherEmail: string;
+  issueDetails: string;
+  sendEmail: (params: { emailData: EmailData }) => void | Promise<any>;
+  onProgress?: (progress: { sent: number; total: number }) => void;
+}
+
+/**
+ * Sends chromebook check emails for a check with no student attached. There is
+ * no student or parent to notify, so only tech support is emailed.
+ */
+export async function sendNoStudentChromebookEmails({
+  classroomName,
+  teacherName,
+  teacherEmail,
+  issueDetails,
+  sendEmail,
+  onProgress,
+}: NoStudentChromebookEmailParams): Promise<void> {
+  const totalEmails = chromebookEmails.length;
+  let emailsSent = 0;
+  const location = classroomName ? ` in ${classroomName}'s classroom` : '';
+
+  for (const email of chromebookEmails) {
+    const emailData: EmailData = {
+      toAddress: email,
+      fromAddress: teacherEmail,
+      subject: `New Chromebook Check - no student${location}`,
+      body: `
+<p>There is a new Chromebook check with no student attached${location} at NCUJHS.TECH created by ${teacherName}. </p>
+<p>${issueDetails}</p>
+      `,
+    };
+    await sendEmail({ emailData });
+    emailsSent++;
+    onProgress?.({ sent: emailsSent, total: totalEmails });
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Small delay between emails
+  }
+}
+
 export async function sendChromebookCheckEmails({
   student,
   teacherName,

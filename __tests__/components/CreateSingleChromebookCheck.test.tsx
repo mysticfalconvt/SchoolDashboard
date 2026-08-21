@@ -1,11 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateSingleChromebookCheck from '../../components/Chromebooks/CreateSingleChromebookCheck';
-import { sendChromebookCheckEmails } from '../../lib/chromebookEmailUtils';
+import {
+  sendChromebookCheckEmails,
+  sendNoStudentChromebookEmails,
+} from '../../lib/chromebookEmailUtils';
+import { useGqlMutation } from '../../lib/useGqlMutation';
 
 // Mock the utility function
 jest.mock('../../lib/chromebookEmailUtils', () => ({
   sendChromebookCheckEmails: jest.fn(),
+  sendNoStudentChromebookEmails: jest.fn(),
   chromebookEmails: [
     'robert.boskind@ncsuvt.org',
     'Joyce.Lantagne@ncsuvt.org',
@@ -96,6 +101,10 @@ describe('CreateSingleChromebookCheck', () => {
   const mockSendChromebookCheckEmails =
     sendChromebookCheckEmails as jest.MockedFunction<
       typeof sendChromebookCheckEmails
+    >;
+  const mockSendNoStudentChromebookEmails =
+    sendNoStudentChromebookEmails as jest.MockedFunction<
+      typeof sendNoStudentChromebookEmails
     >;
 
   beforeEach(() => {
@@ -467,6 +476,161 @@ describe('CreateSingleChromebookCheck', () => {
         sendEmail: expect.any(Function),
         onProgress: expect.any(Function),
       });
+    });
+  });
+
+  it('should default the classroom select to the logged in teacher', async () => {
+    const user = userEvent.setup();
+    render(<CreateSingleChromebookCheck />);
+
+    await user.click(screen.getByText('Chromebook Check'));
+
+    const classroomSelect = screen.getByLabelText('Classroom') as HTMLSelectElement;
+    expect(classroomSelect).toBeInTheDocument();
+    expect(classroomSelect.value).toBe('teacher1');
+  });
+
+  it('should connect the selected classroom when creating the check', async () => {
+    const user = userEvent.setup();
+    const mockCreateCheck = jest.fn().mockResolvedValue({});
+    (useGqlMutation as jest.Mock).mockReturnValue([
+      mockCreateCheck,
+      { loading: false },
+    ]);
+
+    render(<CreateSingleChromebookCheck />);
+
+    await user.click(screen.getByText('Chromebook Check'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('search-for-user')).toBeInTheDocument();
+    });
+
+    await user.type(
+      screen.getByPlaceholderText('Describe the issue...'),
+      'Broken screen',
+    );
+
+    const submitButton = screen
+      .getAllByText('Create Chromebook Check')
+      .find((element) => element.tagName === 'BUTTON');
+    await user.click(submitButton!);
+
+    await waitFor(() => {
+      expect(mockCreateCheck).toHaveBeenCalledWith({
+        chromebookCheck: {
+          student: { connect: { id: 'student1' } },
+          message: 'Broken screen',
+          classroom: { connect: { id: 'teacher1' } },
+        },
+      });
+    });
+  });
+
+  describe('checks with no student', () => {
+    it('should hide the student search and still allow submitting', async () => {
+      const user = userEvent.setup();
+      const mockCreateCheck = jest.fn().mockResolvedValue({});
+      (useGqlMutation as jest.Mock).mockReturnValue([
+        mockCreateCheck,
+        { loading: false },
+      ]);
+
+      render(<CreateSingleChromebookCheck />);
+      await user.click(screen.getByText('Chromebook Check'));
+
+      await user.click(
+        screen.getByLabelText('No student'),
+      );
+
+      expect(screen.queryByTestId('search-for-user')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('No student attached to this check'),
+      ).toBeInTheDocument();
+
+      await user.type(
+        screen.getByPlaceholderText('Describe the issue...'),
+        'Cracked lid',
+      );
+
+      const submitButton = screen
+        .getAllByText('Create Chromebook Check')
+        .find((element) => element.tagName === 'BUTTON');
+      await user.click(submitButton!);
+
+      await waitFor(() => {
+        expect(mockCreateCheck).toHaveBeenCalledWith({
+          chromebookCheck: {
+            message: 'Cracked lid',
+            classroom: { connect: { id: 'teacher1' } },
+          },
+        });
+      });
+    });
+
+    it('should notify tech support only, not the student/parent flow', async () => {
+      const user = userEvent.setup();
+      (useGqlMutation as jest.Mock).mockReturnValue([
+        jest.fn().mockResolvedValue({}),
+        { loading: false },
+      ]);
+
+      render(<CreateSingleChromebookCheck />);
+      await user.click(screen.getByText('Chromebook Check'));
+
+      await user.click(screen.getByLabelText('No student'));
+      await user.type(
+        screen.getByPlaceholderText('Describe the issue...'),
+        'Cracked lid',
+      );
+
+      const submitButton = screen
+        .getAllByText('Create Chromebook Check')
+        .find((element) => element.tagName === 'BUTTON');
+      await user.click(submitButton!);
+
+      await waitFor(() => {
+        expect(mockSendNoStudentChromebookEmails).toHaveBeenCalledWith({
+          classroomName: 'Ms. Teacher',
+          teacherName: 'Ms. Teacher',
+          teacherEmail: 'teacher@school.com',
+          issueDetails: 'Cracked lid',
+          sendEmail: expect.any(Function),
+          onProgress: expect.any(Function),
+        });
+      });
+      // the student/parent email flow must not run without a student
+      expect(mockSendChromebookCheckEmails).not.toHaveBeenCalled();
+    });
+
+    it('should not email anyone for a good check with no student', async () => {
+      const user = userEvent.setup();
+      (useGqlMutation as jest.Mock).mockReturnValue([
+        jest.fn().mockResolvedValue({}),
+        { loading: false },
+      ]);
+
+      render(<CreateSingleChromebookCheck />);
+      await user.click(screen.getByText('Chromebook Check'));
+
+      await user.click(screen.getByLabelText('No student'));
+      await user.selectOptions(
+        screen.getByLabelText('Status'),
+        'Everything good',
+      );
+
+      const submitButton = screen
+        .getAllByText('Create Chromebook Check')
+        .find((element) => element.tagName === 'BUTTON');
+      await user.click(submitButton!);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Create Chromebook Check'),
+        ).not.toBeInTheDocument();
+      });
+      expect(mockSendNoStudentChromebookEmails).not.toHaveBeenCalled();
+      expect(mockSendChromebookCheckEmails).not.toHaveBeenCalled();
     });
   });
 

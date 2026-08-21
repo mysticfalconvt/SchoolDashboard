@@ -1,80 +1,52 @@
 import React, { useMemo, useState } from 'react';
 import GradientButton from '../styles/Button';
 import { Dialog, DialogContent } from '../styles/Dialog';
-
-interface ChromebookCheck {
-  id: string;
-  time: string;
-  [key: string]: any;
-}
-
-interface TaStudent {
-  id: string;
-  name: string;
-  chromebookCheck: ChromebookCheck[];
-  [key: string]: any;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-  taStudents: TaStudent[];
-  [key: string]: any;
-}
+import { NO_CLASSROOM, type ChromebookCheck } from './ChromebookChecksData';
 
 interface TeacherWithChecks {
+  id: string;
   name: string;
-  checks: ChromebookCheck[];
+  count: number;
 }
 
 interface TeacherChromebookDataProps {
-  teachers: Teacher[];
+  checks: ChromebookCheck[];
 }
 
 const TeacherChromebookData: React.FC<TeacherChromebookDataProps> = ({
-  teachers,
+  checks,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [dateRange, setDateRange] = useState(7);
 
   const teacherData = useMemo(() => {
-    // get all the teachers and an array of all checks for each teacher
-    if (!teachers) return [];
+    // Count checks by the classroom they were performed in, within the range
+    if (!checks) return [];
 
-    const teachersWithChecks: TeacherWithChecks[] = [];
-    teachers.forEach((teacher) => {
-      const teacherWithChecks: TeacherWithChecks = {
-        name: teacher.name,
-        checks: [],
-      };
-      teacher.taStudents.forEach((student) => {
-        student.chromebookCheck.forEach((check) => {
-          teacherWithChecks.checks.push(check);
-        });
+    const byClassroom = new Map<string, TeacherWithChecks>();
+
+    checks.forEach((check) => {
+      const checkDate = new Date(check.time);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - checkDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays > dateRange) return;
+
+      const classroom = check.classroom ?? NO_CLASSROOM;
+      const existing = byClassroom.get(classroom.id);
+      if (existing) {
+        existing.count += 1;
+        return;
+      }
+      byClassroom.set(classroom.id, {
+        id: classroom.id,
+        name: classroom.name,
+        count: 1,
       });
-
-      teachersWithChecks.push(teacherWithChecks);
     });
 
-    const teachersWithFilteredChecks = teachersWithChecks.map((teacher) => {
-      const teacherWithFilteredChecks: TeacherWithChecks = {
-        name: teacher.name,
-        checks: [],
-      };
-      teacher.checks.forEach((check) => {
-        const checkDate = new Date(check.time);
-        const now = new Date();
-        const diffTime = Math.abs(now.getTime() - checkDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= dateRange) {
-          teacherWithFilteredChecks.checks.push(check);
-        }
-      });
-      return teacherWithFilteredChecks;
-    });
-
-    return teachersWithFilteredChecks;
-  }, [teachers, dateRange]);
+    return Array.from(byClassroom.values()).sort((a, b) => b.count - a.count);
+  }, [checks, dateRange]);
 
   return (
     <div>
@@ -95,7 +67,7 @@ const TeacherChromebookData: React.FC<TeacherChromebookDataProps> = ({
             <div className="mb-2">
               <h2 className="text-lg font-bold text-white mb-1">Teacher Statistics</h2>
               <p className="text-white/80 text-sm">
-                View chromebook check counts by teacher over a specified date range
+                View chromebook check counts by classroom over a specified date range
               </p>
             </div>
 
@@ -123,13 +95,13 @@ const TeacherChromebookData: React.FC<TeacherChromebookDataProps> = ({
 
               <div className="space-y-2 max-h-64 overflow-auto">
                 {teacherData.map((teacher) => (
-                  <div 
-                    key={`teacher-${teacher.name}`}
+                  <div
+                    key={`teacher-${teacher.id}`}
                     className="flex justify-between items-center p-3 bg-base-200/30 rounded-lg"
                   >
                     <span className="text-white font-medium">{teacher.name}</span>
                     <span className="badge badge-primary">
-                      {teacher.checks.length || 0} checks
+                      {teacher.count || 0} checks
                     </span>
                   </div>
                 ))}

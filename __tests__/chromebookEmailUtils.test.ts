@@ -1,6 +1,7 @@
 import {
   chromebookEmails,
   sendChromebookCheckEmails,
+  sendNoStudentChromebookEmails,
 } from '../lib/chromebookEmailUtils';
 
 // Mock the formatParentName function
@@ -285,6 +286,65 @@ describe('chromebookEmailUtils', () => {
         (call) => call[0].emailData.toAddress === 'jane.smith@example.com',
       );
       expect(janeEmail[0].emailData.body).toContain('Dear parents and guardians');
+    });
+  });
+
+  describe('sendNoStudentChromebookEmails', () => {
+    const baseParams = {
+      teacherName: 'Ms. Teacher',
+      teacherEmail: 'teacher@school.com',
+      issueDetails: 'Cracked lid',
+      sendEmail: mockSendEmail,
+    };
+
+    it('should email only the tech support staff', async () => {
+      await sendNoStudentChromebookEmails({
+        ...baseParams,
+        classroomName: 'Mr. Smith',
+      });
+
+      expect(mockSendEmail).toHaveBeenCalledTimes(chromebookEmails.length);
+      const recipients = mockSendEmail.mock.calls.map(
+        (call) => call[0].emailData.toAddress,
+      );
+      expect(recipients).toEqual(chromebookEmails);
+    });
+
+    it('should name the classroom in the subject and body', async () => {
+      await sendNoStudentChromebookEmails({
+        ...baseParams,
+        classroomName: 'Mr. Smith',
+      });
+
+      const { emailData } = mockSendEmail.mock.calls[0][0];
+      expect(emailData.subject).toBe(
+        "New Chromebook Check - no student in Mr. Smith's classroom",
+      );
+      expect(emailData.body).toContain("in Mr. Smith's classroom");
+      expect(emailData.body).toContain('Cracked lid');
+      expect(emailData.body).toContain('Ms. Teacher');
+      expect(emailData.fromAddress).toBe('teacher@school.com');
+    });
+
+    it('should omit the classroom wording when none is given', async () => {
+      await sendNoStudentChromebookEmails(baseParams);
+
+      const { emailData } = mockSendEmail.mock.calls[0][0];
+      expect(emailData.subject).toBe('New Chromebook Check - no student');
+      expect(emailData.body).not.toContain('classroom');
+    });
+
+    it('should report progress for each email', async () => {
+      await sendNoStudentChromebookEmails({
+        ...baseParams,
+        onProgress: mockOnProgress,
+      });
+
+      expect(mockOnProgress).toHaveBeenCalledTimes(chromebookEmails.length);
+      expect(mockOnProgress).toHaveBeenLastCalledWith({
+        sent: chromebookEmails.length,
+        total: chromebookEmails.length,
+      });
     });
   });
 

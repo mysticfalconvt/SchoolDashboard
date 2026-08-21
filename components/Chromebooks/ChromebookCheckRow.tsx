@@ -1,11 +1,8 @@
 // Two-state model: green when 'Everything good', otherwise red. Keep basic legacy support.
 
-interface Teacher {
-  id: string;
-  name: string;
-}
+import { getColorFromMessage } from './ChromebookChecksData';
 
-interface Student {
+interface Person {
   id: string;
   name: string;
 }
@@ -16,45 +13,30 @@ interface CheckLog {
   time: string;
 }
 
-interface Assignment {
-  id: string;
-  teacher: Teacher;
-  student: Student;
-  number: string;
-  checkLog: CheckLog[];
-}
-
 interface ChromebookCheckRowProps {
-  assignment: Assignment;
+  classroom: Person;
+  student: Person;
+  number: number;
+  checkLog: CheckLog[];
   showGreens: boolean;
 }
 
-const getColorFromMessage = (message: string): string => {
-  if (message === 'Everything good') return 'green';
-  if (message.startsWith('As Issued')) return 'green';
-  if (message.startsWith('Same as previous week')) return 'green';
-  if (message === 'Out for Service' || message === 'Not in Cart')
-    return 'orange';
-  return 'red';
-};
-
 export default function ChromebookCheckRow({
-  assignment,
+  classroom,
+  student,
+  number,
+  checkLog,
   showGreens,
 }: ChromebookCheckRowProps) {
-  const { teacher, student, number, checkLog } = assignment;
-  if (!teacher || !student || !number || !checkLog.length) return null;
+  if (!classroom || !student || !number || !checkLog.length) return null;
   return (
-    <tr
-      key={`assignment-${assignment.student.id}`}
-      className="border-spacing-2"
-    >
+    <tr className="border-spacing-2">
       <td className="border border-slate-500 border-spacing-2 ">
-        {teacher?.name}
+        {classroom.name}
       </td>
 
       <td className="border border-slate-500 border-spacing-2">
-        {assignment.number} - {student?.name}
+        {number} - {student.name}
       </td>
 
       {checkLog.map((check) => {

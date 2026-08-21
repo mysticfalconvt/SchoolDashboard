@@ -1,26 +1,26 @@
 import gql from 'graphql-tag';
 import type { GetStaticProps, NextPage } from 'next';
 import { useMemo } from 'react';
-import ChromebookCheck from '../components/Chromebooks/ChromebookCheck';
 import ChromebookChecksData from '../components/Chromebooks/ChromebookChecksData';
+import CreateSingleChromebookCheck from '../components/Chromebooks/CreateSingleChromebookCheck';
 import { useUser } from '../components/User';
-import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import isAllowed from '../lib/isAllowed';
+import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
-const GET_CHROMEBOOK_ASSIGNMENTS_QUERY = gql`
-  query GET_CHROMEBOOK_ASSIGNMENTS_QUERY {
-    users(where: { hasTA: { equals: true } }) {
+const GET_CHROMEBOOK_CHECKS_QUERY = gql`
+  query GET_CHROMEBOOK_CHECKS_QUERY {
+    chromebookChecks(orderBy: { time: desc }) {
       id
-      name
-      taStudents {
+      message
+      time
+      student {
         id
         name
-        chromebookCheck {
-          id
-          message
-          time
-        }
+      }
+      classroom {
+        id
+        name
       }
     }
   }
@@ -30,44 +30,34 @@ interface ChromebookCheck {
   id: string;
   message: string;
   time: string;
-}
-
-interface TaStudent {
-  id: string;
-  name: string;
-  chromebookCheck: ChromebookCheck;
-}
-
-interface User {
-  id: string;
-  name: string;
-  taStudents: TaStudent[];
+  student: { id: string; name: string } | null;
+  classroom: { id: string; name: string } | null;
 }
 
 interface ChromebooksPageProps {
-  initialChromebookAssignments: {
-    users: User[];
+  initialChromebookChecks: {
+    chromebookChecks: ChromebookCheck[];
   };
 }
 
 const Chromebooks: NextPage<ChromebooksPageProps> = ({
-  initialChromebookAssignments,
+  initialChromebookChecks,
 }) => {
   const me = useUser();
-  const { data: chromebookAssignmentsData } = useGQLQuery(
-    'Chromebook Assignments',
-    GET_CHROMEBOOK_ASSIGNMENTS_QUERY,
+  const { data: chromebookChecksData } = useGQLQuery(
+    'Chromebook Checks',
+    GET_CHROMEBOOK_CHECKS_QUERY,
     {},
     {
       staleTime: 1000,
-      initialData: initialChromebookAssignments,
+      initialData: initialChromebookChecks,
     },
   );
 
-  const chromebookAssignments = useMemo(() => {
-    if (!chromebookAssignmentsData) return [];
-    return chromebookAssignmentsData.users;
-  }, [chromebookAssignmentsData]);
+  const chromebookChecks = useMemo(
+    () => chromebookChecksData?.chromebookChecks ?? [],
+    [chromebookChecksData],
+  );
 
   if (!me) return <p>loading...</p>;
   return (
@@ -75,12 +65,11 @@ const Chromebooks: NextPage<ChromebooksPageProps> = ({
       <div className="flex justify-center gap-4 items-center">
         <h1 className="text-2xl">Chromebooks</h1>
       </div>
-      {isAllowed(me, 'hasTA') && <ChromebookCheck />}
-      {/* {display === "Chromebook Assignments" ? (
-        <ChromebookAssignmentsData assignments={chromebookAssignments} />
-      ) : null} */}
+      <div className="flex justify-center gap-4 items-center">
+        {isAllowed(me, 'isStaff') && <CreateSingleChromebookCheck />}
+      </div>
 
-      <ChromebookChecksData taTeachers={chromebookAssignments} />
+      <ChromebookChecksData checks={chromebookChecks} />
     </div>
   );
 };
@@ -88,15 +77,15 @@ const Chromebooks: NextPage<ChromebooksPageProps> = ({
 export const getStaticProps: GetStaticProps<ChromebooksPageProps> = async (
   context,
 ) => {
-  // fetch PBIS Page data from the server
-  const fetchChromebookAssignments = async (): Promise<{ users: User[] }> =>
-    smartGraphqlClient.request(GET_CHROMEBOOK_ASSIGNMENTS_QUERY);
+  const fetchChromebookChecks = async (): Promise<{
+    chromebookChecks: ChromebookCheck[];
+  }> => smartGraphqlClient.request(GET_CHROMEBOOK_CHECKS_QUERY);
 
-  const initialChromebookAssignments = await fetchChromebookAssignments();
+  const initialChromebookChecks = await fetchChromebookChecks();
 
   return {
     props: {
-      initialChromebookAssignments,
+      initialChromebookChecks,
     }, // will be passed to the page component as props
     revalidate: 1200, // In seconds
   };

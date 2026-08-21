@@ -1,16 +1,20 @@
 import useSendEmail from '@/components/../lib/useSendEmail';
+import { SEARCH_ALL_USERS_QUERY } from '@/components/Search';
 import SearchForUserName from '@/components/SearchForUserName';
-import GradientButton from '@/components/styles/Button';
+import GradientButton, {
+  SmallGradientButton,
+} from '@/components/styles/Button';
 import { Dialog, DialogContent } from '@/components/styles/Dialog';
 import { useUser } from '@/components/User';
 import {
   sendChromebookCheckEmails,
+  sendNoStudentChromebookEmails,
   type StudentDetails,
 } from '@/lib/chromebookEmailUtils';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   CREATE_CHROMEBOOK_CHECK_MUTATION,
   goodCheckMessages,
@@ -43,6 +47,12 @@ interface User {
   email: string;
 }
 
+interface StaffUser {
+  id: string;
+  name: string;
+  isStaff?: boolean;
+}
+
 export default function CreateSingleChromebookCheck() {
   const me = useUser() as User;
   const [createChromebookCheck, { data, loading, error }] = useGqlMutation(
@@ -56,8 +66,12 @@ export default function CreateSingleChromebookCheck() {
   >('Something wrong');
   const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
   const [isSendingEmails, setIsSendingEmails] = useState(false);
+  // The classroom the chromebook lives in. Defaults to whoever is filling out
+  // the form, but can be changed when covering another teacher's room.
+  const [classroomId, setClassroomId] = useState('');
+  // Spare / unassigned chromebooks aren't tied to a student
+  const [noStudent, setNoStudent] = useState(false);
   const { sendEmail, emailLoading } = useSendEmail();
-
 
   // Fetch student details when a student is selected
   const { data: studentDetails } = useGQLQuery(
@@ -66,6 +80,36 @@ export default function CreateSingleChromebookCheck() {
     { id: studentFor?.userId },
     { enabled: !!studentFor?.userId },
   );
+
+  const { data: allUsers } = useGQLQuery(
+    'allUsers',
+    SEARCH_ALL_USERS_QUERY,
+    {},
+    { enabled: !!me?.id, staleTime: 1000 * 60 * 60 },
+  );
+
+  // Staff list for the classroom picker, always including the current user so
+  // the default selection is valid even before the user list loads.
+  const staffOptions = useMemo(() => {
+    const staff: StaffUser[] = (allUsers?.users || []).filter(
+      (user: StaffUser) => user.isStaff,
+    );
+    const withMe =
+      me?.id && !staff.some((user) => user.id === me.id)
+        ? [...staff, { id: me.id, name: me.name }]
+        : staff;
+    return [...withMe].sort((a, b) => a.name.localeCompare(b.name));
+  }, [allUsers?.users, me?.id, me?.name]);
+
+  const selectedClassroomId = classroomId || me?.id || '';
+
+  const closeForm = () => {
+    setShowForm(false);
+    setMessage('');
+    setNoStudent(false);
+    setStudentCheckIsFor(null);
+    setClassroomId('');
+  };
   return (
     <div>
       <GradientButton onClick={() => setShowForm(true)}>
@@ -74,7 +118,7 @@ export default function CreateSingleChromebookCheck() {
 
       <Dialog
         isOpen={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={closeForm}
         title="Chromebook Check"
         variant="modal"
         size="lg"
@@ -90,29 +134,72 @@ export default function CreateSingleChromebookCheck() {
                 Submit a chromebook check for any student
               </p>
             </div>
-            <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+            <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10 relative z-30">
               <div className="space-y-6">
-                <div className="form-control">
+                <div className="form-control relative z-30">
                   <label className="label pb-2">
                     <span className="label-text text-white font-medium text-base">
                       Select Student
                     </span>
                   </label>
-                  <SearchForUserName
-                    name="studentName"
-                    value=""
-                    updateUser={setStudentCheckIsFor}
-                    userType="isStudent"
-                  />
+                  {noStudent ? (
+                    <p className="text-white/60 text-sm italic h-12 flex items-center">
+                      No student attached to this check
+                    </p>
+                  ) : (
+                    <SearchForUserName
+                      name="studentName"
+                      value=""
+                      updateUser={setStudentCheckIsFor}
+                      userType="isStudent"
+                    />
+                  )}
+                  <label className="label cursor-pointer justify-start gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-sm"
+                      checked={noStudent}
+                      onChange={(e) => {
+                        setNoStudent(e.target.checked);
+                        if (e.target.checked) setStudentCheckIsFor(null);
+                      }}
+                    />
+                    <span className="label-text text-white/80 text-sm">
+                      No student
+                    </span>
+                  </label>
                 </div>
 
                 <div className="form-control">
-                  <label className="label pb-2">
+                  <label className="label pb-2" htmlFor="classroom">
+                    <span className="label-text text-white font-medium text-base">
+                      Classroom
+                    </span>
+                  </label>
+                  <select
+                    id="classroom"
+                    name="classroom"
+                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] h-12"
+                    value={selectedClassroomId}
+                    onChange={(e) => setClassroomId(e.target.value)}
+                  >
+                    {staffOptions.map((teacher) => (
+                      <option key={teacher.id} value={teacher.id}>
+                        {teacher.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-control">
+                  <label className="label pb-2" htmlFor="status">
                     <span className="label-text text-white font-medium text-base">
                       Status
                     </span>
                   </label>
                   <select
+                    id="status"
+                    name="status"
                     className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] h-12"
                     value={status}
                     onChange={(e) => {
@@ -138,7 +225,7 @@ export default function CreateSingleChromebookCheck() {
                 </div>
 
                 <div className="form-control">
-                  <label className="label pb-2">
+                  <label className="label pb-2" htmlFor="message">
                     <span className="label-text text-white font-medium text-base">
                       Details
                     </span>
@@ -185,24 +272,16 @@ export default function CreateSingleChromebookCheck() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-              <button
+            <div className="flex justify-end gap-2 pt-4 border-t border-white/10 relative z-0">
+              <SmallGradientButton
                 type="button"
                 disabled={
-                  !studentFor?.userId ||
+                  (!studentFor?.userId && !noStudent) ||
+                  !selectedClassroomId ||
                   !status ||
                   (status === 'Something wrong' && !message) ||
                   isSendingEmails
                 }
-                className="btn btn-sm text-white font-medium border-none disabled:opacity-50"
-                style={{
-                  background:
-                    isSendingEmails ||
-                    !studentFor?.userId ||
-                    (status === 'Something wrong' && !message)
-                      ? '#666'
-                      : 'linear-gradient(135deg, #760D08, #38B6FF)',
-                }}
                 onClick={async () => {
                   // Persist the status message for predefined options, custom message for "Something wrong"
                   const messageToSend =
@@ -210,8 +289,13 @@ export default function CreateSingleChromebookCheck() {
 
                   await createChromebookCheck({
                     chromebookCheck: {
-                      student: { connect: { id: studentFor?.userId } },
+                      ...(studentFor?.userId
+                        ? { student: { connect: { id: studentFor.userId } } }
+                        : {}),
                       message: messageToSend,
+                      ...(selectedClassroomId
+                        ? { classroom: { connect: { id: selectedClassroomId } } }
+                        : {}),
                     },
                   });
 
@@ -225,6 +309,34 @@ export default function CreateSingleChromebookCheck() {
                     !isGoodCheck &&
                     !noEmailNoPBISMessages.includes(status)
                   ) {
+                    // With no student there is nobody to notify but tech
+                    // support, so send them the check on its own.
+                    if (!studentFor?.userId) {
+                      setIsSendingEmails(true);
+                      setEmailProgress({ sent: 0, total: 0 });
+
+                      try {
+                        await sendNoStudentChromebookEmails({
+                          classroomName: staffOptions.find(
+                            (teacher) => teacher.id === selectedClassroomId,
+                          )?.name,
+                          teacherName: me.name,
+                          teacherEmail: me.email,
+                          issueDetails: messageToSend,
+                          sendEmail,
+                          onProgress: setEmailProgress,
+                        });
+                      } finally {
+                        setIsSendingEmails(false);
+                        setEmailProgress({ sent: 0, total: 0 });
+                        // Auto-close the form after emails are sent
+                        setTimeout(() => {
+                          closeForm();
+                        }, 1000);
+                      }
+                      return;
+                    }
+
                     const student = studentDetails?.user as StudentDetails;
 
                     if (student) {
@@ -245,33 +357,30 @@ export default function CreateSingleChromebookCheck() {
                         setEmailProgress({ sent: 0, total: 0 });
                         // Auto-close the form after emails are sent
                         setTimeout(() => {
-                          setMessage('');
-                          setShowForm(false);
+                          closeForm();
                         }, 1000);
                       }
                     } else {
-                      setMessage('');
-                      setShowForm(false);
+                      closeForm();
                     }
                   } else {
-                    setMessage('');
-                    setShowForm(false);
+                    closeForm();
                   }
                 }}
               >
                 {isSendingEmails
                   ? 'Sending Emails...'
                   : 'Create Chromebook Check'}
-              </button>
+              </SmallGradientButton>
 
-              <button
+              <SmallGradientButton
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={closeForm}
                 disabled={isSendingEmails}
-                className="btn btn-outline text-white border-white/30 hover:bg-white/10 disabled:opacity-50"
+                className="opacity-70 hover:opacity-100"
               >
                 Close
-              </button>
+              </SmallGradientButton>
             </div>
           </div>
         </DialogContent>
