@@ -23,6 +23,16 @@ const emailCorrections = {
     // second half of his surname - a district name-collision case that no naming
     // rule can derive.
     "pip.cornelius-dreher@ncsuvt.org": "philip.dreher@ncsuvt.org",
+    // The district disambiguates name collisions by folding the middle name into
+    // the first name - sometimes in full, sometimes just the initial. Which of
+    // the two, and whether a student needs it at all, is not derivable from the
+    // roster: Connor Russell's name carries no middle initial yet his address
+    // does, and of the four Smiths only Mark D is disambiguated.
+    // All verified against the district's own student/parent export.
+    "jack.bragdoncyr@ncsuvt.org": "jackbyron.bragdoncyr@ncsuvt.org",
+    "nathan.yabo@ncsuvt.org": "nathanwayne.yabo@ncsuvt.org",
+    "connor.russell@ncsuvt.org": "connorh.russell@ncsuvt.org",
+    "mark.smith@ncsuvt.org": "markd.smith@ncsuvt.org",
 };
 
 // Function to validate email format

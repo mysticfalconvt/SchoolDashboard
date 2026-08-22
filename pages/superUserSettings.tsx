@@ -11,6 +11,7 @@ import { useUser } from '../components/User';
 import GradientButton from '../components/styles/Button';
 import NewStudent from '../components/users/CreateNewStudent';
 import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
+import CreateParentAccountsFromEmails from '../components/users/CreateParentAccountsFromEmails';
 import NewEvents from '../components/users/NewEvents';
 import NewStaff from '../components/users/NewStaff';
 import NewUpdateUsers from '../components/users/NewUpdateUsers';
@@ -32,6 +33,7 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <NewUpdateUsers />}
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />}
       {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromCSV />}
+      {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromEmails />}
       {isAllowed(me, 'isSuperAdmin') && <NewEvents />}
       {isAllowed(me, 'isSuperAdmin') && <BulkCompleteOldCallbacks />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}

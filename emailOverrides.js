@@ -13,10 +13,6 @@ const teacherEmailCorrections = {
   'josh.fortin@ncsuvt.org': 'joshua.fortin@ncsuvt.org', // Fortin, Josh
   'mic.hallinan@ncsuvt.org': 'michael.hallinan@ncsuvt.org', // Hallinan, Mic
   'becca.larose@ncsuvt.org': 'rebecca.larose@ncsuvt.org', // LaRose, Becca
-  // Verified against the live database: jessica.tetreault@ exists, jess.tetreault@
-  // does not. Last year's students_input.json used the wrong address, so her block
-  // assignments pointed at an account that was never created.
-  'jess.tetreault@ncsuvt.org': 'jessica.tetreault@ncsuvt.org', // Tetreault, Jess
 };
 
 // People who appear in teacher columns of the schedule CSV but do not actually
@@ -25,6 +21,9 @@ const teacherEmailCorrections = {
 // Listed here so they are not written out as teachers.
 const nonTeachingStaff = new Set([
   'lynn.crew@ncsuvt.org', // Assistant Principal
+  'lona.stuart@ncsuvt.org', // 504/EST Coordinator
+  'katrina.mcfarlane@ncsuvt.org', // School Counselor
+  'cody.lanou@ncsuvt.org', // no longer teaches
 ]);
 
 module.exports = { teacherEmailCorrections, nonTeachingStaff };
