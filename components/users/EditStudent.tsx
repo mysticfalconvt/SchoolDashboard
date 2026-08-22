@@ -4,10 +4,12 @@ import GradientButton from '@/components/styles/Button';
 import Form from '@/components/styles/Form';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
+import { blockDisplayList } from '@/lib/blockNames';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
+import BlockLabel from '../BlockLabel';
 
 const LIST_OF_TEACHERS_QUERY = gql`
   query {
@@ -192,18 +194,20 @@ export default function EditStudent({ student }: EditStudentProps) {
                         ))}
                       </select>
                     </div>
-                    {Array.from({ length: NUMBER_OF_BLOCKS }, (_, i) => (
-                      <div key={`block${i + 1}`} className="mb-4">
+                    {/* Ordered by colour, so a colour's A and B rotation sit
+                        next to each other in the two-column grid. */}
+                    {blockDisplayList().map(({ block, name, color }) => (
+                      <div key={`block${block}`} className="mb-4">
                         <label
-                          htmlFor={`block${i + 1}`}
+                          htmlFor={`block${block}`}
                           className="block text-white font-semibold mb-1"
                         >
-                          Block {i + 1}
+                          <BlockLabel name={name} color={color} />
                         </label>
                         <select
-                          id={`block${i + 1}`}
-                          name={`block${i + 1}`}
-                          value={inputs[`block${i + 1}`]}
+                          id={`block${block}`}
+                          name={`block${block}`}
+                          value={inputs[`block${block}`]}
                           onChange={handleChange}
                           className="w-full p-2 rounded border bg-white text-gray-900"
                         >

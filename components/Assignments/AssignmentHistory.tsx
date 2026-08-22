@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 import React from 'react';
+import { blockName } from '../../lib/blockNames';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Loading from '../Loading';
 
@@ -68,7 +69,7 @@ const AssignmentHistory: React.FC<AssignmentHistoryProps> = ({
       <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[80vh] rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl flex flex-col">
         <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
           <h4 className="text-white text-xl font-semibold">
-            Assignment History for Block {block}
+            Assignment History for {blockName(block)}
           </h4>
           <button
             type="button"

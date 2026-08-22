@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 import { useMemo } from 'react';
+import { blockDisplayList } from '../../lib/blockNames';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import AssignmentViewCards from '../Assignments/AssignmentViewCards';
 import CallbackCards from '../Callback/CallbackCards';
@@ -377,13 +378,16 @@ interface ViewTeacherPageProps {
 
 export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
   const me = useUser();
-  
+
   // Memoize variables to prevent infinite re-renders
-  const variables = useMemo(() => ({
-    id: teacher.id,
-    date: new Date(me?.lastCollection || new Date()),
-  }), [teacher.id, me?.lastCollection]);
-  
+  const variables = useMemo(
+    () => ({
+      id: teacher.id,
+      date: new Date(me?.lastCollection || new Date()),
+    }),
+    [teacher.id, me?.lastCollection],
+  );
+
   const { data, isLoading, error } = useGQLQuery(
     `SingleTeacher-${teacher.id}`,
     GET_SINGLE_TEACHER,
@@ -395,76 +399,32 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
   if (isLoading) return <Loading />;
   //   console.log(data.user);
   const { user } = data || {};
-  const {
-    taStudents = [],
-    block1Students = [],
-    block2Students = [],
-    block3Students = [],
-    block4Students = [],
-    block5Students = [],
-    block6Students = [],
-    block7Students = [],
-    block8Students = [],
-    block9Students = [],
-    block10Students = [],
-    block11Students = [],
-    block12Students = [],
-    callbackAssigned = [],
-  } = user || {};
+  const { taStudents = [], callbackAssigned = [] } = user || {};
+
+  const studentsForBlock = (block: number): any[] =>
+    user?.[`block${block}Students`] || [];
+  const rosterKey = (block: number): string =>
+    studentsForBlock(block)
+      .map((student: { id: string }) => student.id)
+      .sort()
+      .join(',');
+  // A colour taught to the same roster in both rotations is one class here.
+  const blocksToShow = blockDisplayList(
+    (a, b) => rosterKey(a) === rosterKey(b),
+  );
   return (
     <div>
       {me.id === teacher.id && (
         <div className="flex flex-row justify-around items-center max-w-[80%] flex-wrap rounded-3xl border-2 border-[var(--red)] p-2.5 mx-auto">
           <h3>Give a whole class a card</h3>
           <GiveListOfStudentsACardButton title="TA" students={taStudents} />
-          <GiveListOfStudentsACardButton
-            title="Block 1"
-            students={block1Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 2"
-            students={block2Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 3"
-            students={block3Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 4"
-            students={block4Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 5"
-            students={block5Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 6"
-            students={block6Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 7"
-            students={block7Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 8"
-            students={block8Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 9"
-            students={block9Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 10"
-            students={block10Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 11"
-            students={block11Students}
-          />
-          <GiveListOfStudentsACardButton
-            title="Block 12"
-            students={block12Students}
-          />
+          {blocksToShow.map(({ block, blocks, name }) => (
+            <GiveListOfStudentsACardButton
+              key={blocks.join('-')}
+              title={name}
+              students={studentsForBlock(block)}
+            />
+          ))}
         </div>
       )}
       <h3>Teacher info</h3>
@@ -472,41 +432,14 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
       {taStudents[0] && (
         <ViewStudentTable users={taStudents} title="TA Students" />
       )}
-      {block1Students[0] && (
-        <ViewStudentTable users={block1Students} title="Block 1" />
-      )}
-      {block2Students[0] && (
-        <ViewStudentTable users={block2Students} title="Block 2" />
-      )}
-      {block3Students[0] && (
-        <ViewStudentTable users={block3Students} title="Block 3" />
-      )}
-      {block4Students[0] && (
-        <ViewStudentTable users={block4Students} title="Block 4" />
-      )}
-      {block5Students[0] && (
-        <ViewStudentTable users={block5Students} title="Block 5" />
-      )}
-      {block6Students[0] && (
-        <ViewStudentTable users={block6Students} title="Block 6" />
-      )}
-      {block7Students[0] && (
-        <ViewStudentTable users={block7Students} title="Block 7" />
-      )}
-      {block8Students[0] && (
-        <ViewStudentTable users={block8Students} title="Block 8" />
-      )}
-      {block9Students[0] && (
-        <ViewStudentTable users={block9Students} title="Block 9" />
-      )}
-      {block10Students[0] && (
-        <ViewStudentTable users={block10Students} title="Block 10" />
-      )}
-      {block11Students[0] && (
-        <ViewStudentTable users={block11Students} title="Block 11" />
-      )}
-      {block12Students[0] && (
-        <ViewStudentTable users={block12Students} title="Block 12" />
+      {blocksToShow.map(({ block, blocks, name }) =>
+        studentsForBlock(block)[0] ? (
+          <ViewStudentTable
+            key={blocks.join('-')}
+            users={studentsForBlock(block)}
+            title={name}
+          />
+        ) : null,
       )}
       <CallbackCards callbacks={callbackAssigned} />
     </div>

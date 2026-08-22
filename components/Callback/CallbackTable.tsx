@@ -1,6 +1,8 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
+import { NUMBER_OF_BLOCKS } from '../../config';
+import { blockName, pairedBlock, pairedBlockName } from '../../lib/blockNames';
 import getDisplayName from '../../lib/displayName';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import Table from '../Table';
@@ -88,20 +90,8 @@ interface CallbackTableProps {
   showClassBlock?: boolean;
 }
 
-interface StudentsByBlock {
-  B1?: string[];
-  B2?: string[];
-  B3?: string[];
-  B4?: string[];
-  B5?: string[];
-  B6?: string[];
-  B7?: string[];
-  B8?: string[];
-  B9?: string[];
-  B10?: string[];
-  B11?: string[];
-  B12?: string[];
-}
+/** Student ids taught in each block, keyed by block number. */
+type StudentsByBlock = Record<number, string[]>;
 
 const CallbackTable = React.memo(function CallbackTable({
   callbacks,
@@ -121,73 +111,37 @@ const CallbackTable = React.memo(function CallbackTable({
   );
   const studentsByBlock = useMemo((): StudentsByBlock => {
     const students = data?.user;
-    const B1 = students?.block1Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B2 = students?.block2Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B3 = students?.block3Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B4 = students?.block4Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B5 = students?.block5Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B6 = students?.block6Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B7 = students?.block7Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B8 = students?.block8Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B9 = students?.block9Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B10 = students?.block10Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B11 = students?.block11Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const B12 = students?.block12Students?.map(
-      (student: { id: string }) => student.id,
-    );
-    const studentsByBlock = {
-      B1,
-      B2,
-      B3,
-      B4,
-      B5,
-      B6,
-      B7,
-      B8,
-      B9,
-      B10,
-      B11,
-      B12,
-    };
-    return studentsByBlock;
+    const byBlock: StudentsByBlock = {};
+    for (let block = 1; block <= NUMBER_OF_BLOCKS; block++) {
+      byBlock[block] = (students?.[`block${block}Students`] || []).map(
+        (student: { id: string }) => student.id,
+      );
+    }
+    return byBlock;
   }, [data]);
 
   const callbacksMemo = useMemo(() => {
     if (!callbacks) {
       return [];
     }
-    
+
     const callbackWithName = callbacks.map((callback) => {
       const name = getDisplayName(callback.student as any);
       const student = { ...callback.student, name };
-      // check which block student is in from studentsByBlock
-      const block =
-        Object.keys(studentsByBlock).find((block) => {
-          const students = studentsByBlock[block as keyof StudentsByBlock];
-          return students?.includes(student.id);
-        }) || 'n/a';
+      // Which blocks the student sits in. A colour they have in both
+      // rotations reads as one name — 'Yellow A/B', not just 'Yellow A'.
+      const blocksIn = Object.keys(studentsByBlock)
+        .map(Number)
+        .filter((b) => studentsByBlock[b]?.includes(student.id));
+      const first = blocksIn[0];
+      let block = 'n/a';
+      if (first) {
+        const pair = pairedBlock(first);
+        block =
+          pair && blocksIn.includes(pair)
+            ? pairedBlockName(first)
+            : blockName(first);
+      }
 
       return { ...callback, student, block };
     });
@@ -204,7 +158,7 @@ const CallbackTable = React.memo(function CallbackTable({
   }, [callbacks, studentsByBlock]);
   // Create today's date once and memoize it
   const todayString = useMemo(() => new Date().toLocaleDateString(), []);
-  
+
   const columns = useMemo(() => {
     return [
       {
@@ -220,7 +174,7 @@ const CallbackTable = React.memo(function CallbackTable({
             }) => (
               <Link
                 href={`/userProfile/${cell?.row?.original?.student?.id || ''}`}
-                >
+              >
                 {cell.value}
               </Link>
             ),
@@ -235,7 +189,7 @@ const CallbackTable = React.memo(function CallbackTable({
             }) => (
               <Link
                 href={`/userProfile/${cell?.row?.original?.teacher?.id || ''}`}
-                >
+              >
                 {cell.value}
               </Link>
             ),
@@ -248,7 +202,7 @@ const CallbackTable = React.memo(function CallbackTable({
             }: {
               cell: { value: string; row: { original: Callback } };
             }) => (
-              <Link href={`/callback/${cell.row.original.id}`} >
+              <Link href={`/callback/${cell.row.original.id}`}>
                 {cell.value}
               </Link>
             ),
@@ -276,7 +230,7 @@ const CallbackTable = React.memo(function CallbackTable({
               return (
                 <>
                   <div className="relative inline-block group">
-                    <Link href={`/callback/${cell.row.original.id}`} >
+                    <Link href={`/callback/${cell.row.original.id}`}>
                       {shortDescription}
                     </Link>
                     <span className="invisible group-hover:visible w-[clamp(200px,30vw,60vw)] bg-black/80 text-white text-center rounded-md p-1.5 absolute z-10">
@@ -314,7 +268,7 @@ const CallbackTable = React.memo(function CallbackTable({
             Cell: ({ cell: { value } }: { cell: { value?: string } }) => (
               <Link
                 href={value?.startsWith('http') ? value : `http://${value}`}
-                >
+              >
                 {value ? 'Link' : ''}
               </Link>
             ),

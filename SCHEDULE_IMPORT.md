@@ -160,6 +160,28 @@ Where 12 is declared:
 | `processStudents.js` | local `NUMBER_OF_BLOCKS` constant |
 | `buildStudentsInput.js` | derived from the six `COLOURS` |
 
+### Block numbers never reach the screen
+
+`lib/blockNames.ts` turns a block number into the label staff and students
+actually use — block 3 reads as *Yellow A*, block 9 as *Yellow B*, and the pair
+as *Yellow A/B*. Every user-facing label goes through it, so the colour order
+lives in one place.
+
+It also decides when the two rotations collapse into one entry.
+`blockDisplayList(isSameInBothRotations)` returns the blocks to render, merging a
+colour's A and B halves when the caller says they carry the same class — same
+class name on the current-work views, same teacher on a student's schedule, same
+roster on a teacher's class lists. **A merged colour hides its B half rather than
+listing it underneath**, so if the two rotations are posting different
+assignments only the A one is on screen. Most colours match, so the twelve cards
+and columns read as six. `blockColorGroups()` is the table-column form: one
+column per colour, with the B rotation named inside the cell only when it teaches
+a different class.
+
+A merged card in `AssignmentUpdater` writes both rotations by default and offers
+"A only" / "B only", so two halves that have merely looked identical so far can
+still be split apart.
+
 Raising it again means adding `block{N}Teacher` / `Students` / `Assignment` /
 `ClassName` / `AssignmentLastUpdated` to `schemas/User.ts`, plus the matching
 GraphQL selection sets in the front end (19 files reference them individually).

@@ -4,8 +4,9 @@ import Link from 'next/link';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import AssignmentHistory from '../components/Assignments/AssignmentHistory';
 import useAssignmentHistoryBlocks from '../components/Assignments/useAssignmentHistoryBlocks';
+import BlockLabel from '../components/BlockLabel';
 import Table from '../components/Table';
-import { NUMBER_OF_BLOCKS } from '../config';
+import { blockColorGroups, blockRotation, sameText } from '../lib/blockNames';
 import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
@@ -98,6 +99,8 @@ interface TeacherData {
 interface DisplayClassworkProps {
   data: TeacherData;
   block: string;
+  /** Shown when the two rotations differ and both halves need naming. */
+  rotationLabel?: string;
   onShowHistory: (teacherId: string, block: number) => void;
   hasHistory: (teacherId: string, block: number) => boolean;
 }
@@ -105,6 +108,7 @@ interface DisplayClassworkProps {
 const DisplayClasswork: React.FC<DisplayClassworkProps> = ({
   data,
   block,
+  rotationLabel,
   onShowHistory,
   hasHistory,
 }) => {
@@ -132,6 +136,11 @@ const DisplayClasswork: React.FC<DisplayClassworkProps> = ({
 
   return (
     <div className="max-w-full">
+      {rotationLabel && (
+        <p className="m-0 p-0 text-sm uppercase tracking-wide opacity-70">
+          {rotationLabel}
+        </p>
+      )}
       {hasData ? (
         <>
           <h3 className="m-0 p-0 text-xl font-semibold">
@@ -203,21 +212,52 @@ const AllTeacherCurrentWork: NextPage<AllTeacherCurrentWorkProps> = (props) => {
   );
 
   const columns = useMemo(() => {
-    const blockColumns = [...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
-      const num = i + 1;
-      return {
-        Header: `Block ${num}`,
-        accessor: `block${num}Assignment`,
-        Cell: ({ row }: any) => (
-          <DisplayClasswork
-            data={row.original}
-            block={String(num)}
-            onShowHistory={handleShowHistory}
-            hasHistory={checkHasHistory}
-          />
-        ),
-      };
-    });
+    // One column per colour. The B rotation only gets its own entry in the
+    // cell when it teaches a different class, which is the uncommon case.
+    const blockColumns = blockColorGroups().map(
+      ({ color, name, blockA, blockB }) => ({
+        Header: () => <BlockLabel name={name} color={color} />,
+        id: `block${blockA}`,
+        accessor: `block${blockA}Assignment`,
+        Cell: ({ row }: any) => {
+          const teacher = row.original as TeacherData;
+          // The same class in both rotations shows once; only a genuinely
+          // different class in the B half gets its own entry.
+          const matches =
+            blockB !== null &&
+            sameText(
+              teacher[`block${blockA}ClassName` as keyof TeacherData] as string,
+              teacher[`block${blockB}ClassName` as keyof TeacherData] as string,
+            );
+
+          if (blockB === null || matches) {
+            return (
+              <DisplayClasswork
+                data={teacher}
+                block={String(blockA)}
+                onShowHistory={handleShowHistory}
+                hasHistory={checkHasHistory}
+              />
+            );
+          }
+
+          return (
+            <div className="flex flex-col gap-2">
+              {[blockA, blockB].map((num) => (
+                <DisplayClasswork
+                  key={num}
+                  data={teacher}
+                  block={String(num)}
+                  rotationLabel={blockRotation(num) || undefined}
+                  onShowHistory={handleShowHistory}
+                  hasHistory={checkHasHistory}
+                />
+              ))}
+            </div>
+          );
+        },
+      }),
+    );
 
     return [
       {

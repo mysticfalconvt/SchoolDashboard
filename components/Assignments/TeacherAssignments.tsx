@@ -1,7 +1,8 @@
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import { NUMBER_OF_BLOCKS } from '../../config';
+import { blockDisplayList, sameText } from '../../lib/blockNames';
 import { useGQLQuery } from '../../lib/useGqlQuery';
+import BlockLabel from '../BlockLabel';
 import Loading from '../Loading';
 import { useUser } from '../User';
 import AssignmentHistory from './AssignmentHistory';
@@ -97,7 +98,7 @@ const GET_MESSAGES = gql`
 const TeacherAssignments: React.FC = () => {
   const me = useUser();
   const [showUpdater, setShowUpdater] = useState(false);
-  const [block, setBlock] = useState<number>();
+  const [blocksToUpdate, setBlocksToUpdate] = useState<number[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [historyBlock, setHistoryBlock] = useState<number>();
 
@@ -111,11 +112,19 @@ const TeacherAssignments: React.FC = () => {
   if (isLoading) return <Loading />;
 
   const assignments: AssignmentData = data?.authenticatedItem || {};
+  // The same class in both rotations is one card — the B half is hidden, not
+  // stacked underneath, so the card reads exactly like a single-rotation one.
+  const blocksToShow = blockDisplayList((a, b) =>
+    sameText(
+      assignments[`block${a}ClassName`],
+      assignments[`block${b}ClassName`],
+    ),
+  );
   return (
     <>
-      {showUpdater && block && (
+      {showUpdater && blocksToUpdate.length > 0 && (
         <MessageUpdater
-          block={block}
+          blocks={blocksToUpdate}
           assignments={assignments}
           hide={setShowUpdater}
           refetch={async () => {
@@ -135,15 +144,22 @@ const TeacherAssignments: React.FC = () => {
 
         <div
           className="grid grid-cols-1 md:grid-cols-[repeat(var(--num-blocks),minmax(0,1fr))]"
-          style={{ '--num-blocks': NUMBER_OF_BLOCKS } as React.CSSProperties}
+          style={{ '--num-blocks': blocksToShow.length } as React.CSSProperties}
         >
-          {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
-            const num = i + 1;
+          {blocksToShow.map(({ block: num, blocks, name, color }) => {
             const today = new Date();
-            const messageDate = new Date(
+            const lastUpdated = new Date(
               assignments[`block${num}AssignmentLastUpdated`] || '',
             );
-            const late = today.getTime() - messageDate.getTime() > 600000000;
+            // Either half falling behind flags the whole card.
+            const late = blocks.some(
+              (b) =>
+                today.getTime() -
+                  new Date(
+                    assignments[`block${b}AssignmentLastUpdated`] || '',
+                  ).getTime() >
+                600000000,
+            );
 
             return (
               <div
@@ -152,24 +168,20 @@ const TeacherAssignments: React.FC = () => {
                     ? 'needsUpdate bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
                     : ''
                 }`}
-                key={`key ${num}`}
+                key={`key ${blocks.join('-')}`}
                 onClick={() => {
-                  setBlock(num);
+                  setBlocksToUpdate(blocks);
                   setShowUpdater(true);
                 }}
               >
-                <h4>{num}</h4>
+                <h4>
+                  <BlockLabel name={name} color={color} />
+                </h4>
                 <p>{assignments[`block${num}ClassName`]}</p>
                 <p>{assignments[`block${num}Assignment`]}</p>
-                <p>
-                  {
-                    new Date(
-                      assignments[`block${num}AssignmentLastUpdated`] || '',
-                    )
-                      .toLocaleString()
-                      .split(',')[0]
-                  }
-                </p>
+                {!Number.isNaN(lastUpdated.getTime()) && (
+                  <p>{lastUpdated.toLocaleString().split(',')[0]}</p>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {

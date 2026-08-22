@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { callbackDisabled } from '../../config';
+import { blockColorGroups, blockRotation } from '../../lib/blockNames';
 import { lastNameCommaFirstName } from '../../lib/lastNameCommaFirstName';
+import BlockLabel from '../BlockLabel';
 import Table from '../Table';
 
 interface BlockTeacher {
@@ -46,6 +48,17 @@ interface ViewTaStudentTableProps {
   discipline?: boolean;
 }
 
+const teacherForBlock = (
+  student: Student,
+  block: number,
+): BlockTeacher | undefined =>
+  student[`block${block}Teacher` as keyof Student] as BlockTeacher | undefined;
+
+function TeacherLink({ teacher }: { teacher?: BlockTeacher }) {
+  if (!teacher?.id) return null;
+  return <Link href={`/userProfile/${teacher.id}`}>{teacher.name}</Link>;
+}
+
 export default function ViewTaStudentTable({
   users,
   title,
@@ -66,7 +79,7 @@ export default function ViewTaStudentTable({
                 ? `${formattedName} - (${preferredName})`
                 : formattedName;
               return (
-                <Link href={`/userProfile/${row.original.id}`} >
+                <Link href={`/userProfile/${row.original.id}`}>
                   {nameToShow}
                 </Link>
               );
@@ -93,186 +106,36 @@ export default function ViewTaStudentTable({
             Header: 'Average days on callback',
             accessor: 'averageTimeToCompleteCallback',
           },
-          {
-            Header: 'Block 1',
-            accessor: 'block1Teacher.name',
+          // One column per colour. Most students keep the same teacher across
+          // the A/B rotation, so only the ones who don't show both halves.
+          ...blockColorGroups().map(({ color, name, blockA, blockB }) => ({
+            Header: () => <BlockLabel name={name} color={color} />,
+            id: `block${blockA}Teacher`,
+            accessor: `block${blockA}Teacher.name`,
             Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block1Teacher?.id;
-              //   console.log(showLink);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block1Teacher?.id}`} >
-                    {row.original?.block1Teacher?.name}
-                  </Link>
-                );
-              return null;
+              const student = row.original;
+              const teacherA = teacherForBlock(student, blockA);
+              const teacherB = blockB
+                ? teacherForBlock(student, blockB)
+                : undefined;
+
+              if (!blockB || teacherA?.id === teacherB?.id) {
+                return <TeacherLink teacher={teacherA} />;
+              }
+              return (
+                <div className="flex flex-col">
+                  {[blockA, blockB].map((block) => (
+                    <span key={block}>
+                      <span className="opacity-70 mr-1">
+                        {blockRotation(block)}:
+                      </span>
+                      <TeacherLink teacher={teacherForBlock(student, block)} />
+                    </span>
+                  ))}
+                </div>
+              );
             },
-          },
-          {
-            Header: 'Block 2',
-            accessor: 'block2Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block2Teacher?.id;
-              //   console.log(showLink);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block2Teacher?.id}`} >
-                    {row.original?.block2Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 3',
-            accessor: 'block3Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block3Teacher?.id;
-              //   console.log(showLink);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block3Teacher?.id}`} >
-                    {row.original?.block3Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 4',
-            accessor: 'block4Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block4Teacher?.id;
-              //   console.log(showLink);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block4Teacher?.id}`} >
-                    {row.original?.block4Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 5',
-            accessor: 'block5Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block5Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block5Teacher?.id}`} >
-                    {row.original?.block5Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 6',
-            accessor: 'block6Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block6Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block6Teacher?.id}`} >
-                    {row.original?.block6Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 7',
-            accessor: 'block7Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block7Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block7Teacher?.id}`} >
-                    {row.original?.block7Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 8',
-            accessor: 'block8Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block8Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block8Teacher?.id}`} >
-                    {row.original?.block8Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 9',
-            accessor: 'block9Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block9Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block9Teacher?.id}`} >
-                    {row.original?.block9Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 10',
-            accessor: 'block10Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block10Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block10Teacher?.id}`} >
-                    {row.original?.block10Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 11',
-            accessor: 'block11Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block11Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block11Teacher?.id}`} >
-                    {row.original?.block11Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
-          {
-            Header: 'Block 12',
-            accessor: 'block12Teacher.name',
-            Cell: ({ row }: { row: { original: Student } }) => {
-              const showLink = !!row.original?.block12Teacher?.id;
-              // console.log(row);
-              if (showLink)
-                return (
-                  <Link href={`/userProfile/${row.original?.block12Teacher?.id}`} >
-                    {row.original?.block12Teacher?.name}
-                  </Link>
-                );
-              return null;
-            },
-          },
+          })),
           {
             Header: 'Parent Account',
             accessor: 'parent',

@@ -4,11 +4,13 @@ import GradientButton from '@/components/styles/Button';
 import Form, { FormContainerStyles } from '@/components/styles/Form';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
+import { blockDisplayList } from '@/lib/blockNames';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
+import BlockLabel from '../BlockLabel';
 
 // TODO: update this edit into create new student
 
@@ -229,13 +231,15 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((blockNum) => (
+                {/* Every block the mutation requires, ordered by colour so a
+                    colour's A and B rotation sit next to each other. */}
+                {blockDisplayList().map(({ block: blockNum, name, color }) => (
                   <div key={blockNum} className="mb-4">
                     <label
                       htmlFor={`block${blockNum}`}
                       className="block text-white font-semibold mb-1"
                     >
-                      Block {blockNum} Teacher
+                      <BlockLabel name={name} color={color} /> Teacher
                     </label>
                     <select
                       id={`block${blockNum}`}
@@ -245,9 +249,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
                       required
                       className="w-full p-2 rounded border"
                     >
-                      <option value="">
-                        Select a Block {blockNum} Teacher
-                      </option>
+                      <option value="">Select a {name} Teacher</option>
                       {data?.teacherList?.map((teacher: any) => (
                         <option key={teacher.id} value={teacher.id}>
                           {teacher.name}

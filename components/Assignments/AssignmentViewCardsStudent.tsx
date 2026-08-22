@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { NUMBER_OF_BLOCKS } from '../../config';
+import { blockDisplayList } from '../../lib/blockNames';
+import BlockLabel from '../BlockLabel';
 import AssignmentHistory from './AssignmentHistory';
 import useAssignmentHistoryBlocks from './useAssignmentHistoryBlocks';
 
@@ -49,15 +51,27 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
   const [historyBlock, setHistoryBlock] = useState<number>();
   const [historyTeacherId, setHistoryTeacherId] = useState<string>();
 
+  const teacherForBlock = (block: number): BlockTeacher | undefined =>
+    student[`block${block}Teacher` as keyof Student] as
+      | BlockTeacher
+      | undefined;
+
   const blockTeacherIds = [...Array(NUMBER_OF_BLOCKS)]
-    .map((e, i) => {
-      const bt = student[`block${i + 1}Teacher` as keyof Student] as
-        | BlockTeacher
-        | undefined;
-      return bt?.id;
-    })
+    .map((e, i) => teacherForBlock(i + 1)?.id)
     .filter((id): id is string => !!id);
   const hasHistory = useAssignmentHistoryBlocks(blockTeacherIds);
+
+  const fieldFor = (block: number, field: string): string =>
+    (teacherForBlock(block)?.[
+      `block${block}${field}` as keyof BlockTeacher
+    ] as string) || '';
+
+  // The class a student sits in is the teacher they sit with, so the same
+  // teacher in both rotations is one colour to read, not two. The B half is
+  // hidden, so the card reads exactly like a single-rotation one.
+  const blocksToShow = blockDisplayList(
+    (a, b) => teacherForBlock(a)?.id === teacherForBlock(b)?.id,
+  );
 
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
@@ -71,33 +85,35 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
       )}
       <div
         className="grid grid-cols-1 md:grid-cols-[repeat(var(--num-blocks),minmax(0,1fr))]"
-        style={{ '--num-blocks': NUMBER_OF_BLOCKS } as React.CSSProperties}
+        style={{ '--num-blocks': blocksToShow.length } as React.CSSProperties}
       >
-        {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
-          const num = i + 1;
-          const blockTeacher = student[
-            `block${num}Teacher` as keyof Student
-          ] as BlockTeacher | undefined;
+        {blocksToShow.map(({ block: num, blocks, name, color }) => {
+          const blockTeacher = teacherForBlock(num);
+          const cardKey = `key for student - ${student.id} - ${blocks.join('-')}`;
 
           if (!blockTeacher) {
             return (
               <div
                 className="flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] text-xl"
-                key={`key for student - ${student.id} - ${num}`}
-              />
+                key={cardKey}
+              >
+                <h4>
+                  <BlockLabel name={name} color={color} />
+                </h4>
+              </div>
             );
           }
 
-          const lastUpdated = new Date(
-            (blockTeacher[
-              `block${num}AssignmentLastUpdated` as keyof BlockTeacher
-            ] as string) || '',
-          );
-          const hasValidDate = !Number.isNaN(lastUpdated.getTime());
+          const updatedTimes = blocks
+            .map((b) =>
+              new Date(fieldFor(b, 'AssignmentLastUpdated')).getTime(),
+            )
+            .filter((time) => !Number.isNaN(time));
           // Only flash when the teacher genuinely posted an update recently.
           // A block with no valid date (never posted) must not flash.
           const recentlyUpdated =
-            hasValidDate && Date.now() - lastUpdated.getTime() < RECENT_UPDATE_MS;
+            updatedTimes.length > 0 &&
+            Date.now() - Math.max(...updatedTimes) < RECENT_UPDATE_MS;
 
           return (
             <div
@@ -106,25 +122,33 @@ const AssignmentViewCardsStudent: React.FC<AssignmentViewCardsStudentProps> = ({
                   ? 'flashAssignment bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
                   : ''
               }`}
-              key={`key for student - ${student.id} - ${num}`}
+              key={cardKey}
             >
-              <h4>{num}</h4>
+              <h4>
+                <BlockLabel name={name} color={color} />
+              </h4>
               <p>{blockTeacher.name}</p>
-              <p>
-                {blockTeacher[`block${num}ClassName` as keyof BlockTeacher]}
-              </p>
-              <p>
-                {blockTeacher[`block${num}Assignment` as keyof BlockTeacher]}
-              </p>
-              {hasValidDate && (
-                <p>{lastUpdated.toLocaleString().split(',')[0]}</p>
+              <p>{fieldFor(num, 'ClassName')}</p>
+              <p>{fieldFor(num, 'Assignment')}</p>
+              {!Number.isNaN(
+                new Date(fieldFor(num, 'AssignmentLastUpdated')).getTime(),
+              ) && (
+                <p>
+                  {
+                    new Date(fieldFor(num, 'AssignmentLastUpdated'))
+                      .toLocaleString()
+                      .split(',')[0]
+                  }
+                </p>
               )}
-              {hasHistory(blockTeacher.id, num) && (
+              {blocks.some((b) => hasHistory(blockTeacher.id, b)) && (
                 <button
                   type="button"
                   onClick={() => {
                     setHistoryTeacherId(blockTeacher.id);
-                    setHistoryBlock(num);
+                    setHistoryBlock(
+                      blocks.find((b) => hasHistory(blockTeacher.id, b)),
+                    );
                     setShowHistory(true);
                   }}
                   className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"

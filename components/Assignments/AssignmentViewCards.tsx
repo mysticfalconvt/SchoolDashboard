@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { NUMBER_OF_BLOCKS } from '../../config';
+import { blockDisplayList, sameText } from '../../lib/blockNames';
+import BlockLabel from '../BlockLabel';
 import AssignmentHistory from './AssignmentHistory';
 import useAssignmentHistoryBlocks from './useAssignmentHistoryBlocks';
 
@@ -57,6 +58,17 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
   const [historyBlock, setHistoryBlock] = useState<number>();
   const teacherId = assignments?.id as string | undefined;
   const hasHistory = useAssignmentHistoryBlocks(teacherId ? [teacherId] : []);
+  // A merged card's history can sit under either rotation.
+  const historyBlockFor = (blocks: number[]): number | undefined =>
+    blocks.find((b) => teacherId && hasHistory(teacherId, b));
+  // One card per colour when both rotations carry the same class. The B half
+  // is hidden rather than stacked under the A half.
+  const blocksToShow = blockDisplayList((a, b) =>
+    sameText(
+      assignments[`block${a}ClassName`],
+      assignments[`block${b}ClassName`],
+    ),
+  );
 
   return (
     <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
@@ -70,21 +82,19 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
       )}
       <div
         className="grid grid-cols-1 md:grid-cols-[repeat(var(--num-blocks),minmax(0,1fr))]"
-        style={{ '--num-blocks': NUMBER_OF_BLOCKS } as React.CSSProperties}
+        style={{ '--num-blocks': blocksToShow.length } as React.CSSProperties}
       >
-        {[...Array(NUMBER_OF_BLOCKS)].map((e, i) => {
-          const num = i + 1;
-          const lastUpdatedRaw =
-            assignments[`block${num}AssignmentLastUpdated`];
-          const lastUpdated = lastUpdatedRaw ? new Date(lastUpdatedRaw) : null;
-          const noValidDate =
-            !lastUpdated || Number.isNaN(lastUpdated.getTime());
+        {blocksToShow.map(({ block: num, blocks, name, color }) => {
           // Teachers: flag a block that has never been updated (flash until
           // it's first filled in), or that has gone stale — not updated in
-          // over 8 days (once-a-week cadence plus a buffer).
-          const isStale =
-            noValidDate ||
-            Date.now() - lastUpdated!.getTime() > STALE_ASSIGNMENT_MS;
+          // over 8 days (once-a-week cadence plus a buffer). Either half of a
+          // merged card falling behind flags the card.
+          const isStale = blocks.some((b) => {
+            const raw = assignments[`block${b}AssignmentLastUpdated`];
+            const updated = raw ? new Date(raw) : null;
+            if (!updated || Number.isNaN(updated.getTime())) return true;
+            return Date.now() - updated.getTime() > STALE_ASSIGNMENT_MS;
+          });
 
           return (
             <div
@@ -93,9 +103,11 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
                   ? 'flashAssignment bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
                   : ''
               }`}
-              key={`key ${num}`}
+              key={`key ${blocks.join('-')}`}
             >
-              <h4>{num}</h4>
+              <h4>
+                <BlockLabel name={name} color={color} />
+              </h4>
               <p>{assignments[`block${num}ClassName`]}</p>
               <p>{assignments[`block${num}Assignment`]}</p>
               {/* <p>
@@ -105,11 +117,11 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
                     .split(',')[0]
                 }
               </p> */}
-              {teacherId && hasHistory(teacherId, num) && (
+              {teacherId && historyBlockFor(blocks) && (
                 <button
                   type="button"
                   onClick={() => {
-                    setHistoryBlock(num);
+                    setHistoryBlock(historyBlockFor(blocks));
                     setShowHistory(true);
                   }}
                   className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"

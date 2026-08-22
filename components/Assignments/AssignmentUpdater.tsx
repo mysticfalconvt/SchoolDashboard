@@ -1,9 +1,11 @@
 import { useUser } from '@/components/User';
+import { blockName, pairedBlockName } from '@/lib/blockNames';
 import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
-import React from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { NUMBER_OF_BLOCKS } from '../../config';
 
 interface AssignmentData {
   [key: string]: string | Date;
@@ -11,7 +13,8 @@ interface AssignmentData {
 
 interface AssignmentUpdaterProps {
   assignments: AssignmentData;
-  block: number;
+  /** The blocks this card stands for — an A/B pair when they're identical. */
+  blocks: number[];
   hide: (show: boolean) => void;
   refetch: () => Promise<void>;
 }
@@ -109,11 +112,18 @@ const UPDATE_ASSIGNMENTS = gql`
 
 const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
   assignments,
-  block,
+  blocks,
   hide,
   refetch,
 }) => {
   const me = useUser();
+  const block = blocks[0];
+  const isPair = blocks.length > 1;
+  const label = isPair ? pairedBlockName(block) : blockName(block);
+  // A merged card writes both rotations by default; a teacher whose two halves
+  // have only looked identical so far can still split them back apart here.
+  const [target, setTarget] = useState<string>('both');
+  const targetBlocks = !isPair || target === 'both' ? blocks : [Number(target)];
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     classTitle: (assignments[`block${block}ClassName`] as string) || '',
     assignment: (assignments[`block${block}Assignment`] as string) || '',
@@ -134,7 +144,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
       <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
         <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
           <h4 className="text-white text-xl font-semibold">
-            Update Class Assignment for Block {block}
+            Update Class Assignment for {label}
           </h4>
           <button
             type="button"
@@ -145,6 +155,25 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
           </button>
         </div>
         <form className="flex flex-col justify-center text-white">
+          {isPair && (
+            <label htmlFor="rotationTarget" className="p-2.5 text-left">
+              Applies to:
+              <select
+                id="rotationTarget"
+                name="rotationTarget"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                className="mx-8 text-black"
+              >
+                <option value="both">{label} (both rotations)</option>
+                {blocks.map((b) => (
+                  <option key={b} value={String(b)}>
+                    {blockName(b)} only
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label htmlFor="Class Name" className="p-2.5 text-left">
             Class Name:
             <input
@@ -172,12 +201,19 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
             <button
               type="button"
               onClick={async () => {
-                updateData[`block${block}AssignmentLastUpdated`] = new Date();
-                updateData[`block${block}Assignment`] = inputs.assignment;
-                updateData[`block${block}ClassName`] = inputs.classTitle;
+                const now = new Date();
+                targetBlocks.forEach((b) => {
+                  updateData[`block${b}AssignmentLastUpdated`] = now;
+                  updateData[`block${b}Assignment`] = inputs.assignment;
+                  updateData[`block${b}ClassName`] = inputs.classTitle;
+                });
                 updateData.id = me.id;
                 await updateAssignment(updateData);
-                toast.success(`Updated Assignment for Block ${block}`);
+                toast.success(
+                  `Updated Assignment for ${targetBlocks
+                    .map((b) => blockName(b))
+                    .join(' and ')}`,
+                );
                 await refetch();
                 hide(false);
               }}
@@ -190,33 +226,13 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
               className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
               onClick={async () => {
                 const todaysDate = new Date();
-                updateData[`block1AssignmentLastUpdated`] = todaysDate;
-                updateData[`block2AssignmentLastUpdated`] = todaysDate;
-                updateData[`block3AssignmentLastUpdated`] = todaysDate;
-                updateData[`block4AssignmentLastUpdated`] = todaysDate;
-                updateData[`block5AssignmentLastUpdated`] = todaysDate;
-                updateData[`block6AssignmentLastUpdated`] = todaysDate;
-                updateData[`block7AssignmentLastUpdated`] = todaysDate;
-                updateData[`block8AssignmentLastUpdated`] = todaysDate;
-                updateData[`block9AssignmentLastUpdated`] = todaysDate;
-                updateData[`block10AssignmentLastUpdated`] = todaysDate;
-                updateData[`block11AssignmentLastUpdated`] = todaysDate;
-                updateData[`block12AssignmentLastUpdated`] = todaysDate;
-                updateData[`block1Assignment`] = inputs.assignment;
-                updateData[`block2Assignment`] = inputs.assignment;
-                updateData[`block3Assignment`] = inputs.assignment;
-                updateData[`block4Assignment`] = inputs.assignment;
-                updateData[`block5Assignment`] = inputs.assignment;
-                updateData[`block6Assignment`] = inputs.assignment;
-                updateData[`block7Assignment`] = inputs.assignment;
-                updateData[`block8Assignment`] = inputs.assignment;
-                updateData[`block9Assignment`] = inputs.assignment;
-                updateData[`block10Assignment`] = inputs.assignment;
-                updateData[`block11Assignment`] = inputs.assignment;
-                updateData[`block12Assignment`] = inputs.assignment;
+                for (let b = 1; b <= NUMBER_OF_BLOCKS; b++) {
+                  updateData[`block${b}AssignmentLastUpdated`] = todaysDate;
+                  updateData[`block${b}Assignment`] = inputs.assignment;
+                }
                 updateData.id = me.id;
                 await updateAssignment(updateData);
-                toast.success(`Updated Assignment for Block ${block}`);
+                toast.success('Updated Assignment for every block');
                 await refetch();
                 hide(false);
               }}

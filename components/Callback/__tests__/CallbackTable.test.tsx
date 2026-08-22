@@ -168,9 +168,9 @@ describe('CallbackTable', () => {
       expect(screen.getByTestId('hidden-columns')).toHaveTextContent('[]');
     });
 
-    // Should show block information
-    expect(screen.getByTestId('block-0')).toHaveTextContent('B1');
-    expect(screen.getByTestId('block-1')).toHaveTextContent('B2');
+    // Should show block information, named by colour rather than number
+    expect(screen.getByTestId('block-0')).toHaveTextContent('Red A');
+    expect(screen.getByTestId('block-1')).toHaveTextContent('Orange A');
   });
 
   it('hides block column when showClassBlock is false', async () => {
@@ -189,8 +189,30 @@ describe('CallbackTable', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('block-0')).toHaveTextContent('B1');
-      expect(screen.getByTestId('block-1')).toHaveTextContent('B2');
+      expect(screen.getByTestId('block-0')).toHaveTextContent('Red A');
+      expect(screen.getByTestId('block-1')).toHaveTextContent('Orange A');
+    });
+  });
+
+  it('collapses a colour the student has in both rotations', async () => {
+    useGQLQuery.mockReturnValue({
+      data: {
+        user: {
+          ...mockStudentsByBlockData.user,
+          // Same student in the A and B halves of Red.
+          block7Students: [{ id: 'student-1' }],
+        },
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    renderWithProviders(
+      <CallbackTable callbacks={[mockCallbacks[0]]} showClassBlock={true} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('block-0')).toHaveTextContent('Red A/B');
     });
   });
 
