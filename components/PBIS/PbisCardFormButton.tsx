@@ -151,6 +151,12 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
     } as React.ChangeEvent<HTMLInputElement>);
   };
 
+  const clearMessage = () => {
+    handleChange({
+      target: { name: 'message', value: '' },
+    } as React.ChangeEvent<HTMLTextAreaElement>);
+  };
+
   const messageMissing = !inputs.message || inputs.message.trim() === '';
   // A category is always required. Staff cards additionally require a comment.
   const missingFields = isStaffCard
@@ -275,10 +281,17 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
               </div>
 
               <div className="form-control">
-                <label className="label pb-2">
+                <label className="label pb-2 flex items-center justify-between">
                   <span className="label-text text-white font-medium text-base">
                     Message
                   </span>
+                  <SmallGradientButton
+                    type="button"
+                    onClick={clearMessage}
+                    className="px-2 py-1 text-xs shadow-none hover:shadow-md"
+                  >
+                    Clear
+                  </SmallGradientButton>
                 </label>
                 <textarea
                   id="message"
