@@ -105,7 +105,7 @@ const SingleDayCalendar: React.FC<SingleDayCalendarProps> = ({
   return (
     <Fragment>
       <div
-        className={`h-full ${todaysDay === day ? 'col-span-2' : 'col-span-1'} ${todaysDay === day ? todayClass : notTodayClass}`}
+        className={`h-full ${todaysDay === day ? 'col-span-2 max-[650px]:col-span-1' : 'col-span-1'} ${todaysDay === day ? todayClass : notTodayClass}`}
       >
         <h2>{day}</h2>
         <div className="flex flex-col gap-2">
