@@ -262,9 +262,12 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
             </div>
           )}
 
-          <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+          {/* backdrop-blur-sm traps the search dropdown in its own stacking
+              context, so z-30 here lifts the whole panel over the footer's
+              skewed (transformed) buttons. Same fix as CreateSingleChromebookCheck. */}
+          <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10 relative z-30">
             <div className="space-y-6">
-              <div className="form-control">
+              <div className="form-control relative z-30">
                 <label className="label pb-2">
                   <span className="label-text text-white font-medium text-base">
                     {isStaffCard ? 'Select Staff' : 'Select Student'}
