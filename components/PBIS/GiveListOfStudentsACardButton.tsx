@@ -2,6 +2,7 @@ import { lastNameCommaFirstName } from '@/lib/lastNameCommaFirstName';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
+import toast from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 import { SmallGradientButton } from '../styles/Button';
 import { useUser } from '../User';
@@ -212,37 +213,44 @@ export default function GiveListOfStudentsACardButton({
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
   const [displayForm, setDisplayForm] = React.useState(false);
-  console.log(students.length);
   const [message, setMessage] = React.useState(
     `${me.name} gave a card to the entire class`,
   );
   const [selectedStudentIds, setSelectedStudentIds] = React.useState<string[]>(
     [],
   );
-  const [createCard, { data, loading, error }] = useGqlMutation(
+  // mutateAsync, not mutate: mutate returns void, so awaiting it resolves
+  // before any card is actually written and swallows backend errors.
+  const [, { mutateAsync: createCard }] = useGqlMutation(
     CREATE_CLASS_PBIS_CARD,
   );
 
   const handleCreateCards = React.useCallback(async () => {
-    const listOfStudentIds = selectedStudentIds;
-
-    setIsLoading(true);
-    const cardsToCreate = await createCardsFromListOfStudents({
-      studentIds: listOfStudentIds,
+    const cardsToCreate = createCardsFromListOfStudents({
+      studentIds: selectedStudentIds,
       teacher: me,
       message,
     });
-    await Promise.all(
-      cardsToCreate.map(async (card) => {
-        //   console.log('card', card);
-        const res = await createCard({ variables: card });
-      }),
-    );
-    await queryClient.refetchQueries(`SingleTeacher-${me.id}`);
-    setIsLoading(false);
-    setDisplayForm(false);
-    setMessage(`${me.name} gave a card to the entire class`);
-    setSelectedStudentIds([]);
+
+    setIsLoading(true);
+    try {
+      // Variables are passed flat -- the client forwards this object straight
+      // through as the GraphQL variables.
+      await Promise.all(cardsToCreate.map((card) => createCard(card)));
+      await queryClient.refetchQueries(`SingleTeacher-${me.id}`);
+      toast.success(
+        `Gave a card to ${cardsToCreate.length} ${
+          cardsToCreate.length === 1 ? 'student' : 'students'
+        }`,
+      );
+      setDisplayForm(false);
+      setMessage(`${me.name} gave a card to the entire class`);
+      setSelectedStudentIds([]);
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not give the cards.');
+    } finally {
+      setIsLoading(false);
+    }
   }, [selectedStudentIds, me, message, queryClient, createCard]);
 
   if (students.length === 0) {
