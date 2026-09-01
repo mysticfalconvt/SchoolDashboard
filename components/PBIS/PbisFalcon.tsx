@@ -8,7 +8,6 @@ import Loading from '../Loading';
 export const TOTAL_PBIS_CARDS = gql`
   query {
     pbisCardsCount
-    staffPbisCardsCount
   }
 `;
 
@@ -18,15 +17,12 @@ interface PbisFalconProps {
 
 interface TotalPbisCardsData {
   pbisCardsCount: number;
-  staffPbisCardsCount: number;
 }
 
 export default function PbisFalcon({ initialCount }: PbisFalconProps) {
   let queryOptions = {};
   const initialData: Partial<TotalPbisCardsData> = {};
-  // initialCount already includes staff cards (school-wide total)
   initialData.pbisCardsCount = initialCount;
-  initialData.staffPbisCardsCount = 0;
   if (initialCount) {
     queryOptions = {
       initialData,
@@ -44,8 +40,7 @@ export default function PbisFalcon({ initialCount }: PbisFalconProps) {
   if (isLoading) return <Loading />;
   if (error) return <DisplayError error={error} />;
 
-  const displayCount =
-    (data?.pbisCardsCount || 0) + (data?.staffPbisCardsCount || 0);
+  const displayCount = data?.pbisCardsCount || 0;
   const percentageFull = Math.round((displayCount / cardGoal) * 10000) / 100;
   const percentageLeft = 100 - percentageFull;
 

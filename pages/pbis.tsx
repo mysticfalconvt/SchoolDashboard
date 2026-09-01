@@ -34,7 +34,6 @@ const PBIS_PAGE_QUERY = gql`
 const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY($lastCollectionDate: DateTime) {
     totalSchoolCards: pbisCardsCount
-    staffCards: staffPbisCardsCount
 
     chromebookCards: pbisCardsCount(
       where: { category: { equals: "Chromebook Check" } }
@@ -363,7 +362,6 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
   // fetch PBIS Page data from the server
   const fetchData = async (): Promise<{
     totalSchoolCards: number;
-    staffCards: number;
     chromebookCards: number;
     classCards: number;
     quickCards: number;
@@ -404,9 +402,7 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
     });
   };
   const data = await fetchData();
-  // School-wide total includes staff PBIS cards (but not TA/student levels).
-  const totalSchoolCards =
-    (data?.totalSchoolCards || 0) + (data?.staffCards || 0);
+  const totalSchoolCards = data?.totalSchoolCards || 0;
 
   // get the number of cards in each category for whole school
   const schoolWideCardsInCategories: CategoryData[] = [

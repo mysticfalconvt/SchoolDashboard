@@ -515,7 +515,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async (context) => {
       props: {
         totalCards:
           totalCards?.pbisCardsCount != null
-            ? totalCards.pbisCardsCount + (totalCards.staffPbisCardsCount ?? 0)
+            ? totalCards.pbisCardsCount
             : null,
         homePageLinks: homePageLinks ?? null,
         weeklyCalendar: weeklyCalendar ?? null,
