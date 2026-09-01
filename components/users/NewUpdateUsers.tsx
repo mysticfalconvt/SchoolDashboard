@@ -1,6 +1,7 @@
 import DisplayError from '@/components/ErrorMessage';
-import { SEARCH_ALL_USERS_QUERY } from '@/components/Search';
-import GradientButton from '@/components/styles/Button';
+import GradientButton, {
+  SmallGradientButton,
+} from '@/components/styles/Button';
 import Form from '@/components/styles/Form';
 import { useUser } from '@/components/User';
 import useForm from '@/lib/useForm';
@@ -9,6 +10,11 @@ import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import * as React from 'react';
 import { useState } from 'react';
+import {
+  findUntouchedStudents,
+  summariseImport,
+} from '@/lib/studentImportUtils';
+import { NUMBER_OF_BLOCKS } from '../../config';
 
 const UPDATE_USER_MUTATION = gql`
   mutation UPDATE_USER_MUTATION($studentScheduleData: JSON!) {
@@ -16,13 +22,80 @@ const UPDATE_USER_MUTATION = gql`
   }
 `;
 
+// Students are compared to the import by email, not name - two students can
+// share a name, and the resolver reports results keyed on email.
+const GET_STUDENTS_AND_TEACHERS_QUERY = gql`
+  query GET_STUDENTS_AND_TEACHERS_FOR_IMPORT {
+    students: users(where: { isStudent: { equals: true } }) {
+      id
+      name
+      email
+    }
+    teachers: users(where: { isTeacher: { equals: true } }) {
+      id
+      name
+      email
+    }
+  }
+`;
+
+// Where a student's schedule goes when they leave the export. Everything lands
+// on one teacher so the student keeps their account, history and parent links,
+// and stops appearing on real teachers' block rosters.
+const PARK_STUDENT_MUTATION = gql`
+  mutation PARK_STUDENT_SCHEDULE($id: ID!, $teacherId: ID!) {
+    updateUser(
+      where: { id: $id }
+      data: {
+        taTeacher: { connect: { id: $teacherId } }
+        ${Array.from(
+          { length: NUMBER_OF_BLOCKS },
+          (_, i) => `block${i + 1}Teacher: { connect: { id: $teacherId } }`,
+        ).join('\n        ')}
+      }
+    ) {
+      id
+      email
+    }
+  }
+`;
+
+const PARKING_TEACHER_EMAIL = 'robert.boskind@ncsuvt.org';
+
+const TILE_TONES: Record<string, string> = {
+  green: 'bg-green-50 text-green-800 border-green-200',
+  blue: 'bg-blue-50 text-blue-800 border-blue-200',
+  orange: 'bg-orange-50 text-orange-800 border-orange-200',
+  grey: 'bg-gray-50 text-gray-700 border-gray-200',
+};
+
+function ResultTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: keyof typeof TILE_TONES;
+}) {
+  return (
+    <div className={`rounded-xl border px-3 py-2 ${TILE_TONES[tone]}`}>
+      <div className="text-2xl font-semibold leading-tight">{value}</div>
+      <div className="text-[11px] uppercase tracking-wide opacity-80">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 interface FormInputs {
   userData?: string;
 }
 
-interface User {
+interface Person {
+  id: string;
   name: string;
-  isStudent: boolean;
+  email: string;
 }
 
 interface UpdateResult {
@@ -35,38 +108,97 @@ export default function NewUpdateUsers() {
   const me = useUser();
   const [showForm, setShowForm] = useState(false);
   const { inputs, handleChange, clearForm } = useForm();
-  const { data: allUsers } = useGQLQuery(
-    'allUsers',
-    SEARCH_ALL_USERS_QUERY,
+  const { data: rosterData, refetch: refetchRoster } = useGQLQuery(
+    'studentsAndTeachersForImport',
+    GET_STUDENTS_AND_TEACHERS_QUERY,
     {},
-    {
-      enabled: !!me,
-      staleTime: 1000 * 60 * 60, // 1 hour
-    },
+    { enabled: !!me },
   );
 
   const [updateUsersFromJson, { loading, error, data }] =
     useGqlMutation(UPDATE_USER_MUTATION);
+  const [, { error: parkError, mutateAsync: parkStudent }] =
+    useGqlMutation(PARK_STUDENT_MUTATION);
+
   const [resultOfUpdate, setResultOfUpdate] = useState<UpdateResult[] | null>(
     null,
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [parkingTeacherId, setParkingTeacherId] = useState('');
+  const [parkProgress, setParkProgress] = useState({ current: 0, total: 0 });
+  const [parkedIds, setParkedIds] = useState<Set<string>>(new Set());
+  const [parkingId, setParkingId] = useState<string | null>(null);
+  const [parkFailures, setParkFailures] = useState<string[]>([]);
 
-  const unUpdatedUsers = React.useMemo(() => {
-    const updatedUsersByName: Record<string, UpdateResult> = {};
-    if (resultOfUpdate) {
-      resultOfUpdate?.forEach((user) => {
-        updatedUsersByName[user.name] = user;
-      });
+  const teachers: Person[] = React.useMemo(
+    () =>
+      [...(rosterData?.teachers || [])].sort((a: Person, b: Person) =>
+        a.name.localeCompare(b.name),
+      ),
+    [rosterData],
+  );
+
+  // Students that exist in the app but were absent from the import - normally
+  // students who have left, since a departure simply drops them from the export.
+  // Matched on email: the resolver reports one per processed student, and names
+  // are not unique.
+  const unUpdatedUsers: Person[] = React.useMemo(
+    () => findUntouchedStudents(resultOfUpdate, rosterData?.students || []),
+    [resultOfUpdate, rosterData],
+  );
+
+  const summary = React.useMemo(
+    () => summariseImport(resultOfUpdate),
+    [resultOfUpdate],
+  );
+
+  const pendingCount = unUpdatedUsers.filter((s) => !parkedIds.has(s.id)).length;
+
+  React.useEffect(() => {
+    if (parkingTeacherId || teachers.length === 0) return;
+    const preferred = teachers.find(
+      (t) => t.email.toLowerCase() === PARKING_TEACHER_EMAIL,
+    );
+    setParkingTeacherId(preferred?.id || '');
+  }, [teachers, parkingTeacherId]);
+
+  const parkOne = async (student: Person): Promise<boolean> => {
+    try {
+      await parkStudent({ id: student.id, teacherId: parkingTeacherId });
+      setParkedIds((prev) => new Set(prev).add(student.id));
+      return true;
+    } catch (err: any) {
+      setParkFailures((prev) => [
+        ...prev,
+        `${student.name}: ${err?.message || 'Unknown error'}`,
+      ]);
+      return false;
+    }
+  };
+
+  const parkSingleStudent = async (student: Person) => {
+    if (!parkingTeacherId) return;
+    setParkingId(student.id);
+    await parkOne(student);
+    setParkingId(null);
+    await refetchRoster();
+  };
+
+  const parkAllRemaining = async () => {
+    const pending = unUpdatedUsers.filter((s) => !parkedIds.has(s.id));
+    if (!parkingTeacherId || pending.length === 0) return;
+    setParkProgress({ current: 0, total: pending.length });
+
+    // Sequential so a long list cannot flood the API.
+    for (let i = 0; i < pending.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await parkOne(pending[i]);
+      setParkProgress({ current: i + 1, total: pending.length });
     }
 
-    if (resultOfUpdate) {
-      return allUsers?.users?.filter((user: User) => {
-        return !updatedUsersByName[user.name] && user.isStudent;
-      });
-    }
-    return [];
-  }, [resultOfUpdate, allUsers]);
+    setParkProgress({ current: 0, total: 0 });
+    await refetchRoster();
+  };
   return (
     <div>
       <GradientButton
@@ -226,53 +358,173 @@ export default function NewUpdateUsers() {
         </>
       )}
       {resultOfUpdate && (
-        <div className="mt-4 bg-white rounded-xl p-4 shadow text-black">
-          <div>
-            {resultOfUpdate.map((user) => {
-              return (
-                <p key={user.email}>
-                  {user.email} - {user.existed ? 'Existing User' : 'New User'}
-                </p>
-              );
-            })}
-            <div className="mt-4 p-3 bg-gray-100 rounded-lg">
-              <h3 className="font-semibold text-lg mb-2">Summary</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-green-700">
-                    New Users:{' '}
-                    {resultOfUpdate.filter((user) => !user.existed).length}
-                  </p>
-                  <p className="font-medium text-blue-700">
-                    Updated Users:{' '}
-                    {resultOfUpdate.filter((user) => user.existed).length}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">
-                    Total Processed: {resultOfUpdate.length}
-                  </p>
-                  <p className="font-medium text-orange-700">
-                    Not Updated: {unUpdatedUsers?.length || 0}
-                  </p>
-                </div>
+        <div className="mt-4 bg-white rounded-2xl p-5 shadow-lg text-black">
+          <h3 className="font-semibold text-xl mb-4">Import results</h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            <ResultTile
+              label="Created"
+              value={summary.created}
+              tone="green"
+            />
+            <ResultTile
+              label="Updated"
+              value={summary.updated}
+              tone="blue"
+            />
+            <ResultTile
+              label="Total processed"
+              value={summary.total}
+              tone="grey"
+            />
+            <ResultTile
+              label="Not in import"
+              value={unUpdatedUsers.length}
+              tone={unUpdatedUsers.length ? 'orange' : 'grey'}
+            />
+          </div>
+
+          <DisplayError error={parkError as any} />
+
+          {unUpdatedUsers.length > 0 && (
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+              <h4 className="font-semibold mb-1">
+                {unUpdatedUsers.length} student
+                {unUpdatedUsers.length === 1 ? '' : 's'} not in this import
+              </h4>
+              <p className="text-sm text-gray-700 mb-3">
+                Usually students who have left, since a departure just drops them
+                from the export. Their schedules are untouched, so they still
+                appear on their old teachers&apos; block rosters. Moving every
+                block and their TA onto one teacher clears those rosters while
+                keeping the account, its history and any parent links - so a
+                returning student picks up where they left off.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <label
+                  htmlFor="parkingTeacher"
+                  className="text-sm font-medium"
+                >
+                  Move all blocks and TA to
+                </label>
+                <select
+                  id="parkingTeacher"
+                  value={parkingTeacherId}
+                  onChange={(e) => setParkingTeacherId(e.target.value)}
+                  className="rounded-lg border border-gray-300 px-2 py-1 text-sm bg-white"
+                  disabled={parkProgress.total > 0 || parkingId !== null}
+                >
+                  <option value="">Select a teacher…</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name} ({teacher.email})
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
-            {unUpdatedUsers && unUpdatedUsers.length > 0 && (
-              <div className="mt-3">
-                <p className="font-medium text-gray-700 mb-2">
-                  Users not updated:
-                </p>
-                {unUpdatedUsers.map((user: User) => {
+
+              {parkProgress.total > 0 ? (
+                <div className="mb-3">
+                  <div className="h-2 w-full rounded-full bg-orange-200 overflow-hidden">
+                    <div
+                      className="h-full bg-orange-500 transition-all duration-300"
+                      style={{
+                        width: `${(parkProgress.current / parkProgress.total) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-sm mt-2">
+                    Moving {parkProgress.current} of {parkProgress.total}…
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3 mb-3">
+                  <SmallGradientButton
+                    type="button"
+                    onClick={parkAllRemaining}
+                    disabled={!parkingTeacherId || pendingCount === 0}
+                  >
+                    {pendingCount === 0
+                      ? 'All moved'
+                      : `Move all ${pendingCount} remaining`}
+                  </SmallGradientButton>
+                  {parkedIds.size > 0 && (
+                    <span className="text-sm font-medium text-green-800">
+                      {parkedIds.size} moved
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {parkFailures.length > 0 && (
+                <div className="mb-3 max-h-32 overflow-y-auto text-xs font-mono text-red-700">
+                  {parkFailures.map((f, i) => (
+                    <div key={`park-failed-${i}`}>{f}</div>
+                  ))}
+                </div>
+              )}
+
+              <div className="rounded-lg bg-white border border-orange-200 divide-y divide-orange-100 max-h-64 overflow-y-auto">
+                {unUpdatedUsers.map((student) => {
+                  const isParked = parkedIds.has(student.id);
                   return (
-                    <p key={user.name} className="text-sm text-gray-600">
-                      {user.name}
-                    </p>
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between gap-3 px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {student.name}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {student.email}
+                        </div>
+                      </div>
+                      {isParked ? (
+                        <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                          Moved
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => parkSingleStudent(student)}
+                          disabled={
+                            !parkingTeacherId ||
+                            parkingId === student.id ||
+                            parkProgress.total > 0
+                          }
+                          className="text-xs font-semibold uppercase tracking-wide rounded-lg border border-orange-300 bg-orange-100 hover:bg-orange-200 disabled:opacity-40 px-3 py-1 whitespace-nowrap"
+                        >
+                          {parkingId === student.id ? 'Moving…' : 'Move'}
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          <details className="mt-4">
+            <summary className="text-sm font-medium cursor-pointer">
+              Per-student detail ({resultOfUpdate.length})
+            </summary>
+            <div className="max-h-64 overflow-y-auto mt-2 text-sm">
+              {resultOfUpdate.map((user) => (
+                <p key={user.email}>
+                  {user.email} -{' '}
+                  <span
+                    className={
+                      user.existed ? 'text-blue-700' : 'text-green-700'
+                    }
+                  >
+                    {user.existed ? 'Updated' : 'Created'}
+                  </span>
+                </p>
+              ))}
+            </div>
+          </details>
         </div>
       )}
     </div>

@@ -82,11 +82,16 @@ function columnLabel(col) {
 
 // Both header rows that repeat down the export: the A / B (or L / H) banner and
 // the column-label row beneath it.
+// The A/B (or L/H) banner that repeats down the export. Detected by content
+// rather than position: one export had it at columns 0 and 9 while every other
+// copy of it sat at 1 and 10, so a fixed-position check missed the first one.
 function isBannerRow(row) {
-    if (cellAt(row, 0)) return false;
-    const a = cellAt(row, A_TA_COLUMN);
-    const b = cellAt(row, B_TA_COLUMN);
-    return (a === 'A' && b === 'B') || (a === 'L' && b === 'H');
+    const values = row.slice(0, LAST_COLUMN + 1)
+        .map((cell) => (cell || '').trim())
+        .filter(Boolean);
+    if (values.length !== 2) return false;
+    const [first, second] = values;
+    return (first === 'A' && second === 'B') || (first === 'L' && second === 'H');
 }
 
 function isLabelRow(row) {

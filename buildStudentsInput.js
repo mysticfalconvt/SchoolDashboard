@@ -19,6 +19,7 @@ const COLOURS = ['Red', 'Ora', 'Yel', 'Gre', 'Blu', 'Pur'];
 const COLUMN_LABELS = ['TA', 'Red', 'Ora', 'BR', 'Yel', 'Gre', 'Blu', 'Pur', 'GS'];
 const A_START = 1;
 const B_START = 10;
+const LAST_COLUMN = B_START + COLUMN_LABELS.length - 1;
 
 // BR (break duty) and GS (guided study) always hold the advisory teacher, so
 // they carry nothing beyond `ta` and are dropped.
@@ -36,11 +37,16 @@ function columnIndex(group, label) {
     return group + COLUMN_LABELS.indexOf(label);
 }
 
+// The A/B (or L/H) banner that repeats down the export. Detected by content
+// rather than position: one export had it at columns 0 and 9 while every other
+// copy of it sat at 1 and 10, so a fixed-position check missed the first one.
 function isBannerRow(row) {
-    if (cellAt(row, 0)) return false;
-    const a = cellAt(row, A_START);
-    const b = cellAt(row, B_START);
-    return (a === 'A' && b === 'B') || (a === 'L' && b === 'H');
+    const values = row.slice(0, LAST_COLUMN + 1)
+        .map((cell) => (cell || '').trim())
+        .filter(Boolean);
+    if (values.length !== 2) return false;
+    const [first, second] = values;
+    return (first === 'A' && second === 'B') || (first === 'L' && second === 'H');
 }
 
 function isLabelRow(row) {
