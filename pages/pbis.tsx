@@ -351,7 +351,9 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           ))}
       </div>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
-      {isAllowed(me, 'canManagePbis') && <StaffPbisCardTable />}
+      {(isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) && (
+        <StaffPbisCardTable />
+      )}
     </div>
   );
 };
