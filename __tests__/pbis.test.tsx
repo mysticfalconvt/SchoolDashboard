@@ -48,6 +48,9 @@ jest.mock('../components/PBIS/DisplayPbisCollectionData', () => {
     return (
       <div data-testid="pbis-collection-data">
         Collection Data: {collectionData?.id}
+        {collectionData?.staffRandomWinners?.map((winner: any) => (
+          <span key={winner.id}>Staff Winner: {winner.name}</span>
+        ))}
       </div>
     );
   };
@@ -352,6 +355,41 @@ describe('PbisPage', () => {
     expect(
       screen.getByText('Collection Data: collection-1'),
     ).toBeInTheDocument();
+  });
+
+  it('uses current collection data so newly chosen staff winners appear', () => {
+    useUser.mockReturnValue(mockUserWithTeam);
+    useGQLQuery
+      .mockReturnValueOnce({
+        data: mockTeamData,
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      })
+      .mockReturnValueOnce({
+        data: {
+          lastCollection: [
+            {
+              id: 'current-collection',
+              staffRandomWinners: [
+                { id: 'staff-1', name: 'Ms. Winner' },
+              ],
+              taNewLevelWinners: [],
+              personalLevelWinners: [],
+              randomDrawingWinners: [],
+            },
+          ],
+        },
+        isLoading: false,
+        error: null,
+      });
+
+    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
+
+    expect(
+      screen.getByText('Collection Data: current-collection'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Staff Winner: Ms. Winner')).toBeInTheDocument();
   });
 
   it('shows management links for users with canManagePbis permission', () => {

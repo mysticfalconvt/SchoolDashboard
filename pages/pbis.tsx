@@ -116,6 +116,44 @@ const PBIS_PAGE_STATIC_QUERY = gql`
   }
 `;
 
+const LATEST_PBIS_COLLECTION_QUERY = gql`
+  query LATEST_PBIS_COLLECTION_QUERY {
+    lastCollection: pbisCollectionDates(
+      orderBy: { collectionDate: desc }
+      take: 1
+    ) {
+      id
+      collectionDate
+      taNewLevelWinners {
+        id
+        name
+        taTeamPbisLevel
+        taTeamAveragePbisCardsPerStudent
+      }
+      personalLevelWinners {
+        id
+        name
+        individualPbisLevel
+      }
+      staffRandomWinners {
+        id
+        name
+        email
+      }
+      randomDrawingWinners {
+        id
+        student {
+          id
+          name
+          taTeacher {
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
 interface PbisCard {
   id: string;
   dateGiven: string;
@@ -189,6 +227,12 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
       enabled: !!me && !!teamId, // Only run query when we have a valid teamId
     },
   );
+  const { data: latestCollectionData } = useGQLQuery(
+    'LatestPbisCollection',
+    LATEST_PBIS_COLLECTION_QUERY,
+    {},
+    { enabled: !!me },
+  );
   // if (isLoading) return <Loading />;
   // const cards = data?.cards;
   const totalSchoolCards = props?.totalSchoolCards || data?.totalSchoolCards;
@@ -196,7 +240,10 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
     props?.schoolWideCardsInCategories || data?.schoolWideCardsInCategories;
   const hasTeam = !!teamId;
   const categoriesArray = props?.categoriesArray || [];
-  const lastPbisCollection = props?.lastPbisCollection || null;
+  const lastPbisCollection =
+    latestCollectionData?.lastCollection?.[0] ||
+    props?.lastPbisCollection ||
+    null;
   const rawListOfLinks = props?.pbisLinks || [];
   const cardCounts = props?.cardCounts;
   const totalTeamCards = hasTeam ? data?.totalTeamCards || 0 : 0;
