@@ -123,6 +123,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
   // A merged card writes both rotations by default; a teacher whose two halves
   // have only looked identical so far can still split them back apart here.
   const [target, setTarget] = useState<string>('both');
+  const [updateAllClassNames, setUpdateAllClassNames] = useState(false);
   const targetBlocks = !isPair || target === 'both' ? blocks : [Number(target)];
   const { inputs, handleChange, clearForm, resetForm } = useForm({
     classTitle: (assignments[`block${block}ClassName`] as string) || '',
@@ -197,48 +198,70 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
               className="mx-8 min-w-[90%] text-black"
             />
           </label>
-          <div className="flex flex-row justify-around items-center">
-            <button
-              type="button"
-              onClick={async () => {
-                const now = new Date();
-                targetBlocks.forEach((b) => {
-                  updateData[`block${b}AssignmentLastUpdated`] = now;
-                  updateData[`block${b}Assignment`] = inputs.assignment;
-                  updateData[`block${b}ClassName`] = inputs.classTitle;
-                });
-                updateData.id = me.id;
-                await updateAssignment(updateData);
-                toast.success(
-                  `Updated Assignment for ${targetBlocks
-                    .map((b) => blockName(b))
-                    .join(' and ')}`,
-                );
-                await refetch();
-                hide(false);
-              }}
-              className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+          <div className="flex flex-col items-center">
+            <label
+              htmlFor="updateAllClassNames"
+              className="mb-3 flex items-center gap-2 text-sm"
             >
-              Update
-            </button>
-            <button
-              type="button"
-              className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
-              onClick={async () => {
-                const todaysDate = new Date();
-                for (let b = 1; b <= NUMBER_OF_BLOCKS; b++) {
-                  updateData[`block${b}AssignmentLastUpdated`] = todaysDate;
-                  updateData[`block${b}Assignment`] = inputs.assignment;
-                }
-                updateData.id = me.id;
-                await updateAssignment(updateData);
-                toast.success('Updated Assignment for every block');
-                await refetch();
-                hide(false);
-              }}
-            >
-              Update All Blocks
-            </button>
+              <input
+                id="updateAllClassNames"
+                name="updateAllClassNames"
+                type="checkbox"
+                checked={updateAllClassNames}
+                onChange={(e) => setUpdateAllClassNames(e.target.checked)}
+              />
+              Also set every block&apos;s class name to the name above
+            </label>
+            <div className="flex w-full flex-row justify-around items-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  const now = new Date();
+                  targetBlocks.forEach((b) => {
+                    updateData[`block${b}AssignmentLastUpdated`] = now;
+                    updateData[`block${b}Assignment`] = inputs.assignment;
+                    updateData[`block${b}ClassName`] = inputs.classTitle;
+                  });
+                  updateData.id = me.id;
+                  await updateAssignment(updateData);
+                  toast.success(
+                    `Updated Assignment for ${targetBlocks
+                      .map((b) => blockName(b))
+                      .join(' and ')}`,
+                  );
+                  await refetch();
+                  hide(false);
+                }}
+                className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+              >
+                Update
+              </button>
+              <button
+                type="button"
+                className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+                onClick={async () => {
+                  const todaysDate = new Date();
+                  for (let b = 1; b <= NUMBER_OF_BLOCKS; b++) {
+                    updateData[`block${b}AssignmentLastUpdated`] = todaysDate;
+                    updateData[`block${b}Assignment`] = inputs.assignment;
+                    if (updateAllClassNames) {
+                      updateData[`block${b}ClassName`] = inputs.classTitle;
+                    }
+                  }
+                  updateData.id = me.id;
+                  await updateAssignment(updateData);
+                  toast.success(
+                    updateAllClassNames
+                      ? 'Updated assignment and class name for every block'
+                      : 'Updated assignment for every block',
+                  );
+                  await refetch();
+                  hide(false);
+                }}
+              >
+                Update Assignment for All Blocks
+              </button>
+            </div>
           </div>
         </form>
       </div>

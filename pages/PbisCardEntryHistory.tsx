@@ -1,11 +1,32 @@
 import gql from 'graphql-tag';
 import { NextPage } from 'next';
 import React, { useMemo, useState } from 'react';
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import Loading from '../components/Loading';
 import Table from '../components/Table';
 import { useUser } from '../components/User';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
+
+ChartJS.register(
+  CategoryScale,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+);
 
 const PBIS_CARD_ENTRIES_QUERY = gql`
   query PBIS_CARD_ENTRIES_QUERY($start: DateTime!, $end: DateTime!) {
@@ -23,10 +44,33 @@ const PBIS_CARD_ENTRIES_QUERY = gql`
   }
 `;
 
+const STAFF_PBIS_CARD_SUMMARY_QUERY = gql`
+  query STAFF_PBIS_CARD_SUMMARY_QUERY($start: DateTime!, $end: DateTime!) {
+    staffPbisCards(
+      where: { dateGiven: { gte: $start, lte: $end } }
+      orderBy: { dateGiven: desc }
+    ) {
+      id
+      dateGiven
+      giver {
+        id
+        isStudent
+        isStaff
+      }
+    }
+  }
+`;
+
 interface CardEntry {
   id: string;
   dateGiven: string;
   teacher?: { id: string; name: string } | null;
+}
+
+interface StaffCardEntry {
+  id: string;
+  dateGiven: string;
+  giver?: { id: string; isStudent?: boolean; isStaff?: boolean } | null;
 }
 
 // A teacher's card entry activity: total cards + a per-day count map
@@ -51,7 +95,7 @@ function heatColor(count: number): string {
   return 'rgba(59, 130, 246, 1)';
 }
 
-type TabKey = 'heatmap' | 'table' | 'calendar' | 'overview';
+type TabKey = 'heatmap' | 'table' | 'calendar' | 'overview' | 'staffCards';
 
 const PbisCardEntryHistory: NextPage = () => {
   const me = useUser();
@@ -69,10 +113,27 @@ const PbisCardEntryHistory: NextPage = () => {
     };
   }, []);
 
+  const staffCardVariables = useMemo(() => {
+    const endDate = new Date();
+    const yearStart = new Date(endDate.getFullYear(), 0, 1);
+    const sevenDaysAgo = new Date(endDate);
+    sevenDaysAgo.setDate(endDate.getDate() - 7);
+    return {
+      start: new Date(Math.min(yearStart.getTime(), sevenDaysAgo.getTime())).toISOString(),
+      end: endDate.toISOString(),
+    };
+  }, []);
+
   const { data, isLoading } = useGQLQuery(
     'pbisCardEntries',
     PBIS_CARD_ENTRIES_QUERY,
     variables,
+    { enabled: !!me && (isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) },
+  );
+  const { data: staffCardData, isLoading: staffCardsLoading } = useGQLQuery(
+    'staffPbisCardSummary',
+    STAFF_PBIS_CARD_SUMMARY_QUERY,
+    staffCardVariables,
     { enabled: !!me && (isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) },
   );
 
@@ -129,6 +190,7 @@ const PbisCardEntryHistory: NextPage = () => {
             ['heatmap', 'Heatmap'],
             ['table', 'Table'],
             ['calendar', 'Month Calendar'],
+            ['staffCards', 'Staff Card Data'],
           ] as [TabKey, string][]
         ).map(([key, label]) => (
           <button
@@ -146,12 +208,19 @@ const PbisCardEntryHistory: NextPage = () => {
         ))}
       </div>
 
-      {isLoading && <Loading />}
-      {!isLoading && teachers.length === 0 && (
+      {tab === 'staffCards' && (
+        <StaffCardSummaryView
+          cards={staffCardData?.staffPbisCards || []}
+          isLoading={staffCardsLoading}
+        />
+      )}
+
+      {tab !== 'staffCards' && isLoading && <Loading />}
+      {tab !== 'staffCards' && !isLoading && teachers.length === 0 && (
         <p>No cards were entered in this date range.</p>
       )}
 
-      {!isLoading && teachers.length > 0 && (
+      {tab !== 'staffCards' && !isLoading && teachers.length > 0 && (
         <>
           {tab === 'heatmap' && (
             <HeatmapView teachers={teachers} dayList={dayList} />
@@ -163,6 +232,212 @@ const PbisCardEntryHistory: NextPage = () => {
           {tab === 'overview' && <MonthOverviewView teachers={teachers} />}
         </>
       )}
+    </div>
+  );
+};
+
+const StaffCardSummaryView: React.FC<{
+  cards: StaffCardEntry[];
+  isLoading: boolean;
+}> = ({ cards, isLoading }) => {
+  const stats = useMemo(() => {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+
+    const weekCards = cards.filter(
+      (card) => new Date(card.dateGiven) >= sevenDaysAgo,
+    );
+    const yearCards = cards.filter(
+      (card) => new Date(card.dateGiven) >= yearStart,
+    );
+    const firstYearCardDate = yearCards.reduce<Date | undefined>(
+      (firstDate, card) => {
+        const cardDate = new Date(card.dateGiven);
+        return !firstDate || cardDate < firstDate ? cardDate : firstDate;
+      },
+      undefined,
+    );
+    const studentGivers = new Set(
+      weekCards
+        .filter((card) => card.giver?.isStudent && !card.giver.isStaff)
+        .map((card) => card.giver?.id),
+    );
+    const staffGivers = new Set(
+      weekCards
+        .filter((card) => card.giver?.isStaff)
+        .map((card) => card.giver?.id),
+    );
+
+    return {
+      cardsAwarded: weekCards.length,
+      studentGivers: studentGivers.size,
+      staffGivers: staffGivers.size,
+      yearlyCards: yearCards.length,
+      weeklyAverage: Math.round(
+        (yearCards.length /
+          Math.max(
+            1,
+            firstYearCardDate
+              ? (now.getTime() - firstYearCardDate.getTime()) /
+                (7 * 24 * 60 * 60 * 1000)
+              : 1,
+          )) *
+          10,
+      ) / 10,
+    };
+  }, [cards]);
+
+  if (isLoading) return <Loading />;
+
+  const metrics = [
+    { label: 'Staff Cards Awarded, Last 7 Days', value: stats.cardsAwarded },
+    {
+      label: 'Students Who Handed Staff Cards, Last 7 Days',
+      value: stats.studentGivers,
+    },
+    {
+      label: 'Staff Who Handed Staff Cards, Last 7 Days',
+      value: stats.staffGivers,
+    },
+    {
+      label: 'Total Staff Cards This Year',
+      value: stats.yearlyCards,
+      detail: `${stats.weeklyAverage} average per week`,
+    },
+  ];
+
+  return (
+    <div>
+      <p className="mb-4 opacity-80">
+        Staff card activity for the last seven days and current calendar year.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map(({ label, value, detail }) => (
+          <div
+            key={label}
+            className="rounded-lg border border-[var(--blue)] bg-[var(--blueTrans)] p-4"
+          >
+            <p className="text-sm font-semibold">{label}</p>
+            <p className="mt-2 text-4xl font-bold">{value}</p>
+            {detail && <p className="mt-1 text-sm opacity-80">{detail}</p>}
+          </div>
+        ))}
+      </div>
+      <StaffCardGiverChart cards={cards} />
+    </div>
+  );
+};
+
+const StaffCardGiverChart: React.FC<{ cards: StaffCardEntry[] }> = ({
+  cards,
+}) => {
+  const chartData = useMemo(() => {
+    const yearStart = new Date(new Date().getFullYear(), 0, 1);
+    const cardsByWeek: Record<
+      number,
+      { students: number; staff: number }
+    > = {};
+
+    cards.forEach((card) => {
+      const cardDate = new Date(card.dateGiven);
+      if (cardDate < yearStart) return;
+
+      const weekStart = new Date(cardDate);
+      weekStart.setHours(0, 0, 0, 0);
+      weekStart.setDate(cardDate.getDate() - ((cardDate.getDay() + 6) % 7));
+      const weekKey = weekStart.getTime();
+      const week = cardsByWeek[weekKey] || (cardsByWeek[weekKey] = { students: 0, staff: 0 });
+
+      if (card.giver?.isStudent && !card.giver.isStaff) week.students += 1;
+      if (card.giver?.isStaff) week.staff += 1;
+    });
+
+    const recordedWeeks = Object.keys(cardsByWeek)
+      .map(Number)
+      .sort((a, b) => a - b);
+    if (recordedWeeks.length === 0) {
+      return { labels: [], datasets: [] };
+    }
+
+    const currentWeek = new Date();
+    currentWeek.setHours(0, 0, 0, 0);
+    currentWeek.setDate(
+      currentWeek.getDate() - ((currentWeek.getDay() + 6) % 7),
+    );
+    const weeks: number[] = [];
+    for (
+      let week = recordedWeeks[0];
+      week <= currentWeek.getTime();
+      week += 7 * 24 * 60 * 60 * 1000
+    ) {
+      weeks.push(week);
+      if (!cardsByWeek[week]) cardsByWeek[week] = { students: 0, staff: 0 };
+    }
+    return {
+      labels: weeks.map((week) => new Date(week).toLocaleDateString()),
+      datasets: [
+        {
+          label: 'Students gave staff cards',
+          data: weeks.map((week) => cardsByWeek[week].students),
+          backgroundColor: 'rgba(56, 182, 255, 0.45)',
+          borderColor: 'rgba(56, 182, 255, 1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          stack: 'cards',
+        },
+        {
+          label: 'Staff gave staff cards',
+          data: weeks.map((week) => cardsByWeek[week].staff),
+          backgroundColor: 'rgba(120, 192, 145, 0.45)',
+          borderColor: 'rgba(120, 192, 145, 1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          stack: 'cards',
+        },
+      ],
+    };
+  }, [cards]);
+
+  if (chartData.labels.length === 0) return null;
+
+  return (
+    <div className="mt-8 rounded-lg border border-[var(--blue)] p-4">
+      <h2 className="text-xl font-semibold">Staff Cards Given by Week</h2>
+      <p className="mb-4 text-sm opacity-80">
+        The stacked total shows all staff cards given each week.
+      </p>
+      <div className="h-80">
+        <Line
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true },
+              y: { beginAtZero: true, stacked: true },
+            },
+            plugins: {
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                  footer: (items) =>
+                    `Total: ${items.reduce(
+                      (total, item) => total + Number(item.raw),
+                      0,
+                    )}`,
+                },
+              },
+            },
+          }}
+        />
+      </div>
     </div>
   );
 };
