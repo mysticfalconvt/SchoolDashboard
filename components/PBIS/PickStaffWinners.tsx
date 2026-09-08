@@ -23,7 +23,8 @@ const GET_COLLECTIONS_QUERY = gql`
   }
 `;
 
-// Staff cards given since the last collection — one ticket per card.
+// Staff cards given since the last collection with staff winners — one ticket
+// per card.
 const GET_STAFF_CARDS_SINCE_QUERY = gql`
   query GET_STAFF_CARDS_SINCE($date: DateTime!) {
     staffPbisCards(where: { dateGiven: { gt: $date } }) {
@@ -86,14 +87,16 @@ export default function PickStaffWinners() {
     {},
   );
 
-  const lastCollectionDate =
-    collectionsData?.pbisCollectionDates?.[0]?.collectionDate ||
+  const lastStaffWinnerCollectionDate =
+    collectionsData?.pbisCollectionDates?.find(
+      (collection: any) => collection.staffRandomWinners?.length > 0,
+    )?.collectionDate ||
     new Date(0).toISOString();
 
   const { data: staffCardsData, isLoading: staffCardsLoading } = useGQLQuery(
     'Staff Cards Since Collection',
     GET_STAFF_CARDS_SINCE_QUERY,
-    { date: lastCollectionDate },
+    { date: lastStaffWinnerCollectionDate },
     { enabled: !!collectionsData },
   );
 

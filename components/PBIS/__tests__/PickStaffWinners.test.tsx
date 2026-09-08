@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { useGQLQuery } from '../../../lib/useGqlQuery';
 import PickStaffWinners from '../PickStaffWinners';
 
 // Mock dependencies
@@ -16,7 +17,7 @@ jest.mock('../../User', () => ({
 jest.mock('../../../lib/useGqlQuery', () => ({
   // Both the collections query and the staff-cards query read from this single
   // mocked object (each picks the field it needs).
-  useGQLQuery: () => ({
+  useGQLQuery: jest.fn(() => ({
     data: {
       pbisCollectionDates: [
         {
@@ -54,7 +55,7 @@ jest.mock('../../../lib/useGqlQuery', () => ({
     },
     isLoading: false,
     error: null,
-  }),
+  })),
 }));
 
 jest.mock('../../Loading', () => {
@@ -139,6 +140,47 @@ describe('PickStaffWinners', () => {
         screen.queryByText(/John Teacher/),
       );
     });
+  });
+
+  it('uses the most recent collection with staff winners as the card cutoff', () => {
+    (useGQLQuery as jest.Mock)
+      .mockImplementationOnce(() => ({
+        data: {
+          pbisCollectionDates: [
+            {
+              id: 'collection-without-staff-winners',
+              collectionDate: '2024-01-22',
+              staffRandomWinners: [],
+            },
+            {
+              id: 'collection-with-staff-winners',
+              collectionDate: '2024-01-15',
+              staffRandomWinners: [
+                {
+                  id: 'staff1',
+                  name: 'John Teacher',
+                  email: 'john@school.edu',
+                },
+              ],
+            },
+          ],
+        },
+        isLoading: false,
+      }))
+      .mockImplementationOnce(() => ({
+        data: { staffPbisCards: [] },
+        isLoading: false,
+      }));
+
+    renderComponent();
+
+    expect(useGQLQuery).toHaveBeenNthCalledWith(
+      2,
+      'Staff Cards Since Collection',
+      expect.anything(),
+      { date: '2024-01-15' },
+      { enabled: true },
+    );
   });
 
   it('has default number of winners input', async () => {
