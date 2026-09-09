@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { useIsFetching } from 'react-query';
@@ -10,8 +11,17 @@ import Nav from './Nav';
 
 const Header: React.FC = () => {
   const me = useUser();
+  const router = useRouter();
   const isFetching = useIsFetching();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const preventCurrentPageNavigation = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) => {
+    if (router.asPath === '/') {
+      event.preventDefault();
+    }
+  };
 
   return (
     <>
@@ -34,6 +44,7 @@ const Header: React.FC = () => {
             <Link
               href="/"
               className="text-white font-extrabold text-2xl tracking-wide px-2 py-1"
+              onClick={preventCurrentPageNavigation}
             >
               NCUJHS
             </Link>
@@ -45,7 +56,11 @@ const Header: React.FC = () => {
               background: 'linear-gradient(to top left, #38B6FF, #760D08)',
             }}
           >
-            <Link href="/" className="block skew-x-[20deg]">
+            <Link
+              href="/"
+              className="block skew-x-[20deg]"
+              onClick={preventCurrentPageNavigation}
+            >
               <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
                 <Image
                   src="/falcon.svg"
@@ -115,7 +130,10 @@ const Header: React.FC = () => {
                 style={{
                   background: 'linear-gradient(to top left, #38B6FF, #760D08)',
                 }}
-                onClick={() => setMenuOpen(false)}
+                onClick={(event) => {
+                  preventCurrentPageNavigation(event);
+                  setMenuOpen(false);
+                }}
               >
                 Home
               </Link>

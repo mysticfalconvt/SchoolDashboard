@@ -192,7 +192,10 @@ const Search: React.FC = () => {
     },
     onSelectedItemChange({ selectedItem }) {
       // if selected item.path is a relative path
-      if (selectedItem?.path.startsWith('/')) {
+      if (
+        selectedItem?.path.startsWith('/') &&
+        selectedItem.path !== router.asPath
+      ) {
         router.push(selectedItem?.path);
       }
       // if selected item.path is an absolute path

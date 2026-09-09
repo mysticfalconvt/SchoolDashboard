@@ -53,7 +53,12 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
             ? 'uppercase font-bold text-white text-center px-4 py-3 block text-lg skew-x-[20deg] whitespace-nowrap w-full'
             : 'uppercase font-bold text-white text-center px-2 py-1 block text-base skew-x-[20deg] whitespace-nowrap'
         }
-        onClick={mobile && onClickLink ? onClickLink : undefined}
+        onClick={(event) => {
+          if (router.asPath === href) {
+            event.preventDefault();
+          }
+          onClickLink?.();
+        }}
       >
         {children}
       </Link>
@@ -95,6 +100,11 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
                 background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
               aria-label="Super User Settings"
+              onClick={(event) => {
+                if (router.asPath === '/superUserSettings') {
+                  event.preventDefault();
+                }
+              }}
             >
               <span className="skew-x-[20deg] w-full text-center text-xl text-white">
                 ⚙️
@@ -150,6 +160,11 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
                 background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
               aria-label="Super User Settings"
+              onClick={(event) => {
+                if (router.asPath === '/superUserSettings') {
+                  event.preventDefault();
+                }
+              }}
             >
               <span className="skew-x-[20deg] w-full text-center text-xl text-white">
                 ⚙️
