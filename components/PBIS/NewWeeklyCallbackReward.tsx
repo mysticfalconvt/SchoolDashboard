@@ -1,5 +1,4 @@
 import gql from 'graphql-tag';
-import { useRouter } from 'next/dist/client/router';
 import React, { useMemo, useState } from 'react';
 import { ADMIN_ID } from '../../config';
 import useForm from '../../lib/useForm';
@@ -90,8 +89,8 @@ export default function NewWeeklyCallbackReward() {
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { inputs, handleChange, resetForm } = useForm();
-  const router = useRouter();
   const user = useUser();
 
   const { data, isLoading } = useGQLQuery(
@@ -101,8 +100,12 @@ export default function NewWeeklyCallbackReward() {
     { enabled: !!user && showForm },
   );
 
-  const [createCards] = useGqlMutation(CREATE_CARDS_MUTATION);
-  const [createRewardRun] = useGqlMutation(CREATE_CALLBACK_REWARD_RUN);
+  const [, { mutateAsync: createCards }] = useGqlMutation(
+    CREATE_CARDS_MUTATION,
+  );
+  const [, { mutateAsync: createRewardRun }] = useGqlMutation(
+    CREATE_CALLBACK_REWARD_RUN,
+  );
 
   const eligibleStudents: EligibleStudent[] = data?.eligibleStudents || [];
   const ineligibleStudents: EligibleStudent[] = data?.ineligibleStudents || [];
@@ -199,6 +202,15 @@ export default function NewWeeklyCallbackReward() {
                 Gives {CARDS_PER_STUDENT} PBIS cards to every student with fewer
                 than {CALLBACK_THRESHOLD} active callback items.
               </p>
+
+              {error && (
+                <div
+                  role="alert"
+                  className="mb-6 p-4 bg-red-600 bg-opacity-30 border border-red-300 rounded-lg text-red-100"
+                >
+                  {error}
+                </div>
+              )}
 
               {hasRecentRun && (
                 <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
@@ -306,15 +318,30 @@ export default function NewWeeklyCallbackReward() {
                 className="w-full bg-transparent border-0 shadow-none p-0"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  if (inputs.confirmation === 'yes' && eligibleStudents.length) {
+                  if (
+                    inputs.confirmation === 'yes' &&
+                    eligibleStudents.length
+                  ) {
                     setRunning(true);
-                    await runReward();
-                    resetForm();
-                    await sendRevalidationRequest();
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
-                    setRunning(false);
-                    setShowForm(false);
-                    router.push({ pathname: `/pbis` });
+                    setError(null);
+                    try {
+                      await runReward();
+                      const revalidationResponse =
+                        await sendRevalidationRequest();
+                      if (!revalidationResponse.ok) {
+                        throw new Error('Unable to refresh the PBIS page.');
+                      }
+                      resetForm();
+                      setShowForm(false);
+                    } catch (submissionError) {
+                      setError(
+                        submissionError instanceof Error
+                          ? submissionError.message
+                          : 'Unable to award callback reward cards. Please try again.',
+                      );
+                    } finally {
+                      setRunning(false);
+                    }
                   }
                 }}
               >
