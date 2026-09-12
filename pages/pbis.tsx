@@ -14,22 +14,6 @@ import isAllowed from '../lib/isAllowed';
 import { smartGraphqlClient } from '../lib/smartGraphqlClient';
 import { useGQLQuery } from '../lib/useGqlQuery';
 
-const PBIS_PAGE_QUERY = gql`
-  query PBIS_PAGE_QUERY($teamId: ID) {
-    totalTeamCards: pbisCardsCount(
-      where: { student: { taTeacher: { taTeam: { id: { equals: $teamId } } } } }
-    )
-
-    teamData: pbisCards(
-      where: { student: { taTeacher: { taTeam: { id: { equals: $teamId } } } } }
-    ) {
-      id
-      dateGiven
-      category
-      counted
-    }
-  }
-`;
 
 const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY($lastCollectionDate: DateTime) {
@@ -207,55 +191,21 @@ interface PbisPageProps {
 
 const Pbis: NextPage<PbisPageProps> = (props) => {
   const me = useUser();
-  const teamId = me?.taTeam?.id || me?.taTeacher?.taTeam?.id || null;
   const TAs = props?.TAs || [];
-  const teamName =
-    me?.taTeam?.teamName || me?.taTeacher?.taTeam?.teamName || null;
-  const { data, isLoading, error, refetch } = useGQLQuery(
-    'PbisPageInfo',
-    PBIS_PAGE_QUERY,
-    {
-      teamId: teamId || undefined, // Convert null to undefined to avoid sending null
-      forTeachers: me?.isStaff || null,
-      forStudents: me?.isStudent || null,
-      forParents: me?.isParent || null,
-    },
-    {
-      enabled: !!me && !!teamId, // Only run query when we have a valid teamId
-    },
-  );
   const { data: latestCollectionData } = useGQLQuery(
     'LatestPbisCollection',
     LATEST_PBIS_COLLECTION_QUERY,
     {},
     { enabled: !!me },
   );
-  // if (isLoading) return <Loading />;
-  // const cards = data?.cards;
-  const totalSchoolCards = props?.totalSchoolCards || data?.totalSchoolCards;
-  const schoolWideCardsInCategories =
-    props?.schoolWideCardsInCategories || data?.schoolWideCardsInCategories;
-  const hasTeam = !!teamId;
-  const categoriesArray = props?.categoriesArray || [];
+  const totalSchoolCards = props?.totalSchoolCards;
+  const schoolWideCardsInCategories = props?.schoolWideCardsInCategories;
   const lastPbisCollection =
     latestCollectionData?.lastCollection?.[0] ||
     props?.lastPbisCollection ||
     null;
   const rawListOfLinks = props?.pbisLinks || [];
   const cardCounts = props?.cardCounts;
-  const totalTeamCards = hasTeam ? data?.totalTeamCards || 0 : 0;
-
-  // get the number of cards in each category for the team
-  const teamWideCardsInCategories =
-    categoriesArray?.map((category: string) => {
-      const cardsInCategory = data?.teamData?.filter(
-        (card: PbisCard) => card.category === category,
-      );
-      return {
-        word: category,
-        total: cardsInCategory?.length,
-      };
-    }) || [];
 
   // filter raw links to only show links for the user's role
   const links = rawListOfLinks?.filter((link: PbisLink) => {
@@ -271,13 +221,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
         {/* {JSON.stringify(rawListOfLinks)} */}
         <div>
           <h1 className="hidePrint">School-Wide PBIS Data</h1>
-          {/* <p>{JSON.stringify(data.teamData)}</p> */}
           <h2 className="hidePrint">School-Wide Cards: {totalSchoolCards}</h2>
-          {hasTeam && (
-            <h2 className="hidePrint">
-              Total Team Cards: {totalTeamCards || 'loading...'}
-            </h2>
-          )}
         </div>
         <div>
           <h2 className="hidePrint">Links</h2>
@@ -344,12 +288,6 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           title="School-Wide Cards By Category"
           chartData={schoolWideCardsInCategories}
         />
-        {hasTeam && (
-          <DoughnutChart
-            title={`${teamName} Cards By Category`}
-            chartData={teamWideCardsInCategories}
-          />
-        )}
         {isAllowed(me, 'isStaff') && <PbisVisitorStats />}
       </div>
       <PbisCardChart className="hidePrint" cardCounts={cardCounts} />

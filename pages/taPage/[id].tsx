@@ -20,13 +20,6 @@ const TA_INFO_QUERY = gql`
       id
       email
       taTeamAveragePbisCardsPerStudent
-      taTeam {
-        teamName
-        countedCards
-        uncountedCards
-        averageCardsPerStudent
-        currentLevel
-      }
       taStudents {
         averageTimeToCompleteCallback
         parent {

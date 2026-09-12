@@ -87,17 +87,6 @@ const CURRENT_USER_QUERY = gql`
           }
           dateGiven
         }
-        taTeam {
-          id
-          teamName
-        }
-        taTeacher {
-          id
-          taTeam {
-            id
-            teamName
-          }
-        }
         birthday {
           id
           cakeType
@@ -160,11 +149,6 @@ export interface User {
     giver: { id: string; name: string };
     dateGiven: string;
   }>;
-  taTeam?: { id: string; teamName: string };
-  taTeacher?: {
-    id: string;
-    taTeam: { id: string; teamName: string };
-  };
   birthday?: {
     id: string;
     cakeType?: string;

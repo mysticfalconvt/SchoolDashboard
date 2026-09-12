@@ -135,10 +135,6 @@ const GET_SINGLE_TEACHER = gql`
         name
         email
       }
-      taTeam {
-        teamName
-        currentLevel
-      }
       studentPbisCards(
         orderBy: { dateGiven: desc }
         take: 20
@@ -231,11 +227,6 @@ interface Parent {
   email: string;
 }
 
-interface TaTeam {
-  teamName: string;
-  currentLevel: number;
-}
-
 interface PbisCard {
   id: string;
   cardMessage: string;
@@ -277,7 +268,6 @@ interface User {
     name: string;
   };
   parent: Parent[];
-  taTeam: TaTeam;
   studentPbisCards: PbisCard[];
   allCards: { dateGiven: string }[];
   studentFocusStudent: StudentFocus[];

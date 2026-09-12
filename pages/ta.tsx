@@ -17,13 +17,6 @@ const TA_INFO_QUERY = gql`
       id
       email
 
-      taTeam {
-        teamName
-        countedCards
-        uncountedCards
-        averageCardsPerStudent
-        currentLevel
-      }
       taStudents {
         averageTimeToCompleteCallback
         parent {
@@ -228,21 +221,12 @@ interface TaStudent {
   callbackItems?: CallbackItem[];
 }
 
-interface TaTeam {
-  teamName: string;
-  countedCards: number;
-  uncountedCards: number;
-  averageCardsPerStudent: number;
-  currentLevel: number;
-}
-
 interface TaTeacher {
   PbisCardCount: number;
   taPbisCardCount: number;
   name: string;
   id: string;
   email: string;
-  taTeam?: TaTeam;
   taStudents: TaStudent[];
 }
 
