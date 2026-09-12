@@ -53,15 +53,6 @@ const GET_ALL_TEACHERS = gql`
       averageTimeToCompleteCallback
       callbackAssignedCount(where: { dateCompleted: null })
       totalCallback: callbackAssignedCount
-
-      currentTaWinner {
-        name
-        id
-      }
-      previousTaWinner {
-        name
-        id
-      }
     }
   }
 `;
@@ -104,14 +95,6 @@ interface Teacher {
   averageTimeToCompleteCallback: number;
   callbackAssignedCount: number;
   totalCallback: number;
-  currentTaWinner?: {
-    name: string;
-    id: string;
-  };
-  previousTaWinner?: {
-    name: string;
-    id: string;
-  };
 }
 
 const Users: NextPage = () => {
@@ -303,14 +286,6 @@ const Users: NextPage = () => {
             Header: 'Virtual PBIS Given',
             accessor: 'virtualCards',
           },
-          // {
-          //   Header: "Latest PBIS Winner",
-          //   accessor: "currentTaWinner.name",
-          // },
-          // {
-          //   Header: "Previous PBIS Winner",
-          //   accessor: "previousTaWinner.name",
-          // },
           // {
           //   Header: 'TA Count',
           //   accessor: '_taStudentsMeta.count',

@@ -190,44 +190,6 @@ describe('PbisPage', () => {
     ],
   };
 
-  const mockUserWithTeam = {
-    ...mockUser,
-    isStaff: true,
-    taTeam: {
-      id: 'team-1',
-      teamName: 'Eagles',
-    },
-  };
-
-  const mockUserWithTaTeacher = {
-    ...mockUser,
-    isStudent: true,
-    taTeacher: {
-      taTeam: {
-        id: 'team-2',
-        teamName: 'Hawks',
-      },
-    },
-  };
-
-  const mockTeamData = {
-    totalTeamCards: 250,
-    teamData: [
-      {
-        id: 'card-1',
-        dateGiven: '2024-01-10T00:00:00.000Z',
-        category: 'respect',
-        counted: true,
-      },
-      {
-        id: 'card-2',
-        dateGiven: '2024-01-12T00:00:00.000Z',
-        category: 'responsibility',
-        counted: true,
-      },
-    ],
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     isAllowed.mockReturnValue(true);
@@ -248,34 +210,6 @@ describe('PbisPage', () => {
     expect(screen.getByText('School-Wide Cards: 5000')).toBeInTheDocument();
   });
 
-  it('displays team data when user has a team', () => {
-    useUser.mockReturnValue(mockUserWithTeam);
-    useGQLQuery.mockReturnValue({
-      data: mockTeamData,
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
-
-    expect(screen.getByText('Total Team Cards: 250')).toBeInTheDocument();
-  });
-
-  it('displays team data for student with TA teacher', () => {
-    useUser.mockReturnValue(mockUserWithTaTeacher);
-    useGQLQuery.mockReturnValue({
-      data: mockTeamData,
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
-
-    expect(screen.getByText('Total Team Cards: 250')).toBeInTheDocument();
-  });
-
   it('renders school-wide doughnut chart', () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
@@ -292,22 +226,6 @@ describe('PbisPage', () => {
     expect(
       screen.getByText('School-Wide Cards By Category'),
     ).toBeInTheDocument();
-  });
-
-  it('renders team doughnut chart when user has team', () => {
-    useUser.mockReturnValue(mockUserWithTeam);
-    useGQLQuery.mockReturnValue({
-      data: mockTeamData,
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
-
-    const charts = screen.getAllByTestId('doughnut-chart');
-    expect(charts).toHaveLength(2);
-    expect(screen.getByText('Eagles Cards By Category')).toBeInTheDocument();
   });
 
   it('renders PBIS falcon with correct count', () => {
@@ -358,31 +276,22 @@ describe('PbisPage', () => {
   });
 
   it('uses current collection data so newly chosen staff winners appear', () => {
-    useUser.mockReturnValue(mockUserWithTeam);
-    useGQLQuery
-      .mockReturnValueOnce({
-        data: mockTeamData,
-        isLoading: false,
-        error: null,
-        refetch: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        data: {
-          lastCollection: [
-            {
-              id: 'current-collection',
-              staffRandomWinners: [
-                { id: 'staff-1', name: 'Ms. Winner' },
-              ],
-              taNewLevelWinners: [],
-              personalLevelWinners: [],
-              randomDrawingWinners: [],
-            },
-          ],
-        },
-        isLoading: false,
-        error: null,
-      });
+    useUser.mockReturnValue(mockUser);
+    useGQLQuery.mockReturnValue({
+      data: {
+        lastCollection: [
+          {
+            id: 'current-collection',
+            staffRandomWinners: [{ id: 'staff-1', name: 'Ms. Winner' }],
+            taNewLevelWinners: [],
+            personalLevelWinners: [],
+            randomDrawingWinners: [],
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    });
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
@@ -645,66 +554,6 @@ describe('PbisPage', () => {
 
     expect(screen.getByText(/School-Wide Cards:/)).toBeInTheDocument();
     expect(screen.getByText('Current Team Data')).toBeInTheDocument();
-  });
-
-  it('handles loading state appropriately', () => {
-    useUser.mockReturnValue(mockUserWithTeam);
-    useGQLQuery.mockReturnValue({
-      data: null,
-      isLoading: true,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
-
-    expect(
-      screen.getByText('Total Team Cards: loading...'),
-    ).toBeInTheDocument();
-  });
-
-  it('calculates team categories correctly from team data', () => {
-    useUser.mockReturnValue(mockUserWithTeam);
-    useGQLQuery.mockReturnValue({
-      data: mockTeamData,
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    const propsWithCategories = {
-      ...mockPbisPageProps,
-      categoriesArray: ['respect', 'responsibility', 'perseverance'],
-    };
-
-    renderWithProviders(<PbisPage {...propsWithCategories} />);
-
-    // Should process team data to create category charts
-    expect(screen.getByText('Eagles Cards By Category')).toBeInTheDocument();
-  });
-
-  it('enables query only when user and teamId are available', () => {
-    const mockRefetch = jest.fn();
-
-    useUser.mockReturnValue(null); // No user
-    useGQLQuery.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-      refetch: mockRefetch,
-    });
-
-    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
-
-    // Query should be disabled when no user
-    expect(useGQLQuery).toHaveBeenCalledWith(
-      'PbisPageInfo',
-      expect.any(Object),
-      expect.any(Object),
-      expect.objectContaining({
-        enabled: false, // !!null && !!null = false
-      }),
-    );
   });
 
   it('excludes admin user from TA display', () => {

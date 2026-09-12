@@ -36,11 +36,6 @@ export const mockUser = {
   sortingHat: 'Gryffindor',
   children: [],
   studentPbisCards: [],
-  taTeam: {
-    id: 'team-1',
-    teamName: 'Test Team',
-  },
-  taTeacher: null,
   birthday: null,
   lastCollection: '2024-01-01T00:00:00.000Z',
 };

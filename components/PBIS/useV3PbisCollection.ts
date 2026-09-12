@@ -60,7 +60,6 @@ const PBIS_COLLECTION_QUERY = gql`
       id
       name
       taTeamPbisLevel
-      taPbisCardCount
       taTeamAveragePbisCardsPerStudent
       taStudents {
         id
@@ -182,7 +181,6 @@ interface TaTeacher {
   id: string;
   name: string;
   taTeamPbisLevel: number;
-  taPbisCardCount: number;
   taTeamAveragePbisCardsPerStudent: number;
   taStudents: TaStudent[];
   taTeamPbisLevelChange?: number;

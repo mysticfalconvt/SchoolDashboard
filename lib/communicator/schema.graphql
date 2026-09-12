@@ -246,10 +246,6 @@ type User {
   messageReceiverCount(where: MessageWhereInput! = {}): Int
   communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
   communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
-  currentTaWinner: User
-  previousTaWinner: User
-  studentIsCurrentWinner: User
-  studentIsPreviousWinner: User
   individualPbisLevel: Int
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
@@ -257,10 +253,7 @@ type User {
   chromebookCheckCount(where: ChromebookCheckWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
-  PbisCardCount: Int
-  YearPbisCount: Int
   teacherSubject: String
-  taPbisCardCount: Int
   averageTimeToCompleteCallback: Int
   block1Assignment: String
   block1ClassName: String
@@ -492,21 +485,6 @@ input CellPhoneViolationWhereInput {
 }
 
 input CellPhoneViolationWhereUniqueInput {
-  id: ID
-}
-
-input ChromebookAssignmentOrderByInput {
-  id: OrderDirection
-}
-
-input ChromebookAssignmentWhereInput {
-  AND: [ChromebookAssignmentWhereInput!]
-  OR: [ChromebookAssignmentWhereInput!]
-  NOT: [ChromebookAssignmentWhereInput!]
-  id: IDFilter
-}
-
-input ChromebookAssignmentWhereUniqueInput {
   id: ID
 }
 
@@ -859,71 +837,6 @@ input PbisCollectionDateWhereUniqueInput {
   id: ID
 }
 
-input PbisCollectionOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  collectionDate: OrderDirection
-  personalLevelWinners: OrderDirection
-  randomDrawingWinners: OrderDirection
-  taTeamsLevels: OrderDirection
-  taTeamNewLevelWinners: OrderDirection
-  currentPbisTeamGoal: OrderDirection
-  collectedCards: OrderDirection
-  dateModified: OrderDirection
-}
-
-input PbisCollectionWhereInput {
-  AND: [PbisCollectionWhereInput!]
-  OR: [PbisCollectionWhereInput!]
-  NOT: [PbisCollectionWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  collectionDate: DateTimeFilter
-  personalLevelWinners: StringFilter
-  randomDrawingWinners: StringFilter
-  taTeamsLevels: StringFilter
-  taTeamNewLevelWinners: StringFilter
-  currentPbisTeamGoal: StringFilter
-  collectedCards: StringFilter
-  dateModified: DateTimeFilter
-  lastModifiedBy: UserWhereInput
-}
-
-input PbisCollectionWhereUniqueInput {
-  id: ID
-}
-
-input PbisTeamOrderByInput {
-  id: OrderDirection
-  teamName: OrderDirection
-  uncountedCards: OrderDirection
-  countedCards: OrderDirection
-  currentLevel: OrderDirection
-  numberOfStudents: OrderDirection
-  averageCardsPerStudent: OrderDirection
-  dateModified: OrderDirection
-}
-
-input PbisTeamWhereInput {
-  AND: [PbisTeamWhereInput!]
-  OR: [PbisTeamWhereInput!]
-  NOT: [PbisTeamWhereInput!]
-  id: IDFilter
-  teamName: StringFilter
-  taTeacher: UserManyRelationFilter
-  uncountedCards: IntNullableFilter
-  countedCards: IntNullableFilter
-  currentLevel: IntNullableFilter
-  numberOfStudents: IntNullableFilter
-  averageCardsPerStudent: IntNullableFilter
-  dateModified: DateTimeFilter
-  lastModifiedBy: UserWhereInput
-}
-
-input PbisTeamWhereUniqueInput {
-  id: ID
-}
-
 input RandomDrawingWinManyRelationFilter {
   every: RandomDrawingWinWhereInput
   some: RandomDrawingWinWhereInput
@@ -1094,10 +1007,7 @@ input UserOrderByInput {
   taTeamAveragePbisCardsPerStudent: OrderDirection
   callbackCount: OrderDirection
   totalCallbackCount: OrderDirection
-  PbisCardCount: OrderDirection
-  YearPbisCount: OrderDirection
   teacherSubject: OrderDirection
-  taPbisCardCount: OrderDirection
   averageTimeToCompleteCallback: OrderDirection
   block1Assignment: OrderDirection
   block1ClassName: OrderDirection
@@ -1192,7 +1102,6 @@ input UserWhereInput {
   block10Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
   coTeachesWithTeacher: UserManyRelationFilter
-  taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
   studentFocusStudent: StudentFocusManyRelationFilter
   studentCellPhoneViolation: CellPhoneViolationManyRelationFilter
@@ -1206,10 +1115,6 @@ input UserWhereInput {
   messageSender: MessageManyRelationFilter
   messageReceiver: MessageManyRelationFilter
   communicatorChats: CommunicatorChatManyRelationFilter
-  currentTaWinner: UserWhereInput
-  previousTaWinner: UserWhereInput
-  studentIsCurrentWinner: UserWhereInput
-  studentIsPreviousWinner: UserWhereInput
   randomDrawingWins: RandomDrawingWinManyRelationFilter
   birthday: BirthdayWhereInput
   individualPbisLevel: IntNullableFilter
@@ -1218,10 +1123,7 @@ input UserWhereInput {
   chromebookCheck: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
-  PbisCardCount: IntNullableFilter
-  YearPbisCount: IntNullableFilter
   teacherSubject: StringFilter
-  taPbisCardCount: IntNullableFilter
   averageTimeToCompleteCallback: IntNullableFilter
   block1Assignment: StringFilter
   block1ClassName: StringFilter
@@ -1265,10 +1167,6 @@ input UserWhereInput {
 input UserWhereUniqueInput {
   id: ID
   email: String
-  currentTaWinner: UserWhereUniqueInput
-  previousTaWinner: UserWhereUniqueInput
-  studentIsCurrentWinner: UserWhereUniqueInput
-  studentIsPreviousWinner: UserWhereUniqueInput
   birthday: BirthdayWhereUniqueInput
 }
 

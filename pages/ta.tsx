@@ -11,19 +11,10 @@ import { useGQLQuery } from '../lib/useGqlQuery';
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
     taTeacher: user(where: { id: $id }) {
-      PbisCardCount
-      taPbisCardCount
       name
       id
       email
 
-      taTeam {
-        teamName
-        countedCards
-        uncountedCards
-        averageCardsPerStudent
-        currentLevel
-      }
       taStudents {
         averageTimeToCompleteCallback
         parent {
@@ -104,10 +95,8 @@ const TA_INFO_QUERY = gql`
         }
         callbackCount
         studentCellPhoneViolationCount
-        PbisCardCount
-
+        studentPbisCardsCount
         studentFocusStudentCount
-        YearPbisCount
         studentCardCountInLastWeek : studentPbisCardsCount(
           where: {
             dateGiven: {
@@ -221,28 +210,16 @@ interface TaStudent {
   block12Teacher?: BlockTeacher;
   callbackCount?: number;
   studentCellPhoneViolationCount?: number;
-  PbisCardCount: number;
+  studentPbisCardsCount: number;
   studentFocusStudentCount?: number;
-  YearPbisCount?: number;
   studentCardCountInLastWeek?: number;
   callbackItems?: CallbackItem[];
 }
 
-interface TaTeam {
-  teamName: string;
-  countedCards: number;
-  uncountedCards: number;
-  averageCardsPerStudent: number;
-  currentLevel: number;
-}
-
 interface TaTeacher {
-  PbisCardCount: number;
-  taPbisCardCount: number;
   name: string;
   id: string;
   email: string;
-  taTeam?: TaTeam;
   taStudents: TaStudent[];
 }
 
@@ -272,7 +249,8 @@ const TA: React.FC = () => {
   const students = data?.taTeacher?.taStudents || [];
 
   const taTotalPbisCards = students.reduce(
-    (acc: number, student: TaStudent) => acc + student.PbisCardCount,
+    (acc: number, student: TaStudent) =>
+      acc + (student.studentPbisCardsCount || 0),
     0,
   );
   const taStudentCount = students.length;

@@ -2,7 +2,6 @@ import React from 'react';
 
 interface MessagePreviewCardProps {
   question: string;
-  timestamp: string | null;
   createdAt: string | null;
   isSelected: boolean;
   onClick: () => void;
@@ -14,7 +13,6 @@ interface MessagePreviewCardProps {
 
 const MessagePreviewCard: React.FC<MessagePreviewCardProps> = ({
   question,
-  timestamp,
   createdAt,
   isSelected,
   onClick,
@@ -23,8 +21,7 @@ const MessagePreviewCard: React.FC<MessagePreviewCardProps> = ({
   hasError,
   errorMessage,
 }) => {
-  // Use timestamp if available, otherwise fall back to createdAt
-  const dateToShow = timestamp || createdAt;
+  const dateToShow = createdAt;
   const displayDate = dateToShow
     ? new Date(dateToShow).toLocaleDateString('en-US', {
         month: 'short',
