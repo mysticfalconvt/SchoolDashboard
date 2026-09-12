@@ -47,8 +47,6 @@ const SuperUserSettings: NextPage = () => {
           <GradientButton>Communicator Chat</GradientButton>
         </Link>
       )}
-      {/* {isAllowed(me, "isSuperAdmin") && <CreateChromebookAssignments />} */}
-      {/* {isAllowed(me, "isSuperAdmin") && <TransferData />} */}
     </div>
   );
 };

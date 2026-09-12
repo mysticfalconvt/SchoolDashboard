@@ -62,11 +62,6 @@ export const PBIS_STUDENT_RANDOM_DRAWING_WINNERS: boolean = Boolean(
     process.env.PBIS_STUDENT_RANDOM_DRAWING_WINNERS,
 );
 
-// Chromebook check minimum frequency (days between checks)
-export const CHROMEBOOK_CHECK_MIN_DAYS: number = Number(
-  process.env.NEXT_PUBLIC_CHROMEBOOK_CHECK_MIN_FREQUENCY || 5,
-);
-
 // Server-side GraphQL authorization header
 export const GRAPHQL_AUTHORIZATION: string =
   process.env.API_KEY_KEYSTONE || 'test auth for keystone';

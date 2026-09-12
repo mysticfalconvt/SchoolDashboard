@@ -35,9 +35,6 @@ const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY($lastCollectionDate: DateTime) {
     totalSchoolCards: pbisCardsCount
 
-    chromebookCards: pbisCardsCount(
-      where: { category: { equals: "Chromebook Check" } }
-    )
     perseveranceCards: pbisCardsCount(
       where: { category: { equals: "perseverance" } }
     )
@@ -411,7 +408,6 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
   // fetch PBIS Page data from the server
   const fetchData = async (): Promise<{
     totalSchoolCards: number;
-    chromebookCards: number;
     classCards: number;
     quickCards: number;
     respectCards: number;
@@ -455,10 +451,6 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
 
   // get the number of cards in each category for whole school
   const schoolWideCardsInCategories: CategoryData[] = [
-    {
-      word: 'Chromebook Check',
-      total: data.chromebookCards || 0,
-    },
     {
       word: 'class',
       total: data.classCards || 0,
