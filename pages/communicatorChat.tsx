@@ -40,9 +40,13 @@ interface QueryResponse {
   error?: boolean;
   message?: string;
   details?: string;
-  status?: number;
+  // HTTP status of a failed communicator call. Named httpStatus so it is not
+  // confused with CommunicatorChat.status, which is the chat outcome.
+  httpStatus?: number;
   errorMessage?: string;
   hasError?: string;
+  status?: string;
+  chatId?: string | null;
 }
 
 interface CommunicatorMessage {
@@ -50,16 +54,14 @@ interface CommunicatorMessage {
   question: string;
   explanation?: string;
   graphqlQuery?: string;
-  timestamp?: string | null;
   createdAt?: string | null;
   iterations?: number;
   evaluationScore?: number;
-  rawData?: any;
   model?: string;
   userRating?: number;
   userComment?: string;
   errorMessage?: string;
-  hasError?: string;
+  status?: string;
   user?: {
     id: string;
     name: string;
@@ -85,23 +87,30 @@ const COMMUNICATOR_QUERY_MUTATION = gql`
   }
 `;
 
+// History is ordered and bounded server-side. rawData is deliberately not
+// selected here - it can hold broad student and staff records, and the detail
+// view gets it from the mutation response instead.
+const CHAT_HISTORY_PAGE_SIZE = 50;
+
 const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
-  query QueryCommunicatorMessageList($userId: ID) {
-    communicatorChats(where: { user: { id: { equals: $userId } } }) {
+  query QueryCommunicatorMessageList($userId: ID, $take: Int!) {
+    communicatorChats(
+      where: { user: { id: { equals: $userId } } }
+      orderBy: { createdAt: desc }
+      take: $take
+    ) {
       id
       question
       explanation
       graphqlQuery
-      timestamp
       createdAt
       iterations
       evaluationScore
-      rawData
       model
       userRating
       userComment
       errorMessage
-      hasError
+      status
       user {
         id
         name
@@ -111,22 +120,20 @@ const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
 `;
 
 const QUERY_ALL_COMMUNICATOR_MESSAGES = gql`
-  query QueryAllCommunicatorMessages {
-    communicatorChats {
+  query QueryAllCommunicatorMessages($take: Int!) {
+    communicatorChats(orderBy: { createdAt: desc }, take: $take) {
       id
       question
       explanation
       graphqlQuery
-      timestamp
       createdAt
       iterations
       evaluationScore
-      rawData
       model
       userRating
       userComment
       errorMessage
-      hasError
+      status
       user {
         id
         name
@@ -191,7 +198,9 @@ const CommunicatorChat: NextPage = () => {
   const queryToUse = isSuperAdmin
     ? QUERY_ALL_COMMUNICATOR_MESSAGES
     : QUERY_COMMUNICATOR_MESSAGE_LIST;
-  const queryVariables = isSuperAdmin ? {} : { userId: me?.id || '' };
+  const queryVariables = isSuperAdmin
+    ? { take: CHAT_HISTORY_PAGE_SIZE }
+    : { userId: me?.id || '', take: CHAT_HISTORY_PAGE_SIZE };
 
   const {
     data: messagesData,
@@ -353,8 +362,8 @@ const CommunicatorChat: NextPage = () => {
       if (matchingMessages.length > 0) {
         // Sort by date to get the most recent one
         const sortedMatches = [...matchingMessages].sort((a, b) => {
-          const dateA = new Date(a.timestamp || a.createdAt || 0).getTime();
-          const dateB = new Date(b.timestamp || b.createdAt || 0).getTime();
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA;
         });
 
@@ -394,12 +403,13 @@ const CommunicatorChat: NextPage = () => {
   // Filter messages based on showOnlyFailures toggle (for superadmins)
   const filteredMessages =
     isSuperAdmin && showOnlyFailures
-      ? messages.filter((msg) => msg.hasError === 'true')
-      : messages.filter((msg) => msg.hasError !== 'true');
-  // Sort messages by date (newest first)
+      ? messages.filter((msg) => msg.status === 'failed')
+      : messages.filter((msg) => msg.status !== 'failed');
+  // Already ordered by createdAt desc server-side; re-sorted here because the
+  // failure filter above can be applied to a locally updated list.
   const sortedMessages = [...filteredMessages].sort((a, b) => {
-    const dateA = new Date(a.timestamp || a.createdAt || 0).getTime();
-    const dateB = new Date(b.timestamp || b.createdAt || 0).getTime();
+    const dateA = new Date(a.createdAt || 0).getTime();
+    const dateB = new Date(b.createdAt || 0).getTime();
     return dateB - dateA;
   });
 
@@ -567,13 +577,12 @@ const CommunicatorChat: NextPage = () => {
                   <MessagePreviewCard
                     key={message.id}
                     question={message.question}
-                    timestamp={message.timestamp}
                     createdAt={message.createdAt}
                     isSelected={selectedMessageId === message.id}
                     onClick={() => handleMessageClick(message)}
                     userName={message.user?.name}
                     showUserName={isSuperAdmin}
-                    hasError={message.hasError === 'true'}
+                    hasError={message.status === 'failed'}
                     errorMessage={message.errorMessage}
                   />
                 ))
