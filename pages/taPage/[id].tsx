@@ -14,8 +14,6 @@ import { useGQLQuery } from '../../lib/useGqlQuery';
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
     taTeacher: user(where: { id: $id }) {
-      PbisCardCount
-      taPbisCardCount
       name
       id
       email

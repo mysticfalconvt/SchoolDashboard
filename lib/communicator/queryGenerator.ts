@@ -470,13 +470,22 @@ Callback Query Rules for Teachers:
 - For counting teacher's callbacks: query callbacks table with teacher filter and count results
 
 PBIS Card Rules:
-- CRITICAL: PbisCardCount on User type is for STUDENTS (cards RECEIVED), NOT teachers (cards GIVEN)
-- When a TEACHER asks "how many PBIS cards have I given", query pbisCards table with teacher filter
-- WRONG for teacher: query { user(where: { id: "..." }) { PbisCardCount } } ← This is STUDENT cards received
-- CORRECT for teacher: query { pbisCards(where: { teacher: { id: { equals: "..." } } }) { id student { name } category dateGiven } }
-- To count: use the pbisCards query and count the results, OR add a count aggregation
-- CRITICAL CASING: PbisCardCount (uppercase 'P') NOT pbisCardCount (lowercase 'p')
-- For TA PBIS cards only: use taPbisCardCount (lowercase 't')
+- Card counts on User are RELATIONSHIP counts, computed live. They are always accurate.
+  - studentPbisCardsCount = cards a student RECEIVED
+  - teacherPbisCardsCount = cards a staff member GAVE
+  - staffPbisCardsReceivedCount / staffPbisCardsGivenCount = staff-to-staff cards
+- Each accepts the same filters as the underlying list, so date ranges go inside it:
+  studentPbisCardsCount(where: { dateGiven: { gte: "2026-09-01T00:00:00.000Z" } })
+  With no argument it counts every card on record.
+- CRITICAL: these counts CANNOT be used in orderBy. UserOrderByInput has no card
+  fields at all. There is no way to sort users by cards in the query.
+- So for "who has the most cards" style questions, DO NOT try to sort. Fetch the
+  candidates with their count and let the explanation step find the maximum:
+  query { users(where: { isStudent: { equals: true } }) { id name studentPbisCardsCount } }
+- When a TEACHER asks "how many PBIS cards have I given", use teacherPbisCardsCount,
+  or query the pbisCards list filtered by teacher if you need the individual cards.
+- Do not invent stored count fields such as PbisCardCount, YearPbisCount or
+  taPbisCardCount. They were removed; only the relationship counts above exist.
 
 Name and Display Rules:
 - The name field for users includes BOTH first and last name (e.g., "John Smith")
@@ -487,7 +496,7 @@ Name and Display Rules:
 
 Example correct queries:
 query { users(where: { isStaff: { equals: true } }, orderBy: [{ name: asc }], take: 10) { id name callbackCount } }
-query { users(where: { isStudent: { equals: true } }, orderBy: [{ PbisCardCount: desc }]) { id name PbisCardCount } }
+query { users(where: { isStudent: { equals: true } }) { id name studentPbisCardsCount } }
 query { users(where: { isStudent: { equals: true }, name: { contains: "Korbin", mode: insensitive } }, take: 1) { id name block1Teacher { id name } block2Teacher { id name } } }
 query { callbacks(where: { student: { name: { contains: "John", mode: insensitive } } }) { id student { name } title } }
 query { pbisCards(where: { teacher: { id: { equals: "123" } } }) { id student { name } category dateGiven } }

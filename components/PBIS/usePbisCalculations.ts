@@ -30,7 +30,6 @@ interface TaTeacher {
   id: string;
   name: string;
   taTeamPbisLevel: number;
-  taPbisCardCount: number;
   taTeamAveragePbisCardsPerStudent: number;
   taStudents: TaStudent[];
   taTeamPbisLevelChange?: number;
