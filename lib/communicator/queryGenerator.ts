@@ -443,15 +443,17 @@ CRITICAL - User Query Types (MUST UNDERSTAND):
 - users (plural) uses UserWhereInput - accepts filtering fields like name, isStaff, isStudent, etc.
   CORRECT: users(where: { name: { contains: "John", mode: insensitive }, isStaff: { equals: true } })
 - When filtering by name, isStaff, isStudent, or any non-unique field, ALWAYS use users (plural), NEVER user (singular)
-- There is NO "isTeacher" field - use "isStaff" instead (teachers are staff members)
-  WRONG: users(where: { isTeacher: { equals: true } })
-  CORRECT: users(where: { isStaff: { equals: true } })
+- People here say "teacher" to mean anyone who works at the school, so DEFAULT to isStaff
+  DEFAULT: users(where: { isStaff: { equals: true } })
+  isTeacher does exist and marks classroom teachers specifically (those with a TA group or
+  assigned classes - roughly half of staff). Use it ONLY when the question clearly means
+  classroom teachers as distinct from other staff.
 
 Domain-Specific Rules (CRITICAL):
 - ALL users (teachers, staff, students) are in the same "users" table
 - When asking about TEACHERS or STAFF: ALWAYS filter by { isStaff: { equals: true } } using users (plural)
 - When asking about STUDENTS: ALWAYS filter by { isStudent: { equals: true } } using users (plural)
-- CRITICAL: There is NO "isTeacher" field - teachers are staff, so use isStaff: { equals: true }
+- CRITICAL: "teacher" in a question usually means any employee, so default to isStaff: { equals: true }. Only use isTeacher when the question means classroom teachers as opposed to other staff.
 - CRITICAL: If the question asks about a student (e.g., "what teachers does [name] have"), you MUST:
   1. Use users (plural) not user (singular) when filtering by name
   2. Combine name filter with isStudent filter: { isStudent: { equals: true }, name: { contains: "name", mode: insensitive } }
@@ -944,9 +946,13 @@ ${
       const result = await graphql.query({ query, variables });
       console.log('Result:', result);
       if (result.errors) {
-        // Check if it's a validation error that we might be able to fix
-        const validationError = result.errors.find(
+        // Check if it's a parse or validation error that we might be able to fix.
+        // Parse failures mean the document never made it past the tokenizer, so
+        // nothing downstream was even analysed - they are worth a retry too.
+        const retryableError = result.errors.find(
           (e) =>
+            e.extensions?.code === 'GRAPHQL_PARSE_FAILED' ||
+            e.message.includes('Syntax Error') ||
             e.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
             e.message.includes('conflict') ||
             e.message.includes('differing arguments') ||
@@ -954,33 +960,46 @@ ${
             e.message.includes('UserWhereUniqueInput'),
         );
 
-        // If it's a validation error and we have iterations left, retry with error context
-        if (validationError && iteration < this.MAX_ITERATIONS) {
+        // If it's a retryable error and we have iterations left, retry with error context
+        if (retryableError && iteration < this.MAX_ITERATIONS) {
           console.log(
-            `⚠️ GraphQL validation error detected, retrying with error context...`,
+            `⚠️ GraphQL ${
+              retryableError.message.includes('Syntax Error')
+                ? 'parse'
+                : 'validation'
+            } error detected, retrying with error context...`,
           );
-          console.log('Error:', validationError.message);
+          console.log('Error:', retryableError.message);
 
           // Build specific error guidance based on error type
           let errorGuidance = '';
-          if (validationError.message.includes('UserWhereUniqueInput')) {
-            errorGuidance = `CRITICAL ERROR: You used user (singular) with fields that don't exist in UserWhereUniqueInput. UserWhereUniqueInput ONLY accepts unique fields like { id: "..." }. When filtering by name, isStaff, isStudent, or any non-unique field, you MUST use users (plural) instead. Also, there is NO "isTeacher" field - use "isStaff" instead.`;
+          if (
+            retryableError.extensions?.code === 'GRAPHQL_PARSE_FAILED' ||
+            retryableError.message.includes('Syntax Error')
+          ) {
+            const loc = retryableError.locations?.[0];
+            const where = loc
+              ? ` The parser stopped at line ${loc.line}, column ${loc.column}.`
+              : '';
+            errorGuidance = `CRITICAL: Your query is not valid GraphQL - it failed to parse, so none of it ran.${where} Common causes: unbalanced { } or ( ), a trailing comma, a missing field name, or the query being cut off before it finished. Rewrite the whole query from scratch as ONE complete, syntactically valid query operation. Do not send a fragment or a partial query.`;
+          } else if (retryableError.message.includes('UserWhereUniqueInput')) {
+            errorGuidance = `CRITICAL ERROR: You used user (singular) with fields that don't exist in UserWhereUniqueInput. UserWhereUniqueInput ONLY accepts unique fields like { id: "..." }. When filtering by name, isStaff, isStudent, or any non-unique field, you MUST use users (plural) instead. Also, "teacher" in a question usually means any employee, so prefer isStaff unless the question specifically means classroom teachers.`;
           } else if (
-            validationError.message.includes('conflict') ||
-            validationError.message.includes('differing arguments')
+            retryableError.message.includes('conflict') ||
+            retryableError.message.includes('differing arguments')
           ) {
             // Extract the field name from the error message
-            const fieldMatch = validationError.message.match(/Fields "(\w+)"/);
+            const fieldMatch = retryableError.message.match(/Fields "(\w+)"/);
             const fieldName = fieldMatch ? fieldMatch[1] : 'the same field';
             errorGuidance = `CRITICAL: You queried "${fieldName}" multiple times with different arguments. GraphQL requires aliases when querying the same field multiple times. Use descriptive aliases like "first: ${fieldName}(...)" and "second: ${fieldName}(...)" or more descriptive names based on the filter (e.g., "students: users(...)" and "staff: users(...)").`;
           } else if (
-            validationError.message.includes('is not defined by type')
+            retryableError.message.includes('is not defined by type')
           ) {
             errorGuidance = `The field you used doesn't exist in that input type. Check the schema and use the correct field name and input type. Remember: user (singular) only accepts unique fields like id, while users (plural) accepts filtering fields.`;
           }
 
           // Update the question to include the error context
-          currentQuestion = `${currentQuestion}\n\nIMPORTANT: The previous query failed with this error: "${validationError.message}". ${errorGuidance} Please fix the query to resolve this issue.`;
+          currentQuestion = `${currentQuestion}\n\nIMPORTANT: The previous query failed with this error: "${retryableError.message}". ${errorGuidance} Please fix the query to resolve this issue.`;
           continue; // Retry with updated question
         }
 
