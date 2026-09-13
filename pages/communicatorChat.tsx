@@ -20,6 +20,12 @@ interface QueryResponse {
   timestamp?: string | null;
   createdAt?: string | null;
   iterations?: number;
+  // Still returned by the backend and still recorded on the chat, but
+  // deliberately not shown. Across 51 chats it only ever landed between 6 and
+  // 10, mean 7.9, and the two answers a human rated came back 10-vs-self-8 and
+  // 1-vs-self-7 - a nine point difference the score read as one. Displayed next
+  // to the answer it looked like confidence and tracked nothing. Kept for
+  // diagnostics; do not put it back in the UI without recalibrating it first.
   evaluationScore?: number;
   rawData?: any;
   model?: string;
@@ -33,7 +39,6 @@ interface QueryResponse {
   // confused with CommunicatorChat.status, which is the chat outcome.
   httpStatus?: number;
   errorMessage?: string;
-  hasError?: string;
   status?: string;
   chatId?: string | null;
 }
@@ -45,7 +50,6 @@ interface CommunicatorMessage {
   graphqlQuery?: string;
   createdAt?: string | null;
   iterations?: number;
-  evaluationScore?: number;
   model?: string;
   userRating?: number;
   userComment?: string;
@@ -96,7 +100,6 @@ const QUERY_COMMUNICATOR_MESSAGE_LIST = gql`
       graphqlQuery
       createdAt
       iterations
-      evaluationScore
       model
       userRating
       userComment
@@ -119,7 +122,6 @@ const QUERY_ALL_COMMUNICATOR_MESSAGES = gql`
       graphqlQuery
       createdAt
       iterations
-      evaluationScore
       model
       userRating
       userComment
@@ -613,8 +615,7 @@ const CommunicatorChat: NextPage = () => {
                   </div>
 
                   {/* Show error message if this is an error response */}
-                  {(queryResponse.hasError === 'true' ||
-                    queryResponse.error) && (
+                  {queryResponse.error && (
                     <div className="mb-6 pb-4 border-b border-red-300 dark:border-red-600">
                       <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
                         <p className="font-semibold text-lg mb-2">
@@ -656,7 +657,6 @@ const CommunicatorChat: NextPage = () => {
 
                   {/* Explanation Content - only show if not an error */}
                   {queryResponse.explanation &&
-                    queryResponse.hasError !== 'true' &&
                     !queryResponse.error && (
                       <div className="prose max-w-none dark:prose-invert mb-6">
                         <div
@@ -668,22 +668,13 @@ const CommunicatorChat: NextPage = () => {
                     )}
 
                   {/* Detail Icons - only show if not an error */}
-                  {queryResponse.hasError !== 'true' &&
-                    !queryResponse.error && (
+                  {!queryResponse.error && (
                       <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-300 dark:border-gray-600">
                         {queryResponse.iterations !== undefined && (
                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                             <span className="text-xl">🔄</span>
                             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
                               Iterations: {queryResponse.iterations}
-                            </span>
-                          </div>
-                        )}
-                        {queryResponse.evaluationScore !== undefined && (
-                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                            <span className="text-xl">⭐</span>
-                            <span className="text-sm font-medium text-green-900 dark:text-green-100">
-                              Score: {queryResponse.evaluationScore}
                             </span>
                           </div>
                         )}
@@ -736,7 +727,6 @@ const CommunicatorChat: NextPage = () => {
 
                   {/* Rating Section - only show if not an error */}
                   {queryResponse.id &&
-                    queryResponse.hasError !== 'true' &&
                     !queryResponse.error &&
                     (queryResponse.userRating === undefined ||
                       queryResponse.userRating === null ||
@@ -780,7 +770,6 @@ const CommunicatorChat: NextPage = () => {
 
                   {/* Show existing rating if rated - only show if not an error */}
                   {queryResponse.id &&
-                    queryResponse.hasError !== 'true' &&
                     !queryResponse.error &&
                     queryResponse.userRating !== undefined &&
                     queryResponse.userRating !== null &&
