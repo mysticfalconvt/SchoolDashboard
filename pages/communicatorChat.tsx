@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
 import MessagePreviewCard from '../components/communicator/MessagePreviewCard';
 import QueryLoadingSpinner from '../components/communicator/QueryLoadingSpinner';
 import Loading from '../components/Loading';
@@ -12,16 +11,6 @@ import isAllowed from '../lib/isAllowed';
 import { markdownToHtml } from '../lib/markdownToHtml';
 import { useGqlMutation } from '../lib/useGqlMutation';
 import { useGQLQuery } from '../lib/useGqlQuery';
-
-interface Model {
-  id: string;
-  name: string;
-  available: boolean;
-}
-
-interface ModelsResponse {
-  models: Model[];
-}
 
 interface QueryResponse {
   id?: string;
@@ -78,12 +67,14 @@ interface CommunicatorQueryData {
 
 interface CommunicatorQueryVariables {
   question: string;
-  model: string;
 }
 
+// The model is chosen by the backend (COMMUNICATOR_MODEL), not here. It was a
+// dropdown from when different models were being trialled, which mostly let a
+// user pick one that was not loaded and get a confusing failure.
 const COMMUNICATOR_QUERY_MUTATION = gql`
-  mutation QueryCommunicator($question: String!, $model: String!) {
-    queryCommunicator(question: $question, model: $model)
+  mutation QueryCommunicator($question: String!) {
+    queryCommunicator(question: $question)
   }
 `;
 
@@ -159,17 +150,8 @@ const UPDATE_COMMUNICATOR_CHAT_RATING = gql`
   }
 `;
 
-const fetchModels = async (): Promise<ModelsResponse> => {
-  const response = await fetch('/api/communicator/models');
-  if (!response.ok) {
-    throw new Error('Failed to fetch models');
-  }
-  return response.json();
-};
-
 const CommunicatorChat: NextPage = () => {
   const me = useUser();
-  const [selectedModel, setSelectedModel] = useState<string>('');
   const [question, setQuestion] = useState<string>('');
   const [queryResponse, setQueryResponse] = useState<QueryResponse | null>(
     null,
@@ -265,19 +247,9 @@ const CommunicatorChat: NextPage = () => {
     },
   });
 
-  const {
-    data: modelsData,
-    isLoading: modelsLoading,
-    error: modelsError,
-    refetch: refetchModels,
-  } = useQuery<ModelsResponse, Error>('communicatorModels', fetchModels, {
-    enabled: !!me && isAllowed(me, 'isCommunicatorEnabled'),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
   const handleQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedModel || !question.trim()) {
+    if (!question.trim()) {
       return;
     }
 
@@ -293,10 +265,7 @@ const CommunicatorChat: NextPage = () => {
       // Clear any previous errors
       setUserFriendlyError(null);
 
-      await mutateAsync({
-        question: questionText,
-        model: selectedModel,
-      });
+      await mutateAsync({ question: questionText });
 
       // After mutation succeeds, wait a bit for the backend to save, then refetch
       // and find the new message
@@ -413,35 +382,6 @@ const CommunicatorChat: NextPage = () => {
     return dateB - dateA;
   });
 
-  // Set default model to gpt-oss-120b if available (only on initial load)
-  useEffect(() => {
-    if (modelsData?.models && !selectedModel) {
-      const defaultModel = modelsData.models.find(
-        (model) =>
-          model.id.toLowerCase().includes('gpt-oss-120b') ||
-          model.name.toLowerCase().includes('gpt-oss-120b') ||
-          model.id.toLowerCase().includes('gpt oss 120b') ||
-          model.name.toLowerCase().includes('gpt oss 120b'),
-      );
-      if (defaultModel) {
-        setSelectedModel(defaultModel.id);
-      } else if (modelsData.models.length > 0) {
-        // If gpt-oss-120b not available, select first available model
-        const firstAvailable = modelsData.models.find(
-          (model) => model.available,
-        );
-        if (firstAvailable) {
-          setSelectedModel(firstAvailable.id);
-        } else {
-          setSelectedModel(modelsData.models[0]?.id || '');
-        }
-      } else {
-        setSelectedModel('');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelsData]);
-
   // Show loading while checking authentication
   if (me === undefined) {
     return <Loading />;
@@ -463,9 +403,6 @@ const CommunicatorChat: NextPage = () => {
     );
   }
 
-  const models = modelsData?.models || [];
-  const isGptOss20bAvailable = selectedModel !== '';
-
   return (
     <div className="h-screen flex flex-col">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -473,54 +410,9 @@ const CommunicatorChat: NextPage = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Communicator Chat
           </h1>
-          {isSuperAdmin && models.length > 0 && (
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="model-selector"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
-              >
-                Model:
-              </label>
-              <select
-                id="model-selector"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-              >
-                {models.map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name} {!model.available && '(Unavailable)'}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
       </div>
 
-      {modelsLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loading />
-        </div>
-      ) : modelsError ? (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
-            <p className="font-semibold">Error loading service</p>
-            <p>{modelsError.message}</p>
-            <GradientButton onClick={() => refetchModels()} className="mt-2">
-              Retry
-            </GradientButton>
-          </div>
-        </div>
-      ) : !isGptOss20bAvailable ? (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded">
-            <p className="font-semibold text-lg">
-              This service is not currently available
-            </p>
-          </div>
-        </div>
-      ) : (
         <div className="flex-1 flex overflow-hidden relative">
           {/* Sidebar */}
           <div
@@ -639,7 +531,7 @@ const CommunicatorChat: NextPage = () => {
                       onClick={async () => {
                         const questionToRetry =
                           queryResponse?.question || lastFailedQuestion;
-                        if (!selectedModel || !questionToRetry) {
+                        if (!questionToRetry) {
                           return;
                         }
                         // Clear errors
@@ -653,7 +545,6 @@ const CommunicatorChat: NextPage = () => {
                         try {
                           await mutateAsync({
                             question: questionToRetry,
-                            model: selectedModel,
                           });
                         } catch (error) {
                           console.error('Error re-asking question:', error);
@@ -696,7 +587,7 @@ const CommunicatorChat: NextPage = () => {
                       </div>
                       <button
                         onClick={async () => {
-                          if (!selectedModel || !queryResponse.question) {
+                          if (!queryResponse.question) {
                             return;
                           }
                           setQueryResponse(null);
@@ -704,8 +595,7 @@ const CommunicatorChat: NextPage = () => {
                           try {
                             await mutateAsync({
                               question: queryResponse.question,
-                              model: selectedModel,
-                            });
+                              });
                           } catch (error) {
                             console.error('Error re-asking question:', error);
                           }
@@ -1172,7 +1062,6 @@ const CommunicatorChat: NextPage = () => {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };
