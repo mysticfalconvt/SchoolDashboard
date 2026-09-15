@@ -320,8 +320,27 @@ describe('PbisPage', () => {
       screen.getByRole('link', { name: 'Weekly Reading' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'Data Table' }),
+      screen.getByRole('link', { name: 'PBIS Stats' }),
     ).toBeInTheDocument();
+  });
+
+  it('shows PBIS Stats to superadmins', () => {
+    useUser.mockReturnValue({
+      ...mockUser,
+      isSuperAdmin: true,
+    });
+    useGQLQuery.mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    renderWithProviders(<PbisPage {...mockPbisPageProps} />);
+
+    expect(
+      screen.getByRole('link', { name: 'PBIS Stats' }),
+    ).toHaveAttribute('href', '/PbisStats');
   });
 
   it('shows staff links for staff users', () => {

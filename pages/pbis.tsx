@@ -227,24 +227,17 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           <h2 className="hidePrint">Links</h2>
           <div className="flex justify-around items-center w-full flex-wrap gap-2">
             {isAllowed(me, 'canManagePbis') && (
-              <>
-                <Link href="/PbisWeeklyReading">
-                  <SmallGradientButton title="Weekly Reading">
-                    Weekly Reading
-                  </SmallGradientButton>
-                </Link>
-                <Link href="/PbisDataTable">
-                  <SmallGradientButton title="Data Table">
-                    Data Table
-                  </SmallGradientButton>
-                </Link>
-              </>
+              <Link href="/PbisWeeklyReading">
+                <SmallGradientButton title="Weekly Reading">
+                  Weekly Reading
+                </SmallGradientButton>
+              </Link>
             )}
             {(isAllowed(me, 'canManagePbis') ||
               isAllowed(me, 'isSuperAdmin')) && (
-              <Link href="/PbisCardEntryHistory">
-                <SmallGradientButton title="Card Entry History">
-                  Card Entry History
+              <Link href="/PbisStats">
+                <SmallGradientButton title="PBIS Stats">
+                  PBIS Stats
                 </SmallGradientButton>
               </Link>
             )}

@@ -17,6 +17,13 @@ import Table from '../components/Table';
 import { useUser } from '../components/User';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
+import {
+  getAveragePbisCount,
+  getMedianPbis,
+  getTeacherStudentStats,
+  PbisStudent,
+  roundToOneDecimal,
+} from '../lib/pbisStats';
 
 ChartJS.register(
   CategoryScale,
@@ -27,6 +34,37 @@ ChartJS.register(
   PointElement,
   Tooltip,
 );
+
+const PBIS_STUDENT_STATS_QUERY = gql`
+  query PBIS_STUDENT_STATS_QUERY(
+    $sevenDaysAgo: DateTime!
+    $thirtyDaysAgo: DateTime!
+  ) {
+    students: users(where: { isStudent: { equals: true } }) {
+      id
+      name
+      YearPbisCount: studentPbisCardsCount
+      Last7DaysPbisCount: studentPbisCardsCount(
+        where: { dateGiven: { gte: $sevenDaysAgo } }
+      )
+      Last30DaysPbisCount: studentPbisCardsCount(
+        where: { dateGiven: { gte: $thirtyDaysAgo } }
+      )
+      block1Teacher { id name }
+      block2Teacher { id name }
+      block3Teacher { id name }
+      block4Teacher { id name }
+      block5Teacher { id name }
+      block6Teacher { id name }
+      block7Teacher { id name }
+      block8Teacher { id name }
+      block9Teacher { id name }
+      block10Teacher { id name }
+      block11Teacher { id name }
+      block12Teacher { id name }
+    }
+  }
+`;
 
 const PBIS_CARD_ENTRIES_QUERY = gql`
   query PBIS_CARD_ENTRIES_QUERY($start: DateTime!, $end: DateTime!) {
@@ -86,7 +124,7 @@ function dayKey(date: Date): string {
   return date.toLocaleDateString('en-CA');
 }
 
-// Shade a heatmap cell by how many cards were entered that day
+// Shade a heatmap cell by how many cards were recorded that day
 function heatColor(count: number): string {
   if (!count) return 'transparent';
   if (count <= 2) return 'rgba(59, 130, 246, 0.25)';
@@ -95,12 +133,17 @@ function heatColor(count: number): string {
   return 'rgba(59, 130, 246, 1)';
 }
 
-type TabKey = 'heatmap' | 'table' | 'calendar' | 'overview' | 'staffCards';
+type TabKey = 'overview' | 'students' | 'activity' | 'staffCards';
+type ActivityViewKey = 'month' | 'heatmap' | 'table' | 'calendar';
+type StudentPeriod = 'all' | '30days' | '7days';
 
-const PbisCardEntryHistory: NextPage = () => {
+const PbisStats: NextPage = () => {
   const me = useUser();
 
   const [tab, setTab] = useState<TabKey>('overview');
+  const [activityView, setActivityView] =
+    useState<ActivityViewKey>('month');
+  const [studentPeriod, setStudentPeriod] = useState<StudentPeriod>('all');
 
   // Always look back over the last 12 months
   const variables = useMemo(() => {
@@ -124,17 +167,49 @@ const PbisCardEntryHistory: NextPage = () => {
     };
   }, []);
 
-  const { data, isLoading } = useGQLQuery(
+  const studentStatsVariables = useMemo(() => {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    const thirtyDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    return {
+      sevenDaysAgo: sevenDaysAgo.toISOString(),
+      thirtyDaysAgo: thirtyDaysAgo.toISOString(),
+    };
+  }, []);
+
+  const canView =
+    !!me &&
+    (isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin'));
+  const {
+    data: studentData,
+    isLoading: studentStatsLoading,
+    error: studentStatsError,
+  } = useGQLQuery(
+    'pbisStudentStats',
+    PBIS_STUDENT_STATS_QUERY,
+    studentStatsVariables,
+    {
+      enabled: canView && (tab === 'overview' || tab === 'students'),
+      staleTime: 1000 * 60 * 3,
+    },
+  );
+  const { data, isLoading, error: activityError } = useGQLQuery(
     'pbisCardEntries',
     PBIS_CARD_ENTRIES_QUERY,
     variables,
-    { enabled: !!me && (isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) },
+    { enabled: canView && tab === 'activity' },
   );
-  const { data: staffCardData, isLoading: staffCardsLoading } = useGQLQuery(
+  const {
+    data: staffCardData,
+    isLoading: staffCardsLoading,
+    error: staffCardsError,
+  } = useGQLQuery(
     'staffPbisCardSummary',
     STAFF_PBIS_CARD_SUMMARY_QUERY,
     staffCardVariables,
-    { enabled: !!me && (isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) },
+    { enabled: canView && tab === 'staffCards' },
   );
 
   // Aggregate cards into per-teacher per-day activity
@@ -144,14 +219,17 @@ const PbisCardEntryHistory: NextPage = () => {
     const daysSeen = new Set<string>();
 
     cards.forEach((card) => {
-      if (!card.teacher) return;
       const key = dayKey(new Date(card.dateGiven));
       daysSeen.add(key);
+      const teacher = card.teacher || {
+        id: 'unknown-giver',
+        name: 'Unknown / system giver',
+      };
       const t =
-        byTeacher[card.teacher.id] ||
-        (byTeacher[card.teacher.id] = {
-          id: card.teacher.id,
-          name: card.teacher.name,
+        byTeacher[teacher.id] ||
+        (byTeacher[teacher.id] = {
+          id: teacher.id,
+          name: teacher.name,
           total: 0,
           days: {},
         });
@@ -167,7 +245,7 @@ const PbisCardEntryHistory: NextPage = () => {
   }, [data]);
 
   if (!me) return <Loading />;
-  if (!isAllowed(me, 'canManagePbis') && !isAllowed(me, 'isSuperAdmin')) {
+  if (!canView) {
     return (
       <div className="text-center m-8">
         <h2>You are not authorized to view this page.</h2>
@@ -176,21 +254,21 @@ const PbisCardEntryHistory: NextPage = () => {
   }
 
   return (
-    <div className="m-4">
-      <h1>PBIS Card Entry History</h1>
-      <p className="opacity-80">
-        Days that teachers entered PBIS cards, over the last 12 months.
+    <div className="mx-auto my-4 w-full max-w-7xl">
+      <h1>PBIS Stats</h1>
+      <p className="mb-6 max-w-4xl opacity-80">
+        Explore student recognition, class-group distributions, card activity,
+        and staff cards. Student totals use the current dataset, which is reset
+        for each school year. Activity views cover the rolling last 12 months.
       </p>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-[var(--blue)] mb-4">
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--blue)]">
         {(
           [
-            ['overview', 'Month Overview'],
-            ['heatmap', 'Heatmap'],
-            ['table', 'Table'],
-            ['calendar', 'Month Calendar'],
-            ['staffCards', 'Staff Card Data'],
+            ['overview', 'Overview'],
+            ['students', 'Student Distribution'],
+            ['activity', 'Card Activity'],
+            ['staffCards', 'Staff Cards'],
           ] as [TabKey, string][]
         ).map(([key, label]) => (
           <button
@@ -208,31 +286,305 @@ const PbisCardEntryHistory: NextPage = () => {
         ))}
       </div>
 
-      {tab === 'staffCards' && (
+      {tab === 'overview' && (
+        <OverviewView
+          students={studentData?.students || []}
+          isLoading={studentStatsLoading}
+          error={studentStatsError}
+        />
+      )}
+
+      {tab === 'students' && (
+        <StudentDistributionView
+          students={studentData?.students || []}
+          isLoading={studentStatsLoading}
+          error={studentStatsError}
+          period={studentPeriod}
+          setPeriod={setStudentPeriod}
+        />
+      )}
+
+      {tab === 'staffCards' && !staffCardsError && (
         <StaffCardSummaryView
           cards={staffCardData?.staffPbisCards || []}
           isLoading={staffCardsLoading}
         />
       )}
-
-      {tab !== 'staffCards' && isLoading && <Loading />}
-      {tab !== 'staffCards' && !isLoading && teachers.length === 0 && (
-        <p>No cards were entered in this date range.</p>
+      {tab === 'staffCards' && staffCardsError && (
+        <ErrorMessage message="Staff card data could not be loaded." />
       )}
 
-      {tab !== 'staffCards' && !isLoading && teachers.length > 0 && (
-        <>
-          {tab === 'heatmap' && (
-            <HeatmapView teachers={teachers} dayList={dayList} />
-          )}
-          {tab === 'table' && (
-            <TableView teachers={teachers} dayList={dayList} />
-          )}
-          {tab === 'calendar' && <CalendarView teachers={teachers} />}
-          {tab === 'overview' && <MonthOverviewView teachers={teachers} />}
-        </>
+      {tab === 'activity' && (
+        <CardActivityView
+          activityView={activityView}
+          setActivityView={setActivityView}
+          teachers={teachers}
+          dayList={dayList}
+          isLoading={isLoading}
+          error={activityError}
+          startDate={new Date(variables.start)}
+          endDate={new Date(variables.end)}
+        />
       )}
     </div>
+  );
+};
+
+const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
+  <div className="rounded-lg border border-red-500/60 bg-red-500/10 p-4">
+    <p className="font-semibold">{message}</p>
+    <p className="mt-1 text-sm opacity-80">Refresh the page to try again.</p>
+  </div>
+);
+
+const MetricCard: React.FC<{
+  label: string;
+  value: string | number;
+  detail?: string;
+}> = ({ label, value, detail }) => (
+  <div className="rounded-lg border border-[var(--blue)] bg-[var(--blueTrans)] p-4">
+    <p className="text-sm font-semibold">{label}</p>
+    <p className="mt-2 text-4xl font-bold">{value}</p>
+    {detail && <p className="mt-1 text-sm opacity-80">{detail}</p>}
+  </div>
+);
+
+const OverviewView: React.FC<{
+  students: PbisStudent[];
+  isLoading: boolean;
+  error?: Error | null;
+}> = ({ students, isLoading, error }) => {
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Student PBIS data could not be loaded." />;
+
+  const totalCards = students.reduce(
+    (total, student) => total + student.YearPbisCount,
+    0,
+  );
+  const recognizedStudents = students.filter(
+    (student) => student.YearPbisCount > 0,
+  ).length;
+  const reach = students.length
+    ? roundToOneDecimal((recognizedStudents / students.length) * 100)
+    : 0;
+
+  return (
+    <section>
+      <h2>Current-Year Student Recognition</h2>
+      <p className="mb-4 max-w-4xl opacity-80">
+        These totals summarize all student PBIS cards in the current dataset.
+        Reach shows how many enrolled students have received at least one card;
+        the median helps show the typical student without being skewed by a few
+        very high totals.
+      </p>
+      {students.length === 0 ? (
+        <p>No student PBIS data is available.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Student Cards" value={totalCards} />
+          <MetricCard
+            label="Average per Student"
+            value={roundToOneDecimal(getAveragePbisCount(students))}
+            detail={`${students.length} students`}
+          />
+          <MetricCard
+            label="Median per Student"
+            value={roundToOneDecimal(getMedianPbis(students))}
+          />
+          <MetricCard
+            label="Students Reached"
+            value={`${reach}%`}
+            detail={`${recognizedStudents} recognized, ${
+              students.length - recognizedStudents
+            } with no cards`}
+          />
+        </div>
+      )}
+    </section>
+  );
+};
+
+const StudentDistributionView: React.FC<{
+  students: PbisStudent[];
+  isLoading: boolean;
+  error?: Error | null;
+  period: StudentPeriod;
+  setPeriod: React.Dispatch<React.SetStateAction<StudentPeriod>>;
+}> = ({ students, isLoading, error, period, setPeriod }) => {
+  const periodStudents = useMemo(
+    () =>
+      students.map((student) => ({
+        ...student,
+        YearPbisCount:
+          period === '7days'
+            ? student.Last7DaysPbisCount || 0
+            : period === '30days'
+              ? student.Last30DaysPbisCount || 0
+              : student.YearPbisCount,
+      })),
+    [period, students],
+  );
+  const rows = useMemo(
+    () =>
+      getTeacherStudentStats(periodStudents).map((teacher) => ({
+        name: teacher.name,
+        studentCount: teacher.students.length,
+        averageCards: roundToOneDecimal(teacher.averageCards),
+        medianCards: roundToOneDecimal(teacher.medianCards),
+        zeroCardStudents: teacher.zeroCardStudents,
+      })),
+    [periodStudents],
+  );
+  const columns = useMemo(
+    () => [
+      { Header: 'Teacher', accessor: 'name' },
+      { Header: 'Students', accessor: 'studentCount' },
+      { Header: 'Average Cards', accessor: 'averageCards' },
+      { Header: 'Median Cards', accessor: 'medianCards' },
+      { Header: 'Students With No Cards', accessor: 'zeroCardStudents' },
+    ],
+    [],
+  );
+
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Student PBIS data could not be loaded." />;
+
+  return (
+    <section>
+      <h2>Student Distribution by Teacher</h2>
+      <p className="mb-4 max-w-4xl opacity-80">
+        This groups each teacher&apos;s currently enrolled students and summarizes
+        those students&apos; PBIS totals. A student is counted once per teacher even
+        if they share multiple blocks. Cards may have been awarded by any staff
+        member, so this is not a ranking of cards given by each teacher.
+      </p>
+      <div className="mb-4 flex flex-wrap gap-2" aria-label="Student data period">
+        {(
+          [
+            ['all', 'All Time'],
+            ['30days', 'Last 30 Days'],
+            ['7days', 'Last 7 Days'],
+          ] as [StudentPeriod, string][]
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setPeriod(key)}
+            className={`rounded px-3 py-2 ${
+              period === key
+                ? 'bg-[var(--blue)] text-white'
+                : 'bg-[var(--blueTrans)] text-white opacity-70'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {rows.length === 0 ? (
+        <p>No class assignments are available.</p>
+      ) : (
+        <Table columns={columns} data={rows} searchColumn="name" />
+      )}
+    </section>
+  );
+};
+
+const CardActivityView: React.FC<{
+  activityView: ActivityViewKey;
+  setActivityView: React.Dispatch<React.SetStateAction<ActivityViewKey>>;
+  teachers: TeacherActivity[];
+  dayList: string[];
+  isLoading: boolean;
+  error?: Error | null;
+  startDate: Date;
+  endDate: Date;
+}> = ({
+  activityView,
+  setActivityView,
+  teachers,
+  dayList,
+  isLoading,
+  error,
+  startDate,
+  endDate,
+}) => {
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Card activity could not be loaded." />;
+
+  const totalCards = teachers.reduce((total, teacher) => total + teacher.total, 0);
+  const activeGivers = teachers.filter(
+    (teacher) => teacher.id !== 'unknown-giver',
+  ).length;
+  const mostRecentDay = dayList[dayList.length - 1] || 'No activity';
+
+  return (
+    <section>
+      <h2>Student Card Activity</h2>
+      <p className="mb-4 max-w-4xl opacity-80">
+        These views use each card&apos;s recorded date and teacher account over the
+        rolling last 12 months. They show card-recording patterns, not student or
+        teacher performance. Cards without a teacher appear under Unknown / system
+        giver so totals remain complete.
+      </p>
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <MetricCard label="Cards Recorded" value={totalCards} />
+        <MetricCard label="Active Givers" value={activeGivers} />
+        <MetricCard label="Most Recent Activity" value={mostRecentDay} />
+      </div>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {(
+          [
+            ['month', 'Month Overview'],
+            ['heatmap', 'Heatmap'],
+            ['table', 'Teacher Summary'],
+            ['calendar', 'Teacher Calendar'],
+          ] as [ActivityViewKey, string][]
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setActivityView(key)}
+            className={`rounded px-3 py-2 ${
+              activityView === key
+                ? 'bg-[var(--blue)] text-white'
+                : 'bg-[var(--blueTrans)] text-white opacity-70'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {teachers.length === 0 ? (
+        <p>No cards were recorded in this date range.</p>
+      ) : (
+        <>
+          {activityView === 'month' && (
+            <MonthOverviewView
+              teachers={teachers}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          )}
+          {activityView === 'heatmap' && (
+            <div>
+              <p className="mb-3 text-sm opacity-80">
+                Each cell is one giver and recorded date. Darker cells contain
+                more cards; blank cells contain none.
+              </p>
+              <HeatmapView teachers={teachers} dayList={dayList} />
+            </div>
+          )}
+          {activityView === 'table' && <TableView teachers={teachers} />}
+          {activityView === 'calendar' && (
+            <CalendarView
+              teachers={teachers}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          )}
+        </>
+      )}
+    </section>
   );
 };
 
@@ -251,13 +603,6 @@ const StaffCardSummaryView: React.FC<{
     );
     const yearCards = cards.filter(
       (card) => new Date(card.dateGiven) >= yearStart,
-    );
-    const firstYearCardDate = yearCards.reduce<Date | undefined>(
-      (firstDate, card) => {
-        const cardDate = new Date(card.dateGiven);
-        return !firstDate || cardDate < firstDate ? cardDate : firstDate;
-      },
-      undefined,
     );
     const studentGivers = new Set(
       weekCards
@@ -279,10 +624,8 @@ const StaffCardSummaryView: React.FC<{
         (yearCards.length /
           Math.max(
             1,
-            firstYearCardDate
-              ? (now.getTime() - firstYearCardDate.getTime()) /
-                (7 * 24 * 60 * 60 * 1000)
-              : 1,
+            (now.getTime() - yearStart.getTime()) /
+              (7 * 24 * 60 * 60 * 1000),
           )) *
           10,
       ) / 10,
@@ -494,51 +837,57 @@ const HeatmapView: React.FC<{
 );
 
 // ---- Table: per-teacher summary, sortable ----
-const TableView: React.FC<{
-  teachers: TeacherActivity[];
-  dayList: string[];
-}> = ({ teachers, dayList }) => {
-  // Weeks in the period, from the first to the last card given (min 1 week).
-  const weeks = useMemo(() => {
-    if (dayList.length === 0) return 1;
-    const first = new Date(dayList[0]).getTime();
-    const last = new Date(dayList[dayList.length - 1]).getTime();
-    return Math.max(1, (last - first) / (7 * 24 * 60 * 60 * 1000));
-  }, [dayList]);
-
+const TableView: React.FC<{ teachers: TeacherActivity[] }> = ({ teachers }) => {
   const rows = useMemo(
     () =>
       teachers.map((t) => {
         const dayKeys = Object.keys(t.days).sort();
+        const activeWeeks = new Set(
+          dayKeys.map((day) => {
+            const date = new Date(`${day}T12:00:00`);
+            date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+            return dayKey(date);
+          }),
+        ).size;
         return {
           name: t.name,
           activeDays: dayKeys.length,
+          activeWeeks,
           totalCards: t.total,
-          avgPerWeek: Math.round((t.total / weeks) * 10) / 10,
           lastEntry: dayKeys.length ? dayKeys[dayKeys.length - 1] : '',
         };
       }),
-    [teachers, weeks],
+    [teachers],
   );
 
   const columns = useMemo(
     () => [
       { Header: 'Teacher', accessor: 'name' },
       { Header: 'Days With Entries', accessor: 'activeDays' },
+      { Header: 'Weeks With Entries', accessor: 'activeWeeks' },
       { Header: 'Total Cards', accessor: 'totalCards' },
-      { Header: 'Avg Cards / Week', accessor: 'avgPerWeek' },
       { Header: 'Last Entry', accessor: 'lastEntry' },
     ],
     [],
   );
 
-  return <Table columns={columns} data={rows} searchColumn="name" />;
+  return (
+    <div>
+      <p className="mb-3 text-sm opacity-80">
+        Compare how often each giver recorded cards and when they were last
+        active. Select a column heading to sort the table.
+      </p>
+      <Table columns={columns} data={rows} searchColumn="name" />
+    </div>
+  );
 };
 
 // ---- Month calendar for a single selected teacher ----
-const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
-  teachers,
-}) => {
+const CalendarView: React.FC<{
+  teachers: TeacherActivity[];
+  startDate: Date;
+  endDate: Date;
+}> = ({ teachers, startDate, endDate }) => {
   const [teacherId, setTeacherId] = useState<string>(teachers[0]?.id || '');
   const [cursor, setCursor] = useState<Date>(() => {
     const d = new Date();
@@ -563,9 +912,25 @@ const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
     month: 'long',
     year: 'numeric',
   });
+  const previousMonth = new Date(year, month - 1, 1);
+  const nextMonth = new Date(year, month + 1, 1);
+  const firstAvailableMonth = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    1,
+  );
+  const lastAvailableMonth = new Date(
+    endDate.getFullYear(),
+    endDate.getMonth(),
+    1,
+  );
 
   return (
     <div>
+      <p className="mb-3 text-sm opacity-80">
+        Select a giver to see how many cards were recorded on each day. Darker
+        days contain more cards.
+      </p>
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <select
           value={teacher?.id}
@@ -581,8 +946,9 @@ const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setCursor(new Date(year, month - 1, 1))}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+            onClick={() => setCursor(previousMonth)}
+            disabled={previousMonth < firstAvailableMonth}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ‹
           </button>
@@ -591,8 +957,9 @@ const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
           </span>
           <button
             type="button"
-            onClick={() => setCursor(new Date(year, month + 1, 1))}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+            onClick={() => setCursor(nextMonth)}
+            disabled={nextMonth > lastAvailableMonth}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ›
           </button>
@@ -626,10 +993,12 @@ const CalendarView: React.FC<{ teachers: TeacherActivity[] }> = ({
   );
 };
 
-// ---- Month calendar across ALL teachers: per-day count of who entered ----
-const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
-  teachers,
-}) => {
+// ---- Month calendar across all teachers: per-day count of active givers ----
+const MonthOverviewView: React.FC<{
+  teachers: TeacherActivity[];
+  startDate: Date;
+  endDate: Date;
+}> = ({ teachers, startDate, endDate }) => {
   const [cursor, setCursor] = useState<Date>(() => {
     const d = new Date();
     d.setDate(1);
@@ -650,8 +1019,20 @@ const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
     month: 'long',
     year: 'numeric',
   });
+  const previousMonth = new Date(year, month - 1, 1);
+  const nextMonth = new Date(year, month + 1, 1);
+  const firstAvailableMonth = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    1,
+  );
+  const lastAvailableMonth = new Date(
+    endDate.getFullYear(),
+    endDate.getMonth(),
+    1,
+  );
 
-  // For a given day, the names of teachers who entered at least one card
+  // For a given day, list the givers associated with at least one card.
   const teachersForDay = (date: Date): string[] =>
     teachers
       .filter((t) => (t.days[dayKey(date)] || 0) > 0)
@@ -663,8 +1044,9 @@ const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setCursor(new Date(year, month - 1, 1))}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+            onClick={() => setCursor(previousMonth)}
+            disabled={previousMonth < firstAvailableMonth}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ‹
           </button>
@@ -673,14 +1055,15 @@ const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
           </span>
           <button
             type="button"
-            onClick={() => setCursor(new Date(year, month + 1, 1))}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white"
+            onClick={() => setCursor(nextMonth)}
+            disabled={nextMonth > lastAvailableMonth}
+            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ›
           </button>
         </div>
         <span className="opacity-80 text-sm">
-          Each day shows how many teachers entered cards. Hover a day to see who.
+          Each day shows how many givers recorded cards. Hover a day to see who.
         </span>
       </div>
 
@@ -724,4 +1107,4 @@ const MonthOverviewView: React.FC<{ teachers: TeacherActivity[] }> = ({
   );
 };
 
-export default PbisCardEntryHistory;
+export default PbisStats;

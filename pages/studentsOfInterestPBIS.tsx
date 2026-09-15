@@ -5,7 +5,7 @@ import { useUser } from '../components/User';
 import { ADMIN_ID } from '../config';
 import isAllowed from '../lib/isAllowed';
 import { useGQLQuery } from '../lib/useGqlQuery';
-import { getAverageYearlyPbis } from '../pages/PbisDataTable';
+import { getAveragePbisCount } from '../lib/pbisStats';
 
 const PBIS_STUDENTS_OF_INTEREST_QUERY = gql`
   query PBIS_STUDENTS_OF_INTEREST_QUERY {
@@ -64,7 +64,7 @@ const StudentsOfInterestPBIS: React.FC = () => {
 
   if (isLoading) return <Loading />;
   if (!isAllowed(me, 'isStaff')) return <div>invalid user</div>;
-  const averageCards = Math.round(getAverageYearlyPbis(studentsWithTaTeacher));
+  const averageCards = Math.round(getAveragePbisCount(studentsWithTaTeacher));
 
   const topStudents = studentsWithTaTeacher
     .sort((a: Student, b: Student) => {
