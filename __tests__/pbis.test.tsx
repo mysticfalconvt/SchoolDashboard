@@ -1,38 +1,38 @@
-import { screen } from '@testing-library/react';
-import PbisPage from '../pages/pbis';
-import { mockUser, renderWithProviders } from './utils/test-utils';
+import { screen } from "@testing-library/react";
+import PbisPage from "../pages/pbis";
+import { mockUser, renderWithProviders } from "./utils/test-utils";
 
 // Mock Next.js router
-jest.mock('next/router', () => ({
+jest.mock("next/router", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn(),
     query: {},
-    pathname: '/pbis',
-    route: '/pbis',
-    asPath: '/pbis',
+    pathname: "/pbis",
+    route: "/pbis",
+    asPath: "/pbis",
   }),
 }));
 
 // Mock dependencies
-jest.mock('../components/User', () => ({
+jest.mock("../components/User", () => ({
   useUser: jest.fn(),
 }));
 
-jest.mock('../lib/useGqlQuery', () => ({
+jest.mock("../lib/useGqlQuery", () => ({
   useGQLQuery: jest.fn(),
 }));
 
-jest.mock('../lib/isAllowed', () => jest.fn());
+jest.mock("../lib/isAllowed", () => jest.fn());
 
-jest.mock('../config', () => ({
-  ...jest.requireActual('../config'),
-  ADMIN_ID: 'admin',
+jest.mock("../config", () => ({
+  ...jest.requireActual("../config"),
+  ADMIN_ID: "admin",
 }));
 
 // Mock chart components
-jest.mock('../components/Chart/DonutChart', () => {
+jest.mock("../components/Chart/DonutChart", () => {
   return function MockDoughnutChart({ title, chartData }: any) {
     return (
       <div data-testid="doughnut-chart">
@@ -43,7 +43,7 @@ jest.mock('../components/Chart/DonutChart', () => {
   };
 });
 
-jest.mock('../components/PBIS/DisplayPbisCollectionData', () => {
+jest.mock("../components/PBIS/DisplayPbisCollectionData", () => {
   return function MockDisplayPbisCollectionData({ collectionData }: any) {
     return (
       <div data-testid="pbis-collection-data">
@@ -56,7 +56,7 @@ jest.mock('../components/PBIS/DisplayPbisCollectionData', () => {
   };
 });
 
-jest.mock('../components/PBIS/PbisCardChart', () => {
+jest.mock("../components/PBIS/PbisCardChart", () => {
   return function MockPbisCardChart({ cardCounts }: any) {
     return (
       <div data-testid="pbis-card-chart">
@@ -66,72 +66,85 @@ jest.mock('../components/PBIS/PbisCardChart', () => {
   };
 });
 
-jest.mock('../components/PBIS/PbisFalcon', () => {
+jest.mock("../components/PBIS/AllTaPbisCollectionChart", () => {
+  return function MockAllTaPbisCollectionChart({
+    teams,
+    collectionDates,
+  }: any) {
+    return (
+      <div data-testid="all-ta-pbis-chart">
+        {teams.length} TAs, {collectionDates.length} collections
+      </div>
+    );
+  };
+});
+
+jest.mock("../components/PBIS/PbisFalcon", () => {
   return function MockPbisFalcon({ initialCount }: any) {
     return <div data-testid="pbis-falcon">Falcon - {initialCount} cards</div>;
   };
 });
 
-const { useUser } = require('../components/User');
-const { useGQLQuery } = require('../lib/useGqlQuery');
-const isAllowed = require('../lib/isAllowed');
+const { useUser } = require("../components/User");
+const { useGQLQuery } = require("../lib/useGqlQuery");
+const isAllowed = require("../lib/isAllowed");
 
-describe('PbisPage', () => {
+describe("PbisPage", () => {
   const mockPbisPageProps = {
     totalSchoolCards: 5000,
     schoolWideCardsInCategories: [
-      { word: 'respect', total: 1200 },
-      { word: 'responsibility', total: 1100 },
-      { word: 'perseverance', total: 900 },
-      { word: 'quick', total: 800 },
-      { word: 'physical', total: 600 },
-      { word: 'class', total: 300 },
-      { word: 'Chromebook Check', total: 100 },
+      { word: "respect", total: 1200 },
+      { word: "responsibility", total: 1100 },
+      { word: "perseverance", total: 900 },
+      { word: "quick", total: 800 },
+      { word: "physical", total: 600 },
+      { word: "class", total: 300 },
+      { word: "Chromebook Check", total: 100 },
     ],
     lastPbisCollection: {
-      id: 'collection-1',
-      collectionDate: '2024-01-15T00:00:00.000Z',
+      id: "collection-1",
+      collectionDate: "2024-01-15T00:00:00.000Z",
       taNewLevelWinners: [
         {
-          id: 'teacher-1',
-          name: 'Ms. Smith',
+          id: "teacher-1",
+          name: "Ms. Smith",
           taTeamPbisLevel: 3,
           taTeamAveragePbisCardsPerStudent: 15,
         },
       ],
       personalLevelWinners: [
         {
-          id: 'student-1',
-          name: 'John Doe',
+          id: "student-1",
+          name: "John Doe",
           individualPbisLevel: 4,
         },
       ],
       randomDrawingWinners: [
         {
-          id: 'winner-1',
+          id: "winner-1",
           student: {
-            id: 'student-2',
-            name: 'Jane Smith',
-            taTeacher: { name: 'Mr. Johnson' },
+            id: "student-2",
+            name: "Jane Smith",
+            taTeacher: { name: "Mr. Johnson" },
           },
         },
       ],
     },
     pbisLinks: [
       {
-        id: 'link-1',
-        link: 'https://example.com/pbis-resources',
-        name: 'PBIS Resources',
-        description: 'Helpful PBIS resources',
+        id: "link-1",
+        link: "https://example.com/pbis-resources",
+        name: "PBIS Resources",
+        description: "Helpful PBIS resources",
         forParents: true,
         forTeachers: true,
         forStudents: false,
       },
       {
-        id: 'link-2',
-        link: 'student-rewards.com',
-        name: 'Student Rewards',
-        description: 'Student reward ideas',
+        id: "link-2",
+        link: "student-rewards.com",
+        name: "Student Rewards",
+        description: "Student reward ideas",
         forParents: false,
         forTeachers: false,
         forStudents: true,
@@ -139,21 +152,21 @@ describe('PbisPage', () => {
     ],
     TAs: [
       {
-        id: 'ta-1',
-        name: 'Ms. Johnson',
+        id: "ta-1",
+        name: "Ms. Johnson",
         taTeamPbisLevel: 2,
         taTeamAveragePbisCardsPerStudent: 12,
         taStudents: [
           {
-            id: 'student-1',
-            name: 'Alice Brown',
+            id: "student-1",
+            name: "Alice Brown",
             studentPbisCardsCount: 85,
             uncountedCards: 5,
             individualPbisLevel: 3,
           },
           {
-            id: 'student-2',
-            name: 'Bob Wilson',
+            id: "student-2",
+            name: "Bob Wilson",
             studentPbisCardsCount: 65,
             uncountedCards: 3,
             individualPbisLevel: 2,
@@ -161,14 +174,14 @@ describe('PbisPage', () => {
         ],
       },
       {
-        id: 'ta-2',
-        name: 'Mr. Davis',
+        id: "ta-2",
+        name: "Mr. Davis",
         taTeamPbisLevel: 1,
         taTeamAveragePbisCardsPerStudent: 8,
         taStudents: [
           {
-            id: 'student-3',
-            name: 'Carol White',
+            id: "student-3",
+            name: "Carol White",
             studentPbisCardsCount: 40,
             uncountedCards: 2,
             individualPbisLevel: 1,
@@ -178,13 +191,13 @@ describe('PbisPage', () => {
     ],
     cardCounts: [
       {
-        id: 'count-1',
-        collectionDate: '2024-01-01T00:00:00.000Z',
+        id: "count-1",
+        collectionDate: "2024-01-01T00:00:00.000Z",
         collectedCards: 4500,
       },
       {
-        id: 'count-2',
-        collectionDate: '2024-01-15T00:00:00.000Z',
+        id: "count-2",
+        collectionDate: "2024-01-15T00:00:00.000Z",
         collectedCards: 5000,
       },
     ],
@@ -195,7 +208,7 @@ describe('PbisPage', () => {
     isAllowed.mockReturnValue(true);
   });
 
-  it('renders school-wide PBIS data correctly', () => {
+  it("renders school-wide PBIS data correctly", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -206,11 +219,12 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(screen.getByText('School-Wide PBIS Data')).toBeInTheDocument();
-    expect(screen.getByText('School-Wide Cards: 5000')).toBeInTheDocument();
+    expect(screen.getByText("School-Wide PBIS Data")).toBeInTheDocument();
+    expect(screen.getByText("School-Wide Cards: 5000")).toBeInTheDocument();
+    expect(screen.getByText("2 TAs, 2 collections")).toBeInTheDocument();
   });
 
-  it('renders school-wide doughnut chart', () => {
+  it("renders school-wide doughnut chart", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -221,14 +235,14 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    const charts = screen.getAllByTestId('doughnut-chart');
+    const charts = screen.getAllByTestId("doughnut-chart");
     expect(charts.length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByText('School-Wide Cards By Category'),
+      screen.getByText("School-Wide Cards By Category"),
     ).toBeInTheDocument();
   });
 
-  it('renders PBIS falcon with correct count', () => {
+  it("renders PBIS falcon with correct count", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -239,11 +253,11 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(screen.getByTestId('pbis-falcon')).toBeInTheDocument();
-    expect(screen.getByText('Falcon - 5000 cards')).toBeInTheDocument();
+    expect(screen.getByTestId("pbis-falcon")).toBeInTheDocument();
+    expect(screen.getByText("Falcon - 5000 cards")).toBeInTheDocument();
   });
 
-  it('displays PBIS card chart', () => {
+  it("displays PBIS card chart", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -254,11 +268,11 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(screen.getByTestId('pbis-card-chart')).toBeInTheDocument();
-    expect(screen.getByText('Card Counts: 2')).toBeInTheDocument();
+    expect(screen.getByTestId("pbis-card-chart")).toBeInTheDocument();
+    expect(screen.getByText("Card Counts: 2")).toBeInTheDocument();
   });
 
-  it('displays collection data when available', () => {
+  it("displays collection data when available", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -269,20 +283,20 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(screen.getByTestId('pbis-collection-data')).toBeInTheDocument();
+    expect(screen.getByTestId("pbis-collection-data")).toBeInTheDocument();
     expect(
-      screen.getByText('Collection Data: collection-1'),
+      screen.getByText("Collection Data: collection-1"),
     ).toBeInTheDocument();
   });
 
-  it('uses current collection data so newly chosen staff winners appear', () => {
+  it("uses current collection data so newly chosen staff winners appear", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: {
         lastCollection: [
           {
-            id: 'current-collection',
-            staffRandomWinners: [{ id: 'staff-1', name: 'Ms. Winner' }],
+            id: "current-collection",
+            staffRandomWinners: [{ id: "staff-1", name: "Ms. Winner" }],
             taNewLevelWinners: [],
             personalLevelWinners: [],
             randomDrawingWinners: [],
@@ -296,12 +310,12 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
     expect(
-      screen.getByText('Collection Data: current-collection'),
+      screen.getByText("Collection Data: current-collection"),
     ).toBeInTheDocument();
-    expect(screen.getByText('Staff Winner: Ms. Winner')).toBeInTheDocument();
+    expect(screen.getByText("Staff Winner: Ms. Winner")).toBeInTheDocument();
   });
 
-  it('shows management links for users with canManagePbis permission', () => {
+  it("shows management links for users with canManagePbis permission", () => {
     const adminUser = {
       ...mockUser,
       canManagePbis: true,
@@ -317,14 +331,14 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
     expect(
-      screen.getByRole('link', { name: 'Weekly Reading' }),
+      screen.getByRole("link", { name: "Weekly Reading" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'PBIS Stats' }),
+      screen.getByRole("link", { name: "PBIS Stats" }),
     ).toBeInTheDocument();
   });
 
-  it('shows PBIS Stats to superadmins', () => {
+  it("shows PBIS Stats to superadmins", () => {
     useUser.mockReturnValue({
       ...mockUser,
       isSuperAdmin: true,
@@ -338,12 +352,13 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(
-      screen.getByRole('link', { name: 'PBIS Stats' }),
-    ).toHaveAttribute('href', '/PbisStats');
+    expect(screen.getByRole("link", { name: "PBIS Stats" })).toHaveAttribute(
+      "href",
+      "/PbisStats",
+    );
   });
 
-  it('shows staff links for staff users', () => {
+  it("shows staff links for staff users", () => {
     const staffUser = {
       ...mockUser,
       isStaff: true,
@@ -359,11 +374,11 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
     expect(
-      screen.getByRole('link', { name: 'Students of Interest' }),
+      screen.getByRole("link", { name: "Students of Interest" }),
     ).toBeInTheDocument();
   });
 
-  it('filters and displays role-specific PBIS links', () => {
+  it("filters and displays role-specific PBIS links", () => {
     const teacherUser = {
       ...mockUser,
       isStaff: true,
@@ -382,15 +397,15 @@ describe('PbisPage', () => {
 
     // Should show teacher links
     expect(
-      screen.getByRole('link', { name: 'PBIS Resources' }),
+      screen.getByRole("link", { name: "PBIS Resources" }),
     ).toBeInTheDocument();
     // Should not show student links
     expect(
-      screen.queryByRole('link', { name: 'Student Rewards' }),
+      screen.queryByRole("link", { name: "Student Rewards" }),
     ).not.toBeInTheDocument();
   });
 
-  it('displays student-specific links for students', () => {
+  it("displays student-specific links for students", () => {
     const studentUser = {
       ...mockUser,
       isStaff: false,
@@ -409,15 +424,15 @@ describe('PbisPage', () => {
 
     // Should show student links
     expect(
-      screen.getByRole('link', { name: 'Student Rewards' }),
+      screen.getByRole("link", { name: "Student Rewards" }),
     ).toBeInTheDocument();
     // Should not show teacher-only links
     expect(
-      screen.queryByRole('link', { name: 'PBIS Resources' }),
+      screen.queryByRole("link", { name: "PBIS Resources" }),
     ).not.toBeInTheDocument();
   });
 
-  it('renders TA team data correctly', () => {
+  it("renders TA team data correctly", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -428,14 +443,14 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    expect(screen.getByText('Current Team Data')).toBeInTheDocument();
-    expect(screen.getByText('Ms. Johnson')).toBeInTheDocument();
-    expect(screen.getByText('Level -2-')).toBeInTheDocument();
-    expect(screen.getByText('12 cards per student')).toBeInTheDocument();
-    expect(screen.getByText('Total of 2 students')).toBeInTheDocument();
+    expect(screen.getByText("Current Team Data")).toBeInTheDocument();
+    expect(screen.getByText("Ms. Johnson")).toBeInTheDocument();
+    expect(screen.getByText("Level -2-")).toBeInTheDocument();
+    expect(screen.getByText("12 cards per student")).toBeInTheDocument();
+    expect(screen.getByText("Total of 2 students")).toBeInTheDocument();
   });
 
-  it.skip('calculates uncounted cards correctly for TAs', () => {
+  it.skip("calculates uncounted cards correctly for TAs", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -447,12 +462,12 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
     // Ms. Johnson's team: 5 + 3 = 8 uncounted cards
-    expect(screen.getByText('Uncounted cards: 8')).toBeInTheDocument();
+    expect(screen.getByText("Uncounted cards: 8")).toBeInTheDocument();
     // Mr. Davis's team: 2 uncounted cards
-    expect(screen.getByText('Uncounted cards: 2')).toBeInTheDocument();
+    expect(screen.getByText("Uncounted cards: 2")).toBeInTheDocument();
   });
 
-  it.skip('displays individual student data within TA teams', () => {
+  it.skip("displays individual student data within TA teams", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -479,7 +494,7 @@ describe('PbisPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('sorts TAs by team PBIS level', () => {
+  it("sorts TAs by team PBIS level", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -492,21 +507,21 @@ describe('PbisPage', () => {
       <PbisPage {...mockPbisPageProps} />,
     );
 
-    const taNames = container.querySelectorAll('h3');
+    const taNames = container.querySelectorAll("h3");
     const taNameTexts = Array.from(taNames).map((h3) => h3.textContent);
 
     // Mr. Davis (Level 1) should come before Ms. Johnson (Level 2)
     const davisIndex = taNameTexts.findIndex((name) =>
-      name?.includes('Mr. Davis'),
+      name?.includes("Mr. Davis"),
     );
     const johnsonIndex = taNameTexts.findIndex((name) =>
-      name?.includes('Ms. Johnson'),
+      name?.includes("Ms. Johnson"),
     );
 
     expect(davisIndex).toBeLessThan(johnsonIndex);
   });
 
-  it('handles external links correctly', () => {
+  it("handles external links correctly", () => {
     useUser.mockReturnValue({ ...mockUser, isStaff: true });
     useGQLQuery.mockReturnValue({
       data: null,
@@ -517,17 +532,17 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    const pbisResourcesLink = screen.getByRole('link', {
-      name: 'PBIS Resources',
+    const pbisResourcesLink = screen.getByRole("link", {
+      name: "PBIS Resources",
     });
     expect(pbisResourcesLink).toHaveAttribute(
-      'href',
-      'https://example.com/pbis-resources',
+      "href",
+      "https://example.com/pbis-resources",
     );
-    expect(pbisResourcesLink).toHaveAttribute('target', '_blank');
+    expect(pbisResourcesLink).toHaveAttribute("target", "_blank");
   });
 
-  it('handles links without http protocol correctly', () => {
+  it("handles links without http protocol correctly", () => {
     const studentUser = {
       ...mockUser,
       isStudent: true,
@@ -542,16 +557,16 @@ describe('PbisPage', () => {
 
     renderWithProviders(<PbisPage {...mockPbisPageProps} />);
 
-    const studentRewardsLink = screen.getByRole('link', {
-      name: 'Student Rewards',
+    const studentRewardsLink = screen.getByRole("link", {
+      name: "Student Rewards",
     });
     expect(studentRewardsLink).toHaveAttribute(
-      'href',
-      'http://student-rewards.com',
+      "href",
+      "http://student-rewards.com",
     );
   });
 
-  it('handles empty or null data gracefully', () => {
+  it("handles empty or null data gracefully", () => {
     useUser.mockReturnValue(mockUser);
     useGQLQuery.mockReturnValue({
       data: null,
@@ -572,23 +587,23 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...emptyProps} />);
 
     expect(screen.getByText(/School-Wide Cards:/)).toBeInTheDocument();
-    expect(screen.getByText('Current Team Data')).toBeInTheDocument();
+    expect(screen.getByText("Current Team Data")).toBeInTheDocument();
   });
 
-  it('excludes admin user from TA display', () => {
+  it("excludes admin user from TA display", () => {
     const propsWithAdmin = {
       ...mockPbisPageProps,
       TAs: [
         ...mockPbisPageProps.TAs,
         {
-          id: 'admin', // This should match the ADMIN_ID from our mock
-          name: 'Admin User',
+          id: "admin", // This should match the ADMIN_ID from our mock
+          name: "Admin User",
           taTeamPbisLevel: 5,
           taTeamAveragePbisCardsPerStudent: 20,
           taStudents: [
             {
-              id: 'admin-student',
-              name: 'Admin Student',
+              id: "admin-student",
+              name: "Admin Student",
               studentPbisCardsCount: 100,
               uncountedCards: 0,
               individualPbisLevel: 5,
@@ -609,9 +624,9 @@ describe('PbisPage', () => {
     renderWithProviders(<PbisPage {...propsWithAdmin} />);
 
     // Admin should not be displayed
-    expect(screen.queryByText('Admin User')).not.toBeInTheDocument();
+    expect(screen.queryByText("Admin User")).not.toBeInTheDocument();
     // Other TAs should still be displayed
-    expect(screen.getByText('Ms. Johnson')).toBeInTheDocument();
-    expect(screen.getByText('Mr. Davis')).toBeInTheDocument();
+    expect(screen.getByText("Ms. Johnson")).toBeInTheDocument();
+    expect(screen.getByText("Mr. Davis")).toBeInTheDocument();
   });
 });

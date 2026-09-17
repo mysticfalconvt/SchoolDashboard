@@ -1,19 +1,19 @@
-import gql from 'graphql-tag';
-import { GetStaticProps, NextPage } from 'next';
-import Link from 'next/link';
-import DoughnutChart from '../components/Chart/DonutChart';
-import DisplayPbisCollectionData from '../components/PBIS/DisplayPbisCollectionData';
-import PbisCardChart from '../components/PBIS/PbisCardChart';
-import PbisFalcon from '../components/PBIS/PbisFalcon';
-import PbisVisitorStats from '../components/PBIS/PbisVisitorStats';
-import StaffPbisCardTable from '../components/PBIS/StaffPbisCardTable';
-import { SmallGradientButton } from '../components/styles/Button';
-import { useUser } from '../components/User';
-import { ADMIN_ID } from '../config';
-import isAllowed from '../lib/isAllowed';
-import { smartGraphqlClient } from '../lib/smartGraphqlClient';
-import { useGQLQuery } from '../lib/useGqlQuery';
-
+import gql from "graphql-tag";
+import { GetStaticProps, NextPage } from "next";
+import Link from "next/link";
+import DoughnutChart from "../components/Chart/DonutChart";
+import AllTaPbisCollectionChart from "../components/PBIS/AllTaPbisCollectionChart";
+import DisplayPbisCollectionData from "../components/PBIS/DisplayPbisCollectionData";
+import PbisCardChart from "../components/PBIS/PbisCardChart";
+import PbisFalcon from "../components/PBIS/PbisFalcon";
+import PbisVisitorStats from "../components/PBIS/PbisVisitorStats";
+import StaffPbisCardTable from "../components/PBIS/StaffPbisCardTable";
+import { SmallGradientButton } from "../components/styles/Button";
+import { useUser } from "../components/User";
+import { ADMIN_ID } from "../config";
+import isAllowed from "../lib/isAllowed";
+import { smartGraphqlClient } from "../lib/smartGraphqlClient";
+import { useGQLQuery } from "../lib/useGqlQuery";
 
 const PBIS_PAGE_STATIC_QUERY = gql`
   query PBIS_PAGE_STATIC_QUERY($lastCollectionDate: DateTime) {
@@ -39,6 +39,12 @@ const PBIS_PAGE_STATIC_QUERY = gql`
         id
         name
         studentPbisCardsCount
+        allCards: studentPbisCards(
+          orderBy: { dateGiven: asc }
+          where: { dateGiven: { lte: $lastCollectionDate } }
+        ) {
+          dateGiven
+        }
         uncountedCards: studentPbisCardsCount(
           where: { dateGiven: { gt: $lastCollectionDate } }
         )
@@ -148,6 +154,7 @@ interface TaStudent {
   studentPbisCardsCount: number;
   uncountedCards: number;
   individualPbisLevel: number;
+  allCards?: Array<{ dateGiven: string }>;
 }
 
 interface TA {
@@ -193,7 +200,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
   const me = useUser();
   const TAs = props?.TAs || [];
   const { data: latestCollectionData } = useGQLQuery(
-    'LatestPbisCollection',
+    "LatestPbisCollection",
     LATEST_PBIS_COLLECTION_QUERY,
     {},
     { enabled: !!me },
@@ -226,30 +233,30 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
         <div>
           <h2 className="hidePrint">Links</h2>
           <div className="flex justify-around items-center w-full flex-wrap gap-2">
-            {isAllowed(me, 'canManagePbis') && (
+            {isAllowed(me, "canManagePbis") && (
               <Link href="/PbisWeeklyReading">
                 <SmallGradientButton title="Weekly Reading">
                   Weekly Reading
                 </SmallGradientButton>
               </Link>
             )}
-            {(isAllowed(me, 'canManagePbis') ||
-              isAllowed(me, 'isSuperAdmin')) && (
+            {(isAllowed(me, "canManagePbis") ||
+              isAllowed(me, "isSuperAdmin")) && (
               <Link href="/PbisStats">
                 <SmallGradientButton title="PBIS Stats">
                   PBIS Stats
                 </SmallGradientButton>
               </Link>
             )}
-            {isAllowed(me, 'isStaff') && (
+            {isAllowed(me, "isStaff") && (
               <Link href="/studentsOfInterestPBIS">
                 <SmallGradientButton title="Students of Interest">
                   Students of Interest
                 </SmallGradientButton>
               </Link>
             )}
-            {(isAllowed(me, 'canManagePbis') ||
-              isAllowed(me, 'isSuperAdmin')) && (
+            {(isAllowed(me, "canManagePbis") ||
+              isAllowed(me, "isSuperAdmin")) && (
               <Link href="/CallbackRewardHistory">
                 <SmallGradientButton title="Callback History">
                   Callback History
@@ -262,7 +269,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
                 className="pbis-link"
                 target="_blank"
                 href={
-                  link.link.startsWith('http')
+                  link.link.startsWith("http")
                     ? link.link
                     : `http://${link.link}`
                 }
@@ -281,7 +288,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           title="School-Wide Cards By Category"
           chartData={schoolWideCardsInCategories}
         />
-        {isAllowed(me, 'isStaff') && <PbisVisitorStats />}
+        {isAllowed(me, "isStaff") && <PbisVisitorStats />}
       </div>
       <PbisCardChart className="hidePrint" cardCounts={cardCounts} />
       <div>
@@ -326,7 +333,11 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           ))}
       </div>
       {/* {JSON.stringify(lastPbisCollection.taTeamsLevels)} */}
-      {(isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) && (
+      <AllTaPbisCollectionChart
+        teams={TAs.filter((ta: TA) => ta.id !== ADMIN_ID)}
+        collectionDates={cardCounts || []}
+      />
+      {(isAllowed(me, "canManagePbis") || isAllowed(me, "isSuperAdmin")) && (
         <StaffPbisCardTable />
       )}
     </div>
@@ -383,27 +394,27 @@ export const getStaticProps: GetStaticProps<PbisPageProps> = async (
   // get the number of cards in each category for whole school
   const schoolWideCardsInCategories: CategoryData[] = [
     {
-      word: 'class',
+      word: "class",
       total: data.classCards || 0,
     },
     {
-      word: 'quick',
+      word: "quick",
       total: data.quickCards || 0,
     },
     {
-      word: 'respect',
+      word: "respect",
       total: data.respectCards || 0,
     },
     {
-      word: 'responsibility',
+      word: "responsibility",
       total: data.responsibilityCards || 0,
     },
     {
-      word: 'perseverance',
+      word: "perseverance",
       total: data.perseveranceCards || 0,
     },
     {
-      word: 'physical',
+      word: "physical",
       total: data.physicalCards || 0,
     },
   ];
