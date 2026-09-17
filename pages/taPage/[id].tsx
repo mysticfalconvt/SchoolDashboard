@@ -1,18 +1,22 @@
-import gql from 'graphql-tag';
-import { GetServerSideProps, NextPage } from 'next';
-import { useMemo } from 'react';
-import CallbackTable from '../../components/Callback/CallbackTable';
-import { GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY } from '../../components/Chromebooks/ChromebookCheck';
-import DisplayError from '../../components/ErrorMessage';
-import Loading from '../../components/Loading';
-import CountPhysicalCards from '../../components/PBIS/CountPhysicalCards';
-import { useUser } from '../../components/User';
-import ViewTaStudentTable from '../../components/users/ViewTaStudentTable';
-import { callbackDisabled } from '../../config';
-import { useGQLQuery } from '../../lib/useGqlQuery';
+import gql from "graphql-tag";
+import { GetServerSideProps, NextPage } from "next";
+import { useMemo } from "react";
+import CallbackTable from "../../components/Callback/CallbackTable";
+import { GET_TA_CHROMEBOOK_ASSIGNMENTS_QUERY } from "../../components/Chromebooks/ChromebookCheck";
+import DisplayError from "../../components/ErrorMessage";
+import Loading from "../../components/Loading";
+import CountPhysicalCards from "../../components/PBIS/CountPhysicalCards";
+import TaPbisCollectionChart from "../../components/PBIS/TaPbisCollectionChart";
+import { useUser } from "../../components/User";
+import ViewTaStudentTable from "../../components/users/ViewTaStudentTable";
+import { callbackDisabled } from "../../config";
+import { useGQLQuery } from "../../lib/useGqlQuery";
 
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
+    pbisCollectionDates(orderBy: { collectionDate: asc }) {
+      collectionDate
+    }
     taTeacher: user(where: { id: $id }) {
       name
       id
@@ -99,6 +103,9 @@ const TA_INFO_QUERY = gql`
         callbackCount
         studentCellPhoneViolationCount
         studentPbisCardsCount
+        allCards: studentPbisCards(orderBy: { dateGiven: asc }) {
+          dateGiven
+        }
         studentCardCountInLastWeek : studentPbisCardsCount(
           where: {
             dateGiven: {
@@ -213,6 +220,7 @@ interface TaStudent {
   callbackCount?: number;
   studentCellPhoneViolationCount?: number;
   studentPbisCardsCount: number;
+  allCards?: Array<{ dateGiven: string }>;
   studentCardCountInLastWeek?: number;
   studentFocusStudentCount?: number;
   callbackItemsCount?: number;
@@ -294,6 +302,11 @@ const TA: NextPage<TaPageProps> = ({ query }) => {
         {data?.taTeacher?.taTeamAveragePbisCardsPerStudent || 0} average PBIS
         cards per student
       </p>
+      <TaPbisCollectionChart
+        students={students}
+        collectionDates={data?.pbisCollectionDates || []}
+        currentAverage={data?.taTeacher?.taTeamAveragePbisCardsPerStudent || 0}
+      />
       {students.length > 0 && (
         <>
           {isAllowedPbisCardCounting && (

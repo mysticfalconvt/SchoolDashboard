@@ -1,19 +1,24 @@
-import gql from 'graphql-tag';
-import React from 'react';
-import CallbackTable from '../components/Callback/CallbackTable';
-import DisplayError from '../components/ErrorMessage';
-import Loading from '../components/Loading';
-import CountPhysicalCards from '../components/PBIS/CountPhysicalCards';
-import { useUser } from '../components/User';
-import ViewTaStudentTable from '../components/users/ViewTaStudentTable';
-import { useGQLQuery } from '../lib/useGqlQuery';
+import gql from "graphql-tag";
+import React from "react";
+import CallbackTable from "../components/Callback/CallbackTable";
+import DisplayError from "../components/ErrorMessage";
+import Loading from "../components/Loading";
+import CountPhysicalCards from "../components/PBIS/CountPhysicalCards";
+import TaPbisCollectionChart from "../components/PBIS/TaPbisCollectionChart";
+import { useUser } from "../components/User";
+import ViewTaStudentTable from "../components/users/ViewTaStudentTable";
+import { useGQLQuery } from "../lib/useGqlQuery";
 
 const TA_INFO_QUERY = gql`
   query TA_INFO_QUERY($id: ID!) {
+    pbisCollectionDates(orderBy: { collectionDate: asc }) {
+      collectionDate
+    }
     taTeacher: user(where: { id: $id }) {
       name
       id
       email
+      taTeamAveragePbisCardsPerStudent
 
       taStudents {
         averageTimeToCompleteCallback
@@ -96,6 +101,9 @@ const TA_INFO_QUERY = gql`
         callbackCount
         studentCellPhoneViolationCount
         studentPbisCardsCount
+        allCards: studentPbisCards(orderBy: { dateGiven: asc }) {
+          dateGiven
+        }
         studentFocusStudentCount
         studentCardCountInLastWeek : studentPbisCardsCount(
           where: {
@@ -211,6 +219,7 @@ interface TaStudent {
   callbackCount?: number;
   studentCellPhoneViolationCount?: number;
   studentPbisCardsCount: number;
+  allCards?: Array<{ dateGiven: string }>;
   studentFocusStudentCount?: number;
   studentCardCountInLastWeek?: number;
   callbackItems?: CallbackItem[];
@@ -226,7 +235,7 @@ interface TaTeacher {
 const TA: React.FC = () => {
   const me = useUser();
   const { data, isLoading, error, refetch } = useGQLQuery(
-    'TaInfo',
+    "TaInfo",
     TA_INFO_QUERY,
     {
       id: me?.id,
@@ -262,6 +271,14 @@ const TA: React.FC = () => {
       <p>{taStudentCount} students</p>
       <p>{taTotalPbisCards} total PBIS cards</p>
       <p>{taAveragePbisCards} average PBIS cards per student</p>
+      <TaPbisCollectionChart
+        students={students}
+        collectionDates={data?.pbisCollectionDates || []}
+        currentAverage={
+          data?.taTeacher?.taTeamAveragePbisCardsPerStudent ??
+          taAveragePbisCards
+        }
+      />
       {students.length > 0 && (
         <>
           <CountPhysicalCards taStudents={students} refetch={refetch} />
