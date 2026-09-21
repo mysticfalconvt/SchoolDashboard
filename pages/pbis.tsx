@@ -7,6 +7,7 @@ import DisplayPbisCollectionData from "../components/PBIS/DisplayPbisCollectionD
 import PbisCardChart from "../components/PBIS/PbisCardChart";
 import PbisFalcon from "../components/PBIS/PbisFalcon";
 import PbisVisitorStats from "../components/PBIS/PbisVisitorStats";
+import RandomStudentDrawing from "../components/PBIS/RandomStudentDrawing";
 import StaffPbisCardTable from "../components/PBIS/StaffPbisCardTable";
 import { SmallGradientButton } from "../components/styles/Button";
 import { useUser } from "../components/User";
@@ -255,6 +256,8 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
                 </SmallGradientButton>
               </Link>
             )}
+            {(isAllowed(me, "canManagePbis") ||
+              isAllowed(me, "isSuperAdmin")) && <RandomStudentDrawing />}
             {(isAllowed(me, "canManagePbis") ||
               isAllowed(me, "isSuperAdmin")) && (
               <Link href="/CallbackRewardHistory">

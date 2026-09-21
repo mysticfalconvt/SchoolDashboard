@@ -5,7 +5,7 @@ const customJestConfig = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/$1',
         // Handle CSS imports
-        '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+        '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
         // Handle image imports
         '\\.(png|jpg|jpeg|gif|svg)$': 'jest-transform-stub',
     },
