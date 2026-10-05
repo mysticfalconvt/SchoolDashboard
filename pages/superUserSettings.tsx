@@ -42,6 +42,11 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'canManagePbis') && <NewWeeklyCallbackReward />}
       {isAllowed(me, 'canManagePbis') && <PickStaffWinners />}
       {isAllowed(me, 'canManagePbis') && <SendPbisWinnerEmails />}
+      {(isAllowed(me, 'canManagePbis') || isAllowed(me, 'isSuperAdmin')) && (
+        <Link href="/emailQueue">
+          <GradientButton>Email Queue</GradientButton>
+        </Link>
+      )}
       {isAllowed(me, 'isSuperAdmin') && (
         <Link href="/communicatorChat">
           <GradientButton>Communicator Chat</GradientButton>

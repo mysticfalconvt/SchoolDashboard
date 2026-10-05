@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import useForm from '../../lib/useForm';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -94,9 +95,17 @@ export default function SendPbisWinnerEmails() {
   const { inputs, handleChange, clearForm, resetForm } = useForm();
   const [sending, setSending] = React.useState(false);
   const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
+  const [lastBatch, setLastBatch] = useState<{
+    id: string;
+    queued: number;
+    failed: number;
+  } | null>(null);
 
   const user = useUser();
-  const { setEmail, emailLoading, sendEmail } = useSendEmail();
+  const { setEmail, emailLoading, sendEmail, sendEmailAsync } = useSendEmail();
+  // sendEmailAsync observes queue acceptance. The fallback keeps older test
+  // doubles and clients compatible while the shared hook retains its API.
+  const queueEmail = sendEmailAsync || sendEmail;
 
   const { data, isLoading } = useGQLQuery(
     'PBIS Winners Email',
@@ -186,6 +195,9 @@ export default function SendPbisWinnerEmails() {
 
   const sendWinnerEmails = async () => {
     setSending(true);
+    setLastBatch(null);
+    const collectionId = data?.lastCollection?.[0]?.id || 'unknown';
+    const batchId = `pbis-${collectionId}-${Date.now()}`;
 
     // Calculate total emails to send
     const winnerEmailsToSend = winners.filter((w) => w.email).length;
@@ -203,6 +215,7 @@ export default function SendPbisWinnerEmails() {
 
     setEmailProgress({ sent: 0, total: totalEmails });
     let emailsSent = 0;
+    let emailsFailed = 0;
 
     // Send emails to winners
     for (const winner of winners) {
@@ -247,7 +260,7 @@ The PBIS Team
 
 Congratulations! You have been selected as a winner in this week's PBIS staff drawing!
 
-Your commitment to supporting our students and reinforcing positive behavior has been recognized. Please check with the main office for details about your reward.
+Your commitment to supporting our students and reinforcing positive behavior has been recognized.
 
 Thank you for all you do to support our PBIS program and for continuing to encourage students to be positive members of our falcon community!
 
@@ -277,16 +290,21 @@ The PBIS Team
         fromAddress: user.email || 'noreply@ncujhs.tech',
         subject: subject,
         body: message,
+        lowPriority: true,
+        batchId,
       };
 
       try {
-        await sendEmail({
+        const result = await queueEmail({
           emailData: emailData,
         });
+        if (result?.sendEmail === false) {
+          throw new Error('The server did not accept this email');
+        }
         emailsSent++;
         setEmailProgress({ sent: emailsSent, total: totalEmails });
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Small delay between emails
       } catch (error) {
+        emailsFailed++;
         console.error(`Error sending email to ${winner.email}:`, error);
       }
     }
@@ -336,16 +354,21 @@ The PBIS Team
             fromAddress: user.email || 'noreply@ncujhs.tech',
             subject: subject,
             body: message,
+            lowPriority: true,
+            batchId,
           };
 
           try {
-            await sendEmail({
+            const result = await queueEmail({
               emailData: emailData,
             });
+            if (result?.sendEmail === false) {
+              throw new Error('The server did not accept this email');
+            }
             emailsSent++;
             setEmailProgress({ sent: emailsSent, total: totalEmails });
-            await new Promise((resolve) => setTimeout(resolve, 1000)); // Small delay between emails
           } catch (error) {
+            emailsFailed++;
             console.error(
               `Error sending email to parent ${parent.email}:`,
               error,
@@ -356,6 +379,7 @@ The PBIS Team
     }
 
     setSending(false);
+    setLastBatch({ id: batchId, queued: emailsSent, failed: emailsFailed });
     setEmailProgress({ sent: 0, total: 0 });
     resetForm();
     setShowForm(false);
@@ -397,6 +421,19 @@ The PBIS Team
       >
         Send Emails to all weekly PBIS winners
       </GradientButton>
+
+      {lastBatch && (
+        <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-900">
+          <strong>{lastBatch.queued} emails queued.</strong>
+          {lastBatch.failed > 0 && ` ${lastBatch.failed} could not be queued.`}{' '}
+          <Link
+            href={`/emailQueue?batchId=${encodeURIComponent(lastBatch.id)}`}
+            className="font-semibold underline"
+          >
+            View this batch
+          </Link>
+        </div>
+      )}
 
       {showForm && (
         <>
@@ -519,12 +556,12 @@ The PBIS Team
                   {sending && (
                     <div className="mb-6">
                       <h3 className="text-white text-lg font-semibold mb-3">
-                        Sending Emails...
+                        Queueing Emails...
                       </h3>
                       <div className="bg-white bg-opacity-10 p-4 rounded">
                         <div className="text-white text-center mb-2">
                           Progress: {emailProgress.sent} / {emailProgress.total}{' '}
-                          emails sent
+                          emails queued
                         </div>
                         <div className="w-full bg-gray-600 rounded-full h-2">
                           <div
@@ -615,11 +652,11 @@ The PBIS Team
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                               ></path>
                             </svg>
-                            Sending Emails...
+                            Queueing Emails...
                           </>
                         ) : (
                           <>
-                            Send Emails
+                            Queue Emails
                             {totalEmailCount > 0 && (
                               <span className="ml-2">
                                 ({totalEmailCount} email

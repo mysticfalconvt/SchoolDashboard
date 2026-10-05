@@ -12,10 +12,17 @@ interface EmailData {
   [key: string]: any;
 }
 
-export default function useSendEmail() {
+interface UseSendEmailResult {
+  setEmail: React.Dispatch<React.SetStateAction<EmailData | null>>;
+  emailLoading: boolean;
+  sendEmail: (...args: any[]) => any;
+  sendEmailAsync?: (...args: any[]) => Promise<any>;
+}
+
+export default function useSendEmail(): UseSendEmailResult {
   const [email, setEmail] = useState<EmailData | null>(null);
 
-  const [sendEmail, { data, loading: emailLoading, error }] =
+  const [sendEmail, { loading: emailLoading, mutateAsync: sendEmailAsync }] =
     useGqlMutation(SEND_EMAIL_MUTATION);
 
   useEffect(() => {
@@ -30,5 +37,5 @@ export default function useSendEmail() {
     }
   }, [email, sendEmail]);
 
-  return { setEmail, emailLoading, sendEmail };
+  return { setEmail, emailLoading, sendEmail, sendEmailAsync };
 }
