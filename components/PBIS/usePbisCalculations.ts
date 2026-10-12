@@ -87,12 +87,18 @@ export function usePbisCalculations(data: PbisCollectionData | undefined): Calcu
 
     const totalCards = data.pbisCardsCount || 0;
 
+    // Newest first. Copied so the query cache is never reordered in place.
+    const previousCollections = [...(data.pbisCollectionDates || [])].sort(
+      (a, b) =>
+        new Date(b.collectionDate).getTime() - new Date(a.collectionDate).getTime(),
+    );
+
     // Check if there's a recent collection (within 7 days)
     let hasRecentCollection = false;
     let daysSinceLastCollection: number | undefined;
-    
-    if (data.pbisCollectionDates && data.pbisCollectionDates.length > 0) {
-      const latestCollection = data.pbisCollectionDates[0];
+
+    if (previousCollections.length > 0) {
+      const latestCollection = previousCollections[0];
       const latestDate = new Date(latestCollection.collectionDate);
       const now = new Date();
       const diffTime = Math.abs(now.getTime() - latestDate.getTime());
@@ -155,11 +161,6 @@ export function usePbisCalculations(data: PbisCollectionData | undefined): Calcu
       .filter((student) => student.levelChange > 0);
 
     // Calculate random drawing winners
-    const previousCollections = data.pbisCollectionDates?.sort(
-      (a, b) =>
-        new Date(b.collectionDate).getTime() - new Date(a.collectionDate).getTime(),
-    ) || [];
-
     const previousWinnersToExclude = previousCollections
       .slice(0, collectionsWithoutRepeatWinners)
       .reduce((acc: string[], cur) => {

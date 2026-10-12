@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
+import plainTextEmailToHtml from '../../lib/plainTextEmailToHtml';
 import useForm from '../../lib/useForm';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import useSendEmail from '../../lib/useSendEmail';
@@ -22,6 +23,15 @@ const PBIS_WINNERS_QUERY = gql`
         name
         email
         taTeamPbisLevel
+        taStudents {
+          id
+          name
+          parent {
+            id
+            name
+            email
+          }
+        }
       }
       personalLevelWinners {
         id
@@ -32,6 +42,9 @@ const PBIS_WINNERS_QUERY = gql`
           id
           name
           email
+        }
+        taTeacher {
+          name
         }
       }
       staffRandomWinners {
@@ -62,6 +75,7 @@ const PBIS_WINNERS_QUERY = gql`
 interface FormInputs {
   confirmation: string;
   emailParents: boolean;
+  sendMeSamples: boolean;
 }
 
 interface Winner {
@@ -76,7 +90,24 @@ interface Winner {
   type: 'personal' | 'ta' | 'staff' | 'random';
   level?: number;
   taTeacher?: string;
+  taStudents?: Array<{
+    id: string;
+    name: string;
+    parent?: Array<{ id: string; name: string; email?: string }>;
+  }>;
 }
+
+interface ParentRecipient {
+  winner: Winner;
+  parent: { id: string; name: string; email?: string };
+  studentName: string;
+}
+
+const LEVEL_UP_POSTER_URL =
+  'https://drive.google.com/file/d/1UNl4FkmsaB0XN3TvDDaUuJw13hJao2DJ/view';
+
+const TA_CELEBRATION_POSTER_URL =
+  'https://drive.google.com/file/d/1_jZeEg_OlUNETYhkQ5a23iugK9u6LkpD/view';
 
 // Helper function to format parent names from "Last, First" to "First Last"
 const formatParentName = (name: string): string => {
@@ -132,6 +163,7 @@ export default function SendPbisWinnerEmails() {
           parents: winner.parent || [],
           type: 'personal',
           level: winner.individualPbisLevel,
+          taTeacher: winner.taTeacher?.name,
         });
       }
     });
@@ -145,6 +177,7 @@ export default function SendPbisWinnerEmails() {
           email: winner.email,
           type: 'ta',
           level: winner.taTeamPbisLevel,
+          taStudents: winner.taStudents || [],
         });
       }
     });
@@ -178,20 +211,54 @@ export default function SendPbisWinnerEmails() {
     return allWinners;
   }, [data?.lastCollection, showForm]);
 
+  // Parents of student winners, plus parents of every student in a TA that
+  // leveled up. A parent with several kids in the same TA gets one email.
+  const parentRecipients = useMemo(() => {
+    const recipients: ParentRecipient[] = [];
+    winners.forEach((winner) => {
+      if (winner.type === 'personal' || winner.type === 'random') {
+        winner.parents
+          ?.filter((parent) => parent.email)
+          .forEach((parent) =>
+            recipients.push({ winner, parent, studentName: winner.name }),
+          );
+      } else if (winner.type === 'ta') {
+        const seen = new Set<string>();
+        winner.taStudents?.forEach((student) => {
+          student.parent
+            ?.filter((parent) => parent.email && !seen.has(parent.email))
+            .forEach((parent) => {
+              seen.add(parent.email!);
+              recipients.push({ winner, parent, studentName: student.name });
+            });
+        });
+      }
+    });
+    return recipients;
+  }, [winners]);
+
   const totalEmailCount = useMemo(() => {
     const winnerEmailsToSend = winners.filter((w) => w.email).length;
-    const studentWinners = winners.filter(
-      (w) => w.type === 'personal' || w.type === 'random',
-    );
     const parentEmailsToSend = inputs.emailParents
-      ? studentWinners.reduce((count, winner) => {
-          const parentsWithEmail =
-            winner.parents?.filter((parent) => parent.email) || [];
-          return count + parentsWithEmail.length;
-        }, 0)
+      ? parentRecipients.length
       : 0;
-    return winnerEmailsToSend + parentEmailsToSend;
-  }, [winners, inputs.emailParents]);
+    // One sample per template type that is actually going out
+    const sampleTypes = new Set([
+      ...winners.filter((w) => w.email).map((w) => `winner:${w.type}`),
+      ...(inputs.emailParents
+        ? parentRecipients.map(({ winner }) => `parent:${winner.type}`)
+        : []),
+    ]);
+    const samplesToSend =
+      inputs.sendMeSamples && user?.email ? sampleTypes.size : 0;
+    return winnerEmailsToSend + parentEmailsToSend + samplesToSend;
+  }, [
+    winners,
+    parentRecipients,
+    inputs.emailParents,
+    inputs.sendMeSamples,
+    user?.email,
+  ]);
 
   const sendWinnerEmails = async () => {
     setSending(true);
@@ -200,22 +267,43 @@ export default function SendPbisWinnerEmails() {
     const batchId = `pbis-${collectionId}-${Date.now()}`;
 
     // Calculate total emails to send
-    const winnerEmailsToSend = winners.filter((w) => w.email).length;
-    const studentWinners = winners.filter(
-      (w) => w.type === 'personal' || w.type === 'random',
-    );
-    const parentEmailsToSend = inputs.emailParents
-      ? studentWinners.reduce((count, winner) => {
-          const parentsWithEmail =
-            winner.parents?.filter((parent) => parent.email) || [];
-          return count + parentsWithEmail.length;
-        }, 0)
-      : 0;
-    const totalEmails = winnerEmailsToSend + parentEmailsToSend;
+    const totalEmails = totalEmailCount;
 
     setEmailProgress({ sent: 0, total: totalEmails });
     let emailsSent = 0;
     let emailsFailed = 0;
+    // First email of each template type, re-sent to the sender at the end
+    const samples = new Map<
+      string,
+      { toAddress: string; subject: string; body: string }
+    >();
+
+    const queueOne = async (emailData: {
+      toAddress: string;
+      subject: string;
+      body: string;
+    }) => {
+      try {
+        const result = await queueEmail({
+          emailData: {
+            ...emailData,
+            // Templates are written as plain text; the backend renders HTML
+            body: plainTextEmailToHtml(emailData.body),
+            fromAddress: user.email || 'noreply@ncujhs.tech',
+            lowPriority: true,
+            batchId,
+          },
+        });
+        if (result?.sendEmail === false) {
+          throw new Error('The server did not accept this email');
+        }
+        emailsSent++;
+        setEmailProgress({ sent: emailsSent, total: totalEmails });
+      } catch (error) {
+        emailsFailed++;
+        console.error(`Error sending email to ${emailData.toAddress}:`, error);
+      }
+    };
 
     // Send emails to winners
     for (const winner of winners) {
@@ -229,28 +317,30 @@ export default function SendPbisWinnerEmails() {
           subject = '🎉 Congratulations! You Leveled Up in PBIS!';
           message = `Dear ${winner.name},
 
-Congratulations! You have leveled up to Level ${winner.level} in our PBIS program! This achievement demonstrates your commitment to our three habits of work: Respect, Responsibility, and Perseverance.
+Congratulations! You have leveled up to Level ${winner.level}! This means that you have earned and submitted at least 25 PBIS cards! Remember that PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just you, but also your TA and school as a whole - so keep submitting your cards as you earn them!
 
-Please report to the Bus Lobby to claim your well-deserved reward. Your positive behavior and dedication to creating a positive academic and social environment are truly commendable!
+Individual levels are based on a tiered system, with each level requiring a set number of cards which rises every 2 levels. As the number of required cards increases, so does the number of rewards available to students. View our level up system poster here: ${LEVEL_UP_POSTER_URL}
 
-Keep up the excellent work!
+Please report to the Bus Lobby to claim your prize. Thank you for modeling our three principles: Respect, Responsibility, and Perseverance!
+
+Thank you for being a positive member of our falcon community.
 
 The PBIS Team
-"Go the distance; dare to explore"`;
+“Have a tree-menous day!”`;
           break;
 
         case 'ta':
-          subject = '🎉 Congratulations! Your TA Team Leveled Up!';
+          subject = '🎉 Congratulations! Your TA Leveled Up in PBIS!';
           message = `Dear ${winner.name},
 
-Congratulations! Your TA team has completed their BINGO Box and reached Level ${winner.level}! This achievement reflects the collective effort and positive behavior of your entire team.
+Congratulations! Your TA has leveled up to Level ${winner.level}! This means that your TA has earned an average of 24 PBIS cards per student. This achievement reflects your students' effort in earning and submitting their cards, and your commitment to reinforcing our three principles: Respect, Responsibility, and Perseverance.
 
-You will be notified when you should receive your team celebration. Your leadership and the team's commitment to our three habits of work: Respect, Responsibility, and Perseverance, have made this possible.
+Your TA's next prize is the next box on the MAPLE lane your TA chose. This celebration will be scheduled during guided study in the coming days. View the TA Celebration poster here: ${TA_CELEBRATION_POSTER_URL}
 
-Congratulations on leading by example!
+Thank you for all you do to support our PBIS program and for continuing to encourage your students to be positive members of our falcon community!
 
 The PBIS Team
-"Go the distance; dare to explore"`;
+“Have a tree-menous day!”`;
           break;
 
         case 'staff':
@@ -258,14 +348,10 @@ The PBIS Team
             '🎉 Congratulations! You Won the Weekly PBIS Staff Drawing!';
           message = `Dear ${winner.name},
 
-Congratulations! You have been selected as a winner in this week's PBIS staff drawing!
-
-Your commitment to supporting our students and reinforcing positive behavior has been recognized.
-
-Thank you for all you do to support our PBIS program and for continuing to encourage students to be positive members of our falcon community!
+Congratulations! You have been selected as a winner in this week's PBIS staff drawing! Your commitment to supporting our students and reinforcing positive behavior has been recognized. You will earn your reward this week…listen carefully to the announcements to claim your prize. Thank you for all you do to support our PBIS program and for continuing to encourage students to be positive members of our falcon community!
 
 The PBIS Team
-"Go the distance; dare to explore"`;
+“Have a tree-menous day!”`;
           break;
 
         case 'random':
@@ -274,107 +360,101 @@ The PBIS Team
 
 Congratulations! You have been selected as a winner in this week's PBIS random drawing!
 
-Your positive behavior and demonstration of our three habits of work: Respect, Responsibility, and Perseverance, have earned you this reward. Please report to the Bus Lobby to claim your prize.
+Your positive behavior and demonstration of our three principles: Respect, Responsibility, and Perseverance, have earned you this reward. Please report to the Bus Lobby to claim your prize.
 
 ${winner.taTeacher ? `Your TA teacher ${winner.taTeacher} should be proud of your excellent behavior!` : ''}
 
 Keep up the great work!
 
 The PBIS Team
-"Go the distance; dare to explore"`;
+“Have a tree-menous day!”`;
           break;
       }
 
-      const emailData = {
-        toAddress: winner.email,
-        fromAddress: user.email || 'noreply@ncujhs.tech',
-        subject: subject,
-        body: message,
-        lowPriority: true,
-        batchId,
-      };
-
-      try {
-        const result = await queueEmail({
-          emailData: emailData,
-        });
-        if (result?.sendEmail === false) {
-          throw new Error('The server did not accept this email');
-        }
-        emailsSent++;
-        setEmailProgress({ sent: emailsSent, total: totalEmails });
-      } catch (error) {
-        emailsFailed++;
-        console.error(`Error sending email to ${winner.email}:`, error);
+      const emailData = { toAddress: winner.email, subject, body: message };
+      if (!samples.has(`winner:${winner.type}`)) {
+        samples.set(`winner:${winner.type}`, emailData);
       }
+      await queueOne(emailData);
     }
 
     // Send emails to parents if checkbox is checked
     if (inputs.emailParents) {
-      for (const winner of studentWinners) {
-        const parentsWithEmail =
-          winner.parents?.filter((parent) => parent.email) || [];
+      for (const { winner, parent, studentName } of parentRecipients) {
+        const student = formatParentName(studentName);
+        // For a TA level up the winner is the TA teacher themselves
+        const taTeacherName = formatParentName(
+          (winner.type === 'ta' ? winner.name : winner.taTeacher) || '',
+        );
+        const theirTa = taTeacherName ? `${taTeacherName}’s TA` : 'their TA';
+        let subject = '';
+        let message = '';
 
-        for (const parent of parentsWithEmail) {
-          let subject = '';
-          let message = '';
+        if (winner.type === 'personal') {
+          subject = '🎉 Great News! Your Child Leveled Up in PBIS!';
+          message = `Dear Parents and Guardians,
 
-          if (winner.type === 'personal') {
-            subject = '🎉 Great News! Your Child Leveled Up in PBIS!';
-            message = `Dear Parents and Guardians,
+Congratulations! Your child, ${student}, has leveled up! This means that ${student} has earned and submitted at least 25 PBIS cards! Remember that PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also ${theirTa} and school as a whole - so keep encouraging your child to submit their cards as they earn them!
 
-Congratulations! Your child has leveled up to Level ${winner.level}! This means that your child has earned and submitted at least 25 PBIS cards! Remember that PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also the TA and school as a whole - so keep encouraging your child to submit their cards as they earn them!
+Individual levels are based on a tiered system, with each level requiring a set number of cards which rises every 2 levels. As the number of required cards increases, so does the number of rewards available to students. View our level up system poster here: ${LEVEL_UP_POSTER_URL}
 
-Individual levels are based on a tiered system, with each level requiring a set number of cards which rises every 2 levels. As the number of required cards increases, so does the number of rewards available to students. Click here to view our level up system poster!
-
-Check in with your child to find out what prize they have earned. Be sure to congratulate them on modeling our three habits of work: Respect, Responsibility, and Perseverance!
+Check in with your child to find out what prize they have earned. Be sure to congratulate them on modeling our three principles: Respect, Responsibility, and Perseverance!
 
 Thank you for continuing to encourage your child to be a positive member of our falcon community.
 
 The PBIS Team
-"Go the distance; dare to explore"`;
-          } else if (winner.type === 'random') {
-            subject = '🎉 Congratulations! Your Child Won the PBIS Drawing!';
-            message = `Dear Parents and Guardians,
+“Have a tree-menous day!”`;
+        } else if (winner.type === 'random') {
+          subject = '🎉 Congratulations! Your Child Won the PBIS Drawing!';
+          message = `Dear Parents and Guardians,
 
-Congratulations! Your child has been selected as a winner in this week's PBIS random drawing! This recognition comes as a result of their positive behavior and demonstration of our three habits of work: Respect, Responsibility, and Perseverance.
+Congratulations! Your child, ${student}, has been selected as a winner in this week's PBIS random drawing! This recognition comes as a result of their positive behavior and demonstration of our three principles: Respect, Responsibility, and Perseverance.
 
 Your child should report to the Bus Lobby to claim their prize.
 
-${winner.taTeacher ? `Their TA teacher ${winner.taTeacher} has been impressed with their excellent behavior!` : ''}
+${taTeacherName ? `Their TA teacher ${taTeacherName} has been impressed with their excellent behavior!` : ''}
 
 Please join us in celebrating this achievement with your child and continue to encourage them to be a positive member of our falcon community!
 
 The PBIS Team
-"Go the distance; dare to explore"`;
-          }
+“Have a tree-menous day!”`;
+        } else if (winner.type === 'ta') {
+          subject = "🎉 Great News! Your Child's TA Leveled Up in PBIS!";
+          message = `Dear Parents and Guardians,
 
-          const emailData = {
-            toAddress: parent.email!,
-            fromAddress: user.email || 'noreply@ncujhs.tech',
-            subject: subject,
-            body: message,
-            lowPriority: true,
-            batchId,
-          };
+Congratulations! ${student}’s TA with ${taTeacherName} has leveled up! This means that the TA has earned an average of 24 PBIS cards per student. PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also the TA and school as a whole - so keep encouraging your child to submit their cards as they earn them!
 
-          try {
-            const result = await queueEmail({
-              emailData: emailData,
-            });
-            if (result?.sendEmail === false) {
-              throw new Error('The server did not accept this email');
-            }
-            emailsSent++;
-            setEmailProgress({ sent: emailsSent, total: totalEmails });
-          } catch (error) {
-            emailsFailed++;
-            console.error(
-              `Error sending email to parent ${parent.email}:`,
-              error,
-            );
-          }
+Each TA chooses a MAPLE lane to work towards. Each box on the MAPLE lane represents a prize which could include snacks, small prize items, or homemade treats. This celebration will be scheduled during guided study in the coming days. View the TA Celebration poster here: ${TA_CELEBRATION_POSTER_URL}
+
+Check in with your child to find out what prize they have earned. Be sure to congratulate them on modeling our three principles: Respect, Responsibility, and Perseverance!
+
+Thank you for continuing to encourage your child to be a positive member of our falcon community.
+
+The PBIS Team
+“Have a tree-menous day!”`;
         }
+
+        const emailData = {
+          toAddress: parent.email!,
+          subject,
+          body: message,
+        };
+        if (!samples.has(`parent:${winner.type}`)) {
+          samples.set(`parent:${winner.type}`, emailData);
+        }
+        await queueOne(emailData);
+      }
+    }
+
+    // Samples go last so they land at the end of the queue, after every
+    // real email, letting the sender confirm the whole batch went through.
+    if (inputs.sendMeSamples && user.email) {
+      for (const sample of Array.from(samples.values())) {
+        await queueOne({
+          toAddress: user.email,
+          subject: `[PBIS SAMPLE] ${sample.subject}`,
+          body: `This is a sample copy. The real email went to: ${sample.toAddress}\n\n----------\n\n${sample.body}`,
+        });
       }
     }
 
@@ -425,7 +505,8 @@ The PBIS Team
       {lastBatch && (
         <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-900">
           <strong>{lastBatch.queued} emails queued.</strong>
-          {lastBatch.failed > 0 && ` ${lastBatch.failed} could not be queued.`}{' '}
+          {lastBatch.failed > 0 &&
+            ` ${lastBatch.failed} could not be queued.`}{' '}
           <Link
             href={`/emailQueue?batchId=${encodeURIComponent(lastBatch.id)}`}
             className="font-semibold underline"
@@ -514,39 +595,22 @@ The PBIS Team
                         Parent Emails Will Be Sent To:
                       </h3>
                       <div className="space-y-2 max-h-32 overflow-y-auto bg-blue-600 bg-opacity-20 p-3 rounded">
-                        {winners
-                          .filter(
-                            (w) => w.type === 'personal' || w.type === 'random',
-                          )
-                          .flatMap((winner) =>
-                            (
-                              winner.parents?.filter(
-                                (parent) => parent.email,
-                              ) || []
-                            ).map((parent) => ({
-                              winner,
-                              parent,
-                            })),
-                          )
-                          .map(({ winner, parent }, index) => (
+                        {parentRecipients.map(
+                          ({ winner, parent, studentName }, index) => (
                             <div
                               key={`parent-${winner.id}-${parent.id}-${index}`}
                               className="text-white text-sm"
                             >
-                              📧 <strong>{winner.name}</strong>'s parent (
+                              📧 <strong>{studentName}</strong>'s parent (
                               {formatParentName(parent.name)}): {parent.email}
+                              {winner.type === 'ta' &&
+                                ` - TA Level ${winner.level}`}
                             </div>
-                          ))}
-                        {winners
-                          .filter(
-                            (w) => w.type === 'personal' || w.type === 'random',
-                          )
-                          .flatMap(
-                            (w) => w.parents?.filter((p) => p.email) || [],
-                          ).length === 0 && (
+                          ),
+                        )}
+                        {parentRecipients.length === 0 && (
                           <div className="text-white text-sm">
-                            No student winners have parent email addresses on
-                            file.
+                            No winners have parent email addresses on file.
                           </div>
                         )}
                       </div>
@@ -604,7 +668,19 @@ The PBIS Team
                           onChange={handleChange}
                           className="mr-2 w-4 h-4"
                         />
-                        Email Parents (for student winners only)
+                        Email Parents (student winners and TA level ups)
+                      </label>
+                      <label className="flex items-center text-white font-semibold mb-4">
+                        <input
+                          type="checkbox"
+                          id="sendMeSamples"
+                          name="sendMeSamples"
+                          checked={inputs.sendMeSamples || false}
+                          onChange={handleChange}
+                          className="mr-2 w-4 h-4"
+                        />
+                        Send me a sample of each email type ({user.email}) after
+                        the rest are queued
                       </label>
 
                       <label

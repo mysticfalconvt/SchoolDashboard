@@ -34,7 +34,7 @@ const GET_ALL_PBIS_DATES_QUERY = gql`
 
 const PBIS_COLLECTION_QUERY = gql`
   query GET_PBIS_COLLECTION_DATA($date: DateTime!) {
-    pbisCollectionDates {
+    pbisCollectionDates(orderBy: { collectionDate: desc }) {
       id
       collectionDate
       collectedCards
@@ -353,11 +353,11 @@ export default function useV3PbisCollection(): UseV3PbisCollectionReturn {
       }
 
       const previousCollections =
-        pbisDates?.pbisCollectionDates?.sort(
+        [...(data?.pbisCollectionDates || [])].sort(
           (a, b) =>
             new Date(b.collectionDate).getTime() -
             new Date(a.collectionDate).getTime(),
-        ) || [];
+        );
 
       const previousWinnersToExclude = previousCollections
         .slice(0, collectionsWithoutRepeatWinners)
