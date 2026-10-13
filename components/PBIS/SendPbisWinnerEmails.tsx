@@ -1,6 +1,9 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
+import Toggle from 'react-toggle';
+import 'react-toggle/style.css';
+import { PBIS_STUDENT_RANDOM_DRAWING_WINNERS } from '../../config';
 import plainTextEmailToHtml from '../../lib/plainTextEmailToHtml';
 import useForm from '../../lib/useForm';
 import { useGQLQuery } from '../../lib/useGqlQuery';
@@ -74,7 +77,6 @@ const PBIS_WINNERS_QUERY = gql`
 
 interface FormInputs {
   confirmation: string;
-  emailParents: boolean;
   sendMeSamples: boolean;
 }
 
@@ -103,6 +105,65 @@ interface ParentRecipient {
   studentName: string;
 }
 
+type WinnerType = Winner['type'];
+type EmailTypeKey = `${'winner' | 'parent'}:${WinnerType}`;
+
+// Every email a collection can send, one switch each. Parent emails start off
+// so a send only reaches families when someone chooses it.
+const EMAIL_TYPES: Array<{
+  key: EmailTypeKey;
+  label: string;
+  defaultOn: boolean;
+}> = [
+  {
+    key: 'winner:personal',
+    label: 'Students: you leveled up',
+    defaultOn: true,
+  },
+  {
+    key: 'winner:ta',
+    label: 'TA teachers: your TA leveled up',
+    defaultOn: true,
+  },
+  {
+    key: 'winner:staff',
+    label: 'Staff: you won the staff drawing',
+    defaultOn: true,
+  },
+  {
+    key: 'winner:random',
+    label: 'Students: you won the drawing',
+    defaultOn: true,
+  },
+  {
+    key: 'parent:personal',
+    label: 'Parents: your child leveled up',
+    defaultOn: false,
+  },
+  {
+    key: 'parent:ta',
+    label: "Parents: your child's TA leveled up",
+    defaultOn: false,
+  },
+  {
+    key: 'parent:random',
+    label: 'Parents: your child won the drawing',
+    defaultOn: false,
+  },
+];
+
+// Drawing emails are hidden, and never sent, in years without the drawing.
+const isShownThisYear = (key: EmailTypeKey) =>
+  PBIS_STUDENT_RANDOM_DRAWING_WINNERS || !key.endsWith(':random');
+
+const defaultEnabledTypes = () =>
+  Object.fromEntries(
+    EMAIL_TYPES.map(({ key, defaultOn }) => [
+      key,
+      defaultOn && isShownThisYear(key),
+    ]),
+  ) as Record<EmailTypeKey, boolean>;
+
 const LEVEL_UP_POSTER_URL =
   'https://drive.google.com/file/d/1UNl4FkmsaB0XN3TvDDaUuJw13hJao2DJ/view';
 
@@ -126,6 +187,7 @@ export default function SendPbisWinnerEmails() {
   const { inputs, handleChange, clearForm, resetForm } = useForm();
   const [sending, setSending] = React.useState(false);
   const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
+  const [enabledTypes, setEnabledTypes] = useState(defaultEnabledTypes);
   const [lastBatch, setLastBatch] = useState<{
     id: string;
     queued: number;
@@ -237,25 +299,40 @@ export default function SendPbisWinnerEmails() {
     return recipients;
   }, [winners]);
 
+  const winnersToEmail = useMemo(
+    () => winners.filter((w) => w.email && enabledTypes[`winner:${w.type}`]),
+    [winners, enabledTypes],
+  );
+  const parentsToEmail = useMemo(
+    () =>
+      parentRecipients.filter(
+        ({ winner }) => enabledTypes[`parent:${winner.type}`],
+      ),
+    [parentRecipients, enabledTypes],
+  );
+
+  // How many emails each type would send, switched on or not
+  const countsByType = useMemo(() => {
+    const counts = Object.fromEntries(
+      EMAIL_TYPES.map(({ key }) => [key, 0]),
+    ) as Record<EmailTypeKey, number>;
+    winners.filter((w) => w.email).forEach((w) => counts[`winner:${w.type}`]++);
+    parentRecipients.forEach(({ winner }) => counts[`parent:${winner.type}`]++);
+    return counts;
+  }, [winners, parentRecipients]);
+
   const totalEmailCount = useMemo(() => {
-    const winnerEmailsToSend = winners.filter((w) => w.email).length;
-    const parentEmailsToSend = inputs.emailParents
-      ? parentRecipients.length
-      : 0;
     // One sample per template type that is actually going out
-    const sampleTypes = new Set([
-      ...winners.filter((w) => w.email).map((w) => `winner:${w.type}`),
-      ...(inputs.emailParents
-        ? parentRecipients.map(({ winner }) => `parent:${winner.type}`)
-        : []),
-    ]);
-    const samplesToSend =
-      inputs.sendMeSamples && user?.email ? sampleTypes.size : 0;
-    return winnerEmailsToSend + parentEmailsToSend + samplesToSend;
+    const sampleTypes = EMAIL_TYPES.filter(
+      ({ key }) => enabledTypes[key] && countsByType[key] > 0,
+    ).length;
+    const samplesToSend = inputs.sendMeSamples && user?.email ? sampleTypes : 0;
+    return winnersToEmail.length + parentsToEmail.length + samplesToSend;
   }, [
-    winners,
-    parentRecipients,
-    inputs.emailParents,
+    winnersToEmail,
+    parentsToEmail,
+    countsByType,
+    enabledTypes,
     inputs.sendMeSamples,
     user?.email,
   ]);
@@ -306,7 +383,7 @@ export default function SendPbisWinnerEmails() {
     };
 
     // Send emails to winners
-    for (const winner of winners) {
+    for (const winner of winnersToEmail) {
       if (!winner.email) continue;
 
       let subject = '';
@@ -378,21 +455,20 @@ The PBIS Team
       await queueOne(emailData);
     }
 
-    // Send emails to parents if checkbox is checked
-    if (inputs.emailParents) {
-      for (const { winner, parent, studentName } of parentRecipients) {
-        const student = formatParentName(studentName);
-        // For a TA level up the winner is the TA teacher themselves
-        const taTeacherName = formatParentName(
-          (winner.type === 'ta' ? winner.name : winner.taTeacher) || '',
-        );
-        const theirTa = taTeacherName ? `${taTeacherName}’s TA` : 'their TA';
-        let subject = '';
-        let message = '';
+    // Send emails to parents for the parent types switched on
+    for (const { winner, parent, studentName } of parentsToEmail) {
+      const student = formatParentName(studentName);
+      // For a TA level up the winner is the TA teacher themselves
+      const taTeacherName = formatParentName(
+        (winner.type === 'ta' ? winner.name : winner.taTeacher) || '',
+      );
+      const theirTa = taTeacherName ? `${taTeacherName}’s TA` : 'their TA';
+      let subject = '';
+      let message = '';
 
-        if (winner.type === 'personal') {
-          subject = '🎉 Great News! Your Child Leveled Up in PBIS!';
-          message = `Dear Parents and Guardians,
+      if (winner.type === 'personal') {
+        subject = '🎉 Great News! Your Child Leveled Up in PBIS!';
+        message = `Dear Parents and Guardians,
 
 Congratulations! Your child, ${student}, has leveled up! This means that ${student} has earned and submitted at least 25 PBIS cards! Remember that PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also ${theirTa} and school as a whole - so keep encouraging your child to submit their cards as they earn them!
 
@@ -404,9 +480,9 @@ Thank you for continuing to encourage your child to be a positive member of our 
 
 The PBIS Team
 “Have a tree-menous day!”`;
-        } else if (winner.type === 'random') {
-          subject = '🎉 Congratulations! Your Child Won the PBIS Drawing!';
-          message = `Dear Parents and Guardians,
+      } else if (winner.type === 'random') {
+        subject = '🎉 Congratulations! Your Child Won the PBIS Drawing!';
+        message = `Dear Parents and Guardians,
 
 Congratulations! Your child, ${student}, has been selected as a winner in this week's PBIS random drawing! This recognition comes as a result of their positive behavior and demonstration of our three principles: Respect, Responsibility, and Perseverance.
 
@@ -418,9 +494,9 @@ Please join us in celebrating this achievement with your child and continue to e
 
 The PBIS Team
 “Have a tree-menous day!”`;
-        } else if (winner.type === 'ta') {
-          subject = "🎉 Great News! Your Child's TA Leveled Up in PBIS!";
-          message = `Dear Parents and Guardians,
+      } else if (winner.type === 'ta') {
+        subject = "🎉 Great News! Your Child's TA Leveled Up in PBIS!";
+        message = `Dear Parents and Guardians,
 
 Congratulations! ${student}’s TA with ${taTeacherName} has leveled up! This means that the TA has earned an average of 24 PBIS cards per student. PBIS cards are awarded by staff to students for following expectations and creating a positive academic and social environment. Earned and submitted cards benefit not just the individual student, but also the TA and school as a whole - so keep encouraging your child to submit their cards as they earn them!
 
@@ -432,18 +508,17 @@ Thank you for continuing to encourage your child to be a positive member of our 
 
 The PBIS Team
 “Have a tree-menous day!”`;
-        }
-
-        const emailData = {
-          toAddress: parent.email!,
-          subject,
-          body: message,
-        };
-        if (!samples.has(`parent:${winner.type}`)) {
-          samples.set(`parent:${winner.type}`, emailData);
-        }
-        await queueOne(emailData);
       }
+
+      const emailData = {
+        toAddress: parent.email!,
+        subject,
+        body: message,
+      };
+      if (!samples.has(`parent:${winner.type}`)) {
+        samples.set(`parent:${winner.type}`, emailData);
+      }
+      await queueOne(emailData);
     }
 
     // Samples go last so they land at the end of the queue, after every
@@ -462,6 +537,7 @@ The PBIS Team
     setLastBatch({ id: batchId, queued: emailsSent, failed: emailsFailed });
     setEmailProgress({ sent: 0, total: 0 });
     resetForm();
+    setEnabledTypes(defaultEnabledTypes());
     setShowForm(false);
   };
 
@@ -548,9 +624,9 @@ The PBIS Team
                     <h3 className="text-white text-lg font-semibold mb-3">
                       Winners from Latest Collection:
                     </h3>
-                    {winners.length > 0 ? (
+                    {winnersToEmail.length > 0 ? (
                       <div className="space-y-2 max-h-40 overflow-y-auto bg-white bg-opacity-10 p-3 rounded">
-                        {winners.map((winner, index) => (
+                        {winnersToEmail.map((winner, index) => (
                           <div
                             key={`${winner.id}-${winner.type}-${index}`}
                             className="text-white text-sm"
@@ -584,18 +660,20 @@ The PBIS Team
                       </div>
                     ) : (
                       <p className="text-white text-sm">
-                        No winners with email addresses found.
+                        {winners.length > 0
+                          ? 'No winner emails switched on.'
+                          : 'No winners with email addresses found.'}
                       </p>
                     )}
                   </div>
 
-                  {inputs.emailParents && (
+                  {parentsToEmail.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-white text-lg font-semibold mb-3">
                         Parent Emails Will Be Sent To:
                       </h3>
                       <div className="space-y-2 max-h-32 overflow-y-auto bg-blue-600 bg-opacity-20 p-3 rounded">
-                        {parentRecipients.map(
+                        {parentsToEmail.map(
                           ({ winner, parent, studentName }, index) => (
                             <div
                               key={`parent-${winner.id}-${parent.id}-${index}`}
@@ -607,11 +685,6 @@ The PBIS Team
                                 ` - TA Level ${winner.level}`}
                             </div>
                           ),
-                        )}
-                        {parentRecipients.length === 0 && (
-                          <div className="text-white text-sm">
-                            No winners have parent email addresses on file.
-                          </div>
                         )}
                       </div>
                     </div>
@@ -659,17 +732,44 @@ The PBIS Team
                       aria-busy={sending || emailLoading}
                       className="border-0 p-0"
                     >
-                      <label className="flex items-center text-white font-semibold mb-4">
-                        <input
-                          type="checkbox"
-                          id="emailParents"
-                          name="emailParents"
-                          checked={inputs.emailParents || false}
-                          onChange={handleChange}
-                          className="mr-2 w-4 h-4"
-                        />
-                        Email Parents (student winners and TA level ups)
-                      </label>
+                      <div className="mb-4 space-y-2 bg-white bg-opacity-10 p-3 rounded">
+                        <h3 className="text-white font-semibold">
+                          Emails to send
+                        </h3>
+                        {EMAIL_TYPES.filter(({ key }) =>
+                          isShownThisYear(key),
+                        ).map(({ key, label }) => {
+                          const count = countsByType[key];
+                          return (
+                            <label
+                              key={key}
+                              className={`flex items-center gap-3 text-white ${
+                                count === 0 ? 'opacity-60' : ''
+                              }`}
+                            >
+                              <Toggle
+                                role="switch"
+                                aria-label={label}
+                                checked={enabledTypes[key] && count > 0}
+                                disabled={count === 0}
+                                onChange={() =>
+                                  setEnabledTypes((prev) => ({
+                                    ...prev,
+                                    [key]: !prev[key],
+                                  }))
+                                }
+                                icons={false}
+                              />
+                              <span>
+                                {label}{' '}
+                                <span className="opacity-80">
+                                  ({count === 0 ? 'none this week' : count})
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
                       <label className="flex items-center text-white font-semibold mb-4">
                         <input
                           type="checkbox"
@@ -703,7 +803,7 @@ The PBIS Team
                         type="submit"
                         className="mt-6"
                         disabled={
-                          winners.length === 0 || sending || emailLoading
+                          totalEmailCount === 0 || sending || emailLoading
                         }
                       >
                         {sending || emailLoading ? (
