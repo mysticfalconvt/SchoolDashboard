@@ -164,7 +164,7 @@ const PbisWeeklyReading: React.FC = () => {
       </ul>
       {hasTaTeamsAtNewLevels && (
         <h3 className="text-3xl mb-4">
-          The following TA Teams have completed their BINGO Box. You will be
+          The following TA Teams have leveled up! You will be
           notified when you should receive your celebration.
         </h3>
       )}
