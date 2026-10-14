@@ -29,8 +29,10 @@ const TEACHER_NAME_REGEX = /^[A-Za-z'\-. ]+, [A-Za-z'\-. ]+$/;
 // slip past its allBlocksAreNull() check.
 const EMPTY = 'null';
 
+// The Oct 2026 export appends a "\n_" line to every teacher cell
+// ("Gann, Deanna\n_"), which is stripped here.
 function cellAt(row, index) {
-    return (row[index] || '').trim();
+    return (row[index] || '').replace(/\s*\n_\s*$/, '').trim();
 }
 
 function columnIndex(group, label) {

@@ -42,3 +42,59 @@ export const summariseImport = (results: ImportedStudentResult[] | null) => ({
   updated: results ? results.filter((r) => r.existed).length : 0,
   total: results ? results.length : 0,
 });
+
+/** A teacher relation as the resolver reports writing it. */
+type Connection = { connect?: { id?: string } } | null | undefined;
+
+/** A student as it stood before the import, with their current teachers. */
+export interface ScheduledStudentRecord extends StudentRecord {
+  taTeacher?: { id: string; name?: string } | null;
+  // block1Teacher..block{NUMBER_OF_BLOCKS}Teacher
+  [blockTeacher: string]: unknown;
+}
+
+export interface ScheduleChange {
+  label: string;
+  from: string | null;
+  to: string | null;
+}
+
+/**
+ * What an import changed for one student, worked out by comparing the
+ * pre-import roster with the teacher ids the resolver reports writing.
+ *
+ * The resolver skips slots whose teacher email it could not match, so a slot
+ * missing from the result was left alone rather than cleared. Teachers are
+ * shown by name where known, falling back to the id.
+ */
+export const describeScheduleChanges = (
+  result: ImportedStudentResult & Record<string, unknown>,
+  before: ScheduledStudentRecord | undefined,
+  teacherNameById: Map<string, string>,
+  numberOfBlocks: number,
+): ScheduleChange[] => {
+  const nameOf = (id: string | null) =>
+    id ? teacherNameById.get(id) || id : null;
+  const slots = [
+    { field: 'taTeacher', label: 'TA' },
+    ...Array.from({ length: numberOfBlocks }, (_, i) => ({
+      field: `block${i + 1}Teacher`,
+      label: `Block ${i + 1}`,
+    })),
+  ];
+
+  const changes: ScheduleChange[] = [];
+  if (before && result.name && result.name !== before.name) {
+    changes.push({ label: 'Name', from: before.name, to: result.name });
+  }
+  slots.forEach(({ field, label }) => {
+    const newId = (result[field] as Connection)?.connect?.id;
+    if (!newId) return;
+    const oldId =
+      (before?.[field] as { id?: string } | null | undefined)?.id || null;
+    if (newId !== oldId) {
+      changes.push({ label, from: nameOf(oldId), to: nameOf(newId) });
+    }
+  });
+  return changes;
+};

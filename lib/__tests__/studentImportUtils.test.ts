@@ -1,4 +1,5 @@
 import {
+  describeScheduleChanges,
   findUntouchedStudents,
   summariseImport,
 } from '../studentImportUtils';
@@ -78,5 +79,85 @@ describe('summariseImport', () => {
 
   it('zeroes out before an import has run', () => {
     expect(summariseImport(null)).toEqual({ created: 0, updated: 0, total: 0 });
+  });
+});
+
+describe('describeScheduleChanges', () => {
+  const teacherNames = new Map([
+    ['t1', 'Deanna Gann'],
+    ['t2', 'Dawn Hall'],
+  ]);
+  const before = {
+    id: 's1',
+    name: 'Vyelle Agcaoili',
+    email: 'vyelle.agcaoili@ncsuvt.org',
+    taTeacher: { id: 't1', name: 'Deanna Gann' },
+    block1Teacher: { id: 't1' },
+    block2Teacher: { id: 't1' },
+  };
+
+  it('reports nothing when every written slot already matched', () => {
+    const changes = describeScheduleChanges(
+      {
+        email: before.email,
+        name: 'Vyelle Agcaoili',
+        existed: true,
+        taTeacher: { connect: { id: 't1' } },
+        block1Teacher: { connect: { id: 't1' } },
+      },
+      before,
+      teacherNames,
+      2,
+    );
+    expect(changes).toEqual([]);
+  });
+
+  it('lists each changed slot with teacher names', () => {
+    const changes = describeScheduleChanges(
+      {
+        email: before.email,
+        name: 'Vyelle Agcaoili',
+        existed: true,
+        taTeacher: { connect: { id: 't2' } },
+        block1Teacher: { connect: { id: 't1' } },
+        block2Teacher: { connect: { id: 't2' } },
+      },
+      before,
+      teacherNames,
+      2,
+    );
+    expect(changes).toEqual([
+      { label: 'TA', from: 'Deanna Gann', to: 'Dawn Hall' },
+      { label: 'Block 2', from: 'Deanna Gann', to: 'Dawn Hall' },
+    ]);
+  });
+
+  it('treats a slot the resolver did not write as unchanged', () => {
+    // An unmatched teacher email is skipped by the resolver, not cleared.
+    const changes = describeScheduleChanges(
+      { email: before.email, name: 'Vyelle Agcaoili', existed: true },
+      before,
+      teacherNames,
+      2,
+    );
+    expect(changes).toEqual([]);
+  });
+
+  it('reports a filled empty slot and a name correction', () => {
+    const changes = describeScheduleChanges(
+      {
+        email: before.email,
+        name: 'Vyelle A',
+        existed: true,
+        block2Teacher: { connect: { id: 't2' } },
+      },
+      { ...before, block2Teacher: null },
+      teacherNames,
+      2,
+    );
+    expect(changes).toEqual([
+      { label: 'Name', from: 'Vyelle Agcaoili', to: 'Vyelle A' },
+      { label: 'Block 2', from: null, to: 'Dawn Hall' },
+    ]);
   });
 });

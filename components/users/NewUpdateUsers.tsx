@@ -11,7 +11,9 @@ import gql from 'graphql-tag';
 import * as React from 'react';
 import { useState } from 'react';
 import {
+  describeScheduleChanges,
   findUntouchedStudents,
+  ScheduledStudentRecord,
   summariseImport,
 } from '@/lib/studentImportUtils';
 import { NUMBER_OF_BLOCKS } from '../../config';
@@ -23,13 +25,22 @@ const UPDATE_USER_MUTATION = gql`
 `;
 
 // Students are compared to the import by email, not name - two students can
-// share a name, and the resolver reports results keyed on email.
+// share a name, and the resolver reports results keyed on email. Current
+// teachers are fetched so the results can say what each import changed.
 const GET_STUDENTS_AND_TEACHERS_QUERY = gql`
   query GET_STUDENTS_AND_TEACHERS_FOR_IMPORT {
     students: users(where: { isStudent: { equals: true } }) {
       id
       name
       email
+      taTeacher {
+        id
+        name
+      }
+      ${Array.from(
+        { length: NUMBER_OF_BLOCKS },
+        (_, i) => `block${i + 1}Teacher { id }`,
+      ).join('\n      ')}
     }
     teachers: users(where: { isTeacher: { equals: true } }) {
       id
@@ -102,6 +113,8 @@ interface UpdateResult {
   name: string;
   email: string;
   existed: boolean;
+  // taTeacher, block1Teacher.. as { connect: { id } } for each slot written
+  [slot: string]: unknown;
 }
 
 export default function NewUpdateUsers() {
@@ -123,6 +136,12 @@ export default function NewUpdateUsers() {
   const [resultOfUpdate, setResultOfUpdate] = useState<UpdateResult[] | null>(
     null,
   );
+  // The roster as it stood when the import was submitted, keyed on email, so
+  // the results can show what changed after the live roster refetches.
+  const [rosterBeforeImport, setRosterBeforeImport] = useState<
+    Map<string, ScheduledStudentRecord>
+  >(new Map());
+  const [hideUnchanged, setHideUnchanged] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [parkingTeacherId, setParkingTeacherId] = useState('');
   const [parkProgress, setParkProgress] = useState({ current: 0, total: 0 });
@@ -151,6 +170,27 @@ export default function NewUpdateUsers() {
     () => summariseImport(resultOfUpdate),
     [resultOfUpdate],
   );
+
+  const studentDetails = React.useMemo(() => {
+    const teacherNameById = new Map(teachers.map((t) => [t.id, t.name]));
+    return (resultOfUpdate || []).map((result) => {
+      const before = rosterBeforeImport.get(result.email.toLowerCase());
+      return {
+        result,
+        name: result.name || before?.name || result.email,
+        changes: describeScheduleChanges(
+          result,
+          before,
+          teacherNameById,
+          NUMBER_OF_BLOCKS,
+        ),
+      };
+    });
+  }, [resultOfUpdate, rosterBeforeImport, teachers]);
+
+  const unchangedCount = studentDetails.filter(
+    (d) => d.result.existed && d.changes.length === 0,
+  ).length;
 
   const pendingCount = unUpdatedUsers.filter((s) => !parkedIds.has(s.id)).length;
 
@@ -236,6 +276,16 @@ export default function NewUpdateUsers() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   setIsProcessing(true);
+                  setRosterBeforeImport(
+                    new Map(
+                      (rosterData?.students || []).map(
+                        (student: ScheduledStudentRecord) => [
+                          student.email.toLowerCase(),
+                          student,
+                        ],
+                      ),
+                    ),
+                  );
 
                   try {
                     const parsedData = JSON.parse(inputs.userData || '[]');
@@ -466,7 +516,7 @@ export default function NewUpdateUsers() {
               )}
 
               <div className="rounded-lg bg-white border border-orange-200 divide-y divide-orange-100 max-h-64 overflow-y-auto">
-                {unUpdatedUsers.map((student) => {
+                {unUpdatedUsers.map((student: ScheduledStudentRecord) => {
                   const isParked = parkedIds.has(student.id);
                   return (
                     <div
@@ -479,6 +529,9 @@ export default function NewUpdateUsers() {
                         </div>
                         <div className="text-xs text-gray-500 truncate">
                           {student.email}
+                        </div>
+                        <div className="text-xs text-gray-700 truncate">
+                          TA: {student.taTeacher?.name || 'none'}
                         </div>
                       </div>
                       {isParked ? (
@@ -508,21 +561,61 @@ export default function NewUpdateUsers() {
 
           <details className="mt-4">
             <summary className="text-sm font-medium cursor-pointer">
-              Per-student detail ({resultOfUpdate.length})
+              Per-student detail ({resultOfUpdate.length}
+              {unchangedCount > 0 && `, ${unchangedCount} with no changes`})
             </summary>
-            <div className="max-h-64 overflow-y-auto mt-2 text-sm">
-              {resultOfUpdate.map((user) => (
-                <p key={user.email}>
-                  {user.email} -{' '}
-                  <span
-                    className={
-                      user.existed ? 'text-blue-700' : 'text-green-700'
-                    }
-                  >
-                    {user.existed ? 'Updated' : 'Created'}
-                  </span>
-                </p>
-              ))}
+            <label className="flex items-center gap-2 mt-2 text-sm">
+              <input
+                type="checkbox"
+                checked={hideUnchanged}
+                onChange={(e) => setHideUnchanged(e.target.checked)}
+              />
+              Hide students with no changes
+            </label>
+            <div className="max-h-[32rem] overflow-y-auto mt-2 text-sm rounded-lg border border-gray-200 divide-y divide-gray-100">
+              {studentDetails
+                .filter(
+                  (d) =>
+                    !hideUnchanged ||
+                    !d.result.existed ||
+                    d.changes.length > 0,
+                )
+                .map(({ result, name, changes }) => {
+                  let status = 'No updates needed';
+                  let tone = 'text-gray-500';
+                  if (!result.existed) {
+                    status = 'Created';
+                    tone = 'text-green-700';
+                  } else if (changes.length > 0) {
+                    status = `Updated ${changes.map((c) => c.label).join(', ')}`;
+                    tone = 'text-blue-700';
+                  }
+                  return (
+                    <div key={result.email} className="px-3 py-2">
+                      <div className="flex flex-wrap items-baseline gap-x-2">
+                        <span className="font-medium">{name}</span>
+                        <span className="text-xs text-gray-500">
+                          {result.email}
+                        </span>
+                        <span className={`font-semibold ${tone}`}>
+                          - {status}
+                        </span>
+                      </div>
+                      {result.existed && changes.length > 0 && (
+                        <ul className="mt-1 ml-4 text-xs text-gray-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4">
+                          {changes.map((change) => (
+                            <li key={change.label}>
+                              <span className="font-medium">
+                                {change.label}:
+                              </span>{' '}
+                              {change.from || 'none'} → {change.to || 'none'}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </details>
         </div>
