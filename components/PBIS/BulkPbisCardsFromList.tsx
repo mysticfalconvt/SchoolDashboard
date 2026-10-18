@@ -340,7 +340,8 @@ export default function BulkPbisCardsFromList() {
                     htmlFor="pastedNames"
                     className="block text-white font-semibold mb-1"
                   >
-                    Paste the list of students (one per line, "Last First")
+                    Paste the list of students (one per line, "Last First", or
+                    copied straight from a PowerSchool PDF)
                     <textarea
                       required
                       rows={12}

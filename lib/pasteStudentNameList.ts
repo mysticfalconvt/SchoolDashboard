@@ -30,24 +30,24 @@ export interface MatchNameListResult {
 
 // Header rows that show up when a list is pasted straight out of a spreadsheet.
 const HEADER_LINES = new Set([
-  'lastfirst',
-  'firstlast',
-  'lastnamefirstname',
-  'firstnamelastname',
-  'name',
-  'studentname',
-  'student',
-  'students',
+  "lastfirst",
+  "firstlast",
+  "lastnamefirstname",
+  "firstnamelastname",
+  "name",
+  "studentname",
+  "student",
+  "students",
 ]);
 
 // Lowercase, strip accents, and drop anything that is not a letter so that
 // "O'Brien", "Obrien", and "o'brién" all compare equal.
 export const normalizeNamePart = (part: string): string =>
-  (part || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  (part || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^a-z]/g, '');
+    .replace(/[^a-z]/g, "");
 
 const normalizeTokens = (tokens: string[]): string[] =>
   tokens.map(normalizeNamePart).filter(Boolean);
@@ -62,16 +62,16 @@ export interface SplitName {
 // Turn a single pasted line into its last name and first name. Lines are
 // expected in "Last First [Middle...]" order, but "Last, First" also works.
 export const splitPastedName = (line: string): SplitName | null => {
-  const trimmed = (line || '').trim();
+  const trimmed = (line || "").trim();
   if (!trimmed) return null;
 
-  if (trimmed.includes(',')) {
-    const [lastPart, ...restParts] = trimmed.split(',');
+  if (trimmed.includes(",")) {
+    const [lastPart, ...restParts] = trimmed.split(",");
     const last = normalizeTokens(lastPart.split(/\s+/));
-    const first = normalizeTokens(restParts.join(' ').split(/\s+/));
+    const first = normalizeTokens(restParts.join(" ").split(/\s+/));
     if (!last.length || !first.length) return null;
     return {
-      last: last.join(''),
+      last: last.join(""),
       first: first[0],
       tokens: [...last, ...first],
     };
@@ -85,7 +85,7 @@ export const splitPastedName = (line: string): SplitName | null => {
 
 // Split a stored student name ("First [Middle...] Last") into the same shape.
 const splitStoredName = (name: string): SplitName | null => {
-  const tokens = normalizeTokens((name || '').trim().split(/\s+/));
+  const tokens = normalizeTokens((name || "").trim().split(/\s+/));
   if (tokens.length < 2) return null;
   return {
     last: tokens[tokens.length - 1],
@@ -96,7 +96,7 @@ const splitStoredName = (name: string): SplitName | null => {
 
 const exactKey = (split: SplitName) => `${split.last}|${split.first}`;
 const looseKey = (split: SplitName) => `${split.last}|${split.first.charAt(0)}`;
-const tokenKey = (split: SplitName) => [...split.tokens].sort().join('|');
+const tokenKey = (split: SplitName) => [...split.tokens].sort().join("|");
 
 const addToIndex = (
   index: Map<string, NameListStudent[]>,
@@ -137,7 +137,7 @@ export const buildStudentIndex = (
 
     // Kids often show up on a list under the name they actually go by, so
     // index "PreferredName LastName" too.
-    const preferred = normalizeNamePart(student.preferredName || '');
+    const preferred = normalizeNamePart(student.preferredName || "");
     if (preferred && preferred !== split.first) {
       const preferredSplit: SplitName = {
         last: split.last,
@@ -156,6 +156,54 @@ export const buildStudentIndex = (
 export const isHeaderLine = (line: string): boolean =>
   HEADER_LINES.has(normalizeNamePart(line));
 
+const isSingleWord = (line: string) => !/\s/.test(line);
+
+/**
+ * Turn pasted text into one name per line, undoing the way PowerSchool PDFs
+ * copy. A PDF report like "Perfect Attendance" prints Last and First as two
+ * columns, and copying it puts each on its own line:
+ *
+ *   PowerSchool SIS          <- report preamble
+ *   ...
+ *   Last
+ *   First
+ *   Agcaoili
+ *   Vyelle Alistaire
+ *   Dunham Westlund
+ *   Eli
+ *
+ * When the lone "Last" / "First" column headers are found, everything up to
+ * them is dropped and the remaining lines are paired up. Without the headers
+ * (only the names were copied) lines are paired when most of them are a single
+ * word, which a normal "Last First" list never is. Pairs come back as
+ * "Last, First" so two-word surnames stay together.
+ */
+export const joinSplitNameLines = (text: string): string[] => {
+  let lines = (text || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const headerAt = lines.findIndex(
+    (line, i) =>
+      normalizeNamePart(line) === "last" &&
+      normalizeNamePart(lines[i + 1] || "") === "first",
+  );
+  const fromPdf = headerAt !== -1;
+  if (fromPdf) lines = lines.slice(headerAt + 2);
+
+  const singleWordLines = lines.filter(isSingleWord).length;
+  if (!fromPdf && singleWordLines <= lines.length / 2) return lines;
+
+  const joined: string[] = [];
+  for (let i = 0; i < lines.length; i += 2) {
+    joined.push(
+      lines[i + 1] === undefined ? lines[i] : `${lines[i]}, ${lines[i + 1]}`,
+    );
+  }
+  return joined;
+};
+
 // Match a pasted block of names against the student list. Lines are matched
 // strictly first (last + first name), then by the same set of name parts in
 // any order, and finally by last name + first initial.
@@ -173,10 +221,7 @@ export const matchPastedNameList = (
   const index = buildStudentIndex(students);
   const alreadyMatched = new Set<string>();
 
-  (text || '')
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
+  joinSplitNameLines(text)
     .filter((line) => !isHeaderLine(line))
     .forEach((line) => {
       const split = splitPastedName(line);
