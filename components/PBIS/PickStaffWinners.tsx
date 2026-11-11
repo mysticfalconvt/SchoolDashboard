@@ -88,16 +88,28 @@ export default function PickStaffWinners() {
     {},
   );
 
-  const lastStaffWinnerCollectionDate =
-    collectionsData?.pbisCollectionDates?.find(
+  // When reopening a collection that already has staff winners, keep using
+  // the same pool of cards by looking back to the preceding winner collection.
+  // Otherwise the current collection would become the cutoff and leave no
+  // staff cards available to preview.
+  const previousStaffWinnerCollectionDate = useMemo(() => {
+    const collections = collectionsData?.pbisCollectionDates || [];
+    const latestCollectionAlreadyHasWinners =
+      collections[0]?.staffRandomWinners?.length > 0;
+    const staffWinnerCollections = collections.filter(
       (collection: any) => collection.staffRandomWinners?.length > 0,
-    )?.collectionDate ||
-    new Date(0).toISOString();
+    );
+    const cutoffCollection = latestCollectionAlreadyHasWinners
+      ? staffWinnerCollections[1]
+      : staffWinnerCollections[0];
+
+    return cutoffCollection?.collectionDate || new Date(0).toISOString();
+  }, [collectionsData?.pbisCollectionDates]);
 
   const { data: staffCardsData, isLoading: staffCardsLoading } = useGQLQuery(
     'Staff Cards Since Collection',
     GET_STAFF_CARDS_SINCE_QUERY,
-    { date: lastStaffWinnerCollectionDate },
+    { date: previousStaffWinnerCollectionDate },
     { enabled: !!collectionsData },
   );
 

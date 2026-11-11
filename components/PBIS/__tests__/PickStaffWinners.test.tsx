@@ -141,15 +141,21 @@ describe('PickStaffWinners', () => {
     });
   });
 
-  it('uses the most recent collection with staff winners as the card cutoff', () => {
+  it('uses the previous winner collection as the card cutoff when reopening a collection', () => {
     (useGQLQuery as jest.Mock)
       .mockImplementationOnce(() => ({
         data: {
           pbisCollectionDates: [
             {
-              id: 'collection-without-staff-winners',
+              id: 'current-collection-with-staff-winners',
               collectionDate: '2024-01-22',
-              staffRandomWinners: [],
+              staffRandomWinners: [
+                {
+                  id: 'staff2',
+                  name: 'Jane Coach',
+                  email: 'jane@school.edu',
+                },
+              ],
             },
             {
               id: 'collection-with-staff-winners',
@@ -175,9 +181,9 @@ describe('PickStaffWinners', () => {
 
     expect(useGQLQuery).toHaveBeenNthCalledWith(
       2,
-      'Staff Cards Since Collection',
-      expect.anything(),
-      { date: '2024-01-15' },
+        'Staff Cards Since Collection',
+        expect.anything(),
+        { date: '2024-01-15' },
       { enabled: true },
     );
   });
