@@ -63,6 +63,7 @@ interface StaffMember {
   name: string;
   email?: string;
   tickets?: number;
+  hasWonPreviously?: boolean;
 }
 
 interface PreviousWinner {
@@ -120,7 +121,8 @@ export default function PickStaffWinners() {
   };
 
   // Staff who received staff cards since the last collection, weighted by the
-  // number of cards received (one ticket per card), excluding past winners.
+  // number of cards received (one ticket per card). Previous winners remain
+  // eligible so an administrator can select them again when necessary.
   const availableStaff = useMemo<StaffMember[]>(() => {
     if (!data || !showForm) {
       return [];
@@ -136,7 +138,7 @@ export default function PickStaffWinners() {
     const byRecipient: Record<string, StaffMember> = {};
     (staffCardsData?.staffPbisCards || []).forEach((card: any) => {
       const r = card.recipient;
-      if (!r || allPreviousWinners.includes(r.id)) return;
+      if (!r) return;
       const existing =
         byRecipient[r.id] ||
         (byRecipient[r.id] = {
@@ -144,6 +146,7 @@ export default function PickStaffWinners() {
           name: r.name,
           email: r.email,
           tickets: 0,
+          hasWonPreviously: allPreviousWinners.includes(r.id),
         });
       existing.tickets = (existing.tickets || 0) + 1;
     });
@@ -152,6 +155,10 @@ export default function PickStaffWinners() {
       a.name.localeCompare(b.name),
     );
   }, [showForm, data, staffCardsData]);
+
+  const hasEligiblePreviousWinners = availableStaff.some(
+    (staff) => staff.hasWonPreviously,
+  );
 
   // Build one ticket per card, then draw unique weighted winners.
   const drawWeightedWinners = (numberOfWinners: number): StaffMember[] => {
@@ -304,8 +311,7 @@ export default function PickStaffWinners() {
                 <>
                   <div className="mb-6">
                     <h3 className="text-white text-lg font-semibold mb-3">
-                      Eligible Staff (received cards this period, not previously
-                      won):
+                      Eligible Staff (received cards this period):
                     </h3>
                     {availableStaff.length > 0 ? (
                       <div className="space-y-2 max-h-32 overflow-y-auto bg-white bg-opacity-10 p-3 rounded">
@@ -314,16 +320,30 @@ export default function PickStaffWinners() {
                             <strong>{staff.name}</strong> (
                             {staff.email || 'No email'}) — {staff.tickets || 0}{' '}
                             card{(staff.tickets || 0) === 1 ? '' : 's'}
+                            {staff.hasWonPreviously && (
+                              <span className="ml-2 text-yellow-200">
+                                ⚠ Previously selected
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                     ) : (
                       <p className="text-white text-sm">
                         No staff have received staff cards since the last
-                        collection (or all eligible staff have already won).
+                        collection.
                       </p>
                     )}
                   </div>
+
+                  {hasEligiblePreviousWinners && (
+                    <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg text-sm text-yellow-100">
+                      <strong className="text-yellow-200">Warning:</strong>{' '}
+                      Staff who have been selected as winners before are still
+                      eligible and are marked above. They can be selected again
+                      when needed.
+                    </div>
+                  )}
 
                   {selectedWinners.length > 0 && (
                     <div className="mb-6">

@@ -29,7 +29,7 @@ jest.mock('../../../lib/useGqlQuery', () => ({
         },
       ],
       // Staff cards given since the last collection (one ticket per card).
-      // staff1 is a previous winner and should be excluded.
+      // staff1 is a previous winner but remains eligible, with a warning.
       staffPbisCards: [
         {
           id: 'c1',
@@ -119,7 +119,7 @@ describe('PickStaffWinners', () => {
     });
   });
 
-  it('displays available staff excluding previous winners', async () => {
+  it('keeps previous winners eligible and marks them with a warning', async () => {
     renderComponent();
 
     fireEvent.click(screen.getByText('Pick Staff winners'));
@@ -129,16 +129,15 @@ describe('PickStaffWinners', () => {
       expect(screen.getByText(/Jane Coach/)).toBeInTheDocument();
       expect(screen.getByText(/Bob Principal/)).toBeInTheDocument();
 
-      // Should NOT show previous winner (staff1) in the available staff list
-      // Note: John Teacher will appear in the warning message, but not in the available staff list
+      // Previous winner should remain in the available staff list and be marked.
       const availableStaffSection = screen
-        .getByText(
-          'Eligible Staff (received cards this period, not previously won):',
-        )
+        .getByText('Eligible Staff (received cards this period):')
         .closest('div');
-      expect(availableStaffSection).not.toContainElement(
-        screen.queryByText(/John Teacher/),
-      );
+      expect(availableStaffSection).toHaveTextContent('John Teacher');
+      expect(screen.getByText('⚠ Previously selected')).toBeInTheDocument();
+      expect(
+        screen.getByText(/They can be selected again when needed/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -226,8 +225,8 @@ describe('PickStaffWinners', () => {
       expect(screen.getByText(/not replace them/)).toBeInTheDocument();
 
       // Should show existing winner in the warning
-      expect(screen.getByText(/John Teacher/)).toBeInTheDocument();
-      expect(screen.getByText(/john@school.edu/)).toBeInTheDocument();
+      expect(screen.getAllByText(/John Teacher/)).toHaveLength(2);
+      expect(screen.getAllByText(/john@school.edu/)).toHaveLength(2);
 
       // Winners must be previewed before they can be saved
       expect(screen.getByText('Preview winners first')).toBeInTheDocument();
