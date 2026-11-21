@@ -298,20 +298,20 @@ export default function PickStaffWinners() {
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Pick Random Staff Winners
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -326,7 +326,7 @@ export default function PickStaffWinners() {
                       Eligible Staff (received cards this period):
                     </h3>
                     {availableStaff.length > 0 ? (
-                      <div className="space-y-2 max-h-32 overflow-y-auto bg-white bg-opacity-10 p-3 rounded">
+                      <div className="space-y-2 max-h-32 overflow-y-auto bg-white/10 p-3 rounded-sm">
                         {availableStaff.map((staff) => (
                           <div key={staff.id} className="text-white text-sm">
                             <strong>{staff.name}</strong> (
@@ -349,7 +349,7 @@ export default function PickStaffWinners() {
                   </div>
 
                   {hasEligiblePreviousWinners && (
-                    <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg text-sm text-yellow-100">
+                    <div className="mb-6 p-4 bg-yellow-600/30 border border-yellow-400 rounded-lg text-sm text-yellow-100">
                       <strong className="text-yellow-200">Warning:</strong>{' '}
                       Staff who have been selected as winners before are still
                       eligible and are marked above. They can be selected again
@@ -362,7 +362,7 @@ export default function PickStaffWinners() {
                       <h3 className="text-white text-lg font-semibold mb-3">
                         Preview — Winners to be saved:
                       </h3>
-                      <div className="space-y-2 bg-green-600 bg-opacity-20 p-3 rounded">
+                      <div className="space-y-2 bg-green-600/20 p-3 rounded-sm">
                         {selectedWinners.map((winner) => (
                           <div
                             key={winner.id}
@@ -384,9 +384,9 @@ export default function PickStaffWinners() {
                     </h1>
 
                     {hasExistingWinners && (
-                      <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
+                      <div className="mb-6 p-4 bg-yellow-600/30 border border-yellow-400 rounded-lg">
                         <div className="flex items-start">
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <svg
                               className="h-5 w-5 text-yellow-400"
                               viewBox="0 0 20 20"
@@ -453,7 +453,7 @@ export default function PickStaffWinners() {
                           max={availableStaff.length}
                           value={inputs.numberOfWinners || '5'}
                           onChange={handleChange}
-                          className="w-full p-2 rounded border mt-2"
+                          className="w-full p-2 rounded-sm border mt-2"
                         />
                       </label>
 
@@ -465,7 +465,7 @@ export default function PickStaffWinners() {
                           )
                         }
                         disabled={availableStaff.length === 0}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
                       >
                         {selectedWinners.length > 0
                           ? 'Re-roll Winners'
@@ -491,7 +491,7 @@ export default function PickStaffWinners() {
                           }
                           value={inputs.confirmation || ''}
                           onChange={handleChange}
-                          className="w-full p-2 rounded border mt-2"
+                          className="w-full p-2 rounded-sm border mt-2"
                         />
                       </label>
 

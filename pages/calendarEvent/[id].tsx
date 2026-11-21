@@ -54,7 +54,7 @@ const CalendarEvent: NextPage<CalendarEventPageProps> = ({
     ? `Link: ${calendar.linkTitle}`
     : 'Attached Link';
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full bg-[var(--background-color)] p-5 rounded-md shadow-md overflow-hidden">
+    <div className="flex flex-col items-center justify-center w-full h-full bg-(--background-color) p-5 rounded-md shadow-md overflow-hidden">
       <h1>{calendar.name}</h1>
       <p>{calendar.description}</p>
       <p>

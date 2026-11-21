@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import gql from 'graphql-tag';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GraphQLClient } from '../graphqlClient';
 import { useGqlMutation } from '../useGqlMutation';
 
@@ -301,6 +301,7 @@ describe('useGqlMutation', () => {
       mockResponse,
       { input: { name: 'John' } },
       undefined,
+      expect.anything(),
     );
     expect(onErrorSpy).not.toHaveBeenCalled();
   });
@@ -335,6 +336,7 @@ describe('useGqlMutation', () => {
       mockError,
       { input: { name: 'John' } },
       undefined,
+      expect.anything(),
     );
     expect(onSuccessSpy).not.toHaveBeenCalled();
   });

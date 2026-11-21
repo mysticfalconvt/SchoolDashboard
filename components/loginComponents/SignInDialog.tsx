@@ -56,7 +56,7 @@ const SignInDialog: React.FC<SignInDialogProps> = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+        <div className="bg-white/10 rounded-lg p-6 backdrop-blur-xs">
           <GoogleSignIn />
 
           <div className="flex items-center gap-3 my-6">

@@ -201,7 +201,7 @@ describe('Button Components', () => {
       button.focus();
       
       expect(button).toHaveFocus();
-      expect(button).toHaveClass('outline-none');
+      expect(button).toHaveClass('outline-hidden');
     });
   });
 

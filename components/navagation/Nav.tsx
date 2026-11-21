@@ -50,8 +50,8 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
         href={href}
         className={
           mobile
-            ? 'uppercase font-bold text-white text-center px-4 py-3 block text-lg skew-x-[20deg] whitespace-nowrap w-full'
-            : 'uppercase font-bold text-white text-center px-2 py-1 block text-base skew-x-[20deg] whitespace-nowrap'
+            ? 'uppercase font-bold text-white text-center px-4 py-3 block text-lg skew-x-20 whitespace-nowrap w-full'
+            : 'uppercase font-bold text-white text-center px-2 py-1 block text-base skew-x-20 whitespace-nowrap'
         }
         onClick={(event) => {
           if (router.asPath === href) {
@@ -95,7 +95,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           <div className="flex items-center justify-center my-2">
             <Link
               href="/superUserSettings"
-              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
+              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-hidden flex items-center justify-center"
               style={{
                 background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
@@ -106,7 +106,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
                 }
               }}
             >
-              <span className="skew-x-[20deg] w-full text-center text-xl text-white">
+              <span className="skew-x-20 w-full text-center text-xl text-white">
                 ⚙️
               </span>
             </Link>
@@ -155,7 +155,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
           <div className="flex items-center justify-center my-2">
             <Link
               href="/superUserSettings"
-              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-none flex items-center justify-center"
+              className="font-bold rounded-lg w-10 h-10 px-2 shadow-lg transition-all duration-200 hover:brightness-110 hover:shadow-xl skew-x-[-20deg] focus:outline-hidden flex items-center justify-center"
               style={{
                 background: 'linear-gradient(to top left, #38B6FF, #760D08)',
               }}
@@ -166,7 +166,7 @@ const Nav: React.FC<NavProps> = ({ mobile = false, onClickLink }) => {
                 }
               }}
             >
-              <span className="skew-x-[20deg] w-full text-center text-xl text-white">
+              <span className="skew-x-20 w-full text-center text-xl text-white">
                 ⚙️
               </span>
             </Link>

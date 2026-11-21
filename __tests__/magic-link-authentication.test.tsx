@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MagicLinkSignIn from '../components/loginComponents/MagicLinkSignIn';
 import SignInDialog from '../components/loginComponents/SignInDialog';
 import { useUser } from '../components/User';
@@ -314,6 +314,32 @@ describe('Magic Link Authentication Flow', () => {
       await waitFor(() => {
         expect(screen.getByText('Sign-in Failed')).toBeInTheDocument();
         expect(screen.getByText('Token has expired')).toBeInTheDocument();
+      });
+    });
+
+    it('should show error state for a failure without __typename', async () => {
+      const { useGqlMutation } = require('../lib/useGqlMutation');
+      useGqlMutation.mockReturnValue([
+        mockMutation,
+        {
+          data: {
+            redeemUserMagicAuthToken: {
+              code: 'FAILURE',
+              message: 'Auth token redemption failed.',
+            },
+          },
+          loading: false,
+          error: null,
+        },
+      ]);
+
+      renderWithQueryClient(<LoginLink />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign-in Failed')).toBeInTheDocument();
+        expect(
+          screen.getByText('Auth token redemption failed.'),
+        ).toBeInTheDocument();
       });
     });
 

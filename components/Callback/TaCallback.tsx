@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';

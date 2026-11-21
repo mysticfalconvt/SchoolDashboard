@@ -165,7 +165,6 @@ const UserProfile: NextPage<UserProfilePageProps> = ({ query }) => {
           <>
             {isStudent && <EditStudent student={user as any} />}
             {/* <SendParentEmailSignupButton student={user} /> */}
-            {/* <ResetPasswordToPassword userID={query.id} /> */}
             <ImpersonateButton userId={user.id} userName={user.name} />
           </>
         )}

@@ -79,20 +79,20 @@ export default function NewWeeklyPbisCollection() {
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Run Weekly PBIS Card Collection
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -100,9 +100,9 @@ export default function NewWeeklyPbisCollection() {
             <div className="p-6 max-h-[80vh] overflow-y-auto">
               {/* Warning for recent collection */}
               {calculatedResults.hasRecentCollection && (
-                <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
+                <div className="mb-6 p-4 bg-yellow-600/30 border border-yellow-400 rounded-lg">
                   <div className="flex items-start">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <svg
                         className="h-5 w-5 text-yellow-400"
                         viewBox="0 0 20 20"
@@ -141,7 +141,7 @@ export default function NewWeeklyPbisCollection() {
                   <button
                     type="button"
                     onClick={() => setShowPreview(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors"
                   >
                     Preview Collection Results
                   </button>
@@ -165,7 +165,7 @@ export default function NewWeeklyPbisCollection() {
                   </div>
 
                   {/* Total Cards */}
-                  <div className="bg-white bg-opacity-10 p-3 rounded">
+                  <div className="bg-white/10 p-3 rounded-sm">
                     <h4 className="text-white font-semibold mb-2">
                       📊 Collection Summary
                     </h4>
@@ -177,7 +177,7 @@ export default function NewWeeklyPbisCollection() {
 
                   {/* TA Team Level Changes */}
                   {calculatedResults.taTeachersWithChanges.length > 0 && (
-                    <div className="bg-green-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-green-600/20 p-3 rounded-sm">
                       <h4 className="text-white font-semibold mb-2">
                         🎉 TA Teams Leveling Up (
                         {calculatedResults.taTeachersWithChanges.length})
@@ -204,7 +204,7 @@ export default function NewWeeklyPbisCollection() {
 
                   {/* Students Leveling Up */}
                   {calculatedResults.studentsLevelingUp.length > 0 && (
-                    <div className="bg-purple-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-purple-600/20 p-3 rounded-sm">
                       <h4 className="text-white font-semibold mb-2">
                         ⭐ Students Leveling Up (
                         {calculatedResults.studentsLevelingUp.length})
@@ -223,7 +223,7 @@ export default function NewWeeklyPbisCollection() {
 
                   {/* Random Drawing Winners */}
                   {calculatedResults.randomDrawingWinners.length > 0 && (
-                    <div className="bg-yellow-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-yellow-600/20 p-3 rounded-sm">
                       <h4 className="text-white font-semibold mb-2">
                         🎲 Random Drawing Winners (
                         {calculatedResults.randomDrawingWinners.length})
@@ -249,7 +249,7 @@ export default function NewWeeklyPbisCollection() {
                   {calculatedResults.taTeachersWithChanges.length === 0 &&
                     calculatedResults.studentsLevelingUp.length === 0 &&
                     calculatedResults.randomDrawingWinners.length === 0 && (
-                      <div className="bg-gray-600 bg-opacity-20 p-3 rounded">
+                      <div className="bg-gray-600/20 p-3 rounded-sm">
                         <p className="text-white text-sm">
                           No level changes or winners will be generated from
                           this collection.
@@ -314,7 +314,7 @@ export default function NewWeeklyPbisCollection() {
                       placeholder="Type 'yes' to confirm"
                       value={inputs.confirmation || ''}
                       onChange={handleChange}
-                      className="w-full p-2 rounded border mt-2"
+                      className="w-full p-2 rounded-sm border mt-2"
                     />
                   </label>
                   <GradientButton

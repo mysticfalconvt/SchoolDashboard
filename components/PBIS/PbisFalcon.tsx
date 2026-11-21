@@ -46,10 +46,10 @@ export default function PbisFalcon({ initialCount }: PbisFalconProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative h-[150px] w-[150px] bg-[var(--blue)] rounded-[20px] m-2 border-[4px] border-[var(--red)] overflow-hidden">
+      <div className="relative h-[150px] w-[150px] bg-(--blue) rounded-[20px] m-2 border-4 border-(--red) overflow-hidden">
         {/* Red fill from bottom up */}
         <div
-          className="absolute left-0 bottom-0 w-full bg-[var(--red)] transition-all duration-1000 ease-in-out z-0"
+          className="absolute left-0 bottom-0 w-full bg-(--red) transition-all duration-1000 ease-in-out z-0"
           style={{ height: `${percentageFull}%` }}
         />
         {/* Falcon and text always on top */}
@@ -61,9 +61,9 @@ export default function PbisFalcon({ initialCount }: PbisFalconProps) {
           className="absolute top-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none drop-shadow-[0_0_8px_white]"
           priority
         />
-        <span className="absolute top-4 left-0 w-full text-white font-bold text-center text-lg z-20 drop-shadow">{`${percentageFull}%`}</span>
+        <span className="absolute top-4 left-0 w-full text-white font-bold text-center text-lg z-20 drop-shadow-sm">{`${percentageFull}%`}</span>
         <span
-          className="absolute top-1/2 left-0 w-full text-white font-bold text-center z-20 text-xl drop-shadow"
+          className="absolute top-1/2 left-0 w-full text-white font-bold text-center z-20 text-xl drop-shadow-sm"
           style={{ transform: 'translateY(-50%)' }}
         >
           {displayCount} cards

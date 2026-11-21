@@ -1,5 +1,5 @@
 import type { DocumentNode } from 'graphql';
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { endpoint } from '../config';
 import { GraphQLClient } from './graphqlClient';
 
@@ -18,7 +18,9 @@ export const useGQLQuery = <TData = any>(
   key: string,
   query: DocumentNode,
   variables?: Record<string, any>,
-  config: Partial<UseQueryOptions<TData, Error, TData>> = {},
+  config: Partial<
+    Omit<UseQueryOptions<TData, Error, TData>, 'queryKey' | 'queryFn'>
+  > = {},
 ) => {
   const fetchData = async (): Promise<TData> => {
     // Create a new client instance for each request to ensure fresh token
@@ -37,7 +39,11 @@ export const useGQLQuery = <TData = any>(
   // Include variables in the query key so React Query knows when to refetch
   const queryKey = variables ? [key, variables] : [key];
 
-  return useQuery<TData, Error, TData>(queryKey, fetchData, config);
+  return useQuery<TData, Error, TData>({
+    queryKey,
+    queryFn: fetchData,
+    ...config,
+  });
 };
 
 export const useAsyncGQLQuery = <TData = any>(query: DocumentNode) => {

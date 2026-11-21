@@ -9,7 +9,7 @@ import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import BlockLabel from '../BlockLabel';
 
 // TODO: update this edit into create new student
@@ -50,7 +50,6 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
         block11Teacher: { connect: { id: $block11 } }
         block12Teacher: { connect: { id: $block12 } }
         isStudent: true
-        password: "password"
       }
     ) {
       id
@@ -150,11 +149,11 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
         {showForm ? 'Close the form' : 'Add A New Student'}
       </GradientButton>
       <FormContainerStyles visible={showForm}>
-        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-4xl mx-auto">
+        <div className="bg-linear-to-tl from-(--red) to-(--blue) border-[5px] border-(--tableAccentColor) rounded-xl shadow-2xl p-6 relative w-full max-w-4xl mx-auto">
           <button
             type="button"
             onClick={() => setShowForm(false)}
-            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black/40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-black/70 focus:outline-hidden"
             aria-label="Close"
           >
             ×
@@ -183,7 +182,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
                   placeholder="Student Name"
                   value={inputs.name}
                   onChange={handleChange}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
 
@@ -202,7 +201,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
                   placeholder="Student Email"
                   value={inputs.email}
                   onChange={handleChange}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
 
@@ -219,7 +218,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
                   value={inputs.ta}
                   onChange={handleChange}
                   required
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 >
                   <option value="">Select a TA Teacher</option>
                   {data?.teacherList?.map((teacher: any) => (
@@ -247,7 +246,7 @@ const NewStudent: React.FC<NewStudentProps> = ({ student }) => {
                       value={inputs[`block${blockNum}` as keyof StudentInputs]}
                       onChange={handleChange}
                       required
-                      className="w-full p-2 rounded border"
+                      className="w-full p-2 rounded-sm border"
                     >
                       <option value="">Select a {name} Teacher</option>
                       {data?.teacherList?.map((teacher: any) => (

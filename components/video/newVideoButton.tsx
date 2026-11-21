@@ -9,8 +9,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 
 const CREATE_VIDEO_MUTATION = gql`
   mutation CREATE_VIDEO_MUTATION(
@@ -159,7 +158,7 @@ const NewVideo: React.FC<NewVideoProps> = ({ refetchLinks, hidden }) => {
                 value={inputs.type}
                 onChange={handleChange}
                 required
-                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               >
                 <option value="">Select a type</option>
                 <option value="youtube">YouTube</option>

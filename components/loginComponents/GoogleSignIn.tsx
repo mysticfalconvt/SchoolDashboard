@@ -79,7 +79,7 @@ const GoogleSignIn: React.FC = () => {
       callback: handleCredential,
     });
     window.google.accounts.id.renderButton(buttonRef.current, {
-      theme: 'outline',
+      theme: 'outline-solid',
       size: 'large',
       width: 280,
       text: 'signin_with',

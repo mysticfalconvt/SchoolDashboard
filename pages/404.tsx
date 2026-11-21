@@ -5,7 +5,7 @@ import NewBugReportButton from "../components/bugreports/NewBugReportButton";
 import { useUser } from "../components/User";
 import useSendEmail from "../lib/useSendEmail";
 
-export default function Page404(): JSX.Element {
+export default function Page404(): React.JSX.Element {
   const [pathname, setPathname] = useState("");
   const me = useUser();
   const { sendEmail } = useSendEmail();

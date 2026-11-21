@@ -25,7 +25,7 @@ import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
@@ -202,7 +202,7 @@ const NewDiscipline: React.FC<NewDisciplineProps> = ({ refetch }) => {
             setEmailSending(false);
             const revalidateResponse = revalidatePage();
             toast.success('Discipline Referral Created');
-            queryClient.refetchQueries('allDisciplines');
+            queryClient.refetchQueries({ queryKey: ['allDisciplines'] });
             setStudentReferralIsFor(null);
             setShowForm(false);
           }}

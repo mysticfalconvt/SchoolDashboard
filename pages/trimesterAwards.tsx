@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../components/Toggle';
 import Loading from '../components/Loading';
 import TrimesterAwardsAllStudentsTable from '../components/TrimesterAwards/TrimesterAwardsAllStudentsTable';
 import TrimesterAwardsTable from '../components/TrimesterAwards/TrimesterAwardsTable';

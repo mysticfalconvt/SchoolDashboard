@@ -262,10 +262,10 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
             </div>
           )}
 
-          {/* backdrop-blur-sm traps the search dropdown in its own stacking
+          {/* backdrop-blur-xs traps the search dropdown in its own stacking
               context, so z-30 here lifts the whole panel over the footer's
               skewed (transformed) buttons. Same fix as CreateSingleChromebookCheck. */}
-          <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10 relative z-30">
+          <div className="bg-base-200/20 backdrop-blur-xs rounded-lg p-6 border border-white/10 relative z-30">
             <div className="space-y-6">
               <div className="form-control relative z-30">
                 <label className="label pb-2">
@@ -302,7 +302,7 @@ function CardForm({ isOpen, onClose }: CardFormProps) {
                   placeholder={isStaffCard ? 'Message for staff' : 'Student Message'}
                   value={inputs.message}
                   onChange={handleChange}
-                  className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-[5rem]"
+                  className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none min-h-20"
                 />
               </div>
 

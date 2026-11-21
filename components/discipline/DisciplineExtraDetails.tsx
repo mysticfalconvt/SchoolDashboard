@@ -113,7 +113,7 @@ const DisciplineExtraDetails: React.FC<DisciplineExtraDetailsProps> = ({
       </GradientButton>
 
       {showModal && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--backgroundColor)] z-[1000] w-screen max-w-[1000px] h-[80vh] rounded-xl p-6 shadow-2xl flex flex-col justify-start items-stretch">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--backgroundColor) z-1000 w-screen max-w-[1000px] h-[80vh] rounded-xl p-6 shadow-2xl flex flex-col justify-start items-stretch">
           <h2>
             Extra Details
             <GradientButton
@@ -129,7 +129,7 @@ const DisciplineExtraDetails: React.FC<DisciplineExtraDetailsProps> = ({
               {!showCounts ? 'Show Details' : 'Show Counts'}
             </GradientButton>
           </h2>
-          <h3 className="text-center border-b border-[var(--red)]">
+          <h3 className="text-center border-b border-(--red)">
             Total: {totalDisciplines}
           </h3>
           <div className="flex overflow-y-auto justify-around gap-8">

@@ -32,7 +32,7 @@ interface UpdateDisciplineVariables {
 
 const UPDATE_DISCIPLINE_ADMIN = gql`
   mutation UPDATE_DISCIPLINE_ADMIN($id: ID!, $adminComments: String) {
-    updateDiscipline(id: $id, data: { adminComments: $adminComments }) {
+    updateDiscipline(where: { id: $id }, data: { adminComments: $adminComments }) {
       id
     }
   }

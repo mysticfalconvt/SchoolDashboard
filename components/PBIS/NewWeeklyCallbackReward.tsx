@@ -179,20 +179,20 @@ export default function NewWeeklyCallbackReward() {
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Run Weekly Callback Reward
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -206,14 +206,14 @@ export default function NewWeeklyCallbackReward() {
               {error && (
                 <div
                   role="alert"
-                  className="mb-6 p-4 bg-red-600 bg-opacity-30 border border-red-300 rounded-lg text-red-100"
+                  className="mb-6 p-4 bg-red-600/30 border border-red-300 rounded-lg text-red-100"
                 >
                   {error}
                 </div>
               )}
 
               {hasRecentRun && (
-                <div className="mb-6 p-4 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg">
+                <div className="mb-6 p-4 bg-yellow-600/30 border border-yellow-400 rounded-lg">
                   <h3 className="text-sm font-medium text-yellow-200">
                     ⚠️ Warning: Recently run
                   </h3>
@@ -238,7 +238,7 @@ export default function NewWeeklyCallbackReward() {
                   <button
                     type="button"
                     onClick={() => setShowPreview(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors"
                   >
                     Preview Reward
                   </button>
@@ -261,7 +261,7 @@ export default function NewWeeklyCallbackReward() {
                     </button>
                   </div>
 
-                  <div className="bg-white bg-opacity-10 p-3 rounded">
+                  <div className="bg-white/10 p-3 rounded-sm">
                     <p className="text-white text-sm">
                       Eligible students: <strong>{eligibleStudents.length}</strong>
                     </p>
@@ -272,7 +272,7 @@ export default function NewWeeklyCallbackReward() {
                   </div>
 
                   {eligibleStudents.length > 0 ? (
-                    <div className="bg-green-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-green-600/20 p-3 rounded-sm">
                       <h4 className="text-white font-semibold mb-2">
                         Students receiving the reward
                       </h4>
@@ -287,7 +287,7 @@ export default function NewWeeklyCallbackReward() {
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-gray-600/20 p-3 rounded-sm">
                       <p className="text-white text-sm">
                         No students are currently eligible.
                       </p>
@@ -295,7 +295,7 @@ export default function NewWeeklyCallbackReward() {
                   )}
 
                   {ineligibleStudents.length > 0 && (
-                    <div className="bg-red-600 bg-opacity-20 p-3 rounded">
+                    <div className="bg-red-600/20 p-3 rounded-sm">
                       <h4 className="text-white font-semibold mb-2">
                         Not eligible ({ineligibleStudents.length}) —{' '}
                         {CALLBACK_THRESHOLD}+ active callbacks
@@ -363,7 +363,7 @@ export default function NewWeeklyCallbackReward() {
                       placeholder="Type 'yes' to confirm"
                       value={inputs.confirmation || ''}
                       onChange={handleChange}
-                      className="w-full p-2 rounded border mt-2"
+                      className="w-full p-2 rounded-sm border mt-2"
                     />
                   </label>
                   <GradientButton

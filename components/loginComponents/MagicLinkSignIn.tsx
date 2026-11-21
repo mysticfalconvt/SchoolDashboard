@@ -10,15 +10,9 @@ const SEND_MAGIC_LINK_MUTATION = gql`
   }
 `;
 
-interface SignInInputs {
-  email: string;
-  password: string;
-}
-
 const MagicLinkSignIn: React.FC = () => {
   const { inputs, handleChange, resetForm } = useForm({
     email: '',
-    password: '',
   });
   const [magicLinkSent, setMagicLinkSent] = React.useState(false);
   const [
@@ -59,7 +53,7 @@ const MagicLinkSignIn: React.FC = () => {
               value={inputs.email}
               onChange={handleChange}
               disabled={sendMagicLinkLoading || magicLinkSent}
-              className="w-full px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all duration-200"
+              className="w-full px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/60 focus:outline-hidden focus:border-white/40 focus:bg-white/20 transition-all duration-200"
               required
             />
           </div>

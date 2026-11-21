@@ -79,8 +79,8 @@ const MessagesCount: React.FC<MessagesCountProps> = ({ mobile = false }) => {
               type="button"
               className={
                 mobile
-                  ? 'flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg my-2 w-full h-10 px-4 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none'
-                  : 'flex items-center justify-center bg-gradient-to-tl from-[var(--blue)] to-[var(--red)] text-white font-bold rounded-lg ml-1 min-w-8 h-10 px-2 shadow transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-none'
+                  ? 'flex items-center justify-center bg-linear-to-tl from-(--blue) to-(--red) text-white font-bold rounded-lg my-2 w-full h-10 px-4 shadow-sm transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-hidden'
+                  : 'flex items-center justify-center bg-linear-to-tl from-(--blue) to-(--red) text-white font-bold rounded-lg ml-1 min-w-8 h-10 px-2 shadow-sm transition-transform duration-200 hover:brightness-110 skew-x-[-20deg] border-none focus:outline-hidden'
               }
               style={
                 mobile
@@ -93,8 +93,8 @@ const MessagesCount: React.FC<MessagesCountProps> = ({ mobile = false }) => {
               <span
                 className={
                   mobile
-                    ? 'skew-x-[20deg] w-full text-center text-lg'
-                    : 'skew-x-[20deg] w-full text-center text-lg'
+                    ? 'skew-x-20 w-full text-center text-lg'
+                    : 'skew-x-20 w-full text-center text-lg'
                 }
               >
                 {mobile ? `${unread} messages` : unread}

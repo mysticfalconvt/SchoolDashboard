@@ -136,7 +136,7 @@ export default function CallbackEditor({
                 placeholder="Title of Assignment"
                 value={inputs.title || ''}
                 onChange={handleChange}
-                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
             <div className="form-control w-full">
@@ -150,7 +150,7 @@ export default function CallbackEditor({
                 name="dateAssigned"
                 value={inputs.dateAssigned}
                 onChange={handleChange}
-                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function CallbackEditor({
               value={inputs.description}
               onChange={handleChange}
               rows={5}
-              className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
+              className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
             />
           </div>
           <div className="form-control w-full mb-6">
@@ -179,7 +179,7 @@ export default function CallbackEditor({
               placeholder="Link to website"
               value={inputs.link}
               onChange={handleChange}
-              className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+              className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
             />
           </div>
           <button 

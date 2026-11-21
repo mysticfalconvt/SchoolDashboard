@@ -53,7 +53,6 @@ const SIGNUP_NEW_PARENT_MUTATION = gql`
   mutation SIGNUP_NEW_PARENT_MUTATION(
     $email: String!
     $name: String!
-    $password: String!
     $children: UserRelateToManyForCreateInput!
     $isParent: Boolean!
   ) {
@@ -61,31 +60,6 @@ const SIGNUP_NEW_PARENT_MUTATION = gql`
       data: {
         email: $email
         name: $name
-        password: $password
-        isParent: $isParent
-        children: $children
-      }
-    ) {
-      id
-      name
-      email
-    }
-  }
-`;
-
-const CREATE_PARENT_ACCOUNT_MUTATION = gql`
-  mutation CREATE_PARENT_ACCOUNT_MUTATION(
-    $email: String!
-    $name: String!
-    $password: String!
-    $children: UserRelateToManyInput!
-    $isParent: Boolean!
-  ) {
-    createUser(
-      data: {
-        email: $email
-        name: $name
-        password: $password
         isParent: $isParent
         children: $children
       }
@@ -162,16 +136,14 @@ export function useNewParentAccount() {
     }
 
     // if not, create a new parent account
-    const password = Math.random().toString(36).substring(2, 10);
     if (!isThisAnExistingParent) {
       const newParent = await createNewUser({
         email: parentEmail,
         name: parentEmail,
-        password,
         children: { connect: { id: student.id } },
         isParent: true,
       });
-      // email to parent with password
+      // email the parent a welcome note; they sign in with a magic link
       const emailToSend = {
         toAddress: parentEmail,
         fromAddress: teacher.email,

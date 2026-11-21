@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import gql from 'graphql-tag';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAsyncGQLQuery, useGQLQuery } from '../useGqlQuery';
 
 // Mock fetch globally since the GraphQL client uses it
@@ -21,7 +21,7 @@ describe('useGqlQuery', () => {
         queries: {
           retry: false,
           staleTime: 0,
-          cacheTime: 0,
+          gcTime: 0,
         },
       },
     });

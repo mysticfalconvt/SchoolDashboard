@@ -2,7 +2,7 @@ import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { UPDATE_CALLBACK_MESSAGES_MUTATION } from './CallbackCardMessages';
 
 interface Teacher {
@@ -70,8 +70,8 @@ const CallbackMessagesForTable = React.memo(function CallbackMessagesForTable({
       });
 
       // Invalidate specific queries to trigger refetch - avoid refetching ALL queries
-      queryClient.invalidateQueries(['taInfo']);
-      queryClient.invalidateQueries(['allCallbacks']);
+      queryClient.invalidateQueries({ queryKey: ['taInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['allCallbacks'] });
 
       toast.success(
         `Updated Callback Message for ${callbackItem.student.name}`,

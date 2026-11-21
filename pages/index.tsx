@@ -21,7 +21,6 @@ import PbisCardFormButton from '../components/PBIS/PbisCardFormButton';
 import { TOTAL_PBIS_CARDS } from '../components/PBIS/PbisFalcon';
 import PbisWidget from '../components/PBIS/PbisWidget';
 import StudentPbisData from '../components/PBIS/StudentPbisData';
-import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
 import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
@@ -164,7 +163,7 @@ export default function Home(props: HomeProps) {
     <div>
       <main>
         {hasStaticDataError && (
-          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-sm mb-4">
             <strong>Warning:</strong> Some data could not be loaded. This may be
             due to the server being unavailable.
           </div>
@@ -180,7 +179,7 @@ export default function Home(props: HomeProps) {
           {/* {me && isAllowed(me || {}, "isStaff") && (
             <a
               href="https://ncujhs.ncsuvt.org/emergency"
-              className="bg-gradient-to-r text-white from-red-950 from-10% via-yellow-900 via-50% to-red-950 to-90% p-4 rounded-xl"
+              className="bg-linear-to-r text-white from-red-950 from-10% via-yellow-900 via-50% to-red-950 to-90% p-4 rounded-xl"
             >
               <button type="button">Emergency</button>
             </a>
@@ -188,7 +187,7 @@ export default function Home(props: HomeProps) {
           {me && isAllowed(me, 'hasClasses') && (
             <Link
               href={`/userProfile/${me?.id}`}
-              className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] text-[var(--navTextColor)] font-medium border border-[var(--backgroundColor)] rounded-xl uppercase text-lg px-6 py-3 skew-x-[-2deg] inline-block transition-all duration-500 m-1 max-h-full outline-none hover:border-[var(--red)] hover:brightness-110 break-words whitespace-normal"
+              className="bg-linear-to-tl from-(--red) to-(--blue) text-(--navTextColor) font-medium border border-(--backgroundColor) rounded-xl uppercase text-lg px-6 py-3 -skew-x-2 inline-block transition-all duration-500 m-1 max-h-full outline-hidden hover:border-(--red) hover:brightness-110 wrap-break-word whitespace-normal"
             >
               My Students
             </Link>
@@ -247,14 +246,11 @@ export default function Home(props: HomeProps) {
       </main>
 
       <footer>
-        {me ? (
+        {me && (
           <div style={{ display: 'flex', justifyContent: 'start' }}>
             <SignOut />
             <NewBugReportButton />
-            {/* <UpdateMyPassword /> */}
           </div>
-        ) : (
-          <RequestReset />
         )}
       </footer>
     </div>

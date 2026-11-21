@@ -1,4 +1,4 @@
-import { resetIdCounter, useCombobox } from 'downshift';
+import { useCombobox } from 'downshift';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -78,14 +78,12 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
     setUsersToDisplay(eightItems || []);
   };
 
-  resetIdCounter();
 
   const {
     isOpen,
     inputValue,
     getMenuProps,
     getInputProps,
-    getComboboxProps,
     getItemProps,
     highlightedIndex,
   } = useCombobox({
@@ -103,20 +101,20 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
 
   return (
     <div className="relative">
-      <div {...getComboboxProps()}>
+      <div>
         <input
           {...getInputProps({
             type: 'search',
             placeholder: 'Search for a User',
             id: name,
             name,
-            className: `w-full p-2 bg-[var(--backgroundColor)] text-[var(--textColor)] border-0 text-2xl focus:ring-2 focus:ring-yellow-300 rounded dark:bg-[var(--backgroundColorDark)] dark:text-[var(--textColorDark)] ${isLoading ? 'animate-pulse ring-2 ring-yellow-300' : ''}`,
+            className: `w-full p-2 bg-(--backgroundColor) text-(--textColor) border-0 text-2xl focus:ring-2 focus:ring-yellow-300 rounded-sm dark:bg-(--backgroundColorDark) dark:text-(--textColorDark) ${isLoading ? 'animate-pulse ring-2 ring-yellow-300' : ''}`,
           })}
         />
       </div>
       <div
         {...getMenuProps()}
-        className="absolute w-full z-20 border border-[var(--lightGrey)] bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700"
+        className="absolute w-full z-20 border border-(--lightGrey) bg-white rounded-b shadow-lg mt-1 dark:bg-gray-900 dark:border-gray-700"
       >
         {isOpen &&
           items.map((item, index) => {
@@ -125,14 +123,14 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
               <div
                 {...getItemProps({ item, index })}
                 key={item.id}
-                className={`flex items-center border-b border-[var(--lightGrey)] px-4 py-3 transition-all duration-200 cursor-pointer ${highlighted ? 'bg-gray-100 dark:bg-gray-800 dark:text-white pl-8 border-l-4 border-yellow-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                className={`flex items-center border-b border-(--lightGrey) px-4 py-3 transition-all duration-200 cursor-pointer ${highlighted ? 'bg-gray-100 dark:bg-gray-800 dark:text-white pl-8 border-l-4 border-yellow-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
               >
                 {item.name}
               </div>
             );
           })}
         {isOpen && !items.length && !isLoading && (
-          <div className="flex items-center border-b border-[var(--lightGrey)] px-4 py-3">
+          <div className="flex items-center border-b border-(--lightGrey) px-4 py-3">
             Sorry, No users found for {inputValue}
           </div>
         )}

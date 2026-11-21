@@ -8,6 +8,7 @@ import useSendEmail from '../lib/useSendEmail';
 const LOGIN_LINK_MUTATION = gql`
   mutation LOGIN_LINK_MUTATION($token: String!, $email: String!) {
     redeemUserMagicAuthToken(email: $email, token: $token) {
+      __typename
       ... on RedeemUserMagicAuthTokenSuccess {
         token
         item {
@@ -25,6 +26,17 @@ const LOGIN_LINK_MUTATION = gql`
 `;
 
 
+
+// A failure is recognised by its typename, or by its `code` when the typename
+// is missing -- without this, a failed redemption fell through to the
+// "Processing..." fallback and the page looked like it hung forever.
+function isFailureResponse(response: any): boolean {
+  if (!response) return false;
+  return (
+    response.__typename === 'RedeemUserMagicAuthTokenFailure' ||
+    (!response.token && Boolean(response.code))
+  );
+}
 
 export default function LoginLink() {
   const router = useRouter();
@@ -179,7 +191,7 @@ export default function LoginLink() {
 
   // Report authentication failure
   React.useEffect(() => {
-    if (data?.redeemUserMagicAuthToken?.__typename === 'RedeemUserMagicAuthTokenFailure') {
+    if (isFailureResponse(data?.redeemUserMagicAuthToken)) {
       const failureMessage = data.redeemUserMagicAuthToken.message || 'Magic link authentication failed';
       const failureCode = data.redeemUserMagicAuthToken.code || 'Unknown';
       reportLoginError('Authentication Failure', `Code: ${failureCode}, Message: ${failureMessage}`);
@@ -197,7 +209,7 @@ export default function LoginLink() {
   if ((token && email && !data && !error && !mutationError && !timeoutReached) || loading) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white">
@@ -217,7 +229,7 @@ export default function LoginLink() {
   if (error || mutationError || timeoutReached) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -238,13 +250,10 @@ export default function LoginLink() {
   }
 
   // Show error state
-  if (
-    data?.redeemUserMagicAuthToken?.__typename ===
-    'RedeemUserMagicAuthTokenFailure'
-  ) {
+  if (isFailureResponse(data?.redeemUserMagicAuthToken)) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -273,7 +282,7 @@ export default function LoginLink() {
   ) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white">
@@ -295,7 +304,7 @@ export default function LoginLink() {
   if (isRouterReady && (!token || !email)) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -319,7 +328,7 @@ export default function LoginLink() {
   // Fallback loading state
   return (
     <div
-      className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+      className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
       style={{ minHeight: 'calc(100vh - 200px)' }}
     >
       <div className="text-center text-white">

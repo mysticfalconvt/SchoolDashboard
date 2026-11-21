@@ -2,7 +2,7 @@ import { SmallGradientButton } from '@/components/styles/Button';
 import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CREATE_QUICK_PBIS = gql`
   mutation CREATE_QUICK_PBIS($teacher: ID!, $student: ID!) {

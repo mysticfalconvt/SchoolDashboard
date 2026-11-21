@@ -211,7 +211,7 @@ describe('NewWeeklyPbisCollection', () => {
     expect(screen.getByText('Run Weekly PBIS Card Collection')).toBeInTheDocument();
 
     // Click backdrop - use className to find the backdrop div
-    const backdrop = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50.z-40');
+    const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/50.z-40');
     fireEvent.click(backdrop!);
 
     expect(screen.queryByText('Run Weekly PBIS Card Collection')).not.toBeInTheDocument();

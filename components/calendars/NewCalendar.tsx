@@ -116,7 +116,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 placeholder="Event Title"
                 value={inputs.name}
                 onChange={handleChange}
-                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
             <div className="form-control w-full mb-4">
@@ -131,7 +131,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                   name="date"
                   value={inputs.date}
                   onChange={handleChange}
-                  className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] pr-10"
+                  className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] pr-10"
                   placeholder="Select date"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -161,7 +161,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 required
                 value={inputs.description}
                 onChange={handleChange}
-                className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
+                className="textarea textarea-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)] resize-none"
               />
             </div>
             <div className="form-control w-full mb-4">
@@ -173,7 +173,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 name="status"
                 value={inputs.status}
                 onChange={handleChange}
-                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               >
                 <option value="Both">Students and Teachers</option>
                 <option value="Students">Students Only</option>
@@ -191,7 +191,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 placeholder="Input Link Here"
                 value={inputs.link}
                 onChange={handleChange}
-                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
             <div className="form-control w-full mb-4">
@@ -205,7 +205,7 @@ const NewCalendar: React.FC<NewCalendarProps> = ({
                 placeholder="Link Title"
                 value={inputs.linkTitle}
                 onChange={handleChange}
-                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                className="input input-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
               />
             </div>
             <button 

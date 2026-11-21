@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { User } from '../../components/User';
 import { useGqlMutation } from '../useGqlMutation';
 import { useAsyncGQLQuery } from '../useGqlQuery';
@@ -246,7 +246,6 @@ describe('useNewParentAccount', () => {
     expect(mockCreateNewUser).toHaveBeenCalledWith({
       email: newParentEmail,
       name: newParentEmail,
-      password: expect.any(String),
       children: { connect: { id: 'student-1' } },
       isParent: true,
     });
@@ -261,7 +260,7 @@ describe('useNewParentAccount', () => {
     });
   });
 
-  it('generates random password when creating new parent', async () => {
+  it('creates the parent without a password (they sign in by magic link)', async () => {
     mockGetStudentData.mockResolvedValue({
       user: { id: 'student-1', parent: [] },
     });
@@ -288,9 +287,7 @@ describe('useNewParentAccount', () => {
     });
 
     const createUserCall = mockCreateNewUser.mock.calls[0][0];
-    expect(createUserCall.password).toBeTruthy();
-    expect(typeof createUserCall.password).toBe('string');
-    expect(createUserCall.password.length).toBeGreaterThan(0);
+    expect(createUserCall).not.toHaveProperty('password');
   });
 
   it('sets loading state correctly during account creation', async () => {

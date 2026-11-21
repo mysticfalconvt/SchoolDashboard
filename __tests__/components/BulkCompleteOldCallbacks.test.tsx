@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BulkCompleteOldCallbacks from '../../components/Callback/BulkCompleteOldCallbacks';
 
 // Mock the GraphQL hooks
@@ -49,7 +49,7 @@ describe('BulkCompleteOldCallbacks', () => {
             defaultOptions: {
                 queries: {
                     retry: false,
-                    cacheTime: 0,
+                    gcTime: 0,
                     staleTime: 0,
                 },
             },
@@ -154,7 +154,7 @@ describe('BulkCompleteOldCallbacks', () => {
             expect(screen.getByRole('button', { name: '×' })).toBeInTheDocument();
 
             // Check for backdrop
-            const backdrop = document.querySelector('.fixed.inset-0.bg-black');
+            const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/50');
             expect(backdrop).toBeInTheDocument();
         });
     });

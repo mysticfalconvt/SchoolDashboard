@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 import { useMemo, useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 import { useGQLQuery } from '../../lib/useGqlQuery';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
@@ -152,8 +151,7 @@ export default function RandomStudentDrawing() {
                 aria-label="Student pool type"
                 checked={!studentsWhoGave}
                 onChange={updatePoolType}
-                icons={false}
-                className="student-drawing-toggle"
+                trackClassName="bg-custom-red peer-checked:bg-custom-blue"
               />
               <span className={!studentsWhoGave ? 'font-bold' : 'opacity-75'}>
                 Received a PBIS card
@@ -217,25 +215,6 @@ export default function RandomStudentDrawing() {
           )}
         </div>
       </FormDialog>
-      <style jsx global>{`
-        .student-drawing-toggle .react-toggle-track,
-        .student-drawing-toggle:hover:not(.react-toggle--disabled)
-          .react-toggle-track {
-          background-color: #760d08;
-        }
-
-        .student-drawing-toggle.react-toggle--checked .react-toggle-track,
-        .student-drawing-toggle.react-toggle--checked:hover:not(
-            .react-toggle--disabled
-          )
-          .react-toggle-track {
-          background-color: #38b6ff;
-        }
-
-        .student-drawing-toggle.react-toggle--checked .react-toggle-thumb {
-          border-color: #38b6ff;
-        }
-      `}</style>
     </>
   );
 }

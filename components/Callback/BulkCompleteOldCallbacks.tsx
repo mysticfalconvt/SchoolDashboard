@@ -237,20 +237,20 @@ export default function BulkCompleteOldCallbacks() {
                 <>
                     {/* Backdrop overlay */}
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                        className="fixed inset-0 bg-black/50 z-40"
                         onClick={handleCloseModal}
                     />
 
                     {/* Modal */}
-                    <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-                        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+                    <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+                        <div className="flex justify-between items-center p-4 border-b border-(--blue)">
                             <h4 className="text-white text-xl font-semibold">
                                 Bulk Complete Old Callbacks
                             </h4>
                             <button
                                 type="button"
                                 onClick={handleCloseModal}
-                                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
                             >
                                 ×
                             </button>
@@ -264,7 +264,7 @@ export default function BulkCompleteOldCallbacks() {
                             )}
 
                             {error && (
-                                <div className="mb-4 p-4 bg-red-600 bg-opacity-30 border border-red-400 rounded-lg">
+                                <div className="mb-4 p-4 bg-red-600/30 border border-red-400 rounded-lg">
                                     <p className="text-white text-sm">{error}</p>
                                 </div>
                             )}
@@ -277,7 +277,7 @@ export default function BulkCompleteOldCallbacks() {
 
                             {!loading && !mutationLoading && !error && previewData.length > 0 && (
                                 <div className="space-y-4">
-                                    <div className="bg-white bg-opacity-10 p-3 rounded">
+                                    <div className="bg-white/10 p-3 rounded-sm">
                                         <h4 className="text-white font-semibold mb-2">
                                             📋 Callbacks to Complete
                                         </h4>
@@ -298,7 +298,7 @@ export default function BulkCompleteOldCallbacks() {
                                             type="button"
                                             onClick={handleCancel}
                                             disabled={isCompleting}
-                                            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+                                            className="px-4 py-2 bg-gray-600 text-white rounded-sm hover:bg-gray-700 transition-colors disabled:opacity-50"
                                         >
                                             Cancel
                                         </button>
@@ -306,7 +306,7 @@ export default function BulkCompleteOldCallbacks() {
                                             type="button"
                                             onClick={handleConfirm}
                                             disabled={isCompleting}
-                                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+                                            className="px-4 py-2 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors disabled:opacity-50"
                                         >
                                             {isCompleting ? 'Completing...' : 'Confirm'}
                                         </button>

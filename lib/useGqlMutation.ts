@@ -1,5 +1,5 @@
 import type { DocumentNode } from 'graphql';
-import { useMutation, UseMutationOptions, useQueryClient } from 'react-query';
+import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import { endpoint } from '../config';
 import { GraphQLClient } from './graphqlClient';
 
@@ -23,7 +23,8 @@ export const useGqlMutation = <TData = any, TVariables = any>(
     return await graphQLClient.request(mutation, variables as object);
   };
 
-  const mutationResult = useMutation<TData, Error, TVariables>(mutateFn, {
+  const mutationResult = useMutation<TData, Error, TVariables>({
+    mutationFn: mutateFn,
     onSuccess: () => {
       // Invalidate and refetch all queries
       queryClient.invalidateQueries();
@@ -36,7 +37,7 @@ export const useGqlMutation = <TData = any, TVariables = any>(
     mutationResult.mutate,
     {
       data: mutationResult.data,
-      loading: mutationResult.isLoading,
+      loading: mutationResult.isPending,
       error: mutationResult.error,
       mutateAsync: mutationResult.mutateAsync,
     },

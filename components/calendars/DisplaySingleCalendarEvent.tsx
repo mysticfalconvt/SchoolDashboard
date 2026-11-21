@@ -31,7 +31,7 @@ const DisplaySingleCalendarEvent: React.FC<DisplaySingleCalendarEventProps> = ({
 
   return (
     <div className="flex flex-col basis-1/4">
-      <div className="m-4 p-4 rounded-2xl opacity-80 bg-gradient-to-tl from-[var(--red)] to-[var(--blue)]">
+      <div className="m-4 p-4 rounded-2xl opacity-80 bg-linear-to-tl from-(--red) to-(--blue)">
         <h2>
           <span style={{ color: 'var(--red)' }} hidden={!isToday}>
             Today 📆{' '}
@@ -43,9 +43,9 @@ const DisplaySingleCalendarEvent: React.FC<DisplaySingleCalendarEventProps> = ({
           {displayDetails ? 'Details' : 'Hide Details'}
         </SmallGradientButton>
       </div>
-      <div className="ml-2.5 w-2.5 h-2.5 z-[100]">
+      <div className="ml-2.5 w-2.5 h-2.5 z-100">
         <div className="w-[200px] overflow-visible" hidden={displayDetails}>
-          <div className="mt-[-2rem] p-4 bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-white opacity-80 rounded-xl">
+          <div className="-mt-8 p-4 bg-linear-to-tr from-(--red) to-(--blue) text-white opacity-80 rounded-xl">
             <p>{calendar.description}</p>
             {calendar.link ? (
               <Link

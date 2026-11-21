@@ -49,7 +49,6 @@ const CREATE_PARENT_MUTATION = gql`
       data: {
         name: $name
         email: $email
-        password: "password"
         isParent: true
         children: { connect: { id: $studentId } }
       }
@@ -565,20 +564,20 @@ export default function CreateParentAccountsFromCSV() {
       {showForm && (
         <>
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             data-testid="csv-backdrop"
             onClick={() => setShowForm(false)}
           />
 
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Create Parent Accounts from CSV
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -592,7 +591,7 @@ export default function CreateParentAccountsFromCSV() {
                     className={`flex items-center ${currentStep === 'upload' || currentStep === 'preview' || currentStep === 'processing' || currentStep === 'complete' ? 'text-white' : 'text-gray-400'}`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'upload' ? 'bg-[var(--blue)]' : 'bg-white text-[var(--blue)]'}`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'upload' ? 'bg-(--blue)' : 'bg-white text-(--blue)'}`}
                     >
                       1
                     </div>
@@ -605,7 +604,7 @@ export default function CreateParentAccountsFromCSV() {
                     className={`flex items-center ${currentStep === 'preview' || currentStep === 'processing' || currentStep === 'complete' ? 'text-white' : 'text-gray-400'}`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'preview' ? 'bg-[var(--blue)]' : currentStep === 'processing' || currentStep === 'complete' ? 'bg-white text-[var(--blue)]' : 'bg-gray-400'}`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'preview' ? 'bg-(--blue)' : currentStep === 'processing' || currentStep === 'complete' ? 'bg-white text-(--blue)' : 'bg-gray-400'}`}
                     >
                       2
                     </div>
@@ -618,7 +617,7 @@ export default function CreateParentAccountsFromCSV() {
                     className={`flex items-center ${currentStep === 'processing' || currentStep === 'complete' ? 'text-white' : 'text-gray-400'}`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'processing' ? 'bg-[var(--blue)]' : currentStep === 'complete' ? 'bg-white text-[var(--blue)]' : 'bg-gray-400'}`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'processing' ? 'bg-(--blue)' : currentStep === 'complete' ? 'bg-white text-(--blue)' : 'bg-gray-400'}`}
                     >
                       3
                     </div>
@@ -654,7 +653,7 @@ export default function CreateParentAccountsFromCSV() {
                       onChange={(e) =>
                         handleFileSelect(e.target.files?.[0] || null)
                       }
-                      className="w-full p-2 rounded border bg-white"
+                      className="w-full p-2 rounded-sm border bg-white"
                     />
                   </div>
                 </div>
@@ -727,7 +726,7 @@ export default function CreateParentAccountsFromCSV() {
                     {previewData.map((result, index) => (
                       <div
                         key={index}
-                        className={`border rounded p-3 mb-2 ${result.errors.length > 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
+                        className={`border rounded-sm p-3 mb-2 ${result.errors.length > 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
                       >
                         <div className="font-semibold">
                           {result.studentName} (
@@ -781,7 +780,7 @@ export default function CreateParentAccountsFromCSV() {
                         )}
 
                         {result.errors.length > 0 && (
-                          <div className="bg-red-100 border border-red-300 rounded p-2 mt-2">
+                          <div className="bg-red-100 border border-red-300 rounded-sm p-2 mt-2">
                             <div className="text-red-800 font-semibold text-sm">
                               ⚠ Errors:
                             </div>
@@ -811,7 +810,7 @@ export default function CreateParentAccountsFromCSV() {
                             Students Not Found (
                             {fileProblems.studentsNotFound.length}):
                           </h5>
-                          <div className="bg-white border border-red-200 rounded p-3 max-h-32 overflow-y-auto">
+                          <div className="bg-white border border-red-200 rounded-sm p-3 max-h-32 overflow-y-auto">
                             <ul className="text-sm text-red-600 space-y-1">
                               {fileProblems.studentsNotFound.map(
                                 (student, index) => (
@@ -832,7 +831,7 @@ export default function CreateParentAccountsFromCSV() {
                             Invalid Contact Information (
                             {fileProblems.invalidContacts.length}):
                           </h5>
-                          <div className="bg-white border border-red-200 rounded p-3 max-h-32 overflow-y-auto">
+                          <div className="bg-white border border-red-200 rounded-sm p-3 max-h-32 overflow-y-auto">
                             <ul className="text-sm text-red-600 space-y-1">
                               {fileProblems.invalidContacts.map(
                                 (contact, index) => (
@@ -853,7 +852,7 @@ export default function CreateParentAccountsFromCSV() {
                             Duplicate Emails (
                             {fileProblems.duplicateEmails.length}):
                           </h5>
-                          <div className="bg-white border border-red-200 rounded p-3 max-h-32 overflow-y-auto">
+                          <div className="bg-white border border-red-200 rounded-sm p-3 max-h-32 overflow-y-auto">
                             <ul className="text-sm text-red-600 space-y-1">
                               {fileProblems.duplicateEmails.map(
                                 (email, index) => (
@@ -876,14 +875,14 @@ export default function CreateParentAccountsFromCSV() {
                         setCurrentStep('upload');
                         setShowPreview(false);
                       }}
-                      className="flex-1 bg-gray-500 text-white p-3 rounded font-semibold"
+                      className="flex-1 bg-gray-500 text-white p-3 rounded-sm font-semibold"
                     >
                       Back
                     </button>
                     <button
                       onClick={processCSV}
                       disabled={!csvFile || isProcessing || creatingParent}
-                      className="flex-1 bg-[var(--blue)] text-white p-3 rounded font-semibold disabled:opacity-50"
+                      className="flex-1 bg-(--blue) text-white p-3 rounded-sm font-semibold disabled:opacity-50"
                     >
                       Process All Records
                     </button>
@@ -902,7 +901,7 @@ export default function CreateParentAccountsFromCSV() {
                   <div className="mb-4">
                     <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
                       <div
-                        className="bg-[var(--blue)] h-4 rounded-full transition-all duration-300"
+                        className="bg-(--blue) h-4 rounded-full transition-all duration-300"
                         style={{
                           width: `${(progress.current / progress.total) * 100}%`,
                         }}
@@ -933,13 +932,13 @@ export default function CreateParentAccountsFromCSV() {
                   <div className="flex space-x-3">
                     <button
                       onClick={resetForm}
-                      className="flex-1 bg-[var(--blue)] text-white p-3 rounded font-semibold"
+                      className="flex-1 bg-(--blue) text-white p-3 rounded-sm font-semibold"
                     >
                       Process Another File
                     </button>
                     <button
                       onClick={() => setShowForm(false)}
-                      className="flex-1 bg-gray-500 text-white p-3 rounded font-semibold"
+                      className="flex-1 bg-gray-500 text-white p-3 rounded-sm font-semibold"
                     >
                       Close
                     </button>
@@ -952,14 +951,14 @@ export default function CreateParentAccountsFromCSV() {
       )}
 
       {processingResults.length > 0 && (
-        <div className="mt-4 bg-white rounded-xl p-4 shadow">
+        <div className="mt-4 bg-white rounded-xl p-4 shadow-sm">
           <h3 className="text-xl font-semibold mb-4">Processing Results</h3>
 
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {processingResults.map((result, index) => (
               <div
                 key={index}
-                className={`border rounded p-3 ${result.errors.length > 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
+                className={`border rounded-sm p-3 ${result.errors.length > 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
               >
                 <div className="font-semibold">
                   {result.studentName} ({result.studentEmail})
@@ -1018,7 +1017,7 @@ export default function CreateParentAccountsFromCSV() {
                 )}
 
                 {result.errors.length > 0 && (
-                  <div className="bg-red-100 border border-red-300 rounded p-2 mt-2">
+                  <div className="bg-red-100 border border-red-300 rounded-sm p-2 mt-2">
                     <div className="text-red-800 font-semibold text-sm">
                       ⚠ Errors:
                     </div>
@@ -1033,7 +1032,7 @@ export default function CreateParentAccountsFromCSV() {
             ))}
           </div>
 
-          <div className="mt-4 p-3 bg-gray-100 rounded">
+          <div className="mt-4 p-3 bg-gray-100 rounded-sm">
             <div className="text-sm">
               {(() => {
                 const stats = generateSummaryStats(processingResults);

@@ -2,7 +2,7 @@ import GradientButton from '@/components/styles/Button';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SignOutData {
   endSession: boolean;

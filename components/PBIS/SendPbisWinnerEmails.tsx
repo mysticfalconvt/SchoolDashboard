@@ -1,8 +1,7 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 import { PBIS_STUDENT_RANDOM_DRAWING_WINNERS } from '../../config';
 import plainTextEmailToHtml from '../../lib/plainTextEmailToHtml';
 import useForm from '../../lib/useForm';
@@ -596,13 +595,13 @@ The PBIS Team
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Send Emails to PBIS Winners
               </h4>
@@ -610,7 +609,7 @@ The PBIS Team
                 type="button"
                 onClick={() => setShowForm(false)}
                 disabled={sending || emailLoading}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ×
               </button>
@@ -625,7 +624,7 @@ The PBIS Team
                       Winners from Latest Collection:
                     </h3>
                     {winnersToEmail.length > 0 ? (
-                      <div className="space-y-2 max-h-40 overflow-y-auto bg-white bg-opacity-10 p-3 rounded">
+                      <div className="space-y-2 max-h-40 overflow-y-auto bg-white/10 p-3 rounded-sm">
                         {winnersToEmail.map((winner, index) => (
                           <div
                             key={`${winner.id}-${winner.type}-${index}`}
@@ -672,7 +671,7 @@ The PBIS Team
                       <h3 className="text-white text-lg font-semibold mb-3">
                         Parent Emails Will Be Sent To:
                       </h3>
-                      <div className="space-y-2 max-h-32 overflow-y-auto bg-blue-600 bg-opacity-20 p-3 rounded">
+                      <div className="space-y-2 max-h-32 overflow-y-auto bg-blue-600/20 p-3 rounded-sm">
                         {parentsToEmail.map(
                           ({ winner, parent, studentName }, index) => (
                             <div
@@ -695,7 +694,7 @@ The PBIS Team
                       <h3 className="text-white text-lg font-semibold mb-3">
                         Queueing Emails...
                       </h3>
-                      <div className="bg-white bg-opacity-10 p-4 rounded">
+                      <div className="bg-white/10 p-4 rounded-sm">
                         <div className="text-white text-center mb-2">
                           Progress: {emailProgress.sent} / {emailProgress.total}{' '}
                           emails queued
@@ -732,7 +731,7 @@ The PBIS Team
                       aria-busy={sending || emailLoading}
                       className="border-0 p-0"
                     >
-                      <div className="mb-4 space-y-2 bg-white bg-opacity-10 p-3 rounded">
+                      <div className="mb-4 space-y-2 bg-white/10 p-3 rounded-sm">
                         <h3 className="text-white font-semibold">
                           Emails to send
                         </h3>
@@ -758,7 +757,6 @@ The PBIS Team
                                     [key]: !prev[key],
                                   }))
                                 }
-                                icons={false}
                               />
                               <span>
                                 {label}{' '}
@@ -796,7 +794,7 @@ The PBIS Team
                           placeholder="Type 'yes' to confirm"
                           value={inputs.confirmation || ''}
                           onChange={handleChange}
-                          className="w-full p-2 rounded border mt-2"
+                          className="w-full p-2 rounded-sm border mt-2"
                         />
                       </label>
                       <GradientButton

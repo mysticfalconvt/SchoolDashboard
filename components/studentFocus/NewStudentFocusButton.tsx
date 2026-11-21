@@ -10,7 +10,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useRevalidatePage from '@/components/../lib/useRevalidatePage';
 import useSendEmail from '@/components/../lib/useSendEmail';
@@ -161,7 +161,7 @@ export default function NewStudentFocusButton({
                 });
               }
             }
-            queryClient.refetchQueries('allStudentFocus');
+            queryClient.refetchQueries({ queryKey: ['allStudentFocus'] });
             clearForm();
             setStudentWhoIsFor(null);
             setEmailSending(false);
@@ -194,7 +194,7 @@ export default function NewStudentFocusButton({
                   name="category"
                   value={inputs.category}
                   onChange={handleChange}
-                  className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
+                  className="select select-bordered w-full bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red focus:ring-2 focus:ring-[rgba(118,13,8,0.3)]"
                 >
                   <option value="Parent Contact">Parent Contact</option>
                   <option value="General Comments">General Comments</option>

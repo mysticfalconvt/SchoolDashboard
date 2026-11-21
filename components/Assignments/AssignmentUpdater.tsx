@@ -137,20 +137,20 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
     <>
       {/* Backdrop overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/50 z-40"
         onClick={() => hide(false)}
       />
 
       {/* Modal */}
-      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-(--blue)">
           <h4 className="text-white text-xl font-semibold">
             Update Class Assignment for {label}
           </h4>
           <button
             type="button"
             onClick={() => hide(false)}
-            className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)]  rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+            className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue)  rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
           >
             ×
           </button>
@@ -184,7 +184,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
               placeholder="student Message"
               value={inputs.classTitle}
               onChange={handleChange}
-              className="mx-8 min-w-[90%] text-black"
+              className="mx-8 min-w-custom text-black"
             />
           </label>
           <label htmlFor="message" className="p-2.5 text-left">
@@ -195,7 +195,7 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
               placeholder="Current Assignment"
               value={inputs.assignment}
               onChange={handleChange}
-              className="mx-8 min-w-[90%] text-black"
+              className="mx-8 min-w-custom text-black"
             />
           </label>
           <div className="flex flex-col items-center">
@@ -232,13 +232,13 @@ const AssignmentUpdater: React.FC<AssignmentUpdaterProps> = ({
                   await refetch();
                   hide(false);
                 }}
-                className="text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+                className="text-white bg-(--blueTrans) border-none rounded-full m-0.5 mb-4 px-8 text-center"
               >
                 Update
               </button>
               <button
                 type="button"
-                className="w-80 text-white bg-[var(--blueTrans)] border-none rounded-full m-0.5 mb-4 px-8 text-center"
+                className="w-80 text-white bg-(--blueTrans) border-none rounded-full m-0.5 mb-4 px-8 text-center"
                 onClick={async () => {
                   const todaysDate = new Date();
                   for (let b = 1; b <= NUMBER_OF_BLOCKS; b++) {

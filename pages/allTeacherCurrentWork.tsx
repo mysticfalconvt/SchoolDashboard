@@ -160,7 +160,7 @@ const DisplayClasswork: React.FC<DisplayClassworkProps> = ({
         <button
           type="button"
           onClick={() => onShowHistory(data.id, Number(block))}
-          className="mt-2 text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+          className="mt-2 text-white bg-(--blueTrans) hover:bg-(--blue) border-none rounded-full px-4 py-1 text-sm"
         >
           History
         </button>

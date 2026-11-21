@@ -3,7 +3,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { SmallGradientButton } from '../styles/Button';
 import { useUser } from '../User';
 
@@ -108,20 +108,20 @@ const Form = ({
     <>
       {/* Backdrop overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/50 z-40"
         onClick={() => setDisplayForm(false)}
       />
 
       {/* Modal */}
-      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-(--blue)">
           <h4 className="text-white text-xl font-semibold">
             Give PBIS Card to {title}
           </h4>
           <button
             type="button"
             onClick={() => setDisplayForm(false)}
-            className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+            className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
           >
             ×
           </button>
@@ -146,14 +146,14 @@ const Form = ({
                   type="text"
                   name="message"
                   id="message"
-                  className="w-full p-2 rounded border bg-white text-gray-900"
+                  className="w-full p-2 rounded-sm border bg-white text-gray-900"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
               <div className="mb-4">
                 <p className="block text-white font-semibold mb-2">Students</p>
-                <div className="max-h-64 overflow-y-auto rounded bg-white/10 p-2">
+                <div className="max-h-64 overflow-y-auto rounded-sm bg-white/10 p-2">
                   {sortedStudents.map((student) => {
                     const studentName =
                       student.preferredName || student.name || student.id;
@@ -237,7 +237,7 @@ export default function GiveListOfStudentsACardButton({
       // Variables are passed flat -- the client forwards this object straight
       // through as the GraphQL variables.
       await Promise.all(cardsToCreate.map((card) => createCard(card)));
-      await queryClient.refetchQueries(`SingleTeacher-${me.id}`);
+      await queryClient.refetchQueries({ queryKey: [`SingleTeacher-${me.id}`] });
       toast.success(
         `Gave a card to ${cardsToCreate.length} ${
           cardsToCreate.length === 1 ? 'student' : 'students'

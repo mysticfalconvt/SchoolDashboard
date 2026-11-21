@@ -3,7 +3,7 @@ import { useUser } from '@/components/User';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import useRecalculateCallback from './recalculateCallback';
 
 const MARK_CALLBACK_COMPLETED = gql`

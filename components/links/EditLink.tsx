@@ -8,9 +8,8 @@ import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useMemo, useState } from 'react';
-import { useQueryClient } from 'react-query';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import { useQueryClient } from '@tanstack/react-query';
+import Toggle from '../Toggle';
 
 interface Link {
   id: string;
@@ -209,7 +208,7 @@ const EditLink: React.FC<EditLinkProps> = ({
                 placeholder="Link Title"
                 value={inputs.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -226,7 +225,7 @@ const EditLink: React.FC<EditLinkProps> = ({
                 placeholder="Input Link Here"
                 value={inputs.link}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -243,7 +242,7 @@ const EditLink: React.FC<EditLinkProps> = ({
                 required
                 value={inputs.description}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mt-4 mb-2 font-bold text-white">
@@ -288,10 +287,10 @@ const EditLink: React.FC<EditLinkProps> = ({
                   revalidateLinksPage();
                   revalidateEPortfolioPage();
                   revalidatePBISPage();
-                  queryClient.refetchQueries('allLinks');
+                  queryClient.refetchQueries({ queryKey: ['allLinks'] });
                   setVisibleForm(null);
                 }}
-                className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-sm"
               >
                 Delete
               </button>

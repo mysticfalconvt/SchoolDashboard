@@ -153,7 +153,7 @@ const NewBugReportButton: React.FC = () => {
                 placeholder="Bug Report Subject"
                 value={inputs.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -171,7 +171,7 @@ const NewBugReportButton: React.FC = () => {
                 value={inputs.description}
                 onChange={handleChange}
                 rows={5}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <button type="submit" className="mt-6">

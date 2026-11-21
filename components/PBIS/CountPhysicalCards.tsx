@@ -95,18 +95,18 @@ export default function CountPhysicalCards({
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">Log TA Cards</h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -154,7 +154,7 @@ export default function CountPhysicalCards({
                           value={inputs[student.id] || ''}
                           onChange={handleChange}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                          className="w-24 p-2 rounded border bg-white text-gray-900 text-center"
+                          className="w-24 p-2 rounded-sm border bg-white text-gray-900 text-center"
                         />
                       </div>
                     ))}

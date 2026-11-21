@@ -80,6 +80,10 @@ export default withSentryConfig(nextConfig, {
   // Do not report anything about our builds to sentry.io.
   telemetry: false,
 
+  // These only apply to webpack builds. Next 16 builds with Turbopack, where
+  // server errors are captured through onRequestError in instrumentation.ts
+  // and pages/_error.tsx instead. Kept so `next build --webpack` behaves as
+  // it did before.
   webpack: {
     // Build-time wrapping of API routes and data-fetching functions. This
     // requires rollup's platform-specific native binary, which means .npmrc

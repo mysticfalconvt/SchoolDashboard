@@ -49,7 +49,7 @@ const Table: React.FC<TableProps> = ({
     <div className="overflow-x-auto w-full">
       {showSearch && (
         <input
-          className="hidePrint p-2 mt-2 ml-20 mb-5 text-lg rounded border border-gray-300 bg-[var(--tableAccentColor)] text-[var(--textColor)] focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="hidePrint p-2 mt-2 ml-20 mb-5 text-lg rounded-sm border border-gray-300 bg-(--tableAccentColor) text-(--textColor) focus:outline-hidden focus:ring-2 focus:ring-blue-200"
           value={filterInput}
           onChange={handleFilterChange}
           placeholder={`Search ${searchColumn.replace('.', ' ')}`}
@@ -67,7 +67,7 @@ const Table: React.FC<TableProps> = ({
               <tr
                 key={headerGroupKey}
                 {...headerGroupProps}
-                className="bg-[var(--backgroundColor)]"
+                className="bg-(--backgroundColor)"
               >
                 {headerGroup.headers.map((column) => {
                   const { key: thKey, ...thProps } = column.getHeaderProps(
@@ -78,7 +78,7 @@ const Table: React.FC<TableProps> = ({
                       key={thKey || column.id}
                       {...thProps}
                       className={
-                        `sticky top-0 z-10 bg-[var(--backgroundColor)] px-2 py-2 min-w-[3rem] border-b border-r border-gray-200 text-[var(--textColor)] text-left font-semibold ` +
+                        `sticky top-0 z-10 bg-(--backgroundColor) px-2 py-2 min-w-12 border-b border-r border-gray-200 text-(--textColor) text-left font-semibold ` +
                         (column.isSorted
                           ? column.isSortedDesc
                             ? 'after:content-[" 25B2"] after:text-green-700'
@@ -102,7 +102,7 @@ const Table: React.FC<TableProps> = ({
               <tr
                 key={rowKey || `row${i}`}
                 {...rowProps}
-                className={i % 2 === 1 ? 'bg-[var(--tableAccentColor)]' : ''}
+                className={i % 2 === 1 ? 'bg-(--tableAccentColor)' : ''}
               >
                 {row.cells.map((cell) => {
                   const { key: cellKey, ...cellProps } = cell.getCellProps();
@@ -110,7 +110,7 @@ const Table: React.FC<TableProps> = ({
                     <td
                       key={cellKey || `${cell.column.id}${i}`}
                       {...cellProps}
-                      className="px-2 py-2 min-w-[3rem] border-b border-r border-gray-200 text-[var(--textColor)]"
+                      className="px-2 py-2 min-w-12 border-b border-r border-gray-200 text-(--textColor)"
                     >
                       {cell.render('Cell')}
                     </td>
