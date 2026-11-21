@@ -54,7 +54,7 @@ export default function DisplayPbisCollectionData({
         {teamsThatWentUpLevel.map((teacher) => (
           <div
             key={`ta-${teacher.id}`}
-            className="border border-gray-300 rounded p-4"
+            className="border border-gray-300 rounded-sm p-4"
           >
             <h3>TA Level-Up</h3>
             <h4>{teacher.name}</h4>
@@ -65,7 +65,7 @@ export default function DisplayPbisCollectionData({
         {studentsWhoWentUpLevel.map((student) => (
           <div
             key={`level-${student.id}`}
-            className="border border-gray-300 rounded p-4"
+            className="border border-gray-300 rounded-sm p-4"
           >
             <h3>Student Level-Up</h3>
             <h4>{student.name}</h4>
@@ -75,7 +75,7 @@ export default function DisplayPbisCollectionData({
         {randomDrawingWinners.map((student) => (
           <div
             key={`random-${student.id}`}
-            className="border border-gray-300 rounded p-4"
+            className="border border-gray-300 rounded-sm p-4"
           >
             <h3>Random Drawing Winner</h3>
             <h4>{capitalizeFirstLetter(student.name)}</h4>
@@ -84,7 +84,7 @@ export default function DisplayPbisCollectionData({
         {staffRandomWinners.map((staff) => (
           <div
             key={`staff-${staff.id}`}
-            className="border border-gray-300 rounded p-4"
+            className="border border-gray-300 rounded-sm p-4"
           >
             <h3>Staff Random Drawing Winner</h3>
             <h4>{staff.name}</h4>

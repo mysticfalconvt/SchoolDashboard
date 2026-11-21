@@ -25,7 +25,7 @@ export default function PbisCardChart({
 
   return (
     <div
-      className={`w-[90%] h-[300px] mx-auto my-2 p-0 shadow-[0_0_10px_0_rgba(0,0,0,0.1)] print:hidden ${className || ''}`}
+      className={`w-custom h-[300px] mx-auto my-2 p-0 shadow-[0_0_10px_0_rgba(0,0,0,0.1)] print:hidden ${className || ''}`}
     >
       <LineChart
         title="Marbles Per Week"

@@ -234,19 +234,19 @@ export default function CreateParentAccountsFromEmails() {
       {showForm && (
         <>
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
             data-testid="parent-emails-backdrop"
           />
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Create Parent Accounts from Emails
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold"
               >
                 ×
               </button>
@@ -274,7 +274,7 @@ export default function CreateParentAccountsFromEmails() {
                   </div>
 
                   {parseError && (
-                    <p className="text-sm bg-[var(--redTrans)] border border-white/20 rounded-xl p-3 mb-4">
+                    <p className="text-sm bg-(--redTrans) border border-white/20 rounded-xl p-3 mb-4">
                       {parseError}
                     </p>
                   )}

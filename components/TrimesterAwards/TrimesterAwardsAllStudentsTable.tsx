@@ -81,7 +81,7 @@ export default function TrimesterAwardsAllStudentsTable({
                   <span>{numberOfAwards}</span>
                   {numberOfAwards > 0 && (
                     <>
-                      <span className="inline-block text-center text-white rounded-full bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] w-16 h-12 m-4">
+                      <span className="inline-block text-center text-white rounded-full bg-linear-to-tr from-(--red) to-(--blue) w-16 h-12 m-4">
                         info
                       </span>
                       <div className="invisible group-hover:visible w-[clamp(200px,30vw,60vw)] bg-black/80 text-white text-center rounded-md p-1.5 absolute right-0 z-50">

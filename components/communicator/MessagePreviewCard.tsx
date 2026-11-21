@@ -51,7 +51,7 @@ const MessagePreviewCard: React.FC<MessagePreviewCardProps> = ({
     >
       <div className="flex items-start gap-2 mb-1">
         {hasError && (
-          <span className="text-red-600 dark:text-red-400 text-sm flex-shrink-0 mt-0.5">
+          <span className="text-red-600 dark:text-red-400 text-sm shrink-0 mt-0.5">
             ⚠️
           </span>
         )}

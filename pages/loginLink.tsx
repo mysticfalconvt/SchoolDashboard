@@ -209,7 +209,7 @@ export default function LoginLink() {
   if ((token && email && !data && !error && !mutationError && !timeoutReached) || loading) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white">
@@ -229,7 +229,7 @@ export default function LoginLink() {
   if (error || mutationError || timeoutReached) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -253,7 +253,7 @@ export default function LoginLink() {
   if (isFailureResponse(data?.redeemUserMagicAuthToken)) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -282,7 +282,7 @@ export default function LoginLink() {
   ) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white">
@@ -304,7 +304,7 @@ export default function LoginLink() {
   if (isRouterReady && (!token || !email)) {
     return (
       <div
-        className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+        className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
         <div className="text-center text-white max-w-md mx-auto p-6">
@@ -328,7 +328,7 @@ export default function LoginLink() {
   // Fallback loading state
   return (
     <div
-      className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-red-600"
+      className="flex items-center justify-center bg-linear-to-br from-blue-500 to-red-600"
       style={{ minHeight: 'calc(100vh - 200px)' }}
     >
       <div className="text-center text-white">

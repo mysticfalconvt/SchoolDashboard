@@ -34,7 +34,7 @@ export default function Toggle({
       />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute left-px top-px h-[22px] w-[22px] rounded-full border border-[#4d4d4d] bg-[#fafafa] shadow transition-transform duration-200 peer-checked:translate-x-[26px] peer-checked:border-transparent"
+        className="pointer-events-none absolute left-px top-px h-[22px] w-[22px] rounded-full border border-[#4d4d4d] bg-[#fafafa] shadow-sm transition-transform duration-200 peer-checked:translate-x-[26px] peer-checked:border-transparent"
       />
     </span>
   );

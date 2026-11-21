@@ -46,7 +46,7 @@ export default function PbisVisitorStats() {
   });
 
   return (
-    <div className="bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)] m-4 p-5 rounded-2xl flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300 w-full max-w-[16rem] mx-auto">
+    <div className="bg-linear-to-tl from-(--redTrans) to-(--blueTrans) m-4 p-5 rounded-2xl flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300 w-full max-w-[16rem] mx-auto">
       <h1 className="text-2xl font-semibold mb-3">Site Visitors</h1>
       {isLoading && <Loading />}
       {error && <DisplayError error={error} />}

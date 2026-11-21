@@ -32,7 +32,7 @@ export function FormContainer({
   const isVisible = visible === true || visible === 'visible';
   return (
     <div
-      className={`${modal ? 'z-[1000] absolute left-0 right-0 mx-auto' : 'relative'} ${
+      className={`${modal ? 'z-1000 absolute left-0 right-0 mx-auto' : 'relative'} ${
         isVisible
           ? 'transition-all duration-500 visible w-[min(75%,1000px)]'
           : 'transition-all duration-500 hidden w-[min(75%,1000px)]'
@@ -63,7 +63,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(function Form(
   return (
     <form
       ref={ref}
-      className={`flex flex-col gap-4 shadow-lg bg-base-200/20 backdrop-blur-sm ${className}`}
+      className={`flex flex-col gap-4 shadow-lg bg-base-200/20 backdrop-blur-xs ${className}`}
       {...props}
     >
       {children}

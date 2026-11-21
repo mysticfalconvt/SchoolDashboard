@@ -56,7 +56,7 @@ export default function ChromebookCheckRow({
                 backgroundColor: `${getColorFromMessage(message)}10`,
               }}
             >
-              <div className="text-md font-medium leading-tight break-words">
+              <div className="text-md font-medium leading-tight wrap-break-word">
                 {message}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">

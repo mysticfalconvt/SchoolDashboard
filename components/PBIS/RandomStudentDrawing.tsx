@@ -151,7 +151,7 @@ export default function RandomStudentDrawing() {
                 aria-label="Student pool type"
                 checked={!studentsWhoGave}
                 onChange={updatePoolType}
-                trackClassName="bg-[#760d08] peer-checked:bg-[#38b6ff]"
+                trackClassName="bg-custom-red peer-checked:bg-custom-blue"
               />
               <span className={!studentsWhoGave ? 'font-bold' : 'opacity-75'}>
                 Received a PBIS card

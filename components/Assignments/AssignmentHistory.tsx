@@ -61,20 +61,20 @@ const AssignmentHistory: React.FC<AssignmentHistoryProps> = ({
     <>
       {/* Backdrop overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/50 z-40"
         onClick={() => hide(false)}
       />
 
       {/* Modal */}
-      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[80vh] rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+      <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[80vh] rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b border-(--blue)">
           <h4 className="text-white text-xl font-semibold">
             Assignment History for {blockName(block)}
           </h4>
           <button
             type="button"
             onClick={() => hide(false)}
-            className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+            className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
           >
             ×
           </button>
@@ -89,7 +89,7 @@ const AssignmentHistory: React.FC<AssignmentHistoryProps> = ({
             history.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col text-left p-3 mb-3 rounded-2xl bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] shadow-[2px_2px_var(--blue)]"
+                className="flex flex-col text-left p-3 mb-3 rounded-2xl bg-linear-to-tr from-(--blueTrans) to-(--redTrans) shadow-[2px_2px_var(--blue)]"
               >
                 {item.className && (
                   <p className="font-semibold">{item.className}</p>

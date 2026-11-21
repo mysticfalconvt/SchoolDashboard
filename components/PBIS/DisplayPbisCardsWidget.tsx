@@ -31,7 +31,7 @@ export default function DisplayPbisCardsWidget({
           return (
             <div
               key={card.id}
-              className="flex flex-wrap items-center justify-around w-full text-white bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] rounded-2xl p-4 m-2 min-w-[300px] max-w-[500px]"
+              className="flex flex-wrap items-center justify-around w-full text-white bg-linear-to-tr from-(--red) to-(--blue) rounded-2xl p-4 m-2 min-w-[300px] max-w-[500px]"
             >
               <p className="mx-auto text-center text-lg">
                 {from} - {card.category.toUpperCase()}

@@ -415,7 +415,7 @@ export default function ViewTeacherPage({ teacher }: ViewTeacherPageProps) {
   return (
     <div>
       {me.id === teacher.id && (
-        <div className="flex flex-row justify-around items-center max-w-[80%] flex-wrap rounded-3xl border-2 border-[var(--red)] p-2.5 mx-auto">
+        <div className="flex flex-row justify-around items-center max-w-[80%] flex-wrap rounded-3xl border-2 border-(--red) p-2.5 mx-auto">
           <h3>Give a whole class a card</h3>
           <GiveListOfStudentsACardButton title="TA" students={taStudents} />
           {blocksToShow.map(({ block, blocks, name }) => (

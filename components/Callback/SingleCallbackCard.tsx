@@ -48,7 +48,7 @@ export default function SingleCallbackCard({
     getDisplayName(callback.student as any),
   );
   return (
-    <div className="bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)] m-4 p-5 rounded-2xl text-xl flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-linear-to-tl from-(--redTrans) to-(--blueTrans) m-4 p-5 rounded-2xl text-xl flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
       <Link
         href={`/callback/${callback.id}`}
         className="text-center block w-full"
@@ -75,7 +75,7 @@ export default function SingleCallbackCard({
         <p className="text-sm opacity-80 mb-3">Assigned {dateAssigned}</p>
 
         {callback.description && (
-          <p className="text-base break-words px-2 mb-2">
+          <p className="text-base wrap-break-word px-2 mb-2">
             {callback.description}
           </p>
         )}
@@ -87,7 +87,7 @@ export default function SingleCallbackCard({
               ? callback.link
               : `http://${callback.link}`
           }
-          className="bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors py-0.5 px-3 rounded-lg mb-3 cursor-pointer inline-block text-base"
+          className="bg-white/20 hover:bg-white/30 transition-colors py-0.5 px-3 rounded-lg mb-3 cursor-pointer inline-block text-base"
         >
           Link
         </Link>

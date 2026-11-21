@@ -137,7 +137,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 placeholder="Event Title"
                 value={inputs.name}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -154,7 +154,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 name="date"
                 value={inputs.date}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -171,7 +171,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 required
                 value={inputs.description}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -188,7 +188,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 placeholder="Input Link Here"
                 value={inputs.link}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <div className="mb-4">
@@ -205,7 +205,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 placeholder="Input Link Here"
                 value={inputs.linkTitle}
                 onChange={handleChange}
-                className="w-full p-2 rounded border"
+                className="w-full p-2 rounded-sm border"
               />
             </div>
             <button type="submit" className="mt-6">
@@ -220,7 +220,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 queryClient.refetchQueries({ queryKey: ['allCalendars'] });
                 router.push('/calendar');
               }}
-              className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-sm"
             >
               Delete
             </button>

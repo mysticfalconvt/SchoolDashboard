@@ -74,7 +74,7 @@ const ModifySpecialGroup: React.FC = () => {
       />
       <SmallGradientButton
         type="button"
-        className="p-4 m-2 bg-stone-500 border border-slate-400 rounded text-[var(--textColor)]"
+        className="p-4 m-2 bg-stone-500 border border-slate-400 rounded-sm text-(--textColor)"
         onClick={async () => {
           setThinking(true);
           await addStudent({

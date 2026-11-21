@@ -393,7 +393,7 @@ const CommunicatorChat: NextPage = () => {
   if (!me || !isAllowed(me, 'isCommunicatorEnabled')) {
     return (
       <div className="max-w-2xl mx-auto p-8">
-        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 text-yellow-700 dark:text-yellow-300 p-4 rounded-sm">
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
           <p className="text-lg">
             {!me
@@ -449,7 +449,7 @@ const CommunicatorChat: NextPage = () => {
                     type="checkbox"
                     checked={showOnlyFailures}
                     onChange={(e) => setShowOnlyFailures(e.target.checked)}
-                    className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-400 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-red-500 dark:focus:ring-red-400 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     Show only failures
@@ -603,7 +603,7 @@ const CommunicatorChat: NextPage = () => {
                           }
                         }}
                         disabled={isQueryLoading}
-                        className="flex-shrink-0 p-2 square rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="shrink-0 p-2 square rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Re-ask this question"
                         aria-label="Re-ask this question"
                       >
@@ -617,7 +617,7 @@ const CommunicatorChat: NextPage = () => {
                   {/* Show error message if this is an error response */}
                   {queryResponse.error && (
                     <div className="mb-6 pb-4 border-b border-red-300 dark:border-red-600">
-                      <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded">
+                      <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 rounded-sm">
                         <p className="font-semibold text-lg mb-2">
                           Error occurred
                         </p>
@@ -631,7 +631,7 @@ const CommunicatorChat: NextPage = () => {
                             <summary className="cursor-pointer text-sm font-medium">
                               Technical details
                             </summary>
-                            <pre className="mt-2 text-xs bg-red-50 dark:bg-red-900/50 p-2 rounded overflow-x-auto">
+                            <pre className="mt-2 text-xs bg-red-50 dark:bg-red-900/50 p-2 rounded-sm overflow-x-auto">
                               {queryResponse.details}
                             </pre>
                           </details>
@@ -644,7 +644,7 @@ const CommunicatorChat: NextPage = () => {
                             Raw Data:
                           </p>
                           <div className="w-full">
-                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap wrap-break-word overflow-wrap-anywhere">
                               <code className="text-gray-900 dark:text-gray-100 block">
                                 {JSON.stringify(queryResponse.rawData, null, 2)}
                               </code>
@@ -918,7 +918,7 @@ const CommunicatorChat: NextPage = () => {
                 <div className="flex flex-col h-full max-h-[70vh] -m-6 p-6 overflow-hidden">
                   {/* Fixed header with tabs and copy button */}
                   {detailsField === 'data' && (
-                    <div className="flex-shrink-0 space-y-3 mb-4">
+                    <div className="shrink-0 space-y-3 mb-4">
                       {/* Show tabs if both graphqlQuery and rawData are available */}
                       {queryResponse?.graphqlQuery &&
                         queryResponse?.rawData && (
@@ -927,7 +927,7 @@ const CommunicatorChat: NextPage = () => {
                               onClick={() => setDetailsTab('query')}
                               className={`px-6 py-3 font-semibold text-sm transition-all rounded-t-lg ${
                                 detailsTab === 'query'
-                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 -mb-[2px]'
+                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 mb-[-2px]'
                                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                               }`}
                             >
@@ -937,7 +937,7 @@ const CommunicatorChat: NextPage = () => {
                               onClick={() => setDetailsTab('rawData')}
                               className={`px-6 py-3 font-semibold text-sm transition-all rounded-t-lg ${
                                 detailsTab === 'rawData'
-                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 -mb-[2px]'
+                                  ? 'bg-blue-600 dark:bg-blue-500 text-white border-b-2 border-blue-600 dark:border-blue-500 mb-[-2px]'
                                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                               }`}
                             >

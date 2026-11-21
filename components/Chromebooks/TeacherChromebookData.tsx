@@ -71,7 +71,7 @@ const TeacherChromebookData: React.FC<TeacherChromebookDataProps> = ({
               </p>
             </div>
 
-            <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+            <div className="bg-base-200/20 backdrop-blur-xs rounded-lg p-4 border border-white/10">
               <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text text-white font-medium">

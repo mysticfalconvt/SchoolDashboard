@@ -307,20 +307,20 @@ export default function BulkPbisCardsFromList() {
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={closeForm}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)]">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl h-auto rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue)">
               <h4 className="text-white text-xl font-semibold">
                 Give PBIS Cards to a List of Students
               </h4>
               <button
                 type="button"
                 onClick={closeForm}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -350,7 +350,7 @@ export default function BulkPbisCardsFromList() {
                       placeholder={'Last First\nSmith Jane\nDoe John Michael'}
                       value={pastedNames}
                       onChange={(e) => setPastedNames(e.target.value)}
-                      className="w-full p-2 rounded border mt-2 text-gray-900"
+                      className="w-full p-2 rounded-sm border mt-2 text-gray-900"
                     />
                   </label>
 
@@ -371,7 +371,7 @@ export default function BulkPbisCardsFromList() {
                           setCardsPerStudent(Number(e.target.value))
                         }
                         onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                        className="w-full p-2 rounded border mt-2 bg-white text-gray-900"
+                        className="w-full p-2 rounded-sm border mt-2 bg-white text-gray-900"
                       />
                     </label>
 
@@ -385,7 +385,7 @@ export default function BulkPbisCardsFromList() {
                         name="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-2 rounded border mt-2 bg-white text-gray-900"
+                        className="w-full p-2 rounded-sm border mt-2 bg-white text-gray-900"
                       >
                         <option value="responsibility">Responsibility</option>
                         <option value="respect">Respect</option>
@@ -408,7 +408,7 @@ export default function BulkPbisCardsFromList() {
                       placeholder={PERFECT_ATTENDANCE_MESSAGE}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full p-2 rounded border mt-2 bg-white text-gray-900"
+                      className="w-full p-2 rounded-sm border mt-2 bg-white text-gray-900"
                     />
                   </label>
                   <p className="text-white text-xs mt-1 opacity-80">
@@ -445,7 +445,7 @@ export default function BulkPbisCardsFromList() {
 
               {step === 'preview' && preview && (
                 <div className="space-y-4">
-                  <div className="bg-white bg-opacity-10 p-3 rounded">
+                  <div className="bg-white/10 p-3 rounded-sm">
                     <p className="text-white text-sm">
                       <strong>{selectedStudentIds.length}</strong> student
                       {selectedStudentIds.length !== 1 ? 's' : ''} selected ×{' '}
@@ -461,7 +461,7 @@ export default function BulkPbisCardsFromList() {
                   </div>
 
                   {alreadyGotCard.length > 0 && (
-                    <div className="p-3 rounded bg-yellow-600 bg-opacity-30 border border-yellow-400">
+                    <div className="p-3 rounded-sm bg-yellow-600/30 border border-yellow-400">
                       <h4 className="text-white font-semibold mb-2">
                         ⚠️ Already got "{cardMessage}" in the last{' '}
                         {DUPLICATE_WINDOW_DAYS} days ({alreadyGotCard.length})
@@ -482,7 +482,7 @@ export default function BulkPbisCardsFromList() {
                   )}
 
                   {duplicateCheckFailed && (
-                    <div className="p-3 rounded bg-red-600 bg-opacity-30 border border-red-400">
+                    <div className="p-3 rounded-sm bg-red-600/30 border border-red-400">
                       <p className="text-white text-sm">
                         We could not check for recent "{cardMessage}" cards, so
                         students may end up with a duplicate.
@@ -490,7 +490,7 @@ export default function BulkPbisCardsFromList() {
                     </div>
                   )}
 
-                  <div className="bg-white bg-opacity-10 p-3 rounded">
+                  <div className="bg-white/10 p-3 rounded-sm">
                     <h4 className="text-white font-semibold mb-2">
                       ✅ Matched students ({preview.matched.length})
                     </h4>
@@ -532,7 +532,7 @@ export default function BulkPbisCardsFromList() {
                   </div>
 
                   {preview.unmatched.length > 0 && (
-                    <div className="p-3 rounded bg-red-600 bg-opacity-30 border border-red-400">
+                    <div className="p-3 rounded-sm bg-red-600/30 border border-red-400">
                       <h4 className="text-white font-semibold mb-2">
                         ❌ Could not find these students (
                         {preview.unmatched.length})
@@ -552,7 +552,7 @@ export default function BulkPbisCardsFromList() {
                   )}
 
                   {preview.ambiguous.length > 0 && (
-                    <div className="p-3 rounded bg-yellow-600 bg-opacity-30 border border-yellow-400">
+                    <div className="p-3 rounded-sm bg-yellow-600/30 border border-yellow-400">
                       <h4 className="text-white font-semibold mb-2">
                         ⚠️ More than one student matched (
                         {preview.ambiguous.length})
@@ -572,7 +572,7 @@ export default function BulkPbisCardsFromList() {
                   )}
 
                   {preview.duplicates.length > 0 && (
-                    <div className="p-3 rounded bg-white bg-opacity-10">
+                    <div className="p-3 rounded-sm bg-white/10">
                       <h4 className="text-white font-semibold mb-2">
                         ♻️ Repeated lines ({preview.duplicates.length})
                       </h4>

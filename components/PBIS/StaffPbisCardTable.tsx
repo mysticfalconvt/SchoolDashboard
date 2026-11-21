@@ -60,7 +60,7 @@ export default function StaffPbisCardTable() {
   return (
     <div className="mt-8 print:hidden">
       <h3>Staff PBIS Cards</h3>
-      <div className="rounded-2xl border-2 border-[var(--blue)] shadow-lg overflow-hidden">
+      <div className="rounded-2xl border-2 border-(--blue) shadow-lg overflow-hidden">
         <div className="max-h-[450px] overflow-y-auto">
           {isLoading && (
             <div className="p-4">
@@ -77,7 +77,7 @@ export default function StaffPbisCardTable() {
           )}
           {!isLoading && !error && cards.length > 0 && (
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-10 bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] text-white">
+              <thead className="sticky top-0 z-10 bg-linear-to-tr from-(--red) to-(--blue) text-white">
                 <tr>
                   <th className="p-2 font-semibold">Date</th>
                   <th className="p-2 font-semibold">Recipient</th>
@@ -103,13 +103,13 @@ export default function StaffPbisCardTable() {
                             <FaUserGraduate
                               aria-label="Given by student"
                               title="Given by student"
-                              className="text-[var(--blue)]"
+                              className="text-(--blue)"
                             />
                           ) : card.giver.isStaff ? (
                             <FaUserTie
                               aria-label="Given by staff"
                               title="Given by staff"
-                              className="text-[var(--red)]"
+                              className="text-(--red)"
                             />
                           ) : null}
                           {card.giver.name}
@@ -119,7 +119,7 @@ export default function StaffPbisCardTable() {
                       )}
                     </td>
                     <td className="p-2 capitalize">{card.category || '—'}</td>
-                    <td className="p-2 break-words">{card.cardMessage || ''}</td>
+                    <td className="p-2 wrap-break-word">{card.cardMessage || ''}</td>
                   </tr>
                 ))}
               </tbody>

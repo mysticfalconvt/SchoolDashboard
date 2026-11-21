@@ -109,8 +109,8 @@ const SingleCallbackPage: NextPage<SingleCallbackPageProps> = ({ query }) => {
     ? new Date(callback?.dateCompleted).toLocaleDateString()
     : 'Not Yet Completed';
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl shadow-lg bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)]">
-      <h1 className="rounded-3xl shadow-lg py-1 px-5 mt-2.5 mb-0 bg-gradient-to-bl from-[var(--redTrans)] to-[var(--blueTrans)]">
+    <div className="flex flex-col items-center justify-center rounded-3xl shadow-lg bg-linear-to-tl from-(--redTrans) to-(--blueTrans)">
+      <h1 className="rounded-3xl shadow-lg py-1 px-5 mt-2.5 mb-0 bg-linear-to-bl from-(--redTrans) to-(--blueTrans)">
         {me?.id === callback?.teacher.id && (
           <SmallGradientButton
             onClick={() => {

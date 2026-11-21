@@ -154,7 +154,7 @@ describe('BulkCompleteOldCallbacks', () => {
             expect(screen.getByRole('button', { name: '×' })).toBeInTheDocument();
 
             // Check for backdrop
-            const backdrop = document.querySelector('.fixed.inset-0.bg-black');
+            const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/50');
             expect(backdrop).toBeInTheDocument();
         });
     });

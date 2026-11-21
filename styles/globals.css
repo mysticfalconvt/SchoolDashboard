@@ -1,6 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-custom-red: #760d08;
+  --color-custom-red-trans: #760d0880;
+  --color-custom-black: #393939;
+  --color-custom-blue: #38b6ff;
+  --color-custom-blue-trans: #38b6ff80;
+  --color-custom-grey: #3a3a3a;
+  --color-custom-light-grey: #e1e1e1;
+  --color-custom-off-white: #ededed;
+
+  --font-radnika: radnika_next, system-ui, sans-serif;
+
+  --shadow-custom: 0 12px 24px 0 rgba(0, 0, 0, 0.09);
+
+  --container-custom: 90%;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* v3 placeholder colour (v4 uses the text colour at 50%). */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  /* v3 gave buttons a pointer cursor; v4 leaves the browser default. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 @font-face {
   font-family: 'radnika_next';

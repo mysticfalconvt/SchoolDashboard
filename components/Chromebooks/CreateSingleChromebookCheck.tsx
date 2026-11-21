@@ -134,7 +134,7 @@ export default function CreateSingleChromebookCheck() {
                 Submit a chromebook check for any student
               </p>
             </div>
-            <div className="bg-base-200/20 backdrop-blur-sm rounded-lg p-6 border border-white/10 relative z-30">
+            <div className="bg-base-200/20 backdrop-blur-xs rounded-lg p-6 border border-white/10 relative z-30">
               <div className="space-y-6">
                 <div className="form-control relative z-30">
                   <label className="label pb-2">
@@ -179,7 +179,7 @@ export default function CreateSingleChromebookCheck() {
                   <select
                     id="classroom"
                     name="classroom"
-                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] h-12"
+                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red h-12"
                     value={selectedClassroomId}
                     onChange={(e) => setClassroomId(e.target.value)}
                   >
@@ -200,7 +200,7 @@ export default function CreateSingleChromebookCheck() {
                   <select
                     id="status"
                     name="status"
-                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] h-12"
+                    className="select select-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red h-12"
                     value={status}
                     onChange={(e) => {
                       const newStatus = e.target.value as
@@ -234,7 +234,7 @@ export default function CreateSingleChromebookCheck() {
                     id="message"
                     name="message"
                     type="text"
-                    className="input input-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-[#760D08] disabled:opacity-50 h-12"
+                    className="input input-bordered bg-base-100 text-base-content border-2 border-base-300 focus:border-custom-red disabled:opacity-50 h-12"
                     disabled={
                       status === 'Everything good' ||
                       noEmailNoPBISMessages.includes(status)
@@ -253,7 +253,7 @@ export default function CreateSingleChromebookCheck() {
             </div>
 
             {isSendingEmails && (
-              <div className="mt-4 p-4 bg-blue-600 bg-opacity-20 rounded-lg">
+              <div className="mt-4 p-4 bg-blue-600/20 rounded-lg">
                 <div className="text-white text-center mb-2">
                   Sending emails... {emailProgress.sent} / {emailProgress.total}{' '}
                   emails sent

@@ -71,7 +71,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
   );
 
   return (
-    <div className="flex flex-col text-center border-2 border-[var(--blue)] rounded-3xl m-2.5 justify-around w-full">
+    <div className="flex flex-col text-center border-2 border-(--blue) rounded-3xl m-2.5 justify-around w-full">
       <h3 className="m-2">Current Class Assignments</h3>
       {showHistory && historyBlock && teacherId && (
         <AssignmentHistory
@@ -98,9 +98,9 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
 
           return (
             <div
-              className={`flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-gradient-to-tr from-[var(--blueTrans)] to-[var(--redTrans)] text-xl ${
+              className={`flex flex-col m-2 p-2 rounded-3xl shadow-[2px_2px_var(--blue)] bg-linear-to-tr from-(--blueTrans) to-(--redTrans) text-xl ${
                 isStale
-                  ? 'flashAssignment bg-gradient-to-tr from-[var(--red)] to-[var(--redTrans)] bg-[length:400%_400%] shadow-[2px_2px_var(--red)]'
+                  ? 'flashAssignment bg-linear-to-tr from-(--red) to-(--redTrans) bg-size-[400%_400%] shadow-[2px_2px_var(--red)]'
                   : ''
               }`}
               key={`key ${blocks.join('-')}`}
@@ -124,7 +124,7 @@ const AssignmentViewCards: React.FC<AssignmentViewCardsProps> = ({
                     setHistoryBlock(historyBlockFor(blocks));
                     setShowHistory(true);
                   }}
-                  className="mt-2 self-center text-white bg-[var(--blueTrans)] hover:bg-[var(--blue)] border-none rounded-full px-4 py-1 text-sm"
+                  className="mt-2 self-center text-white bg-(--blueTrans) hover:bg-(--blue) border-none rounded-full px-4 py-1 text-sm"
                 >
                   History
                 </button>

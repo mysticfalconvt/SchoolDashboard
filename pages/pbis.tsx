@@ -306,7 +306,7 @@ const Pbis: NextPage<PbisPageProps> = (props) => {
           .map((ta: TA) => (
             <div
               key={ta.id}
-              className="text-center p-1 m-1 border border-gray-300 rounded print:break-inside-avoid"
+              className="text-center p-1 m-1 border border-gray-300 rounded-sm print:break-inside-avoid"
             >
               <h3 className="text-blue-600 drop-shadow-[2px_2px_var(--red)]">
                 {ta.name}

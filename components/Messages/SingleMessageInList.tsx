@@ -33,12 +33,12 @@ const SingleMessageInList: React.FC<SingleMessageInListProps> = ({
   };
 
   return (
-    <div className="shrink-0 rounded-lg shadow bg-white/90 dark:bg-gray-800/80 break-words overflow-hidden">
+    <div className="shrink-0 rounded-lg shadow-sm bg-white/90 dark:bg-gray-800/80 wrap-break-word overflow-hidden">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={viewMessage}
-        className="w-full text-left flex items-start justify-between gap-3 p-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300"
+        className="w-full text-left flex items-start justify-between gap-3 p-4 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-yellow-300"
       >
         <span className="min-w-0 flex-1">
           <span
@@ -83,7 +83,7 @@ const SingleMessageInList: React.FC<SingleMessageInListProps> = ({
                 await deleteMessage({ id: message.id });
                 queryClient.refetchQueries({ queryKey: ['myMessages'] });
               }}
-              className="shrink-0 inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white border-none py-1.5 px-3 text-sm rounded-full cursor-pointer shadow"
+              className="shrink-0 inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white border-none py-1.5 px-3 text-sm rounded-full cursor-pointer shadow-sm"
               aria-label="Delete message"
             >
               <span aria-hidden className="text-base leading-none">

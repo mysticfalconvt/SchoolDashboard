@@ -163,12 +163,12 @@ export default function CallbackCardMessages({
             {/* Student's message (visible to teachers / staff) */}
             {!isStudent && (
               <div className="w-full">
-                <p className="text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70">
+                <p className="text-xs uppercase tracking-wide text-(--textColor) opacity-70">
                   Student
                 </p>
                 {callback?.messageFromStudent ? (
                   <>
-                    <p className="text-white text-lg font-medium break-words px-2">
+                    <p className="text-white text-lg font-medium wrap-break-word px-2">
                       {callback.messageFromStudent}
                     </p>
                     {callback.messageFromStudentDate && (
@@ -186,12 +186,12 @@ export default function CallbackCardMessages({
             {/* Teacher's message (read-only for students / staff) */}
             {!isTeacher && (
               <div className="w-full">
-                <p className="text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70">
+                <p className="text-xs uppercase tracking-wide text-(--textColor) opacity-70">
                   Teacher
                 </p>
                 {callback?.messageFromTeacher ? (
                   <>
-                    <p className="text-white text-lg font-medium break-words px-2">
+                    <p className="text-white text-lg font-medium wrap-break-word px-2">
                       {callback.messageFromTeacher}
                     </p>
                     {callback.messageFromTeacherDate && (
@@ -235,7 +235,7 @@ export default function CallbackCardMessages({
               <div className="w-full">
                 <label
                   htmlFor={`student - ${callback.id}`}
-                  className="block text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70 mb-1"
+                  className="block text-xs uppercase tracking-wide text-(--textColor) opacity-70 mb-1"
                 >
                   Your message to the teacher
                 </label>
@@ -275,7 +275,7 @@ export default function CallbackCardMessages({
               <div className="w-full">
                 <label
                   htmlFor={`teacher-${callback.id}`}
-                  className="block text-xs uppercase tracking-wide text-[var(--textColor)] opacity-70 mb-1"
+                  className="block text-xs uppercase tracking-wide text-(--textColor) opacity-70 mb-1"
                 >
                   Teacher message
                 </label>

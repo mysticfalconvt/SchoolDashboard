@@ -69,11 +69,11 @@ const NewSortingHatQuestion: React.FC = () => {
         {showForm ? 'Close the form' : 'New Sorting Hat Question'}
       </GradientButton>
       <FormContainer visible={showForm}>
-        <div className="bg-gradient-to-tl from-[var(--red)] to-[var(--blue)] border-[5px] border-[var(--tableAccentColor)] rounded-xl shadow-2xl p-6 relative w-full max-w-md mx-auto">
+        <div className="bg-linear-to-tl from-(--red) to-(--blue) border-[5px] border-(--tableAccentColor) rounded-xl shadow-2xl p-6 relative w-full max-w-md mx-auto">
           <button
             type="button"
             onClick={() => setShowForm(false)}
-            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black bg-opacity-40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-opacity-70 focus:outline-none"
+            className="absolute top-2 right-2 text-white text-2xl font-bold bg-black/40 rounded-full w-10 h-8 flex items-center justify-center hover:bg-black/70 focus:outline-hidden"
             aria-label="Close"
           >
             ×
@@ -115,7 +115,7 @@ const NewSortingHatQuestion: React.FC = () => {
                   value={inputs.question}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
               <div className="mb-4">
@@ -133,7 +133,7 @@ const NewSortingHatQuestion: React.FC = () => {
                   value={inputs.gryffindorChoice}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
               <div className="mb-4">
@@ -151,7 +151,7 @@ const NewSortingHatQuestion: React.FC = () => {
                   value={inputs.ravenclawChoice}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
               <div className="mb-4">
@@ -169,7 +169,7 @@ const NewSortingHatQuestion: React.FC = () => {
                   value={inputs.hufflepuffChoice}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
               <div className="mb-4">
@@ -187,7 +187,7 @@ const NewSortingHatQuestion: React.FC = () => {
                   value={inputs.slytherinChoice}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full p-2 rounded border"
+                  className="w-full p-2 rounded-sm border"
                 />
               </div>
               <button type="submit" className="mt-6">

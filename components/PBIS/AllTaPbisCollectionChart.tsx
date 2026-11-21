@@ -157,15 +157,15 @@ export default function AllTaPbisCollectionChart({
   };
 
   return (
-    <section className="hidePrint my-6 rounded-lg border border-[var(--tableAccentColor)] bg-[var(--backgroundColor)] p-4 text-[var(--textColor)] shadow-sm">
+    <section className="hidePrint my-6 rounded-lg border border-(--tableAccentColor) bg-(--backgroundColor) p-4 text-(--textColor) shadow-xs">
       <h2 className="text-center text-xl font-semibold">
         TA Progress by PBIS Collection
       </h2>
-      <p className="mb-3 text-center text-sm text-[var(--textColor)] opacity-75">
+      <p className="mb-3 text-center text-sm text-(--textColor) opacity-75">
         Each line shows a TA&apos;s cumulative cards per student at collection
         time.
       </p>
-      <div className="h-[32rem] w-full">
+      <div className="h-128 w-full">
         <Chart type="line" data={data} options={options} />
       </div>
     </section>

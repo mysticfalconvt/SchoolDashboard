@@ -128,7 +128,7 @@ export default function StudentList({
                   checked={isSelected}
                   id={student.id}
                   name={student.name}
-                  className="h-4 w-4 shrink-0 mt-0.5 cursor-pointer accent-[#38B6FF]"
+                  className="h-4 w-4 shrink-0 mt-0.5 cursor-pointer accent-custom-blue"
                   onChange={(e) => {
                     if (e.target.checked) {
                       setSelectedStudents([...selectedStudents, student.id]);
@@ -139,7 +139,7 @@ export default function StudentList({
                     }
                   }}
                 />
-                <span className="min-w-0 break-words">
+                <span className="min-w-0 wrap-break-word">
                   {firstNameSort
                     ? student.name
                     : lastNameCommaFirstName(student.name)}

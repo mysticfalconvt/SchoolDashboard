@@ -262,7 +262,7 @@ const PbisStats: NextPage = () => {
         for each school year. Activity views cover the rolling last 12 months.
       </p>
 
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--blue)]">
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-(--blue)">
         {(
           [
             ['overview', 'Overview'],
@@ -277,8 +277,8 @@ const PbisStats: NextPage = () => {
             onClick={() => setTab(key)}
             className={`px-4 py-2 rounded-t-lg ${
               tab === key
-                ? 'bg-[var(--blue)] text-white'
-                : 'bg-[var(--blueTrans)] text-white opacity-70'
+                ? 'bg-(--blue) text-white'
+                : 'bg-(--blueTrans) text-white opacity-70'
             }`}
           >
             {label}
@@ -342,7 +342,7 @@ const MetricCard: React.FC<{
   value: string | number;
   detail?: string;
 }> = ({ label, value, detail }) => (
-  <div className="rounded-lg border border-[var(--blue)] bg-[var(--blueTrans)] p-4">
+  <div className="rounded-lg border border-(--blue) bg-(--blueTrans) p-4">
     <p className="text-sm font-semibold">{label}</p>
     <p className="mt-2 text-4xl font-bold">{value}</p>
     {detail && <p className="mt-1 text-sm opacity-80">{detail}</p>}
@@ -472,8 +472,8 @@ const StudentDistributionView: React.FC<{
             onClick={() => setPeriod(key)}
             className={`rounded px-3 py-2 ${
               period === key
-                ? 'bg-[var(--blue)] text-white'
-                : 'bg-[var(--blueTrans)] text-white opacity-70'
+                ? 'bg-(--blue) text-white'
+                : 'bg-(--blueTrans) text-white opacity-70'
             }`}
           >
             {label}
@@ -546,8 +546,8 @@ const CardActivityView: React.FC<{
             onClick={() => setActivityView(key)}
             className={`rounded px-3 py-2 ${
               activityView === key
-                ? 'bg-[var(--blue)] text-white'
-                : 'bg-[var(--blueTrans)] text-white opacity-70'
+                ? 'bg-(--blue) text-white'
+                : 'bg-(--blueTrans) text-white opacity-70'
             }`}
           >
             {label}
@@ -660,7 +660,7 @@ const StaffCardSummaryView: React.FC<{
         {metrics.map(({ label, value, detail }) => (
           <div
             key={label}
-            className="rounded-lg border border-[var(--blue)] bg-[var(--blueTrans)] p-4"
+            className="rounded-lg border border-(--blue) bg-(--blueTrans) p-4"
           >
             <p className="text-sm font-semibold">{label}</p>
             <p className="mt-2 text-4xl font-bold">{value}</p>
@@ -750,7 +750,7 @@ const StaffCardGiverChart: React.FC<{ cards: StaffCardEntry[] }> = ({
   if (chartData.labels.length === 0) return null;
 
   return (
-    <div className="mt-8 rounded-lg border border-[var(--blue)] p-4">
+    <div className="mt-8 rounded-lg border border-(--blue) p-4">
       <h2 className="text-xl font-semibold">Staff Cards Given by Week</h2>
       <p className="mb-4 text-sm opacity-80">
         The stacked total shows all staff cards given each week.
@@ -794,7 +794,7 @@ const HeatmapView: React.FC<{
     <table className="border-collapse">
       <thead>
         <tr>
-          <th className="sticky left-0 bg-[var(--blue)] text-white px-2 py-1 text-left">
+          <th className="sticky left-0 bg-(--blue) text-white px-2 py-1 text-left">
             Teacher
           </th>
           {dayList.map((day) => (
@@ -811,7 +811,7 @@ const HeatmapView: React.FC<{
       <tbody>
         {teachers.map((teacher) => (
           <tr key={teacher.id}>
-            <td className="sticky left-0 bg-[var(--backgroundColor)] text-[var(--textColor)] px-2 py-1 whitespace-nowrap border border-gray-200">
+            <td className="sticky left-0 bg-(--backgroundColor) text-(--textColor) px-2 py-1 whitespace-nowrap border border-gray-200">
               {teacher.name}
             </td>
             {dayList.map((day) => {
@@ -935,7 +935,7 @@ const CalendarView: React.FC<{
         <select
           value={teacher?.id}
           onChange={(e) => setTeacherId(e.target.value)}
-          className="text-black rounded px-2 py-1"
+          className="text-black rounded-sm px-2 py-1"
         >
           {teachers.map((t) => (
             <option key={t.id} value={t.id}>
@@ -948,18 +948,18 @@ const CalendarView: React.FC<{
             type="button"
             onClick={() => setCursor(previousMonth)}
             disabled={previousMonth < firstAvailableMonth}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
+            className="px-3 py-1 rounded-sm bg-(--blueTrans) text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ‹
           </button>
-          <span className="min-w-[10rem] text-center font-semibold">
+          <span className="min-w-40 text-center font-semibold">
             {monthLabel}
           </span>
           <button
             type="button"
             onClick={() => setCursor(nextMonth)}
             disabled={nextMonth > lastAvailableMonth}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
+            className="px-3 py-1 rounded-sm bg-(--blueTrans) text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ›
           </button>
@@ -978,7 +978,7 @@ const CalendarView: React.FC<{
           return (
             <div
               key={dayKey(date)}
-              className="h-16 rounded border border-gray-200 p-1 flex flex-col justify-between"
+              className="h-16 rounded-sm border border-gray-200 p-1 flex flex-col justify-between"
               style={{ backgroundColor: heatColor(count) }}
             >
               <span className="text-xs">{date.getDate()}</span>
@@ -1046,18 +1046,18 @@ const MonthOverviewView: React.FC<{
             type="button"
             onClick={() => setCursor(previousMonth)}
             disabled={previousMonth < firstAvailableMonth}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
+            className="px-3 py-1 rounded-sm bg-(--blueTrans) text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ‹
           </button>
-          <span className="min-w-[10rem] text-center font-semibold">
+          <span className="min-w-40 text-center font-semibold">
             {monthLabel}
           </span>
           <button
             type="button"
             onClick={() => setCursor(nextMonth)}
             disabled={nextMonth > lastAvailableMonth}
-            className="px-3 py-1 rounded bg-[var(--blueTrans)] text-white disabled:cursor-not-allowed disabled:opacity-30"
+            className="px-3 py-1 rounded-sm bg-(--blueTrans) text-white disabled:cursor-not-allowed disabled:opacity-30"
           >
             ›
           </button>
@@ -1080,7 +1080,7 @@ const MonthOverviewView: React.FC<{
           return (
             <div
               key={dayKey(date)}
-              className="group relative h-16 rounded border border-gray-200 p-1 flex flex-col justify-between"
+              className="group relative h-16 rounded-sm border border-gray-200 p-1 flex flex-col justify-between"
               style={{ backgroundColor: heatColor(count) }}
             >
               <span className="text-xs">{date.getDate()}</span>
@@ -1088,7 +1088,7 @@ const MonthOverviewView: React.FC<{
                 <span className="text-sm font-bold self-end">{count}</span>
               )}
               {count > 0 && (
-                <div className="pointer-events-none absolute z-20 left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-max max-w-xs rounded border border-[var(--blue)] bg-[var(--backgroundColor)] text-[var(--textColor)] shadow-lg p-2 text-left">
+                <div className="pointer-events-none absolute z-20 left-1/2 top-full mt-1 -translate-x-1/2 hidden group-hover:block w-max max-w-xs rounded-sm border border-(--blue) bg-(--backgroundColor) text-(--textColor) shadow-lg p-2 text-left">
                   <p className="font-semibold text-xs mb-1">
                     {dayKey(date)} — {count} teacher{count === 1 ? '' : 's'}
                   </p>

@@ -280,7 +280,7 @@ const CallbackHistory: NextPage = () => {
       <h1>Callback History</h1>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-[var(--blue)] my-4">
+      <div className="flex gap-2 border-b border-(--blue) my-4">
         {(
           [
             ['runs', 'Reward Runs'],
@@ -294,8 +294,8 @@ const CallbackHistory: NextPage = () => {
             onClick={() => setTab(key)}
             className={`px-4 py-2 rounded-t-lg ${
               tab === key
-                ? 'bg-[var(--blue)] text-white'
-                : 'bg-[var(--blueTrans)] text-white opacity-70'
+                ? 'bg-(--blue) text-white'
+                : 'bg-(--blueTrans) text-white opacity-70'
             }`}
           >
             {label}
@@ -357,7 +357,7 @@ const RewardRunsView: React.FC<{
         <table className="border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 bg-[var(--blue)] text-white px-2 py-1 text-left z-10">
+              <th className="sticky left-0 bg-(--blue) text-white px-2 py-1 text-left z-10">
                 Student
               </th>
               {runs.map((run) => (
@@ -374,7 +374,7 @@ const RewardRunsView: React.FC<{
           <tbody>
             {students.map((student) => (
               <tr key={student.id}>
-                <td className="sticky left-0 bg-[var(--backgroundColor)] text-[var(--textColor)] px-2 py-1 whitespace-nowrap border border-gray-200">
+                <td className="sticky left-0 bg-(--backgroundColor) text-(--textColor) px-2 py-1 whitespace-nowrap border border-gray-200">
                   {student.name}
                 </td>
                 {runs.map((run) => {

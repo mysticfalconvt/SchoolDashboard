@@ -326,7 +326,7 @@ export default function ViewStudentPage({ student }: ViewStudentPageProps) {
       <AssignmentViewCardsStudent student={user} />
       <StudentPbisData student={user} />
       {user.parent.length > 0 && (
-        <div className="rounded-2xl p-4 border border-[var(--blue)]">
+        <div className="rounded-2xl p-4 border border-(--blue)">
           <h4>Parent Contact Info:</h4>
           {user.parent.map((parent) => (
             <p key={`parentID -${parent.id}`}>

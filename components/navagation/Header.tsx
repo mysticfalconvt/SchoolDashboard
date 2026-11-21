@@ -58,7 +58,7 @@ const Header: React.FC = () => {
           >
             <Link
               href="/"
-              className="block skew-x-[20deg]"
+              className="block skew-x-20"
               onClick={preventCurrentPageNavigation}
             >
               <span className="flex flex-row items-center justify-center px-4 md:px-6 py-2 gap-3">
@@ -87,7 +87,7 @@ const Header: React.FC = () => {
             <>
               {/* Hamburger for mobile (right) */}
               <button
-                className="md:hidden ml-auto text-white text-3xl focus:outline-none z-30 bg-transparent border-none"
+                className="md:hidden ml-auto text-white text-3xl focus:outline-hidden z-30 bg-transparent border-none"
                 aria-label="Open menu"
                 onClick={() => setMenuOpen((open) => !open)}
               >
@@ -111,13 +111,13 @@ const Header: React.FC = () => {
         {/* Mobile dropdown menu - covers entire screen, always visible when open */}
         {menuOpen && me && (
           <div
-            className="fixed inset-0 shadow-lg z-[9999] animate-fade-in-down overflow-y-auto flex flex-col"
+            className="fixed inset-0 shadow-lg z-9999 animate-fade-in-down overflow-y-auto flex flex-col"
             style={{
               background: 'linear-gradient(to top right, #38B6FF, #760D08)',
             }}
           >
             <button
-              className="absolute top-4 right-4 text-white text-3xl focus:outline-none z-60 bg-transparent border-none"
+              className="absolute top-4 right-4 text-white text-3xl focus:outline-hidden z-60 bg-transparent border-none"
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}
             >

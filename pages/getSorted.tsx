@@ -156,7 +156,7 @@ const GetSorted: NextPage = () => {
                 await queryClient.refetchQueries({ queryKey: ['me'] });
                 setQuestionNumber(0);
               }}
-              className="mt-5 text-white bg-gradient-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded px-4 py-2 text-3xl cursor-pointer font-harrypotter"
+              className="mt-5 text-white bg-linear-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded-sm px-4 py-2 text-3xl cursor-pointer font-harrypotter"
             >
               Accept your choice
             </button>
@@ -171,7 +171,7 @@ const GetSorted: NextPage = () => {
                 });
                 setQuestionNumber(0);
               }}
-              className="mt-5 text-white bg-gradient-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded px-4 py-2 text-3xl cursor-pointer font-harrypotter"
+              className="mt-5 text-white bg-linear-to-r from-[#0e1a40] via-[#2a623d] via-[#eeba30] via-[#740001] via-[#fff4b1] via-[#ffdb00] to-[#5d5d5d] border-none rounded-sm px-4 py-2 text-3xl cursor-pointer font-harrypotter"
             >
               {' '}
               Start Over

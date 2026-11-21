@@ -240,11 +240,11 @@ export default function TaPbisCollectionChart({
   };
 
   return (
-    <section className="my-6 rounded-lg border border-[var(--tableAccentColor)] bg-[var(--backgroundColor)] p-4 text-[var(--textColor)] shadow-sm">
+    <section className="my-6 rounded-lg border border-(--tableAccentColor) bg-(--backgroundColor) p-4 text-(--textColor) shadow-xs">
       <h2 className="text-center text-xl font-semibold">
         TA PBIS Progress by Collection
       </h2>
-      <p className="mb-3 text-center text-sm text-[var(--textColor)] opacity-75">
+      <p className="mb-3 text-center text-sm text-(--textColor) opacity-75">
         Bars show cards earned per student between collection dates. Green
         points mark a new TA level.
       </p>

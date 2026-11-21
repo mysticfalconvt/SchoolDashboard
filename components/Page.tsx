@@ -53,7 +53,7 @@ export default function Page({ children }: PageProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--backgroundColor)] text-[var(--textColor)]">
+    <div className="min-h-screen bg-(--backgroundColor) text-(--textColor)">
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>NCUJHS Dashboard</title>
@@ -130,12 +130,12 @@ export default function Page({ children }: PageProps) {
           <ToastBar toast={t}>
             {({ icon, message }) => (
               <div className="flex items-center gap-3 w-full">
-                <div className="flex-shrink-0 text-lg">{icon}</div>
+                <div className="shrink-0 text-lg">{icon}</div>
                 <div className="flex-1 text-white font-medium">{message}</div>
                 {t.type !== 'loading' && (
                   <button
                     onClick={() => toast.dismiss(t.id)}
-                    className="flex-shrink-0 ml-2 text-white/80 hover:text-white text-lg font-bold transition-all duration-200 hover:scale-110 focus:outline-none w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"
+                    className="shrink-0 ml-2 text-white/80 hover:text-white text-lg font-bold transition-all duration-200 hover:scale-110 focus:outline-hidden w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10"
                     aria-label="Close notification"
                   >
                     ×
@@ -149,7 +149,7 @@ export default function Page({ children }: PageProps) {
 
       {/* Show main content if user is authenticated OR if we're on loginLink page */}
       {(me || isLoginLinkPage) && (
-        <div className="max-w-[var(--maxWidth)] mx-auto p-8">{children}</div>
+        <div className="max-w-(--maxWidth) mx-auto p-8">{children}</div>
       )}
     </div>
   );

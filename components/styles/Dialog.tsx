@@ -46,7 +46,7 @@ export function DialogBackdrop({
 }: DialogBackdropProps) {
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm ${className}`}
+      className={`fixed inset-0 bg-black/50 z-40 backdrop-blur-xs ${className}`}
       onClick={onClick}
     />
   );
@@ -60,17 +60,17 @@ export function DialogHeader({
 }: DialogHeaderProps) {
   return (
     <div
-      className={`flex justify-between items-center px-4 py-2 border-b flex-shrink-0 ${className}`}
+      className={`flex justify-between items-center px-4 py-2 border-b shrink-0 ${className}`}
       style={{ borderBottomColor: '#38B6FF' }}
     >
-      <h4 className="text-white text-xl font-semibold flex-shrink-0">
+      <h4 className="text-white text-xl font-semibold shrink-0">
         {children}
       </h4>
       {showCloseButton && onClose && (
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 border-none w-10 h-10 text-white hover:brightness-110 ml-4 flex-shrink-0"
+          className="rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 border-none w-10 h-10 text-white hover:brightness-110 ml-4 shrink-0"
           style={{ background: 'rgba(118, 13, 8, 0.8)' }}
           aria-label="Close"
         >
@@ -125,7 +125,7 @@ export function Dialog({
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-2 right-2 text-white text-2xl font-bold bg-black/40 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center focus:outline-none border-none transition-all duration-200"
+              className="absolute top-2 right-2 text-white text-2xl font-bold bg-black/40 hover:bg-black/70 rounded-full w-8 h-8 flex items-center justify-center focus:outline-hidden border-none transition-all duration-200"
               aria-label="Close"
             >
               ×

@@ -122,20 +122,20 @@ export default function EditStudent({ student }: EditStudentProps) {
         <>
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setShowForm(false)}
           />
 
           {/* Modal */}
-          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[90vh] rounded-3xl bg-gradient-to-tr from-[var(--red)] to-[var(--blue)] overflow-hidden border-2 border-[var(--blue)] shadow-2xl flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b border-[var(--blue)] flex-shrink-0">
+          <div className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-4xl max-h-[90vh] rounded-3xl bg-linear-to-tr from-(--red) to-(--blue) overflow-hidden border-2 border-(--blue) shadow-2xl flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-(--blue) shrink-0">
               <h4 className="text-white text-xl font-semibold">
                 Edit {student.name}'s Schedule
               </h4>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="w-8 h-8 text-white bg-[var(--redTrans)] hover:bg-[var(--blue)] rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
+                className="w-8 h-8 text-white bg-(--redTrans) hover:bg-(--blue) rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200"
               >
                 ×
               </button>
@@ -170,7 +170,7 @@ export default function EditStudent({ student }: EditStudentProps) {
                         name="name"
                         value={inputs.name || ''}
                         onChange={handleChange}
-                        className="w-full p-2 rounded border bg-white text-gray-900"
+                        className="w-full p-2 rounded-sm border bg-white text-gray-900"
                       />
                     </div>
                     <div className="mb-4">
@@ -185,7 +185,7 @@ export default function EditStudent({ student }: EditStudentProps) {
                         name="ta"
                         value={inputs.ta}
                         onChange={handleChange}
-                        className="w-full p-2 rounded border bg-white text-gray-900"
+                        className="w-full p-2 rounded-sm border bg-white text-gray-900"
                       >
                         {teacherList.map((item: Teacher) => (
                           <option key={item.id} value={item.id}>
@@ -209,7 +209,7 @@ export default function EditStudent({ student }: EditStudentProps) {
                           name={`block${block}`}
                           value={inputs[`block${block}`]}
                           onChange={handleChange}
-                          className="w-full p-2 rounded border bg-white text-gray-900"
+                          className="w-full p-2 rounded-sm border bg-white text-gray-900"
                         >
                           {teacherList.map((item: Teacher) => (
                             <option key={item.id} value={item.id}>
