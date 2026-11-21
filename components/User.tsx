@@ -175,7 +175,7 @@ export function useUserStatus(): UserStatus {
     {},
     {
       staleTime: 10 * 60 * 1000, // 10 minutes - PBIS dates don't change often
-      cacheTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
@@ -206,7 +206,7 @@ export function useUserStatus(): UserStatus {
     {
       enabled: !!pbisDates,
       staleTime: 5 * 60 * 1000, // 5 minutes - keep data fresh longer
-      cacheTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+      gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
       refetchOnWindowFocus: true, // refetch when window gains focus
       refetchOnMount: true, // refetch on component mount if data exists
       refetchOnReconnect: true, // refetch on network reconnect

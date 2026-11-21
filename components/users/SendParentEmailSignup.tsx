@@ -1,6 +1,6 @@
 import React from 'react';
 import { toast } from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import useForm from '../../lib/useForm';
 import { useNewParentAccount } from '../../lib/useNewParentAccount';
 import useSendEmail from '../../lib/useSendEmail';

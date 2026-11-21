@@ -10,7 +10,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useRevalidatePage from '@/components/../lib/useRevalidatePage';
 import useSendEmail from '@/components/../lib/useSendEmail';
@@ -161,7 +161,7 @@ export default function NewStudentFocusButton({
                 });
               }
             }
-            queryClient.refetchQueries('allStudentFocus');
+            queryClient.refetchQueries({ queryKey: ['allStudentFocus'] });
             clearForm();
             setStudentWhoIsFor(null);
             setEmailSending(false);

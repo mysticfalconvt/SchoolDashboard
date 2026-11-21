@@ -12,7 +12,7 @@ import { useAsyncGQLQuery, useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 const GET_STUDENTS_FOR_BULK_CARDS = gql`
   query GET_STUDENTS_FOR_BULK_CARDS {

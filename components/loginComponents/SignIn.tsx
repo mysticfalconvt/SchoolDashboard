@@ -7,7 +7,7 @@ import { GraphQLClient } from '@/lib/graphqlClient';
 import useForm from '@/lib/useForm';
 import gql from 'graphql-tag';
 import React from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface FormInputs {
   email: string;

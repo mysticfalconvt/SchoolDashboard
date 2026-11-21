@@ -3,7 +3,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { SmallGradientButton } from '../styles/Button';
 import { useUser } from '../User';
 
@@ -237,7 +237,7 @@ export default function GiveListOfStudentsACardButton({
       // Variables are passed flat -- the client forwards this object straight
       // through as the GraphQL variables.
       await Promise.all(cardsToCreate.map((card) => createCard(card)));
-      await queryClient.refetchQueries(`SingleTeacher-${me.id}`);
+      await queryClient.refetchQueries({ queryKey: [`SingleTeacher-${me.id}`] });
       toast.success(
         `Gave a card to ${cardsToCreate.length} ${
           cardsToCreate.length === 1 ? 'student' : 'students'

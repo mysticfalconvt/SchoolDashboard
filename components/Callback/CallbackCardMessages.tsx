@@ -4,7 +4,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const UPDATE_CALLBACK_MESSAGES_MUTATION = gql`
   mutation UPDATE_CALLBACK_MESSAGES_MUTATION(
@@ -122,7 +122,7 @@ export default function CallbackCardMessages({
       messageFromStudent: studentMessage,
       messageFromStudentDate: todaysDate,
     });
-    await queryClient.refetchQueries('myStudentCallbacks');
+    await queryClient.refetchQueries({ queryKey: ['myStudentCallbacks'] });
     toast.success(`Updated Callback Message for ${callback.student.name}`);
   };
   const getStudentMessageOptionsArray = (): MessageOption[] => {
@@ -219,8 +219,8 @@ export default function CallbackCardMessages({
                     messageFromStudent: '',
                     messageFromStudentDate: todaysDate,
                   });
-                  queryClient.invalidateQueries(['myStudentCallbacks']);
-                  queryClient.invalidateQueries(['allCallbacks']);
+                  queryClient.invalidateQueries({ queryKey: ['myStudentCallbacks'] });
+                  queryClient.invalidateQueries({ queryKey: ['allCallbacks'] });
                   toast.success(
                     `Updated Callback Message for ${callback.student.name}`,
                   );

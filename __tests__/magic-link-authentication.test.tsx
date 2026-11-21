@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MagicLinkSignIn from '../components/loginComponents/MagicLinkSignIn';
 import SignInDialog from '../components/loginComponents/SignInDialog';
 import { useUser } from '../components/User';

@@ -11,7 +11,7 @@ import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 const GET_ADMIN_EMAILS = gql`
   query GET_ADMIN_EMAILS {
@@ -168,7 +168,7 @@ const CellPhoneAddButton: React.FC = () => {
             setEmailSending(false);
             const revalidationResponse = revalidatePage();
             // console.log(revalidationResponse);
-            queryClient.refetchQueries('allDisciplines');
+            queryClient.refetchQueries({ queryKey: ['allDisciplines'] });
             resetForm();
             setShowForm(false);
           }}

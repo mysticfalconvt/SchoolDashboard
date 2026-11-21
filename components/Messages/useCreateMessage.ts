@@ -1,7 +1,7 @@
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useEffect, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../User';
 
 interface CreateMessageInput {
@@ -70,7 +70,7 @@ export default function useCreateMessage() {
         link: message?.link || '',
       });
       setTimeout(() => {
-        queryClient.refetchQueries('myMessages');
+        queryClient.refetchQueries({ queryKey: ['myMessages'] });
       }, 1000);
     }
   }, [message, createMessageMutation, queryClient, me?.id]);

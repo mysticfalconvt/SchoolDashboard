@@ -8,7 +8,7 @@ import { blockDisplayList } from '@/lib/blockNames';
 import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import BlockLabel from '../BlockLabel';
 
 const LIST_OF_TEACHERS_QUERY = gql`

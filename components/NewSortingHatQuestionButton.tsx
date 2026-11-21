@@ -3,7 +3,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import React, { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import DisplayError from './ErrorMessage';
 import { useUser } from './User';
@@ -90,7 +90,7 @@ const NewSortingHatQuestion: React.FC = () => {
                 slytherinChoice: inputs.slytherinChoice,
                 createdBy: me.id,
               });
-              queryClient.refetchQueries('SortingHatQuestions');
+              queryClient.refetchQueries({ queryKey: ['SortingHatQuestions'] });
               clearForm();
               setShowForm(false);
             }}

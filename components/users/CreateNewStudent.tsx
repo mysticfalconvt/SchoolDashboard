@@ -9,7 +9,7 @@ import { useGQLQuery } from '@/lib/useGqlQuery';
 import gql from 'graphql-tag';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import BlockLabel from '../BlockLabel';
 
 // TODO: update this edit into create new student

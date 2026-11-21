@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import DisplayError from '../ErrorMessage';
 import Loading from '../Loading';
 
@@ -36,16 +36,14 @@ function StatRow({
 }
 
 export default function PbisVisitorStats() {
-  const { data, isLoading, error } = useQuery<UmamiStats, Error>(
-    'umamiStats',
-    fetchUmamiStats,
-    {
-      // Data is cached hard on the server, so no need to refetch often.
-      staleTime: 1000 * 60 * 60,
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  );
+  const { data, isLoading, error } = useQuery<UmamiStats, Error>({
+    queryKey: ['umamiStats'],
+    queryFn: fetchUmamiStats,
+    // Data is cached hard on the server, so no need to refetch often.
+    staleTime: 1000 * 60 * 60,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   return (
     <div className="bg-gradient-to-tl from-[var(--redTrans)] to-[var(--blueTrans)] m-4 p-5 rounded-2xl flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300 w-full max-w-[16rem] mx-auto">

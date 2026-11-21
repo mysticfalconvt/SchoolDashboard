@@ -9,7 +9,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CalendarEvent {
   id: string;
@@ -217,7 +217,7 @@ const EditCalendarEvent: React.FC<EditCalendarEventProps> = ({
                 const res = await deleteLink({});
                 revalidateIndex();
                 revalidateCalendarPage();
-                queryClient.refetchQueries('allCalendars');
+                queryClient.refetchQueries({ queryKey: ['allCalendars'] });
                 router.push('/calendar');
               }}
               className="ml-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"

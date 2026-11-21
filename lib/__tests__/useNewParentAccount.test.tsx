@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { User } from '../../components/User';
 import { useGqlMutation } from '../useGqlMutation';
 import { useAsyncGQLQuery } from '../useGqlQuery';

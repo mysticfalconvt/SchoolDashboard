@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { FaBirthdayCake } from 'react-icons/fa';
 import { GrCheckbox, GrCheckboxSelected } from 'react-icons/gr';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Cake {
   id: string;
@@ -59,7 +59,7 @@ const DeliveredCake: React.FC<DeliveredCakeProps> = ({ cake }) => {
           id: cake.id,
           isDelivered: !isDelivered,
         });
-        await queryClient.refetchQueries('AllBirthdays');
+        await queryClient.refetchQueries({ queryKey: ['AllBirthdays'] });
         setLoading(false);
       }}
     >

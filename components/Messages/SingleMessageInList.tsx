@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import useMarkMessageRead from './MarkMessageRead';
 import useDeleteMessage from './useDeleteMessage';
 
@@ -81,7 +81,7 @@ const SingleMessageInList: React.FC<SingleMessageInListProps> = ({
               type="button"
               onClick={async () => {
                 await deleteMessage({ id: message.id });
-                queryClient.refetchQueries('myMessages');
+                queryClient.refetchQueries({ queryKey: ['myMessages'] });
               }}
               className="shrink-0 inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white border-none py-1.5 px-3 text-sm rounded-full cursor-pointer shadow"
               aria-label="Delete message"

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
-import { useIsFetching } from 'react-query';
+import { useIsFetching } from '@tanstack/react-query';
 import isAllowed from '../../lib/isAllowed';
 import Search from '../Search';
 import { useUser } from '../User';
