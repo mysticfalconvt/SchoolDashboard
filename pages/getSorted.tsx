@@ -34,7 +34,7 @@ const SORTING_HAT_QUESTION_QUERY = gql`
 
 const UPDATE_HOUSE = gql`
   mutation UPDATE_HOUSE($id: ID!, $house: String) {
-    updateUser(id: $id, data: { sortingHat: $house }) {
+    updateUser(where: { id: $id }, data: { sortingHat: $house }) {
       id
     }
   }

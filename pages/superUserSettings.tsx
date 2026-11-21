@@ -5,14 +5,12 @@ import NewWeeklyCallbackReward from '../components/PBIS/NewWeeklyCallbackReward'
 import NewWeeklyPbisCollection from '../components/PBIS/NewWeeklyPbisCollection';
 import PickStaffWinners from '../components/PBIS/PickStaffWinners';
 import SendPbisWinnerEmails from '../components/PBIS/SendPbisWinnerEmails';
-// import StudentFocusTable from '../components/StudentFocusTable';
 import BulkCompleteOldCallbacks from '../components/Callback/BulkCompleteOldCallbacks';
 import { useUser } from '../components/User';
 import GradientButton from '../components/styles/Button';
 import NewStudent from '../components/users/CreateNewStudent';
 import CreateParentAccountsFromCSV from '../components/users/CreateParentAccountsFromCSV';
 import CreateParentAccountsFromEmails from '../components/users/CreateParentAccountsFromEmails';
-import NewEvents from '../components/users/NewEvents';
 import NewStaff from '../components/users/NewStaff';
 import NewUpdateUsers from '../components/users/NewUpdateUsers';
 import isAllowed from '../lib/isAllowed';
@@ -34,7 +32,6 @@ const SuperUserSettings: NextPage = () => {
       {isAllowed(me, 'isSuperAdmin') && <NewStaff />}
       {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromCSV />}
       {isAllowed(me, 'isSuperAdmin') && <CreateParentAccountsFromEmails />}
-      {isAllowed(me, 'isSuperAdmin') && <NewEvents />}
       {isAllowed(me, 'isSuperAdmin') && <BulkCompleteOldCallbacks />}
       {/* {isAllowed(me, "isSuperAdmin") && <AddBirthdays />} */}
       {isAllowed(me, 'canManagePbis') && <BulkPbisCardsFromList />}

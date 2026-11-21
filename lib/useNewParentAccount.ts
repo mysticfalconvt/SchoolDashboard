@@ -73,30 +73,6 @@ const SIGNUP_NEW_PARENT_MUTATION = gql`
   }
 `;
 
-const CREATE_PARENT_ACCOUNT_MUTATION = gql`
-  mutation CREATE_PARENT_ACCOUNT_MUTATION(
-    $email: String!
-    $name: String!
-    $password: String!
-    $children: UserRelateToManyInput!
-    $isParent: Boolean!
-  ) {
-    createUser(
-      data: {
-        email: $email
-        name: $name
-        password: $password
-        isParent: $isParent
-        children: $children
-      }
-    ) {
-      id
-      name
-      email
-    }
-  }
-`;
-
 interface CreateParentAccountProps {
   parentEmail: string;
   parentName: string;
