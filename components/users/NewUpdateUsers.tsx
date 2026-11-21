@@ -231,7 +231,6 @@ export default function NewUpdateUsers() {
 
     // Sequential so a long list cannot flood the API.
     for (let i = 0; i < pending.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
       await parkOne(pending[i]);
       setParkProgress({ current: i + 1, total: pending.length });
     }
