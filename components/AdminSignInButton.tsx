@@ -1,5 +1,3 @@
-import { useRef } from 'react';
-import toast from 'react-hot-toast';
 import { endpoint } from '../config';
 import GradientButton from './styles/Button';
 
@@ -7,46 +5,20 @@ import GradientButton from './styles/Button';
 export const backendOrigin = new URL(endpoint).origin;
 
 /**
- * Opens the Keystone Admin UI already signed in.
+ * Opens the Keystone Admin UI in a new tab.
  *
- * The Admin UI can't see the dashboard's session (it lives in localStorage
- * here and is sent as a Bearer header), so this posts it to the backend's
- * /admin-signin route, which checks it belongs to a super admin, sets the
- * Admin UI's cookie and redirects into the Admin UI. A form POST keeps the
- * token out of the URL, history and logs.
+ * No extra sign-in step is needed: dashboard requests go to the backend with
+ * credentials, so signing in here (magic link or Google) also sets the
+ * backend's session cookie, and signing out clears it. The Admin UI reads
+ * that cookie and lets super admins in.
  */
 export default function AdminSignInButton() {
-  const tokenInput = useRef<HTMLInputElement>(null);
-
   return (
-    <form
-      method="post"
-      action={`${backendOrigin}/admin-signin`}
-      target="_blank"
-      onSubmit={(e) => {
-        let token: string | null = null;
-        try {
-          token = localStorage.getItem('token');
-        } catch {
-          token = null;
-        }
-        if (!token) {
-          e.preventDefault();
-          toast.error('Sign out and back in, then try again.');
-          return;
-        }
-        const input = tokenInput.current;
-        if (!input) return;
-        input.value = token;
-        // The browser reads the form when this handler returns; clear the
-        // token from the page right after.
-        setTimeout(() => {
-          input.value = '';
-        }, 0);
-      }}
+    <GradientButton
+      type="button"
+      onClick={() => window.open(backendOrigin, '_blank', 'noopener')}
     >
-      <input ref={tokenInput} type="hidden" name="token" defaultValue="" />
-      <GradientButton type="submit">Keystone Admin (be careful in here)</GradientButton>
-    </form>
+      Keystone Admin (be careful in here)
+    </GradientButton>
   );
 }
