@@ -21,7 +21,6 @@ import PbisCardFormButton from '../components/PBIS/PbisCardFormButton';
 import { TOTAL_PBIS_CARDS } from '../components/PBIS/PbisFalcon';
 import PbisWidget from '../components/PBIS/PbisWidget';
 import StudentPbisData from '../components/PBIS/StudentPbisData';
-import RequestReset from '../components/RequestReset';
 import { SEARCH_ALL_USERS_QUERY } from '../components/Search';
 import GradientButton from '../components/styles/Button';
 import { useUser } from '../components/User';
@@ -247,14 +246,11 @@ export default function Home(props: HomeProps) {
       </main>
 
       <footer>
-        {me ? (
+        {me && (
           <div style={{ display: 'flex', justifyContent: 'start' }}>
             <SignOut />
             <NewBugReportButton />
-            {/* <UpdateMyPassword /> */}
           </div>
-        ) : (
-          <RequestReset />
         )}
       </footer>
     </div>

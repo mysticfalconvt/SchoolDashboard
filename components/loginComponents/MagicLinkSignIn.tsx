@@ -10,15 +10,9 @@ const SEND_MAGIC_LINK_MUTATION = gql`
   }
 `;
 
-interface SignInInputs {
-  email: string;
-  password: string;
-}
-
 const MagicLinkSignIn: React.FC = () => {
   const { inputs, handleChange, resetForm } = useForm({
     email: '',
-    password: '',
   });
   const [magicLinkSent, setMagicLinkSent] = React.useState(false);
   const [

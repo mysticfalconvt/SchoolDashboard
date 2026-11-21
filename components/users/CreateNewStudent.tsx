@@ -50,7 +50,6 @@ const CREATE_NEW_STUDENT_MUTATION = gql`
         block11Teacher: { connect: { id: $block11 } }
         block12Teacher: { connect: { id: $block12 } }
         isStudent: true
-        password: "password"
       }
     ) {
       id

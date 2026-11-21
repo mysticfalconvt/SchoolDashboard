@@ -51,7 +51,6 @@ const CREATE_PARENT_MUTATION = gql`
       data: {
         name: $name
         email: $email
-        password: "password"
         isParent: true
         children: { connect: { id: $studentId } }
       }

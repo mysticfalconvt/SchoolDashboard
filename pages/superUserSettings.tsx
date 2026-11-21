@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import AdminSignInButton from '../components/AdminSignInButton';
 import BulkPbisCardsFromList from '../components/PBIS/BulkPbisCardsFromList';
 import NewWeeklyCallbackReward from '../components/PBIS/NewWeeklyCallbackReward';
 import NewWeeklyPbisCollection from '../components/PBIS/NewWeeklyPbisCollection';
@@ -21,11 +22,7 @@ const SuperUserSettings: NextPage = () => {
     <div>
       <h1>Administration</h1>
       {isAllowed(me, 'isSuperAdmin') && (
-        <GradientButton
-          onClick={() => window.open('https://api.ncujhs.tech', '_blank')}
-        >
-          API Backend (Be careful in here)
-        </GradientButton>
+        <AdminSignInButton />
       )}
       {isAllowed(me, 'isSuperAdmin') && <NewStudent />}
       {isAllowed(me, 'isSuperAdmin') && <NewUpdateUsers />}
