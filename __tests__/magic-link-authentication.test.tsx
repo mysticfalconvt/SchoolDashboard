@@ -317,6 +317,32 @@ describe('Magic Link Authentication Flow', () => {
       });
     });
 
+    it('should show error state for a failure without __typename', async () => {
+      const { useGqlMutation } = require('../lib/useGqlMutation');
+      useGqlMutation.mockReturnValue([
+        mockMutation,
+        {
+          data: {
+            redeemUserMagicAuthToken: {
+              code: 'FAILURE',
+              message: 'Auth token redemption failed.',
+            },
+          },
+          loading: false,
+          error: null,
+        },
+      ]);
+
+      renderWithQueryClient(<LoginLink />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Sign-in Failed')).toBeInTheDocument();
+        expect(
+          screen.getByText('Auth token redemption failed.'),
+        ).toBeInTheDocument();
+      });
+    });
+
     it('should redirect authenticated users', () => {
       mockUseUser.mockReturnValue({
         id: '1',
