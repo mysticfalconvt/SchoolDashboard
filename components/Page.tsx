@@ -26,14 +26,12 @@ export default function Page({ children }: PageProps) {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
 
-    // Update document class for Tailwind dark mode and DaisyUI theme
+    // Update document class for Tailwind dark mode
     if (typeof document !== 'undefined') {
       if (newTheme === 'dark') {
         document.documentElement.classList.add('dark');
-        document.documentElement.setAttribute('data-theme', 'ncujhs-dark');
       } else {
         document.documentElement.classList.remove('dark');
-        document.documentElement.setAttribute('data-theme', 'ncujhs-light');
       }
     }
   };
@@ -44,17 +42,12 @@ export default function Page({ children }: PageProps) {
       const localTheme = localStorage.getItem('theme');
       if (localTheme && (localTheme === 'light' || localTheme === 'dark')) {
         setTheme(localTheme);
-        // Set initial document class and DaisyUI theme
+        // Set initial document class for Tailwind dark mode
         if (localTheme === 'dark') {
           document.documentElement.classList.add('dark');
-          document.documentElement.setAttribute('data-theme', 'ncujhs-dark');
         } else {
           document.documentElement.classList.remove('dark');
-          document.documentElement.setAttribute('data-theme', 'ncujhs-light');
         }
-      } else {
-        // Default to light mode
-        document.documentElement.setAttribute('data-theme', 'ncujhs-light');
       }
     }
   }, []);
