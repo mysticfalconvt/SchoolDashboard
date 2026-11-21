@@ -18,8 +18,8 @@
     "build-students": "node buildStudentsInput.js"
   },
   "dependencies": {
-    "@sentry/core": "^10.78.0",
-    "@sentry/nextjs": "^10.78.0",
+    "@sentry/core": "^11.11.0",
+    "@sentry/nextjs": "^11.11.0",
     "@tanstack/react-query": "^5.107.1",
     "@tanstack/react-query-devtools": "^5.107.1",
     "chart.js": "^4.4.2",

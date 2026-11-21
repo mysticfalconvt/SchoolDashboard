@@ -1,3 +1,5 @@
+import type { Options } from '@sentry/core';
+
 /**
  * Shared error-reporting configuration for Sentry.io and Bugsink.
  *
@@ -201,10 +203,12 @@ function scrubPii(event: any): void {
       delete event.user;
     }
   }
-  // `sendDefaultPii: false` already suppresses these, but a custom integration
-  // or a manual `setUser` could reintroduce them.
+  // `dataCollection` in sharedOptions already suppresses these, but a custom
+  // integration or a manual `setUser` could reintroduce them.
   if (event.request?.headers) delete event.request.headers;
   if (event.request?.cookies) delete event.request.cookies;
+  if (event.request?.data) delete event.request.data;
+  if (event.request?.query_string) delete event.request.query_string;
 }
 
 /**
@@ -223,7 +227,7 @@ export function beforeSend(event: any): any {
  * Options shared by every init site. Tracing is off because Bugsink cannot
  * ingest it, and there is no point paying for the traffic while we dual-track.
  */
-export const sharedOptions = {
+export const sharedOptions: Partial<Options> = {
   release: RELEASE,
   environment: ENVIRONMENT,
 
@@ -231,7 +235,22 @@ export const sharedOptions = {
   tracesSampleRate: 0,
 
   // Never attach IPs, headers, cookies or request bodies. See scrubPii above.
-  sendDefaultPii: false,
+  // Sentry 11 replaced `sendDefaultPii: false` with `dataCollection`, whose
+  // defaults collect all of these, so every category is switched off. URL
+  // query strings carry sign-in tokens and GraphQL variables carry passwords.
+  dataCollection: {
+    userInfo: false,
+    cookies: false,
+    httpHeaders: false,
+    httpBodies: [],
+    urlQueryParams: false,
+    graphQL: { document: false, variables: false },
+    genAI: { inputs: false, outputs: false },
+    mcp: { inputs: false, outputs: false },
+    databaseQueryData: false,
+    queues: false,
+    stackFrameVariables: false,
+  },
 
   // Set NEXT_PUBLIC_SENTRY_DEBUG=true to have the SDK log every envelope it
   // sends and the response it gets back. Needs to be set at build time as well
