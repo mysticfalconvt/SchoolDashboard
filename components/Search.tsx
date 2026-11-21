@@ -1,4 +1,4 @@
-import { resetIdCounter, useCombobox } from 'downshift';
+import { useCombobox } from 'downshift';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/dist/client/router';
 import React, { useMemo, useState } from 'react';
@@ -175,13 +175,11 @@ const Search: React.FC = () => {
     );
   }
 
-  resetIdCounter();
   const {
     isOpen,
     inputValue,
     getMenuProps,
     getInputProps,
-    getComboboxProps,
     getItemProps,
     highlightedIndex,
     reset,
@@ -211,7 +209,7 @@ const Search: React.FC = () => {
 
   return (
     <div className="relative">
-      <div {...getComboboxProps()}>
+      <div>
         <input
           {...getInputProps({
             type: 'search',

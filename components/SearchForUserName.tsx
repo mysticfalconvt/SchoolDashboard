@@ -1,4 +1,4 @@
-import { resetIdCounter, useCombobox } from 'downshift';
+import { useCombobox } from 'downshift';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import { useGQLQuery } from '../lib/useGqlQuery';
@@ -78,14 +78,12 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
     setUsersToDisplay(eightItems || []);
   };
 
-  resetIdCounter();
 
   const {
     isOpen,
     inputValue,
     getMenuProps,
     getInputProps,
-    getComboboxProps,
     getItemProps,
     highlightedIndex,
   } = useCombobox({
@@ -103,7 +101,7 @@ const SearchForUserName: React.FC<SearchForUserNameProps> = ({
 
   return (
     <div className="relative">
-      <div {...getComboboxProps()}>
+      <div>
         <input
           {...getInputProps({
             type: 'search',

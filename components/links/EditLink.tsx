@@ -9,8 +9,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 
 interface Link {
   id: string;

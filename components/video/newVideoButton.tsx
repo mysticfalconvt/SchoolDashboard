@@ -9,8 +9,7 @@ import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 
 const CREATE_VIDEO_MUTATION = gql`
   mutation CREATE_VIDEO_MUTATION(

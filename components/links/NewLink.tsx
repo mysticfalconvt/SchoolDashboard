@@ -8,8 +8,7 @@ import useForm from '@/lib/useForm';
 import { useGqlMutation } from '@/lib/useGqlMutation';
 import gql from 'graphql-tag';
 import React, { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 
 interface NewLinkProps {
   refetchLinks?: () => void;

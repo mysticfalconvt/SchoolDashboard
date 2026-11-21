@@ -1,8 +1,7 @@
 import gql from 'graphql-tag';
 import type { NextPage } from 'next';
 import { useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../components/Toggle';
 import CallbackCards from '../components/Callback/CallbackCards';
 import CallbackTable from '../components/Callback/CallbackTable';
 import NewCallback from '../components/Callback/NewCallbackButton';

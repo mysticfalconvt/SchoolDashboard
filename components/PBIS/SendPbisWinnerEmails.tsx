@@ -1,8 +1,7 @@
 import gql from 'graphql-tag';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import Toggle from '../Toggle';
 import { PBIS_STUDENT_RANDOM_DRAWING_WINNERS } from '../../config';
 import plainTextEmailToHtml from '../../lib/plainTextEmailToHtml';
 import useForm from '../../lib/useForm';
@@ -758,7 +757,6 @@ The PBIS Team
                                     [key]: !prev[key],
                                   }))
                                 }
-                                icons={false}
                               />
                               <span>
                                 {label}{' '}
